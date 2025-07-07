@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 
+// Force redeploy - updated at 2025-01-07
 console.log('🚀 Stripe service starting...');
 console.log('🔍 Environment check:');
 console.log('  - NODE_ENV:', process.env.NODE_ENV);
