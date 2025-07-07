@@ -1,5 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 
+// Check if DATABASE_URL is available
+if (!process.env.DATABASE_URL) {
+  console.error('❌ DATABASE_URL environment variable is not set!');
+  console.error('Please set DATABASE_URL in your Railway environment variables.');
+  console.error('Example: mongodb+srv://username:password@cluster.mongodb.net/database?retryWrites=true&w=majority');
+  process.exit(1);
+}
+
 // Create a single PrismaClient instance that can be shared throughout your app
 const globalForPrisma = globalThis;
 
