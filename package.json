@@ -1,0 +1,31 @@
+{
+  "name": "household-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Monorepo for Household Services Subscription Platform (see household_prp.md)",
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ],
+  "scripts": {
+    "lint": "npm run lint --workspaces",
+    "type-check": "npm run type-check --workspaces",
+    "test": "npm run test --workspaces"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "",
+  "license": "MIT",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "keywords": [],
+  "dependencies": {
+    "react-quill": "^2.0.0",
+    "xlsx": "^0.18.5"
+  }
+}

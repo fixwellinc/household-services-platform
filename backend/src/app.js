@@ -1,0 +1,205 @@
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import { PrismaClient } from '@prisma/client';
+import jwt from 'jsonwebtoken';
+
+// Import routes
+import authRoutes from './routes/auth.js';
+import userRoutes from './routes/users.js';
+import serviceRoutes from './routes/services.js';
+import bookingRoutes from './routes/bookings.js';
+import paymentRoutes from './routes/payments.js';
+import quotesRoutes from './routes/quotes.js';
+import docsRoutes from './routes/docs.js';
+// import webhookRoutes from './routes/webhooks.js';
+
+// Import middleware
+import { authMiddleware } from './middleware/auth.js';
+import { errorHandler } from './middleware/error.js';
+import { requestLogger, errorLogger, performanceMonitor } from './middleware/logging.js';
+import { generalLimiter, authLimiter, apiLimiter } from './middleware/rateLimit.js';
+import { sanitize } from './middleware/validation.js';
+
+// Import database and config
+import prisma from './config/database.js';
+import { getCorsOptions } from './config/environment.js';
+
+const app = express();
+
+// PATTERN: Security middleware first
+app.use(helmet());
+
+// CORS configuration
+app.use(cors(getCorsOptions()));
+
+// CORS debugging (development only)
+if (process.env.NODE_ENV === 'development') {
+  app.use((req, res, next) => {
+    console.log('Request from:', req.headers.origin);
+    console.log('Request method:', req.method);
+    next();
+  });
+}
+
+// Enhanced logging and monitoring
+app.use(requestLogger);
+app.use(performanceMonitor);
+
+// Rate limiting
+app.use('/api/', generalLimiter);
+app.use('/api/auth', authLimiter);
+app.use('/api/', apiLimiter);
+
+// PATTERN: Body parsing for JSON and form data
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Cookie parsing
+app.use(cookieParser());
+
+// Input sanitization
+app.use(sanitize);
+
+// Health check endpoint
+app.get('/api/health', async (req, res) => {
+  try {
+    res.json({ 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development'
+    });
+  } catch (error) {
+    res.status(503).json({ 
+      status: 'error', 
+      timestamp: new Date().toISOString(),
+      error: error.message 
+    });
+  }
+});
+
+// CRITICAL: Authentication middleware for protected routes
+// app.use('/api/users', authMiddleware);
+// app.use('/api/bookings', authMiddleware);
+// app.use('/api/payments', authMiddleware);
+
+// Route registration
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/bookings', bookingRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/quotes', quotesRoutes);
+app.use('/api/docs', docsRoutes);
+// app.use('/api/webhooks', webhookRoutes);
+
+function requireAdmin(req, res, next) {
+  if (!req.user || req.user.role !== 'ADMIN') {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+  next();
+}
+
+// Admin: Get all services
+app.get('/admin/services', requireAdmin, async (req, res) => {
+  const services = await prisma.service.findMany();
+  res.json({ services });
+});
+
+// Admin: Get all users
+app.get('/admin/users', requireAdmin, async (req, res) => {
+  const users = await prisma.user.findMany();
+  res.json({ users });
+});
+
+// Admin: Get all bookings
+app.get('/admin/bookings', requireAdmin, async (req, res) => {
+  const bookings = await prisma.booking.findMany();
+  const bookingsWithDetails = await Promise.all(bookings.map(async booking => {
+    const customer = await prisma.user.findUnique({ where: { id: booking.customerId } });
+    const service = await prisma.service.findUnique({ where: { id: booking.serviceId } });
+    return { ...booking, customer, service };
+  }));
+  res.json({ bookings: bookingsWithDetails });
+});
+
+// Admin: Analytics summary (real data for counts, dummy for email stats)
+app.get('/admin/analytics', requireAdmin, async (req, res) => {
+  const userCount = await prisma.user.count();
+  const serviceCount = await prisma.service.count();
+  const bookingCount = await prisma.booking.count();
+  // TODO: Replace with real email stats if available
+  const emailOpenRate = 0.72;
+  const emailClickRate = 0.38;
+  const emailBounceRate = 0.04;
+  res.json({
+    userCount,
+    serviceCount,
+    bookingCount,
+    emailOpenRate,
+    emailClickRate,
+    emailBounceRate
+  });
+});
+
+// Admin: Settings (configurable)
+const allowedKeys = [
+  'siteName', 'maintenanceMode', 'supportEmail',
+  'emailHost', 'emailPort', 'emailUser', 'emailPassword', 'emailFrom', 'emailSecure', 'emailReplyTo'
+];
+
+app.get('/admin/settings', requireAdmin, async (req, res) => {
+  const settings = await prisma.setting.findMany({ where: { key: { in: allowedKeys } } });
+  res.json({ settings });
+});
+
+app.post('/admin/settings', requireAdmin, async (req, res) => {
+  const { key, value } = req.body;
+  if (!allowedKeys.includes(key)) {
+    return res.status(400).json({ error: 'Invalid setting key' });
+  }
+  const setting = await prisma.setting.upsert({
+    where: { key },
+    update: { value },
+    create: { key, value }
+  });
+  res.json({ setting });
+});
+
+// User: Profile
+app.get('/profile', async (req, res) => {
+  // Assume authMiddleware sets req.user
+  if (!req.user) return res.status(401).json({ error: 'Not authenticated' });
+  const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+  res.json({ user });
+});
+
+// User: Settings (placeholder)
+app.get('/settings', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'Not authenticated' });
+  res.json({ settings: { notifications: true, darkMode: false } });
+});
+
+// PATTERN: Error handling middleware last
+app.use(errorLogger);
+app.use(errorHandler);
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something went wrong!' });
+});
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+export default app; 

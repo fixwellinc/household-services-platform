@@ -1,0 +1,39 @@
+{
+  "name": "household-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Backend for Household Services Subscription Platform (Express, Prisma)",
+  "scripts": {
+    "dev": "nodemon src/app.js",
+    "build": "npx prisma generate && npx prisma migrate deploy",
+    "start": "node src/app.js",
+    "setup": "node setup-mongodb.js",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit || echo 'No TS config yet'",
+    "test": "echo \"No tests yet\" && exit 0",
+    "postinstall": "npx prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.7.1",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.0.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.17.0",
+    "multer": "^2.0.1",
+    "node-fetch": "^3.3.2",
+    "nodemailer": "^6.10.1",
+    "stripe": "^18.3.0",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "nodemon": "^3.1.10",
+    "prisma": "^5.7.1"
+  }
+}
