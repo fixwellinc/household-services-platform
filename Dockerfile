@@ -1,6 +1,12 @@
-FROM node:18-alpine
+FROM node:18-slim
 
 WORKDIR /app
+
+# Install system dependencies including SSL libraries
+RUN apt-get update && apt-get install -y \
+    openssl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy only backend files
 COPY backend/package*.json ./backend/
