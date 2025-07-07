@@ -100,7 +100,7 @@ export function StripePaymentForm({
     }
   };
 
-  const handlePayment = async (data: PaymentFormData) => {
+  const handlePayment = async () => {
     if (!stripe || !elements) {
       toast.error('Payment system not ready');
       return;
@@ -174,7 +174,7 @@ export function StripePaymentForm({
     try {
       const clientSecret = await createPaymentIntent(data);
       await setupElements(clientSecret);
-      await handlePayment(data);
+      await handlePayment();
     } catch (error) {
       console.error('Payment setup error:', error);
       toast.error('Failed to set up payment');
