@@ -332,29 +332,29 @@ export class ApiClient {
   }
 
   // User self-service endpoints
-  updateProfile = async (data: { name?: string; email?: string; phone?: string; avatar?: string }) => {
-    return this.request('/users/me', {
+  updateProfile = async (data: { name?: string; email?: string; phone?: string; avatar?: string }): Promise<{ user: User }> => {
+    return this.request<{ user: User }>('/users/me', {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
 
-  changePassword = async (data: { currentPassword: string; newPassword: string }) => {
-    return this.request('/users/me/change-password', {
+  changePassword = async (data: { currentPassword: string; newPassword: string }): Promise<{ message: string }> => {
+    return this.request<{ message: string }>('/users/me/change-password', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  updateNotifications = async (data: { notifications: Record<string, boolean> }) => {
-    return this.request('/users/me/notifications', {
+  updateNotifications = async (data: { notifications: Record<string, boolean> }): Promise<{ user: User }> => {
+    return this.request<{ user: User }>('/users/me/notifications', {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
 
-  deleteAccount = async () => {
-    return this.request('/users/me', {
+  deleteAccount = async (): Promise<{ message: string }> => {
+    return this.request<{ message: string }>('/users/me', {
       method: 'DELETE',
     });
   }
