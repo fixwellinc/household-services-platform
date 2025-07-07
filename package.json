@@ -3,18 +3,11 @@
   "version": "1.0.0",
   "description": "Full-stack household services platform with Next.js frontend and Express backend",
   "private": true,
-  "workspaces": [
-    "frontend",
-    "backend"
-  ],
   "scripts": {
     "start": "cd backend && npm start",
     "build": "cd backend && npm run build",
     "dev": "concurrently \"cd frontend && npm run dev\" \"cd backend && npm run dev\"",
     "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install"
-  },
-  "devDependencies": {
-    "concurrently": "^8.2.2"
   },
   "engines": {
     "node": ">=18.0.0"

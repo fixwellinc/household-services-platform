@@ -1,0 +1,11 @@
+frontend/
+node_modules/
+.git/
+.github/
+scripts/
+deploy.sh
+docker-compose.yml
+*.log
+.env.local
+.env.development
+.env.test 
