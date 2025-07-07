@@ -1,14 +1,15 @@
 import Stripe from 'stripe';
 
-// Check if we're in development mode and don't have Stripe keys
-const isDevelopmentMode = process.env.NODE_ENV === 'development' && 
-  (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_your_stripe_secret_key');
+// Check if we have valid Stripe keys
+const hasValidStripeKeys = process.env.STRIPE_SECRET_KEY && 
+  process.env.STRIPE_SECRET_KEY !== 'sk_test_your_stripe_secret_key' &&
+  process.env.STRIPE_SECRET_KEY.length > 0;
 
 let stripe = null;
 
-if (isDevelopmentMode) {
-  console.log('🔧 Running in development mode with mock Stripe service');
-  // Create a mock Stripe instance for local development
+if (!hasValidStripeKeys) {
+  console.log('🔧 Running with mock Stripe service (no valid Stripe keys found)');
+  // Create a mock Stripe instance for development or when keys are missing
   stripe = {
     paymentIntents: {
       create: async (params) => ({
@@ -98,6 +99,7 @@ if (isDevelopmentMode) {
     },
   };
 } else {
+  console.log('💳 Initializing real Stripe service');
   // Use real Stripe in production
   stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: '2024-12-18.acacia',
