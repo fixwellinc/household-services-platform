@@ -1,31 +1,22 @@
 {
-  "name": "household-monorepo",
+  "name": "household-services-platform",
+  "version": "1.0.0",
+  "description": "Full-stack household services platform with Next.js frontend and Express backend",
   "private": true,
-  "version": "0.1.0",
-  "description": "Monorepo for Household Services Subscription Platform (see household_prp.md)",
   "workspaces": [
     "frontend",
-    "backend",
-    "shared"
+    "backend"
   ],
   "scripts": {
-    "lint": "npm run lint --workspaces",
-    "type-check": "npm run type-check --workspaces",
-    "test": "npm run test --workspaces"
+    "start": "cd backend && npm start",
+    "build": "cd backend && npm run build",
+    "dev": "concurrently \"cd frontend && npm run dev\" \"cd backend && npm run dev\"",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install"
   },
-  "repository": {
-    "type": "git",
-    "url": ""
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   },
-  "author": "",
-  "license": "MIT",
-  "main": "index.js",
-  "directories": {
-    "test": "tests"
-  },
-  "keywords": [],
-  "dependencies": {
-    "react-quill": "^2.0.0",
-    "xlsx": "^0.18.5"
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
