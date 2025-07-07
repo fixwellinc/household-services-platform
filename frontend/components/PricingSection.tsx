@@ -10,8 +10,6 @@ import {
   Crown, 
   Zap, 
   Shield, 
-  Clock, 
-  Users, 
   Sparkles,
   ArrowRight,
   X,
@@ -186,7 +184,7 @@ export default function PricingSection() {
 
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto mb-20">
-          {plans.map((plan, index) => (
+          {plans.map((plan) => (
             <Card 
               key={plan.name}
               className={`relative overflow-hidden transition-all duration-300 hover:shadow-2xl transform hover:-translate-y-2 ${
@@ -271,7 +269,7 @@ export default function PricingSection() {
               Compare Plans
             </h3>
             <p className="text-lg text-gray-600">
-              See exactly what's included in each plan
+              See exactly what&apos;s included in each plan
             </p>
           </div>
 
@@ -359,7 +357,7 @@ export default function PricingSection() {
                   <Quote className="h-8 w-8 text-blue-600 mb-4" />
                   
                   <p className="text-gray-600 mb-6 leading-relaxed">
-                    "{testimonial.content}"
+                    &ldquo;{testimonial.content}&rdquo;
                   </p>
                   
                   <div className="flex items-center gap-3">

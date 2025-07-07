@@ -15,7 +15,7 @@ import {
   Shield, 
   Star, 
   CheckCircle, 
-  Clock, 
+
   MapPin, 
   Sparkles,
   ArrowRight,
@@ -28,7 +28,7 @@ import {
 
 export default function HomePageClient() {
   const { data: userData, isLoading: userLoading } = useCurrentUser();
-  const { data: servicesData, isLoading: servicesLoading, error } = useServices();
+  const { data: servicesData, isLoading: servicesLoading } = useServices();
   const [isHydrated, setIsHydrated] = useState(false);
 
   const user = userData?.user;
@@ -78,7 +78,7 @@ export default function HomePageClient() {
             
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
               Connect with verified professionals for all your household needs. 
-              From cleaning to repairs, we've got you covered.
+              From cleaning to repairs, we&apos;ve got you covered.
             </p>
             
             {user ? (
@@ -265,7 +265,7 @@ export default function HomePageClient() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 leading-relaxed">
-                  We stand behind every service. If you're not 100% satisfied, we'll make it right or your money back.
+                  We stand behind every service. If you&apos;re not 100% satisfied, we&apos;ll make it right or your money back.
                 </p>
               </CardContent>
             </Card>

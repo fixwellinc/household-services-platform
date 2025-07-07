@@ -223,7 +223,7 @@ export default function AdminPage() {
       } else {
         toast.error('Failed to send email blast');
       }
-    } catch (error) {
+    } catch {
       toast.error('Error sending email blast');
     }
   };
@@ -268,7 +268,7 @@ export default function AdminPage() {
       } else {
         toast.error('Failed to send reply');
       }
-    } catch (error) {
+    } catch {
       toast.error('Error sending reply');
     }
   };
@@ -322,7 +322,7 @@ export default function AdminPage() {
       } else {
         toast.error('Failed to send test email');
       }
-    } catch (error) {
+    } catch {
       toast.error('Error sending test email');
     } finally {
       setSendingTest(false);

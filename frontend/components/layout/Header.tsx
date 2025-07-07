@@ -11,7 +11,7 @@ import {
   X, 
   Home, 
   Wrench, 
-  Users, 
+
   Info, 
   MessageCircle,
   ChevronDown,
