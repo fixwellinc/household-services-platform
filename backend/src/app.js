@@ -75,10 +75,13 @@ app.use(sanitize);
 // Health check endpoint
 app.get('/api/health', async (req, res) => {
   try {
+    const dbStatus = prisma ? 'connected' : 'not_configured';
     res.json({ 
       status: 'ok', 
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development'
+      environment: process.env.NODE_ENV || 'development',
+      database: dbStatus,
+      stripe: process.env.STRIPE_SECRET_KEY ? 'configured' : 'mock'
     });
   } catch (error) {
     res.status(503).json({ 
@@ -113,18 +116,27 @@ function requireAdmin(req, res, next) {
 
 // Admin: Get all services
 app.get('/admin/services', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
   const services = await prisma.service.findMany();
   res.json({ services });
 });
 
 // Admin: Get all users
 app.get('/admin/users', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
   const users = await prisma.user.findMany();
   res.json({ users });
 });
 
 // Admin: Get all bookings
 app.get('/admin/bookings', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
   const bookings = await prisma.booking.findMany();
   const bookingsWithDetails = await Promise.all(bookings.map(async booking => {
     const customer = await prisma.user.findUnique({ where: { id: booking.customerId } });
@@ -136,6 +148,9 @@ app.get('/admin/bookings', requireAdmin, async (req, res) => {
 
 // Admin: Analytics summary (real data for counts, dummy for email stats)
 app.get('/admin/analytics', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
   const userCount = await prisma.user.count();
   const serviceCount = await prisma.service.count();
   const bookingCount = await prisma.booking.count();
@@ -160,11 +175,17 @@ const allowedKeys = [
 ];
 
 app.get('/admin/settings', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
   const settings = await prisma.setting.findMany({ where: { key: { in: allowedKeys } } });
   res.json({ settings });
 });
 
 app.post('/admin/settings', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
   const { key, value } = req.body;
   if (!allowedKeys.includes(key)) {
     return res.status(400).json({ error: 'Invalid setting key' });
@@ -181,6 +202,9 @@ app.post('/admin/settings', requireAdmin, async (req, res) => {
 app.get('/profile', async (req, res) => {
   // Assume authMiddleware sets req.user
   if (!req.user) return res.status(401).json({ error: 'Not authenticated' });
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
   const user = await prisma.user.findUnique({ where: { id: req.user.id } });
   res.json({ user });
 });
