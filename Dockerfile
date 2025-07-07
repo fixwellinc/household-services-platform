@@ -21,5 +21,5 @@ RUN npm prune --production
 # Expose port
 EXPOSE 3001
 
-# Start the application
+# Start the application (no cd needed since WORKDIR is already set)
 CMD ["npm", "start"] 
