@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/shared';
 import { Badge } from '@/components/ui/shared';
 import { 
   Search, 
-  Filter, 
+
   X, 
   SlidersHorizontal,
   Star,

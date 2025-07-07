@@ -158,7 +158,7 @@ export default function TestimonialsSection() {
 
                     {/* Testimonial Text */}
                     <blockquote className="text-lg md:text-xl text-gray-700 mb-6 leading-relaxed">
-                      "{testimonials[currentIndex].content}"
+                      &ldquo;{testimonials[currentIndex].content}&rdquo;
                     </blockquote>
 
                     {/* Customer Info */}

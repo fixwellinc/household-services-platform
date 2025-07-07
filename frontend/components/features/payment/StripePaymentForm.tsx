@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button } from '../../ui/button';
-import { Card } from '../../ui/card';
+import { Button, Card } from '@/components/ui/shared';
 import { toast } from 'sonner';
 import { Stripe, StripeElements } from '@stripe/stripe-js';
 
@@ -41,7 +40,6 @@ export function StripePaymentForm({
   const {
     register,
     handleSubmit,
-    formState: { errors },
   } = useForm<PaymentFormData>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {

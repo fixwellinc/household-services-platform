@@ -1,5 +1,5 @@
 // API client for connecting to the backend
-const API_BASE_URL = '/api';
+// const API_BASE_URL = '/api';
 
 // Types for API responses
 export interface User {

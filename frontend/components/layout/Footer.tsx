@@ -30,7 +30,7 @@ const Footer: React.FC = () => {
             </div>
             <p className="text-gray-300 leading-relaxed">
               Connect with verified professionals for all your household needs. 
-              From cleaning to repairs, we've got you covered with quality service.
+              From cleaning to repairs, we&apos;ve got you covered with quality service.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors duration-200">

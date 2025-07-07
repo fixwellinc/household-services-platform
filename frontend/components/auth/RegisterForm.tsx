@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { useRegister } from '@/hooks/use-api';
 import { Button } from '@/components/ui/shared';
 import { toast } from 'sonner';
-import { Eye, EyeOff, Loader2, User } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),

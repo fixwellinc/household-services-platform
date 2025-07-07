@@ -40,8 +40,8 @@ export default function BookServiceForm() {
 
   const selectedServiceId = watch('serviceId');
 
-  // Get the selected service details
-  const service = servicesData?.services?.find((s: any) => s.id === selectedServiceId);
+  // Get the selected service details (unused but kept for potential future use)
+  // const service = servicesData?.services?.find((s: any) => s.id === selectedServiceId);
   
   // Services are now admin-managed, no individual providers
 
