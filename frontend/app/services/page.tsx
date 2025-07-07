@@ -211,7 +211,7 @@ export default function ServicesPage() {
                     key={service.id}
                     service={service}
                     onBook={handleBook}
-                    onViewDetails={handleViewDetails}
+                    onView={handleViewDetails}
                   />
                 ))}
               </div>
