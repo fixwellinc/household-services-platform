@@ -5,6 +5,10 @@ const hasValidStripeKeys = process.env.STRIPE_SECRET_KEY &&
   process.env.STRIPE_SECRET_KEY !== 'sk_test_your_stripe_secret_key' &&
   process.env.STRIPE_SECRET_KEY.length > 0;
 
+console.log('🔍 Stripe service initialization - checking keys...');
+console.log('🔍 STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
+console.log('🔍 STRIPE_SECRET_KEY length:', process.env.STRIPE_SECRET_KEY?.length || 0);
+
 let stripe = null;
 
 if (!hasValidStripeKeys) {
