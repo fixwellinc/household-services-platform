@@ -21,5 +21,6 @@ RUN npm prune --production
 # Expose port
 EXPOSE 3001
 
-# Start the application (no cd needed since WORKDIR is already set)
-CMD ["npm", "start"] 
+# Set working directory and start the application
+WORKDIR /app/backend
+CMD ["node", "src/app.js"] 
