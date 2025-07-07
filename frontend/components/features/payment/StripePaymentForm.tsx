@@ -109,9 +109,6 @@ export function StripePaymentForm({
     setIsLoading(true);
 
     try {
-      // Create payment intent
-      const clientSecret = await createPaymentIntent(data);
-
       // Confirm payment
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
