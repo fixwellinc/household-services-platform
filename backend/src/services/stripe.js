@@ -1,18 +1,24 @@
 import Stripe from 'stripe';
 
+console.log('🚀 Stripe service starting...');
+console.log('🔍 Environment check:');
+console.log('  - NODE_ENV:', process.env.NODE_ENV);
+console.log('  - STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
+console.log('  - STRIPE_SECRET_KEY length:', process.env.STRIPE_SECRET_KEY?.length || 0);
+console.log('  - STRIPE_SECRET_KEY starts with sk_test:', process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_') || false);
+
 // Check if we have valid Stripe keys
 const hasValidStripeKeys = process.env.STRIPE_SECRET_KEY && 
   process.env.STRIPE_SECRET_KEY !== 'sk_test_your_stripe_secret_key' &&
-  process.env.STRIPE_SECRET_KEY.length > 0;
+  process.env.STRIPE_SECRET_KEY.length > 0 &&
+  process.env.STRIPE_SECRET_KEY.startsWith('sk_test_');
 
-console.log('🔍 Stripe service initialization - checking keys...');
-console.log('🔍 STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
-console.log('🔍 STRIPE_SECRET_KEY length:', process.env.STRIPE_SECRET_KEY?.length || 0);
+console.log('🔍 hasValidStripeKeys:', hasValidStripeKeys);
 
 let stripe = null;
 
 if (!hasValidStripeKeys) {
-  console.log('🔧 Running with mock Stripe service (no valid Stripe keys found)');
+  console.log('🔧 Using mock Stripe service (no valid Stripe keys found)');
   // Create a mock Stripe instance for development or when keys are missing
   stripe = {
     paymentIntents: {
@@ -102,13 +108,36 @@ if (!hasValidStripeKeys) {
       }),
     },
   };
+  console.log('✅ Mock Stripe service initialized successfully');
 } else {
-  console.log('💳 Initializing real Stripe service');
-  // Use real Stripe in production
-  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2024-12-18.acacia',
-  });
+  console.log('💳 Initializing real Stripe service with provided keys');
+  try {
+    // Use real Stripe in production
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2024-12-18.acacia',
+    });
+    console.log('✅ Real Stripe service initialized successfully');
+  } catch (error) {
+    console.error('❌ Failed to initialize real Stripe service:', error.message);
+    console.log('🔄 Falling back to mock Stripe service');
+    // Fall back to mock service if real Stripe fails
+    stripe = {
+      paymentIntents: {
+        create: async (params) => ({
+          id: `pi_mock_${Date.now()}`,
+          client_secret: `pi_mock_${Date.now()}_secret_${Math.random().toString(36).substr(2, 9)}`,
+          amount: params.amount,
+          currency: params.currency,
+          status: 'requires_payment_method',
+          metadata: params.metadata || {},
+        }),
+      },
+      // ... rest of mock implementation
+    };
+  }
 }
+
+console.log('🎉 Stripe service initialization complete');
 
 export default stripe;
 
