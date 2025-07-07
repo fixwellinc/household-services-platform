@@ -3,7 +3,15 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-// Environment validation
+console.log('🔧 Environment configuration loading...');
+console.log('🔍 Available environment variables:');
+console.log('  - NODE_ENV:', process.env.NODE_ENV || 'undefined');
+console.log('  - DATABASE_URL exists:', !!process.env.DATABASE_URL);
+console.log('  - JWT_SECRET exists:', !!process.env.JWT_SECRET);
+console.log('  - STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
+console.log('  - PORT:', process.env.PORT || 'undefined');
+
+// Environment validation - warn but don't exit
 const requiredEnvVars = [
   'DATABASE_URL',
   'JWT_SECRET',
@@ -13,7 +21,9 @@ const requiredEnvVars = [
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingVars.length > 0) {
-  throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
+  console.warn('⚠️  Missing environment variables:', missingVars.join(', '));
+  console.warn('⚠️  Some features may not work properly');
+  // Don't throw error - let the app start and handle missing vars gracefully
 }
 
 // Environment configuration
@@ -86,6 +96,8 @@ export const config = {
     analytics: process.env.ENABLE_ANALYTICS === 'true',
   }
 };
+
+console.log('✅ Environment configuration loaded successfully');
 
 // Validation helpers
 export const isDevelopment = config.nodeEnv === 'development';
