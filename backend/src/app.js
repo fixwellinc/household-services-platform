@@ -1,3 +1,13 @@
+// Add environment debugging at the very top
+console.log('🚀 Application starting...');
+console.log('🔍 Environment variables check:');
+console.log('  - NODE_ENV:', process.env.NODE_ENV);
+console.log('  - PORT:', process.env.PORT);
+console.log('  - DATABASE_URL exists:', !!process.env.DATABASE_URL);
+console.log('  - JWT_SECRET exists:', !!process.env.JWT_SECRET);
+console.log('  - STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
+console.log('  - All env vars:', Object.keys(process.env).filter(key => key.includes('DATABASE') || key.includes('JWT') || key.includes('STRIPE') || key.includes('NODE') || key.includes('PORT')));
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';

@@ -18,6 +18,10 @@ RUN npx prisma generate
 # Remove dev dependencies for production
 RUN npm prune --production
 
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3001
+
 # Expose port
 EXPOSE 3001
 
