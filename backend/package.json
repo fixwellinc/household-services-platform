@@ -29,7 +29,9 @@
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.10.1",
     "stripe": "^18.3.0",
-    "winston": "^3.17.0"
+    "uuid": "^9.0.1",
+    "winston": "^3.17.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "eslint": "^8.56.0",
