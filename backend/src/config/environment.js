@@ -29,7 +29,7 @@ if (missingVars.length > 0) {
 // Environment configuration
 export const config = {
   // Server
-  port: process.env.PORT || 5000,
+  port: process.env.PORT || 3001,
   nodeEnv: process.env.NODE_ENV || 'development',
   
   // Database
