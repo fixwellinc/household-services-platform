@@ -1,4 +1,5 @@
 // API client for connecting to the backend
+// Updated for production deployment with Railway backend
 // const API_BASE_URL = '/api';
 
 // Types for API responses
