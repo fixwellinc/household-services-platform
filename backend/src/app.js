@@ -42,16 +42,24 @@ const app = express();
 app.use(helmet());
 
 // CORS configuration
-app.use(cors(getCorsOptions()));
+const corsOptions = getCorsOptions();
+console.log('🔧 CORS Configuration:', {
+  origins: corsOptions.origin,
+  credentials: corsOptions.credentials,
+  methods: corsOptions.methods
+});
+app.use(cors(corsOptions));
 
-// CORS debugging (development only)
-if (process.env.NODE_ENV === 'development') {
-  app.use((req, res, next) => {
-    console.log('Request from:', req.headers.origin);
-    console.log('Request method:', req.method);
-    next();
-  });
-}
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
+
+// CORS debugging (all environments)
+app.use((req, res, next) => {
+  console.log('🌐 Request from:', req.headers.origin);
+  console.log('🌐 Request method:', req.method);
+  console.log('🌐 Request path:', req.path);
+  next();
+});
 
 // Enhanced logging and monitoring
 app.use(requestLogger);

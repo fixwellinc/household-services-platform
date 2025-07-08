@@ -44,6 +44,13 @@ export const config = {
   corsOrigins: process.env.CORS_ORIGINS 
     ? process.env.CORS_ORIGINS.split(',') 
     : ['http://localhost:3000', 'http://localhost:3001'],
+  // Additional production origins for Vercel deployments
+  productionOrigins: [
+    'https://household-services-omega.vercel.app',
+    'https://household-services-omega-git-main.vercel.app',
+    'https://household-services-omega-git-develop.vercel.app',
+    'https://household-services-omega-git-feature.vercel.app'
+  ],
   
   // Stripe
   stripeSecretKey: process.env.STRIPE_SECRET_KEY,
@@ -105,15 +112,36 @@ export const isProduction = config.nodeEnv === 'production';
 export const isTest = config.nodeEnv === 'test';
 
 // Security helpers
-export const getCorsOptions = () => ({
-  origin: isDevelopment 
-    ? config.corsOrigins 
-    : [config.frontendUrl],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  exposedHeaders: ['X-Total-Count', 'X-Page-Count'],
-});
+export const getCorsOptions = () => {
+  // In production, allow both the configured frontend URL and common Vercel domains
+  const productionOrigins = [
+    config.frontendUrl,
+    ...config.productionOrigins
+  ].filter(Boolean); // Remove any undefined values
+
+  console.log('🔧 CORS Origins for', config.nodeEnv, ':', productionOrigins);
+
+  return {
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      const allowedOrigins = isDevelopment ? config.corsOrigins : productionOrigins;
+      
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log('🚫 CORS blocked origin:', origin);
+        console.log('✅ Allowed origins:', allowedOrigins);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    exposedHeaders: ['X-Total-Count', 'X-Page-Count'],
+  };
+};
 
 export const getHelmetOptions = () => ({
   contentSecurityPolicy: isProduction ? {
