@@ -46,10 +46,10 @@ export const config = {
     : ['http://localhost:3000', 'http://localhost:3001'],
   // Additional production origins for Vercel deployments
   productionOrigins: [
-    'https://household-services-omega.vercel.app',
-    'https://household-services-omega-git-main.vercel.app',
-    'https://household-services-omega-git-develop.vercel.app',
-    'https://household-services-omega-git-feature.vercel.app'
+    'https://household-services-zeta.vercel.app',
+    'https://household-services-zeta-git-main.vercel.app',
+    'https://household-services-zeta-git-develop.vercel.app',
+    'https://household-services-zeta-git-feature.vercel.app'
   ],
   
   // Stripe
