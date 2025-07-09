@@ -1,16 +1,60 @@
 {
-  "name": "household-services-platform",
+  "name": "household-services-monorepo",
   "version": "1.0.0",
-  "description": "Full-stack household services platform with Next.js frontend and Express backend",
+  "description": "Household Services Platform - Monorepo",
   "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "start": "cd backend && npm start",
-    "build": "cd frontend && npm install && npm run build",
-    "build:backend": "cd backend && npm run build",
-    "dev": "concurrently \"cd frontend && npm run dev\" \"cd backend && npm run dev\"",
-    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install"
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm run dev --workspace=apps/backend",
+    "dev:frontend": "npm run dev --workspace=apps/frontend",
+    "dev:unified": "node unified-server.js",
+    "build": "npm run build --workspaces",
+    "build:backend": "npm run build --workspace=apps/backend",
+    "build:frontend": "npm run build --workspace=apps/frontend",
+    "build:unified": "npm run build:frontend && npm run build:backend",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "npm run start --workspace=apps/backend",
+    "start:frontend": "npm run start --workspace=apps/frontend",
+    "start:unified": "node unified-server.js",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "clean": "npm run clean --workspaces && rm -rf node_modules",
+    "deploy:railway": "railway up",
+    "deploy:vercel": "vercel --prod",
+    "deploy:unified": "railway up",
+    "setup": "npm install && npm run build:unified"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "next": "^14.0.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   },
   "engines": {
-    "node": ">=18.0.0"
-  }
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fixwellinc/household-services-platform.git"
+  },
+  "keywords": [
+    "household",
+    "services",
+    "monorepo",
+    "nextjs",
+    "express",
+    "railway",
+    "unified"
+  ],
+  "author": "FixWell Inc",
+  "license": "MIT"
 }

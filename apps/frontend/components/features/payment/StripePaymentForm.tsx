@@ -152,7 +152,7 @@ export function StripePaymentForm({
           colorBackground: '#ffffff',
           colorText: '#1f2937',
           colorDanger: '#ef4444',
-          fontFamily: 'Inter, system-ui, sans-serif',
+          fontFamily: 'JetBrains Mono, Consolas, Monaco, monospace',
           spacingUnit: '4px',
           borderRadius: '8px',
         },

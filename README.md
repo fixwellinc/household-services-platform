@@ -1,277 +1,162 @@
-# 🏠 Household Services Platform
+# Household Services Platform
 
-A modern, full-stack household services subscription platform built with **Next.js 14**, **Express.js**, and **Prisma**. Features secure authentication, real-time booking management, and a beautiful responsive UI.
+A unified full-stack application for household services, combining Next.js frontend and Express.js backend in a single deployment.
 
-## ✨ Features
+## 🚀 Unified Deployment
 
-- **🔐 Secure Authentication** - JWT-based auth with role-based access control
-- **📱 Modern UI/UX** - Beautiful, responsive design with Tailwind CSS
-- **🔄 Real-time Updates** - Live booking status and notifications
-- **📊 Admin Dashboard** - Comprehensive management tools
-- **🚀 Railway Deployment** - Production-ready deployment setup
-- **🔒 Data Security** - Encrypted user data and secure API handling
-- **📝 Service Management** - Create, edit, and manage household services
-- **📅 Booking System** - Schedule and manage service appointments
+This project is now configured for **single deployment** on Railway, eliminating the need for separate frontend and backend hosting.
 
-## 🚀 Quick Deploy to Railway
+### Architecture
+
+- **Frontend**: Next.js 14 with TypeScript and Tailwind CSS
+- **Backend**: Express.js API with Prisma ORM
+- **Database**: MongoDB (via Prisma)
+- **Deployment**: Railway (unified)
+- **Font**: JetBrains Mono (monospace throughout)
+
+## 🛠️ Development
 
 ### Prerequisites
-- [Railway Account](https://railway.app)
-- [Stripe Account](https://stripe.com)
-- [GitHub Repository](https://github.com)
 
-### 1. Clone & Setup
+- Node.js 18+
+- npm 9+
+- MongoDB database
+
+### Setup
+
+1. **Clone and install dependencies:**
+   ```bash
+   git clone <repository-url>
+   cd Household
+   npm install
+   ```
+
+2. **Environment variables:**
+   Create `.env` files in both `apps/backend` and `apps/frontend` with:
+   ```env
+   DATABASE_URL="your-mongodb-connection-string"
+   JWT_SECRET="your-jwt-secret"
+   STRIPE_SECRET_KEY="your-stripe-secret"
+   STRIPE_PUBLISHABLE_KEY="your-stripe-publishable-key"
+   ```
+
+3. **Database setup:**
+   ```bash
+   cd apps/backend
+   npx prisma generate
+   npx prisma db push
+   ```
+
+### Running the Application
+
+#### Option 1: Unified Development (Recommended)
 ```bash
-git clone <your-repo-url>
-cd Household
-npm install
+npm run dev:unified
+```
+This runs both frontend and backend in a single process on port 3000.
+
+#### Option 2: Separate Development
+```bash
+# Terminal 1 - Backend
+npm run dev:backend
+
+# Terminal 2 - Frontend  
+npm run dev:frontend
 ```
 
-### 2. Railway Deployment
+#### Option 3: Concurrent Development
 ```bash
-# Install Railway CLI
-npm install -g @railway/cli
-
-# Login to Railway
-railway login
-
-# Deploy to Railway
-railway up
+npm run dev
 ```
 
-### 3. Environment Variables
-Set these in your Railway dashboard:
+## 🚀 Deployment
 
-**Backend Variables:**
-```bash
-DATABASE_URL="postgresql://..."
-JWT_SECRET="your-super-secret-jwt-key"
-FRONTEND_URL="https://your-frontend-domain.railway.app"
-PORT=5000
+### Railway Deployment (Unified)
+
+1. **Install Railway CLI:**
+   ```bash
+   npm install -g @railway/cli
+   ```
+
+2. **Login to Railway:**
+   ```bash
+   railway login
+   ```
+
+3. **Deploy:**
+   ```bash
+   npm run deploy:unified
+   ```
+
+### Environment Variables for Production
+
+Set these in your Railway project:
+
+```env
 NODE_ENV=production
+DATABASE_URL=your-mongodb-connection-string
+JWT_SECRET=your-jwt-secret
+STRIPE_SECRET_KEY=your-stripe-secret
+STRIPE_PUBLISHABLE_KEY=your-stripe-publishable-key
 ```
 
-**Frontend Variables:**
-```bash
-NEXT_PUBLIC_API_URL="https://your-backend-domain.railway.app/api"
-NEXTAUTH_SECRET="your-nextauth-secret"
-```
-
-## 🛠️ Local Development
-
-### Backend Setup
-```bash
-cd backend
-npm install
-cp env.example .env
-# Edit .env with your configuration
-npm run dev
-```
-
-### Frontend Setup
-```bash
-cd frontend
-npm install
-cp env.example .env.local
-# Edit .env.local with your configuration
-npm run dev
-```
-
-### Database Setup
-```bash
-cd backend
-npx prisma migrate dev
-npx prisma generate
-```
-
-## 🏗️ Architecture
+## 📁 Project Structure
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │    Backend      │    │   Database      │
-│   (Next.js)     │◄──►│   (Express)     │◄──►│  (PostgreSQL)   │
-│                 │    │                 │    │                 │
-│ • React 18      │    │ • Node.js       │    │ • Prisma ORM    │
-│ • TypeScript    │    │ • JWT Auth      │    │ • Migrations    │
-│ • Tailwind CSS  │    │ • Stripe API    │    │ • Real-time     │
-│ • NextAuth      │    │ • Webhooks      │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Railway       │    │     Stripe      │    │   Monitoring    │
-│   Deployment    │    │   Payments      │    │   & Analytics   │
-│                 │    │                 │    │                 │
-│ • Auto-deploy   │    │ • Subscriptions │    │ • Railway Logs  │
-│ • SSL Cert      │    │ • One-time      │    │ • Stripe Dash   │
-│ • Custom Domain │    │ • Webhooks      │    │ • Error Tracking│
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+Household/
+├── apps/
+│   ├── frontend/          # Next.js frontend
+│   │   ├── app/          # App router pages
+│   │   ├── components/   # React components
+│   │   └── ...
+│   └── backend/          # Express.js backend
+│       ├── src/
+│       │   ├── routes/   # API routes
+│       │   ├── middleware/
+│       │   └── ...
+│       └── prisma/       # Database schema
+├── packages/             # Shared packages
+├── unified-server.js     # Unified server script
+├── Dockerfile           # Docker configuration
+└── railway.json         # Railway configuration
 ```
 
-## 🔐 Security Features
+## 🔧 Key Features
 
-- **🔒 JWT Authentication** - Secure token-based authentication
-- **🛡️ CORS Protection** - Configured for production domains
-- **⚡ Rate Limiting** - Prevents abuse and DDoS attacks
-- **🔐 Password Hashing** - bcrypt with configurable rounds
-- **💳 Stripe Security** - PCI-compliant payment processing
-- **🔍 Input Validation** - Zod schema validation
-- **🚫 SQL Injection Protection** - Prisma ORM with parameterized queries
+- **Unified Deployment**: Single Railway deployment for both frontend and backend
+- **Monospace Typography**: JetBrains Mono font throughout the application
+- **API Routes**: Backend API accessible at `/api/*`
+- **Database**: MongoDB with Prisma ORM
+- **Authentication**: JWT-based authentication
+- **Payments**: Stripe integration
+- **Real-time**: WebSocket support for real-time features
 
-## 💳 Stripe Integration
+## 🛠️ Scripts
 
-### Payment Features
-- **Subscription Management** - Monthly/yearly billing cycles
-- **One-time Payments** - For individual service bookings
-- **Webhook Processing** - Real-time payment status updates
-- **Refund Handling** - Automated and manual refunds
-- **Customer Management** - Stripe customer profiles
+- `npm run dev:unified` - Run unified development server
+- `npm run build:unified` - Build both frontend and backend
+- `npm run start:unified` - Start unified production server
+- `npm run deploy:unified` - Deploy to Railway
 
-### Security
-- **Webhook Signature Verification** - Ensures webhook authenticity
-- **PCI Compliance** - Stripe handles all card data
-- **Encrypted Communication** - HTTPS for all API calls
-- **Token-based Payments** - No card data stored locally
+## 🔗 API Endpoints
 
-## 📊 Database Schema
+All API endpoints are available at `/api/*`:
 
-```sql
--- Users and Authentication
-users (id, email, name, role, password_hash, created_at)
-subscriptions (id, user_id, tier, status, stripe_customer_id)
+- `/api/auth/*` - Authentication routes
+- `/api/users/*` - User management
+- `/api/services/*` - Service management
+- `/api/bookings/*` - Booking management
+- `/api/payments/*` - Payment processing
+- `/api/health` - Health check
 
--- Services and Bookings
-services (id, name, description, category, base_price)
-bookings (id, customer_id, service_id, scheduled_date, status, amount)
+## 🎨 Styling
 
--- Payments and Communication
-payments (id, booking_id, stripe_payment_intent_id, amount, status)
-messages (id, booking_id, sender_id, content, created_at)
-```
+The application uses:
+- **Tailwind CSS** for styling
+- **JetBrains Mono** as the primary font (monospace)
+- **Custom CSS variables** for theming
+- **Responsive design** for all screen sizes
 
-## 🚀 Deployment Checklist
+## 📝 License
 
-### Pre-Deployment
-- [ ] All environment variables configured
-- [ ] Stripe webhooks set up
-- [ ] Database migrations ready
-- [ ] SSL certificates configured
-- [ ] Custom domain configured
-
-### Post-Deployment
-- [ ] Health checks passing
-- [ ] Payment processing tested
-- [ ] Webhook delivery verified
-- [ ] Error monitoring active
-- [ ] Performance metrics tracked
-
-## 🧪 Testing
-
-### Backend Tests
-```bash
-cd backend
-npm test
-```
-
-### Frontend Tests
-```bash
-cd frontend
-npm test
-```
-
-### E2E Tests
-```bash
-npm run test:e2e
-```
-
-## 📈 Monitoring & Analytics
-
-### Railway Monitoring
-- Real-time logs and metrics
-- Automatic scaling based on traffic
-- Health check endpoints
-- Performance monitoring
-
-### Stripe Analytics
-- Payment success rates
-- Revenue tracking
-- Customer analytics
-- Dispute monitoring
-
-### Application Monitoring
-- Error tracking and alerting
-- User behavior analytics
-- Performance metrics
-- Security monitoring
-
-## 🔧 Configuration
-
-### Environment Variables
-See `backend/env.example` and `frontend/env.example` for all required variables.
-
-### Stripe Configuration
-1. Create products and prices in Stripe Dashboard
-2. Set up webhook endpoints
-3. Configure payment methods
-4. Test with test keys before going live
-
-### Railway Configuration
-1. Connect GitHub repository
-2. Set environment variables
-3. Configure build commands
-4. Set up custom domains
-
-## 🆘 Troubleshooting
-
-### Common Issues
-
-**Build Failures**
-- Check Railway build logs
-- Verify all dependencies in package.json
-- Ensure build commands are correct
-
-**Database Connection**
-- Verify DATABASE_URL is set correctly
-- Check if migrations have been run
-- Ensure database is accessible
-
-**Stripe Webhooks**
-- Verify webhook URL is correct
-- Check webhook signature verification
-- Monitor webhook delivery in Stripe dashboard
-
-**CORS Errors**
-- Verify FRONTEND_URL is set correctly
-- Check CORS configuration in backend
-- Ensure credentials are enabled
-
-### Getting Help
-- **Documentation**: [DEPLOYMENT.md](./DEPLOYMENT.md)
-- **Railway Support**: [docs.railway.app](https://docs.railway.app)
-- **Stripe Support**: [support.stripe.com](https://support.stripe.com)
-- **Issues**: [GitHub Issues](https://github.com/your-repo/issues)
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
-
-## 🎉 Success!
-
-Your Household Services Platform is now deployed with:
-- ✅ Secure payment processing via Stripe
-- ✅ PostgreSQL database for data persistence
-- ✅ Automatic deployments from GitHub
-- ✅ SSL certificates and custom domains
-- ✅ Monitoring and logging
-- ✅ Scalable infrastructure
-
-Monitor your application and Stripe dashboard regularly to ensure everything is running smoothly! 
+MIT License - see LICENSE file for details. 

@@ -1,9 +1,9 @@
 {
-  "name": "household-backend",
+  "name": "@household/backend",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Backend for Household Services Subscription Platform (Express, Prisma)",
+  "description": "Backend for Household Services Platform (Express, Prisma)",
   "scripts": {
     "dev": "nodemon src/app.js",
     "build": "npx prisma generate",
@@ -37,5 +37,9 @@
     "eslint": "^8.56.0",
     "nodemon": "^3.1.10",
     "prisma": "^6.11.1"
+  },
+  "dependencies": {
+    "@household/types": "workspace:*",
+    "@household/utils": "workspace:*"
   }
 }

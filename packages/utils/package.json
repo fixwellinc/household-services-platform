@@ -1,0 +1,30 @@
+{
+  "name": "@household/utils",
+  "version": "1.0.0",
+  "description": "Shared utilities for Household Services Platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "dependencies": {
+    "@household/types": "workspace:*"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "utilities",
+    "household",
+    "services",
+    "shared"
+  ],
+  "author": "FixWell Inc",
+  "license": "MIT"
+} 

@@ -1,5 +1,5 @@
 import './globals.css'
-import { Inter } from 'next/font/google'
+import { JetBrains_Mono } from 'next/font/google'
 import Providers from '@/components/Providers'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
@@ -7,7 +7,11 @@ import { Toaster } from 'sonner'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import React from 'react'
 
-const inter = Inter({ subsets: ['latin'] })
+const jetbrainsMono = JetBrains_Mono({ 
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+})
 
 export const metadata = {
       title: 'Household Services | Professional Home Services',
@@ -66,7 +70,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.className} min-h-screen bg-background text-foreground antialiased`}>
+      <body className={`${jetbrainsMono.className} min-h-screen bg-background text-foreground antialiased`}>
         <ErrorBoundary>
           <Providers>
             <div className="flex min-h-screen flex-col">

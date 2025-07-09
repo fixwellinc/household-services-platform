@@ -67,9 +67,14 @@
   }
   
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-mono;
     font-feature-settings: "rlig" 1, "calt" 1;
     line-height: 1.6;
+  }
+
+  /* Ensure all text elements use monospace font */
+  h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, textarea, select, label {
+    font-family: inherit;
   }
 
   /* Custom scrollbar */
