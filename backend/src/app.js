@@ -52,8 +52,9 @@ const corsOptions = {
       return callback(null, true);
     }
     
-    // Allow the specific Vercel domain being used
-    if (origin === 'https://frontend-lovat-sigma-87.vercel.app') {
+    // Allow the specific Vercel domains being used
+    if (origin === 'https://frontend-lovat-sigma-87.vercel.app' || 
+        origin === 'https://frontend-mq2e2lnbj-jms-projects-46d87d50.vercel.app') {
       return callback(null, true);
     }
     

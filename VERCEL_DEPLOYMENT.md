@@ -1,74 +1,176 @@
 # Vercel Deployment Guide
 
-## Environment Variables Setup
+## Overview
+This guide will help you deploy your Household Services Platform to Vercel. The deployment strategy is:
+- **Frontend**: Deploy to Vercel (Next.js)
+- **Backend**: Deploy to Railway/Render (Express.js API)
+- **Database**: MongoDB Atlas
 
-To fix the deployment error, you need to set the following environment variables in your Vercel dashboard:
+## Prerequisites
+1. Vercel account (free tier available)
+2. Railway/Render account for backend
+3. MongoDB Atlas account
+4. Stripe account (for payments)
 
-### Required Environment Variables
+## Step 1: Database Setup (MongoDB Atlas)
 
-1. **NEXT_PUBLIC_API_URL**
-   - Value: `https://household-services-platform-production.up.railway.app/api`
-   - Description: The URL of your Railway backend API
+1. **Create MongoDB Atlas Cluster**:
+   - Go to [MongoDB Atlas](https://www.mongodb.com/atlas)
+   - Create a free cluster
+   - Get your connection string
 
-2. **NEXT_PUBLIC_APP_NAME**
-   - Value: `Household Services`
-   - Description: The name of your application
+2. **Update Database URL**:
+   - Replace `mongodb://localhost:27017/household-services` with your Atlas connection string
+   - Format: `mongodb+srv://username:password@cluster.mongodb.net/household-services?retryWrites=true&w=majority`
 
-3. **NEXT_PUBLIC_APP_URL**
-   - Value: `https://household-services-zeta.vercel.app`
-   - Description: The URL of your Vercel deployment
+## Step 2: Backend Deployment (Railway)
 
-### How to Set Environment Variables in Vercel
+1. **Deploy Backend to Railway**:
+   ```bash
+   # Install Railway CLI
+   npm install -g @railway/cli
+   
+   # Login to Railway
+   railway login
+   
+   # Deploy backend
+   cd backend
+   railway init
+   railway up
+   ```
 
-1. Go to your Vercel dashboard
-2. Select your project (`household-services-zeta`)
-3. Go to **Settings** tab
-4. Click on **Environment Variables**
-5. Add each variable:
-   - **Name**: `NEXT_PUBLIC_API_URL`
-   - **Value**: `https://household-services-platform-production.up.railway.app/api`
-   - **Environment**: Production, Preview, Development
-6. Repeat for other variables
-7. Click **Save**
-8. Redeploy your application
+2. **Set Environment Variables in Railway**:
+   - Go to your Railway project dashboard
+   - Add all variables from `backend/env.example`
+   - Update `DATABASE_URL` with your MongoDB Atlas connection string
+   - Update `FRONTEND_URL` with your Vercel frontend URL (after deployment)
 
-### Testing the Deployment
+## Step 3: Frontend Deployment (Vercel)
 
-After setting the environment variables:
+1. **Install Vercel CLI**:
+   ```bash
+   npm install -g vercel
+   ```
 
-1. Visit: `https://household-services-zeta.vercel.app/test-api`
-2. This will show you if the API connection is working
-3. Check the environment variables are set correctly
+2. **Login to Vercel**:
+   ```bash
+   vercel login
+   ```
 
-### Common Issues
+3. **Deploy Frontend**:
+   ```bash
+   cd frontend
+   vercel
+   ```
 
-1. **API Connection Failed**: Make sure your Railway backend is running
-2. **Environment Variables Not Set**: Double-check the variable names and values
-3. **Build Errors**: Check the build logs in Vercel dashboard
+4. **Set Environment Variables in Vercel**:
+   - Go to your Vercel project dashboard
+   - Navigate to Settings > Environment Variables
+   - Add the following variables:
 
-### Current Configuration
+   ```
+   DATABASE_URL=your_mongodb_atlas_connection_string
+   JWT_SECRET=your_super_secret_jwt_key
+   NEXT_PUBLIC_API_URL=https://your-backend-url.railway.app
+   NEXTAUTH_SECRET=your_nextauth_secret
+   NEXTAUTH_URL=https://your-vercel-app.vercel.app
+   STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
+   NEXT_PUBLIC_APP_NAME=Household Services
+   NEXT_PUBLIC_APP_URL=https://your-vercel-app.vercel.app
+   ```
 
-- **Framework**: Next.js 14
-- **Build Command**: `cd frontend && npm install && npm run build`
-- **Output Directory**: `frontend/.next`
-- **Install Command**: `cd frontend && npm install`
+## Step 4: Update Configuration
 
-### API Rewrites
+1. **Update CORS in Backend**:
+   - Add your Vercel frontend URL to `CORS_ORIGINS` in Railway environment variables
 
-The application uses Next.js rewrites to proxy API requests to your Railway backend:
+2. **Update Next.js Config**:
+   - The `next.config.js` is already configured for Vercel deployment
 
-```javascript
-// next.config.js
-async rewrites() {
-  return [
-    {
-      source: '/api/:path*',
-      destination: process.env.NODE_ENV === 'production' 
-        ? 'https://household-services-platform-production.up.railway.app/api/:path*'
-        : 'http://localhost:5000/api/:path*',
-    },
-  ];
-}
-```
+## Step 5: Domain Setup (Optional)
 
-This means API requests to `/api/*` will be automatically forwarded to your Railway backend. 
+1. **Custom Domain**:
+   - In Vercel dashboard, go to Settings > Domains
+   - Add your custom domain
+   - Update DNS records as instructed
+
+## Step 6: Environment Variables Checklist
+
+### Frontend (Vercel)
+- [ ] `DATABASE_URL`
+- [ ] `JWT_SECRET`
+- [ ] `NEXT_PUBLIC_API_URL`
+- [ ] `NEXTAUTH_SECRET`
+- [ ] `NEXTAUTH_URL`
+- [ ] `STRIPE_SECRET_KEY`
+- [ ] `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+- [ ] `NEXT_PUBLIC_APP_NAME`
+- [ ] `NEXT_PUBLIC_APP_URL`
+
+### Backend (Railway)
+- [ ] `DATABASE_URL`
+- [ ] `JWT_SECRET`
+- [ ] `JWT_EXPIRES_IN`
+- [ ] `PORT`
+- [ ] `NODE_ENV`
+- [ ] `FRONTEND_URL`
+- [ ] `CORS_ORIGINS`
+- [ ] `STRIPE_SECRET_KEY`
+- [ ] `STRIPE_PUBLISHABLE_KEY`
+- [ ] `STRIPE_WEBHOOK_SECRET`
+
+## Troubleshooting
+
+### Common Issues:
+
+1. **Build Failures**:
+   - Check that all environment variables are set
+   - Ensure Prisma schema is up to date
+   - Run `npx prisma generate` locally first
+
+2. **Database Connection Issues**:
+   - Verify MongoDB Atlas connection string
+   - Check network access settings in Atlas
+   - Ensure IP whitelist includes 0.0.0.0/0 for cloud deployment
+
+3. **CORS Errors**:
+   - Update `CORS_ORIGINS` in backend with your Vercel URL
+   - Check that `FRONTEND_URL` is set correctly
+
+4. **API 404 Errors**:
+   - Verify `NEXT_PUBLIC_API_URL` points to your Railway backend
+   - Check that backend is running and accessible
+
+## Monitoring
+
+1. **Vercel Analytics**:
+   - Enable in Vercel dashboard
+   - Monitor performance and errors
+
+2. **Railway Logs**:
+   - Check Railway dashboard for backend logs
+   - Monitor API performance
+
+## Security Checklist
+
+- [ ] Use strong JWT secrets
+- [ ] Enable HTTPS (automatic with Vercel/Railway)
+- [ ] Set up proper CORS
+- [ ] Use environment variables for all secrets
+- [ ] Enable rate limiting
+- [ ] Set up proper error handling
+
+## Cost Optimization
+
+- **Vercel**: Free tier includes 100GB bandwidth/month
+- **Railway**: Free tier includes $5 credit/month
+- **MongoDB Atlas**: Free tier includes 512MB storage
+
+## Support
+
+If you encounter issues:
+1. Check Vercel deployment logs
+2. Check Railway backend logs
+3. Verify all environment variables are set
+4. Test API endpoints locally first 

@@ -9,7 +9,6 @@
   },
   "env": {
     "PRISMA_GENERATE_DATAPROXY": "true",
-    "SKIP_ENV_VALIDATION": "true",
-    "NEXT_PUBLIC_API_URL": "https://cultured-account-production.up.railway.app/api"
+    "SKIP_ENV_VALIDATION": "true"
   }
 } 
