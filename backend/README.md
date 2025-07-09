@@ -131,4 +131,4 @@ When you're ready to switch to MongoDB:
 3. Update connection string in `.env`
 4. Run `npx prisma generate` and `npx prisma db push`
 
-The schema is already designed to work with both SQLite and MongoDB. 
+The schema is already designed to work with both SQLite and MongoDB. # Trigger redeploy

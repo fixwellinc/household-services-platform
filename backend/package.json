@@ -6,7 +6,7 @@
   "description": "Backend for Household Services Subscription Platform (Express, Prisma)",
   "scripts": {
     "dev": "nodemon src/app.js",
-    "build": "npx prisma generate && npx prisma migrate deploy",
+    "build": "npx prisma generate",
     "start": "node src/app.js",
     "setup": "node setup-mongodb.js",
     "lint": "eslint .",
@@ -15,7 +15,7 @@
     "postinstall": "npx prisma generate"
   },
   "dependencies": {
-    "@prisma/client": "^5.7.1",
+    "@prisma/client": "^6.11.1",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -36,6 +36,6 @@
   "devDependencies": {
     "eslint": "^8.56.0",
     "nodemon": "^3.1.10",
-    "prisma": "^5.7.1"
+    "prisma": "^6.11.1"
   }
 }

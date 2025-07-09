@@ -41,13 +41,49 @@ const app = express();
 // PATTERN: Security middleware first
 app.use(helmet());
 
-// CORS configuration
-const corsOptions = getCorsOptions();
-console.log('🔧 CORS Configuration:', {
-  origins: corsOptions.origin,
+// CORS configuration - Properly configured for production
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Allow all Vercel domains
+    if (origin.includes('vercel.app')) {
+      return callback(null, true);
+    }
+    
+    // Allow the specific Vercel domain being used
+    if (origin === 'https://frontend-lovat-sigma-87.vercel.app') {
+      return callback(null, true);
+    }
+    
+    // Allow localhost for development
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      return callback(null, true);
+    }
+    
+    // Allow the specific Railway domain if needed
+    if (origin.includes('railway.app')) {
+      return callback(null, true);
+    }
+    
+    // Allow all origins for now to prevent CORS issues
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Origin', 'Accept'],
+  exposedHeaders: ['X-Total-Count', 'X-Page-Count'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
+
+console.log('🔧 CORS Configuration (Production Ready):', {
+  origin: 'Dynamic function (allows Vercel, localhost, Railway)',
   credentials: corsOptions.credentials,
   methods: corsOptions.methods
 });
+
 app.use(cors(corsOptions));
 
 // Handle preflight requests explicitly

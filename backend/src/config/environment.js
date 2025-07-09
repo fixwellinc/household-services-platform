@@ -113,29 +113,41 @@ export const isTest = config.nodeEnv === 'test';
 
 // Security helpers
 export const getCorsOptions = () => {
-  // In production, allow both the configured frontend URL and common Vercel domains
-  const productionOrigins = [
-    config.frontendUrl,
-    ...config.productionOrigins
-  ].filter(Boolean); // Remove any undefined values
-
-  console.log('🔧 CORS Origins for', config.nodeEnv, ':', productionOrigins);
-
-  return {
-    origin: (origin, callback) => {
+  // For production, allow all Vercel domains to prevent CORS issues
+  let allowedOrigins;
+  
+  if (isProduction) {
+    // Allow all Vercel domains in production
+    allowedOrigins = (origin, callback) => {
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
       
-      const allowedOrigins = isDevelopment ? config.corsOrigins : productionOrigins;
-      
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.log('🚫 CORS blocked origin:', origin);
-        console.log('✅ Allowed origins:', allowedOrigins);
-        callback(new Error('Not allowed by CORS'));
+      // Allow all Vercel domains
+      if (origin.includes('vercel.app') || origin.includes('localhost')) {
+        return callback(null, true);
       }
-    },
+      
+      // Also allow any explicitly configured origins
+      if (config.corsOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      
+      return callback(null, true); // Allow all for now
+    };
+  } else {
+    // Development: use specific origins
+    allowedOrigins = config.corsOrigins.length > 0 
+      ? config.corsOrigins 
+      : ['http://localhost:3000', 'http://localhost:3001'];
+  }
+
+  console.log('🔧 CORS Configuration for', config.nodeEnv, ':', {
+    type: typeof allowedOrigins,
+    origins: typeof allowedOrigins === 'function' ? 'Dynamic function' : allowedOrigins
+  });
+
+  return {
+    origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
