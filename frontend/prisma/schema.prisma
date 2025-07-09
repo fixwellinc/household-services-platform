@@ -1,0 +1,113 @@
+// This is your Prisma schema file for MongoDB
+// learn more: https://pris.ly/d/mongodb
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  email         String   @unique
+  password      String
+  name          String?
+  role          String   @default("CUSTOMER")
+  avatar        String?
+  phone         String?
+  address       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  // Reference fields (manual lookup in code)
+  subscriptionId String?
+  serviceIds     String[]
+  bookingIds     String[]
+  messageIds     String[]
+  quoteIds       String[]
+}
+
+model Subscription {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String   @unique
+  tier          String
+  status        String   @default("ACTIVE")
+  stripeCustomerId String?
+  stripeSubscriptionId String?
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Service {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  name          String   @unique
+  description   String
+  category      String
+  complexity    String
+  basePrice     Float
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  bookingIds    String[]
+  quoteIds      String[]
+}
+
+model Booking {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  customerId    String
+  serviceId     String
+  scheduledDate DateTime
+  status        String   @default("PENDING")
+  totalAmount   Float
+  discountAmount Float   @default(0)
+  finalAmount   Float
+  notes         String?
+  stripePaymentIntentId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  messageIds    String[]
+}
+
+model Message {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  bookingId     String
+  senderId      String
+  receiverId    String
+  content       String
+  isRead        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model Quote {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String?
+  email           String
+  serviceId       String?
+  message         String
+  status          String   @default("PENDING")
+  adminReply      String?
+  adminReplyPrice Float?
+  adminReplySentAt DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Setting {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+// Enums are not supported in MongoDB, using strings instead
+// UserRole: "CUSTOMER", "ADMIN"
+// SubscriptionTier: "BASIC", "PREMIUM", "VIP"
+// SubscriptionStatus: "ACTIVE", "CANCELLED", "PAST_DUE", "UNPAID"
+// ServiceCategory: "CLEANING", "MAINTENANCE", "REPAIR", "ORGANIZATION", "SHOPPING", "OTHER"
+// ServiceComplexity: "SIMPLE", "MODERATE", "COMPLEX"
+// BookingStatus: "PENDING", "CONFIRMED", "IN_PROGRESS", "COMPLETED", "CANCELLED" 

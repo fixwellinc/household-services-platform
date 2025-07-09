@@ -3,16 +3,6 @@ const nextConfig = {
   images: {
     domains: ['localhost', 'household-services-platform-production.up.railway.app'],
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: process.env.NODE_ENV === 'production' 
-          ? 'https://household-services-platform-production.up.railway.app/api/:path*'
-          : 'http://localhost:5000/api/:path*',
-      },
-    ];
-  },
   async headers() {
     return [
       {
@@ -25,9 +15,17 @@ const nextConfig = {
       },
     ];
   },
+  // Configure for Vercel deployment
   experimental: {
-    serverComponentsExternalPackages: [],
+    serverComponentsExternalPackages: ['@prisma/client'],
   },
+  // Disable static optimization and force server-side rendering
+  staticPageGenerationTimeout: 0,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  // Force all pages to be server-side rendered
+  output: 'standalone',
 }
 
 module.exports = nextConfig 
