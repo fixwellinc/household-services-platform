@@ -19,6 +19,7 @@ model User {
   avatar        String?
   phone         String?
   address       String?
+  isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   // Reference fields (manual lookup in code)
@@ -27,6 +28,20 @@ model User {
   bookingIds     String[]
   messageIds     String[]
   quoteIds       String[]
+  // Employee assignments
+  assignedCustomers CustomerEmployeeAssignment[] @relation("EmployeeAssignments")
+  assignedEmployee   CustomerEmployeeAssignment? @relation("CustomerAssignment")
+}
+
+model CustomerEmployeeAssignment {
+  id         String   @id @default(cuid())
+  customerId String   @unique
+  employeeId String
+  assignedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  customer   User     @relation("CustomerAssignment", fields: [customerId], references: [id])
+  employee   User     @relation("EmployeeAssignments", fields: [employeeId], references: [id])
 }
 
 model Subscription {

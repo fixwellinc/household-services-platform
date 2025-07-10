@@ -242,6 +242,82 @@ app.post('/api/admin/settings', requireAdmin, async (req, res) => {
   res.json({ setting });
 });
 
+// Admin: Update user status
+app.patch('/api/admin/users/:id/status', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+  const { id } = req.params;
+  const { isActive } = req.body;
+  
+  try {
+    const user = await prisma.user.update({
+      where: { id },
+      data: { isActive }
+    });
+    res.json({ user });
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to update user status' });
+  }
+});
+
+// Admin: Update user role
+app.patch('/api/admin/users/:id/role', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+  const { id } = req.params;
+  const { role } = req.body;
+  
+  if (!['CUSTOMER', 'EMPLOYEE', 'ADMIN'].includes(role)) {
+    return res.status(400).json({ error: 'Invalid role' });
+  }
+  
+  try {
+    const user = await prisma.user.update({
+      where: { id },
+      data: { role }
+    });
+    res.json({ user });
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to update user role' });
+  }
+});
+
+// Admin: Assign employee to customer
+app.post('/api/admin/users/:id/assign-employee', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+  const { id } = req.params;
+  const { employeeId } = req.body;
+  
+  try {
+    // Verify both users exist and have correct roles
+    const customer = await prisma.user.findUnique({ where: { id } });
+    const employee = await prisma.user.findUnique({ where: { id: employeeId } });
+    
+    if (!customer || customer.role !== 'CUSTOMER') {
+      return res.status(400).json({ error: 'Invalid customer' });
+    }
+    
+    if (!employee || employee.role !== 'EMPLOYEE') {
+      return res.status(400).json({ error: 'Invalid employee' });
+    }
+    
+    // Create or update the assignment
+    const assignment = await prisma.customerEmployeeAssignment.upsert({
+      where: { customerId: id },
+      update: { employeeId },
+      create: { customerId: id, employeeId }
+    });
+    
+    res.json({ assignment });
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to assign employee' });
+  }
+});
+
 // User: Profile
 app.get('/profile', async (req, res) => {
   // Assume authMiddleware sets req.user

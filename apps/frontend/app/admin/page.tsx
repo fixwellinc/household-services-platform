@@ -88,6 +88,18 @@ export default function AdminPage() {
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsSaving, setSettingsSaving] = useState(false);
 
+  // User management state
+  const [users, setUsers] = useState<any[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [userModal, setUserModal] = useState<{ open: boolean; mode: 'view' | 'edit' | 'assign' }>({
+    open: false,
+    mode: 'view'
+  });
+  const [userSearch, setUserSearch] = useState('');
+  const [userFilter, setUserFilter] = useState<'all' | 'customers' | 'employees' | 'admins'>('all');
+  const [availableEmployees, setAvailableEmployees] = useState<any[]>([]);
+
   const { data: userData, isLoading: userLoading } = useCurrentUser();
 
   useEffect(() => {
@@ -102,6 +114,13 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (activeTab === 'analytics') fetchAnalytics();
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab === 'users') {
+      fetchUsers();
+      fetchAvailableEmployees();
+    }
   }, [activeTab]);
 
   const fetchQuotes = async () => {
@@ -170,6 +189,34 @@ export default function AdminPage() {
       });
     } finally {
       setAnalyticsLoading(false);
+    }
+  };
+
+  const fetchUsers = async () => {
+    setUsersLoading(true);
+    try {
+      const res = await fetch('/api/admin/users');
+      if (res.ok) {
+        const data = await res.json();
+        setUsers(data.users || []);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast.error('Failed to fetch users');
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
+  const fetchAvailableEmployees = async () => {
+    try {
+      const res = await fetch('/api/admin/users?role=EMPLOYEE');
+      if (res.ok) {
+        const data = await res.json();
+        setAvailableEmployees(data.users || []);
+      }
+    } catch (error) {
+      console.error('Error fetching employees:', error);
     }
   };
 
@@ -634,8 +681,82 @@ The Fixwell Team`);
     }
   };
 
+  // User management functions
+  const updateUserStatus = async (userId: string, isActive: boolean) => {
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive })
+      });
+      if (res.ok) {
+        toast.success(`User ${isActive ? 'activated' : 'deactivated'} successfully`);
+        fetchUsers();
+      } else {
+        toast.error('Failed to update user status');
+      }
+    } catch (error) {
+      toast.error('Error updating user status');
+    }
+  };
+
+  const updateUserRole = async (userId: string, role: string) => {
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/role`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role })
+      });
+      if (res.ok) {
+        toast.success('User role updated successfully');
+        fetchUsers();
+      } else {
+        toast.error('Failed to update user role');
+      }
+    } catch (error) {
+      toast.error('Error updating user role');
+    }
+  };
+
+  const assignEmployeeToCustomer = async (customerId: string, employeeId: string) => {
+    try {
+      const res = await fetch(`/api/admin/users/${customerId}/assign-employee`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ employeeId })
+      });
+      if (res.ok) {
+        toast.success('Employee assigned successfully');
+        setUserModal({ open: false, mode: 'view' });
+      } else {
+        toast.error('Failed to assign employee');
+      }
+    } catch (error) {
+      toast.error('Error assigning employee');
+    }
+  };
+
+  const openUserModal = (user: any, mode: 'view' | 'edit' | 'assign') => {
+    setSelectedUser(user);
+    setUserModal({ open: true, mode });
+  };
+
+  const closeUserModal = () => {
+    setUserModal({ open: false, mode: 'view' });
+    setSelectedUser(null);
+  };
+
+  // Filter and search users
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.name?.toLowerCase().includes(userSearch.toLowerCase()) ||
+                         user.email?.toLowerCase().includes(userSearch.toLowerCase());
+    const matchesFilter = userFilter === 'all' || user.role?.toLowerCase() === userFilter;
+    return matchesSearch && matchesFilter;
+  });
+
   const navigation: NavigationItem[] = [
     { name: 'Dashboard', icon: Home, id: 'dashboard' },
+    { name: 'Users', icon: Users, id: 'users' },
     { name: 'Quotes', icon: MessageSquare, id: 'quotes' },
     { name: 'Email Blast', icon: Mail, id: 'email-blast' },
     { name: 'Analytics', icon: BarChart3, id: 'analytics' },
@@ -1001,164 +1122,266 @@ The Fixwell Team`);
   );
 
   const renderSettings = () => (
-    <div className="max-w-xl mx-auto py-8">
-      <h2 className="text-2xl font-bold mb-4 flex items-center"><Settings className="mr-2" /> Admin Settings</h2>
-      {settingsLoading ? <div>Loading...</div> : (
-        <form className="space-y-6">
-          {/* General Settings */}
-          <div>
-            <label className="block font-medium mb-1">Site Name</label>
-            <input
-              className="w-full border rounded px-3 py-2"
-              value={settings.siteName}
-              onChange={e => setSettings(s => ({ ...s, siteName: e.target.value }))}
-              onBlur={e => saveSetting('siteName', e.target.value)}
-              disabled={settingsSaving}
-              placeholder="Household"
-            />
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Support Email</label>
-            <input
-              className="w-full border rounded px-3 py-2"
-              type="email"
-              value={settings.supportEmail}
-              onChange={e => setSettings(s => ({ ...s, supportEmail: e.target.value }))}
-              onBlur={e => saveSetting('supportEmail', e.target.value)}
-              disabled={settingsSaving}
-              placeholder="support@household.com"
-            />
-          </div>
-          <div className="flex items-center">
-            <label className="font-medium mr-4">Maintenance Mode</label>
-            <input
-              type="checkbox"
-              checked={settings.maintenanceMode}
-              onChange={e => {
-                setSettings(s => ({ ...s, maintenanceMode: e.target.checked }));
-                saveSetting('maintenanceMode', String(e.target.checked));
-              }}
-              disabled={settingsSaving}
-            />
-            <span className="ml-2 text-sm text-gray-500">(Show maintenance banner to users)</span>
-          </div>
-
-          {/* Email Settings */}
-          <div className="mt-8 border-t pt-6">
-            <h3 className="text-xl font-semibold mb-2">Email Settings</h3>
-            <p className="text-sm text-gray-500 mb-4">Configure SMTP for email blasts and replies. Changes take effect immediately.</p>
-            <div className="space-y-4">
-              <div>
-                <label className="block font-medium mb-1">SMTP Host</label>
-                <input
-                  className="w-full border rounded px-3 py-2"
-                  value={settings.emailHost}
-                  onChange={e => setSettings(s => ({ ...s, emailHost: e.target.value }))}
-                  onBlur={e => saveSetting('emailHost', e.target.value)}
-                  disabled={settingsSaving}
-                  placeholder="smtp.yourdomain.com"
-                />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">SMTP Port</label>
-                <input
-                  className="w-full border rounded px-3 py-2"
-                  type="number"
-                  value={settings.emailPort}
-                  onChange={e => setSettings(s => ({ ...s, emailPort: e.target.value }))}
-                  onBlur={e => saveSetting('emailPort', e.target.value)}
-                  disabled={settingsSaving}
-                  placeholder="465 or 587"
-                />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">SMTP User</label>
-                <input
-                  className="w-full border rounded px-3 py-2"
-                  value={settings.emailUser}
-                  onChange={e => setSettings(s => ({ ...s, emailUser: e.target.value }))}
-                  onBlur={e => saveSetting('emailUser', e.target.value)}
-                  disabled={settingsSaving}
-                  placeholder="user@yourdomain.com"
-                />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">SMTP Password</label>
-                <input
-                  className="w-full border rounded px-3 py-2"
-                  type="password"
-                  value={settings.emailPassword}
-                  onChange={e => setSettings(s => ({ ...s, emailPassword: e.target.value }))}
-                  onBlur={e => saveSetting('emailPassword', e.target.value)}
-                  disabled={settingsSaving}
-                  placeholder="••••••••"
-                />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">From Email Address</label>
-                <input
-                  className="w-full border rounded px-3 py-2"
-                  type="email"
-                  value={settings.emailFrom}
-                  onChange={e => setSettings(s => ({ ...s, emailFrom: e.target.value }))}
-                  onBlur={e => saveSetting('emailFrom', e.target.value)}
-                  disabled={settingsSaving}
-                  placeholder="noreply@yourdomain.com"
-                />
-              </div>
-              <div className="flex items-center">
-                <label className="font-medium mr-4">Use SSL/TLS</label>
+    <div className="bg-white rounded-lg shadow">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <h2 className="text-2xl font-bold mb-4 flex items-center"><Settings className="mr-2" /> Admin Settings</h2>
+      </div>
+      {settingsLoading ? (
+        <div className="p-6 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading settings...</p>
+        </div>
+      ) : (
+        <form className="p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Site Name</label>
+              <input
+                type="text"
+                value={settings.siteName}
+                onChange={(e) => saveSetting('siteName', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Support Email</label>
+              <input
+                type="email"
+                value={settings.supportEmail}
+                onChange={(e) => saveSetting('supportEmail', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="flex items-center">
                 <input
                   type="checkbox"
-                  checked={settings.emailSecure}
-                  onChange={e => {
-                    setSettings(s => ({ ...s, emailSecure: e.target.checked }));
-                    saveSetting('emailSecure', String(e.target.checked));
-                  }}
-                  disabled={settingsSaving}
+                  checked={settings.maintenanceMode}
+                  onChange={(e) => saveSetting('maintenanceMode', e.target.checked.toString())}
+                  className="mr-2"
                 />
-                <span className="ml-2 text-sm text-gray-500">(Usually true for port 465, false for 587)</span>
+                <span className="text-sm font-medium text-gray-700">Maintenance Mode</span>
+              </label>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-200 pt-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Email Configuration</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">SMTP Host</label>
+                <input
+                  type="text"
+                  value={settings.emailHost}
+                  onChange={(e) => saveSetting('emailHost', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
               <div>
-                <label className="block font-medium mb-1">Reply-To Address (optional)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">SMTP Port</label>
                 <input
-                  className="w-full border rounded px-3 py-2"
+                  type="number"
+                  value={settings.emailPort}
+                  onChange={(e) => saveSetting('emailPort', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email Username</label>
+                <input
+                  type="text"
+                  value={settings.emailUser}
+                  onChange={(e) => saveSetting('emailUser', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email Password</label>
+                <input
+                  type="password"
+                  value={settings.emailPassword}
+                  onChange={(e) => saveSetting('emailPassword', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">From Email</label>
+                <input
+                  type="email"
+                  value={settings.emailFrom}
+                  onChange={(e) => saveSetting('emailFrom', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Reply To Email</label>
+                <input
                   type="email"
                   value={settings.emailReplyTo}
-                  onChange={e => setSettings(s => ({ ...s, emailReplyTo: e.target.value }))}
-                  onBlur={e => saveSetting('emailReplyTo', e.target.value)}
-                  disabled={settingsSaving}
-                  placeholder="support@yourdomain.com"
+                  onChange={(e) => saveSetting('emailReplyTo', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+              </div>
+              <div className="md:col-span-2">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={settings.emailSecure}
+                    onChange={(e) => saveSetting('emailSecure', e.target.checked.toString())}
+                    className="mr-2"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Use SSL/TLS</span>
+                </label>
               </div>
             </div>
           </div>
-
-          {/* Save Status */}
-          <div className="mt-6 pt-4 border-t">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-600">
-                {settingsSaving ? (
-                  <span className="flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
-                    Saving settings...
-                  </span>
-                ) : (
-                  <span className="text-green-600">✓ Settings auto-save on change</span>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => fetchSettings()}
-                className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
-                disabled={settingsSaving}
-              >
-                Refresh Settings
-              </button>
+          
+          <div className="flex items-center justify-between pt-6 border-t border-gray-200">
+            <div className="flex items-center space-x-4">
+              {settingsSaving ? (
+                <span className="text-yellow-600">Saving...</span>
+              ) : (
+                <span className="text-green-600">✓ Settings auto-save on change</span>
+              )}
             </div>
+            <button
+              type="button"
+              onClick={() => fetchSettings()}
+              className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+              disabled={settingsSaving}
+            >
+              Refresh Settings
+            </button>
           </div>
         </form>
       )}
+    </div>
+  );
+
+  const renderUsers = () => (
+    <div className="space-y-6">
+      {/* Search and Filter */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Search users by name or email..."
+              value={userSearch}
+              onChange={(e) => setUserSearch(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <select
+              value={userFilter}
+              onChange={(e) => setUserFilter(e.target.value as any)}
+              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Users</option>
+              <option value="customers">Customers</option>
+              <option value="employees">Employees</option>
+              <option value="admins">Admins</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Users List */}
+      <div className="bg-white rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h3 className="text-lg font-medium text-gray-900">User Management</h3>
+          <p className="text-sm text-gray-600 mt-1">Manage user accounts and assign employees to customers</p>
+        </div>
+        
+        {usersLoading ? (
+          <div className="p-6 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-2 text-gray-600">Loading users...</p>
+          </div>
+        ) : filteredUsers.length === 0 ? (
+          <div className="p-6 text-center">
+            <Users className="h-12 w-12 text-gray-400 mx-auto" />
+            <p className="mt-2 text-gray-600">No users found</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredUsers.map((user) => (
+                  <tr key={user.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                          <span className="text-white font-medium text-sm">
+                            {user.name?.charAt(0)?.toUpperCase() || 'U'}
+                          </span>
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                          <div className="text-sm text-gray-500">{user.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        user.role === 'ADMIN' ? 'bg-red-100 text-red-800' :
+                        user.role === 'EMPLOYEE' ? 'bg-blue-100 text-blue-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {user.role}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {user.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(user.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => openUserModal(user, 'view')}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() => openUserModal(user, 'edit')}
+                          className="text-green-600 hover:text-green-900"
+                        >
+                          Edit
+                        </button>
+                        {user.role === 'CUSTOMER' && (
+                          <button
+                            onClick={() => openUserModal(user, 'assign')}
+                            className="text-purple-600 hover:text-purple-900"
+                          >
+                            Assign Employee
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 
@@ -1166,6 +1389,8 @@ The Fixwell Team`);
     switch (activeTab) {
       case 'dashboard':
         return renderDashboard();
+      case 'users':
+        return renderUsers();
       case 'quotes':
         return renderQuotes();
       case 'email-blast':
@@ -1344,6 +1569,132 @@ The Fixwell Team`);
                   className="w-full sm:w-auto mt-3 sm:mt-0"
                 >
                   Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Management Modal */}
+      {userModal.open && selectedUser && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                      {userModal.mode === 'view' && 'User Details'}
+                      {userModal.mode === 'edit' && 'Edit User'}
+                      {userModal.mode === 'assign' && 'Assign Employee'}
+                    </h3>
+                    
+                    {userModal.mode === 'view' && (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Name</label>
+                          <p className="mt-1 text-sm text-gray-900">{selectedUser.name}</p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Email</label>
+                          <p className="mt-1 text-sm text-gray-900">{selectedUser.email}</p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Role</label>
+                          <p className="mt-1 text-sm text-gray-900">{selectedUser.role}</p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Status</label>
+                          <p className="mt-1 text-sm text-gray-900">
+                            {selectedUser.isActive ? 'Active' : 'Inactive'}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Joined</label>
+                          <p className="mt-1 text-sm text-gray-900">
+                            {new Date(selectedUser.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {userModal.mode === 'edit' && (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Name</label>
+                          <input
+                            type="text"
+                            value={selectedUser.name}
+                            onChange={(e) => setSelectedUser({ ...selectedUser, name: e.target.value })}
+                            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Role</label>
+                          <select
+                            value={selectedUser.role}
+                            onChange={(e) => updateUserRole(selectedUser.id, e.target.value)}
+                            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="CUSTOMER">Customer</option>
+                            <option value="EMPLOYEE">Employee</option>
+                            <option value="ADMIN">Admin</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={selectedUser.isActive}
+                              onChange={(e) => updateUserStatus(selectedUser.id, e.target.checked)}
+                              className="mr-2"
+                            />
+                            <span className="text-sm font-medium text-gray-700">Active Account</span>
+                          </label>
+                        </div>
+                      </div>
+                    )}
+
+                    {userModal.mode === 'assign' && (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Assign Employee to {selectedUser.name}
+                          </label>
+                          <select
+                            onChange={(e) => {
+                              if (e.target.value) {
+                                assignEmployeeToCustomer(selectedUser.id, e.target.value);
+                              }
+                            }}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">Select an employee...</option>
+                            {availableEmployees.map((employee) => (
+                              <option key={employee.id} value={employee.id}>
+                                {employee.name} ({employee.email})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          This will assign an employee to handle all future requests from this customer.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <Button
+                  onClick={closeUserModal}
+                  className="w-full sm:w-auto"
+                >
+                  Close
                 </Button>
               </div>
             </div>
