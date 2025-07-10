@@ -5,6 +5,7 @@ import nodemailer from 'nodemailer';
 import multer from 'multer';
 import xlsx from 'xlsx';
 import { v4 as uuidv4 } from 'uuid';
+import EmailService from '../services/email.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -180,6 +181,60 @@ router.post('/email-blast', authMiddleware, requireAdmin, upload.single('file'),
   } catch (error) {
     console.error('Email blast error:', error);
     res.status(500).json({ error: 'Failed to send email blast' });
+  }
+});
+
+// Admin: Subscription marketing email blast
+router.post('/subscription-marketing-blast', authMiddleware, requireAdmin, upload.single('file'), async (req, res) => {
+  try {
+    let emails = [];
+    let names = [];
+    let planType = req.body.planType || 'all';
+    
+    // If file is uploaded, parse Excel
+    if (req.file) {
+      const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const data = xlsx.utils.sheet_to_json(sheet);
+      emails = data.map(row => row.Email || row.email).filter(Boolean);
+      names = data.map(row => row.Name || row.name || '');
+    } else if (req.body.emails) {
+      emails = Array.isArray(req.body.emails) ? req.body.emails : [];
+      names = emails.map(() => '');
+    }
+    
+    if (!emails || !Array.isArray(emails) || emails.length === 0) {
+      return res.status(400).json({ error: 'Emails required' });
+    }
+
+    const emailService = new EmailService();
+    let sentCount = 0;
+
+    for (let i = 0; i < emails.length; i++) {
+      const email = emails[i];
+      const name = names[i] || 'there';
+      
+      // Create a mock user object for the email service
+      const user = {
+        email: email,
+        name: name
+      };
+
+      try {
+        const result = await emailService.sendSubscriptionMarketingEmail(user, planType);
+        if (result.success) {
+          sentCount++;
+        }
+      } catch (error) {
+        console.error(`Failed to send subscription email to ${email}:`, error);
+      }
+    }
+
+    res.json({ success: true, sent: sentCount, total: emails.length });
+  } catch (error) {
+    console.error('Subscription marketing blast error:', error);
+    res.status(500).json({ error: 'Failed to send subscription marketing blast' });
   }
 });
 

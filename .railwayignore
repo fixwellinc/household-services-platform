@@ -1,4 +1,3 @@
-frontend/
 node_modules/
 .git/
 .github/
@@ -8,4 +7,5 @@ docker-compose.yml
 *.log
 .env.local
 .env.development
-.env.test 
+.env.test
+# Do NOT ignore apps/ or packages/ directories 

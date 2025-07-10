@@ -9,12 +9,17 @@
     "build": "npx prisma generate",
     "start": "node src/app.js",
     "setup": "node setup-mongodb.js",
+    "seed": "node prisma/seed.js",
+    "migrate": "npx prisma migrate deploy",
+    "migrate:dev": "npx prisma migrate dev",
     "lint": "eslint .",
     "type-check": "tsc --noEmit || echo 'No TS config yet'",
     "test": "echo \"No tests yet\" && exit 0",
     "postinstall": "npx prisma generate"
   },
   "dependencies": {
+    "@household/types": "file:../../packages/types",
+    "@household/utils": "file:../../packages/utils",
     "@prisma/client": "^6.11.1",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
@@ -37,9 +42,5 @@
     "eslint": "^8.56.0",
     "nodemon": "^3.1.10",
     "prisma": "^6.11.1"
-  },
-  "dependencies": {
-    "@household/types": "workspace:*",
-    "@household/utils": "workspace:*"
   }
 }

@@ -104,7 +104,9 @@ app.use(performanceMonitor);
 
 // Rate limiting
 app.use('/api/', generalLimiter);
-app.use('/api/auth', authLimiter);
+if (process.env.NODE_ENV === 'production') {
+  app.use('/api/auth', authLimiter);
+}
 app.use('/api/', apiLimiter);
 
 // PATTERN: Body parsing for JSON and form data

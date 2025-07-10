@@ -1,11 +1,12 @@
 node_modules/
 .git/
 .github/
-scripts/
-deploy.sh
-docker-compose.yml
+# scripts/ is needed for build, so do not ignore it
+# deploy.sh is needed for build, so do not ignore it
+# docker-compose.yml is needed for build, so do not ignore it
 *.log
 .env.local
 .env.development
 .env.test
-README.md 
+README.md
+# Do NOT ignore apps/ or packages/ 

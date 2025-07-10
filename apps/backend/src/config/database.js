@@ -25,6 +25,16 @@ if (process.env.DATABASE_URL) {
         db: {
           url: process.env.DATABASE_URL
         }
+      },
+      // Add connection pool configuration for better stability
+      __internal: {
+        engine: {
+          connectionLimit: 5,
+          pool: {
+            min: 0,
+            max: 10
+          }
+        }
       }
     });
     console.log('✅ Prisma client initialized successfully');

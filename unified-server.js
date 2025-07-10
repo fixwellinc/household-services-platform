@@ -11,12 +11,17 @@ const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';
 const port = process.env.PORT || 3000;
 
-// Create Next.js app
-const nextApp = next({ dev, hostname, port });
+// Create Next.js app with correct directory
+const nextApp = next({ 
+  dev, 
+  hostname, 
+  port,
+  dir: path.join(__dirname, 'apps/frontend')
+});
 const handle = nextApp.getRequestHandler();
 
 // Import backend app
-import('./backend/src/app.js').then(({ default: backendApp }) => {
+import('./apps/backend/src/app.js').then(({ default: backendApp }) => {
   // Start the unified server
   nextApp.prepare().then(() => {
     const server = createServer(async (req, res) => {

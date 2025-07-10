@@ -1,17 +1,17 @@
-// This is your Prisma schema file for MongoDB
-// learn more: https://pris.ly/d/mongodb
+// This is your Prisma schema file for PostgreSQL
+// learn more: https://pris.ly/d/postgresql
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  id            String   @id @default(cuid())
   email         String   @unique
   password      String
   name          String?
@@ -30,7 +30,7 @@ model User {
 }
 
 model Subscription {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  id            String   @id @default(cuid())
   userId        String   @unique
   tier          String
   status        String   @default("ACTIVE")
@@ -43,7 +43,7 @@ model Subscription {
 }
 
 model Service {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  id            String   @id @default(cuid())
   name          String   @unique
   description   String
   category      String
@@ -57,7 +57,7 @@ model Service {
 }
 
 model Booking {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  id            String   @id @default(cuid())
   customerId    String
   serviceId     String
   scheduledDate DateTime
@@ -73,7 +73,7 @@ model Booking {
 }
 
 model Message {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  id            String   @id @default(cuid())
   bookingId     String
   senderId      String
   receiverId    String
@@ -83,7 +83,7 @@ model Message {
 }
 
 model Quote {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  id              String   @id @default(cuid())
   userId          String?
   email           String
   serviceId       String?
@@ -97,7 +97,7 @@ model Quote {
 }
 
 model Setting {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(cuid())
   key       String   @unique
   value     String
   updatedAt DateTime @updatedAt
