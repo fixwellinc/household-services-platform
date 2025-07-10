@@ -496,7 +496,7 @@ The Fixwell Team
     
     <!-- Header with Logo -->
     <div style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); padding: 40px 30px; text-align: center; position: relative; overflow: hidden;">
-      <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.1)"/></svg>'); opacity: 0.3;"></div>
+      <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"20\" cy=\"20\" r=\"2\" fill=\"rgba(255,255,255,0.1)\"/><circle cx=\"80\" cy=\"40\" r=\"1.5\" fill=\"rgba(255,255,255,0.1)\"/><circle cx=\"40\" cy=\"80\" r=\"1\" fill=\"rgba(255,255,255,0.1)\"/></svg>'); opacity: 0.3;"></div>
       <div style="position: relative; z-index: 1;">
         <div style="background: rgba(255,255,255,0.2); border-radius: 50%; width: 80px; height: 80px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
           <span style="font-size: 36px;">🔧</span>
@@ -608,34 +608,32 @@ The Fixwell Team
 
       <!-- Benefits Section -->
       <h3 style="color: #1f2937; margin: 40px 0 25px 0; font-size: 22px; font-weight: 600; text-align: center;">💎 WHY FIXWELL MEMBERS LOVE US</h3>
-      <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 30px; border-radius: 16px; margin-bottom: 35px; border: 2px solid #16a34a;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-          <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <span style="color: #16a34a; font-size: 20px; margin-right: 12px;">✅</span>
-            <span style="color: #4b5563; font-weight: 500;">No More Contractor Hunting</span>
-          </div>
-          <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <span style="color: #16a34a; font-size: 20px; margin-right: 12px;">✅</span>
-            <span style="color: #4b5563; font-weight: 500;">Proactive Maintenance</span>
-          </div>
-          <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <span style="color: #16a34a; font-size: 20px; margin-right: 12px;">✅</span>
-            <span style="color: #4b5563; font-weight: 500;">Predictable Costs</span>
-          </div>
-          <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <span style="color: #16a34a; font-size: 20px; margin-right: 12px;">✅</span>
-            <span style="color: #4b5563; font-weight: 500;">Quality Guaranteed</span>
-          </div>
-          <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <span style="color: #16a34a; font-size: 20px; margin-right: 12px;">✅</span>
-            <span style="color: #4b5563; font-weight: 500;">Fully Insured & Bonded</span>
-          </div>
-          <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <span style="color: #16a34a; font-size: 20px; margin-right: 12px;">✅</span>
-            <span style="color: #4b5563; font-weight: 500;">Same-Day Response</span>
-          </div>
-        </div>
-      </div>
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom: 35px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 16px; border: 2px solid #16a34a; padding: 30px;">
+        <tr>
+          <td style="vertical-align: top; width: 32px; padding: 12px 0;"><span style="font-size: 20px; color: #16a34a;">✅</span></td>
+          <td style="vertical-align: middle; color: #4b5563; font-weight: 500; font-size: 16px; padding: 12px 0;">No More Contractor Hunting</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; width: 32px; padding: 12px 0;"><span style="font-size: 20px; color: #16a34a;">✅</span></td>
+          <td style="vertical-align: middle; color: #4b5563; font-weight: 500; font-size: 16px; padding: 12px 0;">Proactive Maintenance</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; width: 32px; padding: 12px 0;"><span style="font-size: 20px; color: #16a34a;">✅</span></td>
+          <td style="vertical-align: middle; color: #4b5563; font-weight: 500; font-size: 16px; padding: 12px 0;">Predictable Costs</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; width: 32px; padding: 12px 0;"><span style="font-size: 20px; color: #16a34a;">✅</span></td>
+          <td style="vertical-align: middle; color: #4b5563; font-weight: 500; font-size: 16px; padding: 12px 0;">Quality Guaranteed</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; width: 32px; padding: 12px 0;"><span style="font-size: 20px; color: #16a34a;">✅</span></td>
+          <td style="vertical-align: middle; color: #4b5563; font-weight: 500; font-size: 16px; padding: 12px 0;">Fully Insured &amp; Bonded</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; width: 32px; padding: 12px 0;"><span style="font-size: 20px; color: #16a34a;">✅</span></td>
+          <td style="vertical-align: middle; color: #4b5563; font-weight: 500; font-size: 16px; padding: 12px 0;">Same-Day Response</td>
+        </tr>
+      </table>
 
       <!-- Testimonials -->
       <h3 style="color: #1f2937; margin: 40px 0 25px 0; font-size: 22px; font-weight: 600; text-align: center;">📊 REAL RESULTS FROM REAL CUSTOMERS</h3>
@@ -663,7 +661,7 @@ The Fixwell Team
 
       <!-- CTA Section -->
       <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); padding: 40px 30px; border-radius: 20px; text-align: center; margin: 40px 0; position: relative; overflow: hidden;">
-        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="0.8" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="0.6" fill="rgba(255,255,255,0.1)"/></svg>'); opacity: 0.3;"></div>
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"20\" cy=\"20\" r=\"1\" fill=\"rgba(255,255,255,0.1)\"/><circle cx=\"80\" cy=\"40\" r=\"0.8\" fill=\"rgba(255,255,255,0.1)\"/><circle cx=\"40\" cy=\"80\" r=\"0.6\" fill=\"rgba(255,255,255,0.1)\"/></svg>'); opacity: 0.3;"></div>
         <div style="position: relative; z-index: 1;">
           <h3 style="color: white; margin: 0 0 15px 0; font-size: 24px; font-weight: bold;">🔥 LIMITED TIME OFFER: FIRST MONTH ONLY $19! 🔥</h3>
           <p style="color: #fecaca; margin: 0 0 30px 0; font-size: 18px; font-weight: 500;">Ready to never stress about home repairs again?</p>
