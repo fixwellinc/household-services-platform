@@ -338,7 +338,8 @@ app.post('/api/admin/test-email', requireAdmin, async (req, res) => {
   
   try {
     // Create a temporary transporter for testing
-    const nodemailer = await import('nodemailer');
+    const nodemailerModule = await import('nodemailer');
+    const nodemailer = nodemailerModule.default;
     const testTransporter = nodemailer.createTransporter({
       host: emailSettings.emailHost,
       port: parseInt(emailSettings.emailPort) || 587,
