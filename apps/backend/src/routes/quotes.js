@@ -26,22 +26,33 @@ const emailAnalytics = { opens: {}, clicks: {}, bounces: {} };
 
 // Helper to fetch SMTP settings from DB
 async function getSmtpSettings() {
-  const keys = [
-    'emailHost', 'emailPort', 'emailUser', 'emailPassword', 'emailFrom', 'emailSecure', 'emailReplyTo'
-  ];
-  const settings = await prisma.setting.findMany({ where: { key: { in: keys } } });
-  const map = Object.fromEntries(settings.map(s => [s.key, s.value]));
-  return {
-    host: map.emailHost,
-    port: map.emailPort ? parseInt(map.emailPort, 10) : 587,
-    auth: {
-      user: map.emailUser,
-      pass: map.emailPassword
-    },
-    secure: map.emailSecure === 'true',
-    from: map.emailFrom,
-    replyTo: map.emailReplyTo || undefined
-  };
+  try {
+    const keys = [
+      'emailHost', 'emailPort', 'emailUser', 'emailPassword', 'emailFrom', 'emailSecure', 'emailReplyTo'
+    ];
+    const settings = await prisma.setting.findMany({ where: { key: { in: keys } } });
+    const map = Object.fromEntries(settings.map(s => [s.key, s.value]));
+    
+    // Check if required SMTP settings are configured
+    if (!map.emailHost || !map.emailUser || !map.emailPassword) {
+      throw new Error('SMTP settings not configured. Please configure email settings in the admin panel.');
+    }
+    
+    return {
+      host: map.emailHost,
+      port: map.emailPort ? parseInt(map.emailPort, 10) : 587,
+      auth: {
+        user: map.emailUser,
+        pass: map.emailPassword
+      },
+      secure: map.emailSecure === 'true',
+      from: map.emailFrom || map.emailUser, // Use emailUser as fallback for from
+      replyTo: map.emailReplyTo || undefined
+    };
+  } catch (error) {
+    console.error('Failed to get SMTP settings:', error);
+    throw new Error('Email service not configured. Please configure SMTP settings in the admin panel.');
+  }
 }
 
 // Public: Submit a quote request
@@ -89,6 +100,7 @@ router.post('/:id/reply', authMiddleware, requireAdmin, async (req, res) => {
     const { reply, price } = req.body;
     const quote = await prisma.quote.findUnique({ where: { id } });
     if (!quote) return res.status(404).json({ error: 'Quote not found' });
+    
     // Send email
     const smtp = await getSmtpSettings();
     const dynamicTransporter = nodemailer.createTransport({
@@ -97,6 +109,7 @@ router.post('/:id/reply', authMiddleware, requireAdmin, async (req, res) => {
       auth: smtp.auth,
       secure: smtp.secure
     });
+    
     await dynamicTransporter.sendMail({
       from: smtp.from,
       to: quote.email,
@@ -104,6 +117,7 @@ router.post('/:id/reply', authMiddleware, requireAdmin, async (req, res) => {
       text: `${reply}\n\nPrice: ${price ? `$${price}` : 'See details'}`,
       replyTo: smtp.replyTo
     });
+    
     // Update quote
     await prisma.quote.update({
       where: { id },
@@ -117,6 +131,13 @@ router.post('/:id/reply', authMiddleware, requireAdmin, async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error('Reply to quote error:', error);
+    
+    if (error.message.includes('SMTP settings not configured')) {
+      return res.status(400).json({ 
+        error: 'Email service not configured. Please configure SMTP settings in the admin panel.' 
+      });
+    }
+    
     res.status(500).json({ error: 'Failed to reply to quote' });
   }
 });
@@ -180,6 +201,13 @@ router.post('/email-blast', authMiddleware, requireAdmin, upload.single('file'),
     res.json({ success: true, sent: emails.length });
   } catch (error) {
     console.error('Email blast error:', error);
+    
+    if (error.message.includes('SMTP settings not configured')) {
+      return res.status(400).json({ 
+        error: 'Email service not configured. Please configure SMTP settings in the admin panel.' 
+      });
+    }
+    
     res.status(500).json({ error: 'Failed to send email blast' });
   }
 });
@@ -271,14 +299,22 @@ router.post('/email-blast-test', authMiddleware, requireAdmin, async (req, res) 
     if (!to || !subject || !(message || html)) {
       return res.status(400).json({ error: 'To, subject, and message or html required' });
     }
-    // Send email
+    
+    // Get SMTP settings with validation
     const smtp = await getSmtpSettings();
+    
+    // Create transporter
     const dynamicTransporter = nodemailer.createTransport({
       host: smtp.host,
       port: smtp.port,
       auth: smtp.auth,
       secure: smtp.secure
     });
+    
+    // Verify connection before sending
+    await dynamicTransporter.verify();
+    
+    // Send email
     await dynamicTransporter.sendMail({
       from: smtp.from,
       to,
@@ -286,10 +322,33 @@ router.post('/email-blast-test', authMiddleware, requireAdmin, async (req, res) 
       text: message,
       html: html || message,
     });
-    res.json({ success: true });
+    
+    res.json({ success: true, message: 'Test email sent successfully' });
   } catch (error) {
     console.error('Test email blast error:', error);
-    res.status(500).json({ error: 'Failed to send test email' });
+    
+    // Provide specific error messages
+    if (error.message.includes('SMTP settings not configured')) {
+      return res.status(400).json({ 
+        error: 'Email service not configured. Please configure SMTP settings in the admin panel.' 
+      });
+    }
+    
+    if (error.code === 'EAUTH') {
+      return res.status(400).json({ 
+        error: 'SMTP authentication failed. Please check your email username and password.' 
+      });
+    }
+    
+    if (error.code === 'ECONNECTION') {
+      return res.status(400).json({ 
+        error: 'SMTP connection failed. Please check your SMTP host and port settings.' 
+      });
+    }
+    
+    res.status(500).json({ 
+      error: 'Failed to send test email. Please check your email configuration and try again.' 
+    });
   }
 });
 
