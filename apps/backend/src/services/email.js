@@ -466,28 +466,32 @@ class EmailService {
             <!-- Benefits Section -->
             <h3 style="color: #1f2937; margin: 30px 0 20px 0; font-size: 20px;">Why Fixwell Members Love Us:</h3>
             <div style="background: #f0fdf4; padding: 25px; border-radius: 12px; margin-bottom: 30px;">
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div style="display: flex; align-items: center;">
-                  <span style="color: #16a34a; font-size: 18px; margin-right: 10px;">✓</span>
-                  <span style="color: #4b5563;">No More Contractor Hunting</span>
-                </div>
-                <div style="display: flex; align-items: center;">
-                  <span style="color: #16a34a; font-size: 18px; margin-right: 10px;">✓</span>
-                  <span style="color: #4b5563;">Proactive Maintenance</span>
-                </div>
-                <div style="display: flex; align-items: center;">
-                  <span style="color: #16a34a; font-size: 18px; margin-right: 10px;">✓</span>
-                  <span style="color: #4b5563;">Predictable Costs</span>
-                </div>
-                <div style="display: flex; align-items: center;">
-                  <span style="color: #16a34a; font-size: 18px; margin-right: 10px;">✓</span>
-                  <span style="color: #4b5563;">Quality Guaranteed</span>
-                </div>
-                <div style="display: flex; align-items: center;">
-                  <span style="color: #16a34a; font-size: 18px; margin-right: 10px;">✓</span>
-                  <span style="color: #4b5563;">Fully Insured</span>
-                </div>
-              </div>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 0;">
+                <tr>
+                  <td style="font-size: 20px; padding-right: 10px; vertical-align: top;">✅</td>
+                  <td style="font-size: 16px; color: #222; padding-bottom: 8px;">No More Contractor Hunting</td>
+                </tr>
+                <tr>
+                  <td style="font-size: 20px; padding-right: 10px; vertical-align: top;">✅</td>
+                  <td style="font-size: 16px; color: #222; padding-bottom: 8px;">Proactive Maintenance</td>
+                </tr>
+                <tr>
+                  <td style="font-size: 20px; padding-right: 10px; vertical-align: top;">✅</td>
+                  <td style="font-size: 16px; color: #222; padding-bottom: 8px;">Predictable Costs</td>
+                </tr>
+                <tr>
+                  <td style="font-size: 20px; padding-right: 10px; vertical-align: top;">✅</td>
+                  <td style="font-size: 16px; color: #222; padding-bottom: 8px;">Quality Guaranteed</td>
+                </tr>
+                <tr>
+                  <td style="font-size: 20px; padding-right: 10px; vertical-align: top;">✅</td>
+                  <td style="font-size: 16px; color: #222; padding-bottom: 8px;">Fully Insured &amp; Bonded</td>
+                </tr>
+                <tr>
+                  <td style="font-size: 20px; padding-right: 10px; vertical-align: top;">✅</td>
+                  <td style="font-size: 16px; color: #222;">Same-Day Response</td>
+                </tr>
+              </table>
             </div>
 
             <!-- Testimonials -->
