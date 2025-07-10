@@ -212,34 +212,168 @@ app.get('/api/admin/analytics', requireAdmin, async (req, res) => {
   });
 });
 
-// Admin: Settings (configurable)
-const allowedKeys = [
-  'siteName', 'maintenanceMode', 'supportEmail',
-  'emailHost', 'emailPort', 'emailUser', 'emailPassword', 'emailFrom', 'emailSecure', 'emailReplyTo'
-];
+// Admin: Email blast
+app.post('/api/admin/email-blast', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+  
+  const { subject, body, html, isHtmlMode, emails } = req.body;
+  
+  if (!subject || (!body && !html)) {
+    return res.status(400).json({ error: 'Subject and message are required' });
+  }
+  
+  if (!emails || !Array.isArray(emails) || emails.length === 0) {
+    return res.status(400).json({ error: 'At least one email address is required' });
+  }
+  
+  try {
+    // Import email service
+    const { default: emailService } = await import('./services/email.js');
+    
+    let sentCount = 0;
+    const failedEmails = [];
+    
+    for (const email of emails) {
+      try {
+        const result = await emailService.sendEmail({
+          to: email,
+          subject,
+          text: body,
+          html: isHtmlMode ? html : undefined
+        });
+        
+        if (result.success) {
+          sentCount++;
+        } else {
+          failedEmails.push({ email, error: result.error });
+        }
+      } catch (error) {
+        failedEmails.push({ email, error: error.message });
+      }
+    }
+    
+    res.json({
+      success: true,
+      sentCount,
+      failedCount: failedEmails.length,
+      failedEmails
+    });
+  } catch (error) {
+    console.error('Email blast error:', error);
+    res.status(500).json({ error: 'Failed to send email blast' });
+  }
+});
 
+// Admin: Get settings
 app.get('/api/admin/settings', requireAdmin, async (req, res) => {
   if (!prisma) {
     return res.status(503).json({ error: 'Database not available' });
   }
-  const settings = await prisma.setting.findMany({ where: { key: { in: allowedKeys } } });
-  res.json({ settings });
+  
+  try {
+    const settings = await prisma.setting.findMany();
+    const settingsMap = settings.reduce((acc, setting) => {
+      acc[setting.key] = setting.value;
+      return acc;
+    }, {});
+    
+    res.json({ settings: settingsMap });
+  } catch (error) {
+    console.error('Failed to fetch settings:', error);
+    res.status(500).json({ error: 'Failed to fetch settings' });
+  }
 });
 
+// Admin: Update settings
 app.post('/api/admin/settings', requireAdmin, async (req, res) => {
   if (!prisma) {
     return res.status(503).json({ error: 'Database not available' });
   }
-  const { key, value } = req.body;
-  if (!allowedKeys.includes(key)) {
-    return res.status(400).json({ error: 'Invalid setting key' });
+  
+  const { settings } = req.body;
+  
+  if (!settings || !Array.isArray(settings)) {
+    return res.status(400).json({ error: 'Settings array is required' });
   }
-  const setting = await prisma.setting.upsert({
-    where: { key },
-    update: { value },
-    create: { key, value }
-  });
-  res.json({ setting });
+  
+  try {
+    const results = [];
+    
+    for (const setting of settings) {
+      const result = await prisma.setting.upsert({
+        where: { key: setting.key },
+        update: { value: setting.value },
+        create: { key: setting.key, value: setting.value }
+      });
+      results.push(result);
+    }
+    
+    // Reconfigure email service with new settings
+    try {
+      const { default: emailService } = await import('./services/email.js');
+      await emailService.reconfigure();
+    } catch (error) {
+      console.error('Failed to reconfigure email service:', error);
+    }
+    
+    res.json({ success: true, settings: results });
+  } catch (error) {
+    console.error('Failed to update settings:', error);
+    res.status(500).json({ error: 'Failed to update settings' });
+  }
+});
+
+// Admin: Test email connection
+app.post('/api/admin/test-email', requireAdmin, async (req, res) => {
+  const { emailSettings } = req.body;
+  
+  if (!emailSettings || !emailSettings.emailHost || !emailSettings.emailUser || !emailSettings.emailPassword) {
+    return res.status(400).json({ error: 'Email settings are required' });
+  }
+  
+  try {
+    // Create a temporary transporter for testing
+    const nodemailer = await import('nodemailer');
+    const testTransporter = nodemailer.createTransporter({
+      host: emailSettings.emailHost,
+      port: parseInt(emailSettings.emailPort) || 587,
+      secure: emailSettings.emailSecure,
+      auth: {
+        user: emailSettings.emailUser,
+        pass: emailSettings.emailPassword,
+      },
+    });
+    
+    // Verify connection
+    await testTransporter.verify();
+    
+    // Send test email
+    const testResult = await testTransporter.sendMail({
+      from: emailSettings.emailFrom || emailSettings.emailUser,
+      to: emailSettings.emailUser, // Send to self for testing
+      subject: 'Fixwell Services - Email Test',
+      text: 'This is a test email from Fixwell Services. If you receive this, your email configuration is working correctly.',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #2563eb;">Email Test Successful</h2>
+          <p>This is a test email from Fixwell Services.</p>
+          <p>If you receive this email, your email configuration is working correctly.</p>
+          <p>Best regards,<br>The Fixwell Services Team</p>
+        </div>
+      `
+    });
+    
+    res.json({ 
+      success: true, 
+      message: 'Email test successful',
+      messageId: testResult.messageId 
+    });
+  } catch (error) {
+    console.error('Email test failed:', error);
+    res.status(500).json({ error: `Email test failed: ${error.message}` });
+  }
 });
 
 // Admin: Update user status
@@ -315,6 +449,64 @@ app.post('/api/admin/users/:id/assign-employee', requireAdmin, async (req, res) 
     res.json({ assignment });
   } catch (error) {
     res.status(400).json({ error: 'Failed to assign employee' });
+  }
+});
+
+// Quote reply with email
+app.post('/api/quotes/:id/reply', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+  
+  const { id } = req.params;
+  const { reply, email } = req.body;
+  
+  if (!reply || !email) {
+    return res.status(400).json({ error: 'Reply message and email are required' });
+  }
+  
+  try {
+    // Update quote with reply
+    const updatedQuote = await prisma.quote.update({
+      where: { id },
+      data: {
+        adminReply: reply,
+        status: 'REPLIED',
+        adminReplySentAt: new Date()
+      }
+    });
+    
+    // Send email reply
+    const { default: emailService } = await import('./services/email.js');
+    
+    const emailResult = await emailService.sendEmail({
+      to: email,
+      subject: 'Re: Your Quote Request - Fixwell Services',
+      text: `Thank you for your quote request. Here's our response:\n\n${reply}\n\nBest regards,\nThe Fixwell Services Team`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #2563eb;">Quote Response</h2>
+          <p>Thank you for your quote request. Here's our response:</p>
+          <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p>${reply.replace(/\n/g, '<br>')}</p>
+          </div>
+          <p>Best regards,<br>The Fixwell Services Team</p>
+        </div>
+      `
+    });
+    
+    if (!emailResult.success) {
+      console.error('Failed to send quote reply email:', emailResult.error);
+    }
+    
+    res.json({ 
+      success: true, 
+      quote: updatedQuote,
+      emailSent: emailResult.success 
+    });
+  } catch (error) {
+    console.error('Quote reply error:', error);
+    res.status(500).json({ error: 'Failed to send quote reply' });
   }
 });
 

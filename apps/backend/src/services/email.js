@@ -5,18 +5,56 @@ class EmailService {
   constructor() {
     this.transporter = null;
     this.isConfigured = false;
+    this.settings = null;
     this.init();
   }
 
   async init() {
-    if (config.smtp.host && config.smtp.user && config.smtp.pass) {
+    await this.loadSettings();
+    await this.configureTransporter();
+  }
+
+  async loadSettings() {
+    try {
+      // Import prisma dynamically to avoid circular dependencies
+      const { PrismaClient } = await import('@prisma/client');
+      const prisma = new PrismaClient();
+      
+      const settings = await prisma.setting.findMany({
+        where: {
+          key: {
+            in: ['emailHost', 'emailPort', 'emailUser', 'emailPassword', 'emailFrom', 'emailSecure', 'emailReplyTo']
+          }
+        }
+      });
+      
+      this.settings = settings.reduce((acc, setting) => {
+        acc[setting.key] = setting.value;
+        return acc;
+      }, {});
+      
+      await prisma.$disconnect();
+    } catch (error) {
+      console.error('Failed to load email settings:', error);
+      this.settings = {};
+    }
+  }
+
+  async configureTransporter() {
+    const host = this.settings.emailHost || config.smtp.host;
+    const port = parseInt(this.settings.emailPort) || config.smtp.port;
+    const user = this.settings.emailUser || config.smtp.user;
+    const pass = this.settings.emailPassword || config.smtp.pass;
+    const secure = this.settings.emailSecure === 'true' || config.smtp.secure;
+
+    if (host && user && pass) {
       this.transporter = nodemailer.createTransporter({
-        host: config.smtp.host,
-        port: config.smtp.port,
-        secure: config.smtp.secure,
+        host,
+        port,
+        secure,
         auth: {
-          user: config.smtp.user,
-          pass: config.smtp.pass,
+          user,
+          pass,
         },
       });
 
@@ -31,7 +69,13 @@ class EmailService {
       }
     } else {
       console.warn('Email service not configured - SMTP settings missing');
+      this.isConfigured = false;
     }
+  }
+
+  async reconfigure() {
+    await this.loadSettings();
+    await this.configureTransporter();
   }
 
   async sendEmail(options) {
@@ -42,11 +86,12 @@ class EmailService {
 
     try {
       const mailOptions = {
-        from: config.smtp.user,
+        from: this.settings.emailFrom || config.smtp.user,
         to: options.to,
         subject: options.subject,
         text: options.text,
         html: options.html,
+        replyTo: this.settings.emailReplyTo || config.smtp.user,
         ...options
       };
 

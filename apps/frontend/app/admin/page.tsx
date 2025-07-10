@@ -252,35 +252,75 @@ export default function AdminPage() {
 
   const sendEmailBlastWithExcel = async () => {
     if (!emailSubject || !(emailBody || emailHtml)) {
-      toast.error('Please fill in both subject and body');
+      toast.error('Please fill in subject and message');
       return;
     }
-    if (!excelFile) {
-      toast.error('Please upload an Excel file');
+    if (parsedUsers.length === 0) {
+      toast.error('Please upload an Excel file with user data');
       return;
     }
-    const formData = new FormData();
-    formData.append('file', excelFile);
-    formData.append('subject', emailSubject);
-    formData.append('message', emailBody);
-    if (isHtmlMode && emailHtml) formData.append('html', emailHtml);
+
+    setSendingBlast(true);
     try {
-      const response = await fetch('/api/quotes/email-blast', {
+      const emails = parsedUsers.map(u => u.email).filter(Boolean);
+      const res = await fetch('/api/admin/email-blast', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: emailSubject,
+          body: emailBody,
+          html: emailHtml,
+          isHtmlMode,
+          emails
+        })
       });
-      if (response.ok) {
-        toast.success('Email blast sent successfully!');
+      
+      if (res.ok) {
+        const data = await res.json();
+        toast.success(`Email blast sent to ${data.sentCount} recipients`);
         setEmailSubject('');
         setEmailBody('');
         setEmailHtml('');
+        setIsHtmlMode(false);
         setExcelFile(null);
         setParsedUsers([]);
       } else {
-        toast.error('Failed to send email blast');
+        const error = await res.json();
+        toast.error(error.error || 'Failed to send email blast');
       }
-    } catch {
+    } catch (error) {
       toast.error('Error sending email blast');
+    } finally {
+      setSendingBlast(false);
+    }
+  };
+
+  const sendQuoteReply = async () => {
+    if (!replyModal.reply.trim()) {
+      toast.error('Please enter a reply message');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/quotes/${replyModal.quoteId}/reply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reply: replyModal.reply,
+          email: replyModal.email
+        })
+      });
+
+      if (res.ok) {
+        toast.success('Reply sent successfully');
+        closeReplyModal();
+        fetchQuotes();
+      } else {
+        const error = await res.json();
+        toast.error(error.error || 'Failed to send reply');
+      }
+    } catch (error) {
+      toast.error('Error sending reply');
     }
   };
 
@@ -300,33 +340,6 @@ export default function AdminPage() {
       email: '',
       reply: ''
     });
-  };
-
-  const sendReply = async () => {
-    if (!replyModal.reply.trim()) {
-      toast.error('Please enter a reply message');
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/quotes/${replyModal.quoteId}/reply`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ reply: replyModal.reply }),
-      });
-
-      if (response.ok) {
-        toast.success('Reply sent successfully!');
-        closeReplyModal();
-        fetchQuotes(); // Refresh quotes
-      } else {
-        toast.error('Failed to send reply');
-      }
-    } catch {
-      toast.error('Error sending reply');
-    }
   };
 
   const saveTemplate = () => {
@@ -1456,7 +1469,7 @@ The Fixwell Team`);
                 item.external ? (
                   <a
                     key={item.id}
-                    href="/settings"
+                    href="/admin/settings"
                     className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                   >
                     <item.icon className="mr-3 h-5 w-5" />
@@ -1557,7 +1570,7 @@ The Fixwell Team`);
               </div>
               <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <Button
-                  onClick={sendReply}
+                  onClick={sendQuoteReply}
                   className="w-full sm:w-auto sm:ml-3"
                 >
                   <Send className="mr-2 h-4 w-4" />
