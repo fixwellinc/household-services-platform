@@ -140,8 +140,13 @@ export default function AdminPage() {
   const fetchSettings = async () => {
     setSettingsLoading(true);
     try {
+      const token = localStorage.getItem('auth_token');
       const res = await fetch('/api/admin/settings', {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        }
       });
       if (res.ok) {
         const data = await res.json();
@@ -167,8 +172,13 @@ export default function AdminPage() {
   const fetchAnalytics = async () => {
     setAnalyticsLoading(true);
     try {
+      const token = localStorage.getItem('auth_token');
       const res = await fetch('/api/admin/analytics', {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        }
       });
       if (res.ok) {
         const data = await res.json();
@@ -199,8 +209,13 @@ export default function AdminPage() {
   const fetchUsers = async () => {
     setUsersLoading(true);
     try {
+      const token = localStorage.getItem('auth_token');
       const res = await fetch('/api/admin/users', {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        }
       });
       if (res.ok) {
         const data = await res.json();
@@ -216,8 +231,13 @@ export default function AdminPage() {
 
   const fetchAvailableEmployees = async () => {
     try {
+      const token = localStorage.getItem('auth_token');
       const res = await fetch('/api/admin/users?role=EMPLOYEE', {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        }
       });
       if (res.ok) {
         const data = await res.json();
@@ -271,9 +291,13 @@ export default function AdminPage() {
     setSendingBlast(true);
     try {
       const emails = parsedUsers.map(u => u.email).filter(Boolean);
+      const token = localStorage.getItem('auth_token');
       const res = await fetch('/api/admin/email-blast', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        },
         credentials: 'include',
         body: JSON.stringify({
           subject: emailSubject,
@@ -687,9 +711,13 @@ The Fixwell Team`);
   const saveSetting = async (key: string, value: string) => {
     setSettingsSaving(true);
     try {
+      const token = localStorage.getItem('auth_token');
       const res = await fetch('/api/admin/settings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        },
         credentials: 'include',
         body: JSON.stringify({ key, value })
       });
@@ -707,9 +735,13 @@ The Fixwell Team`);
   // User management functions
   const updateUserStatus = async (userId: string, isActive: boolean) => {
     try {
+      const token = localStorage.getItem('auth_token');
       const res = await fetch(`/api/admin/users/${userId}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        },
         credentials: 'include',
         body: JSON.stringify({ isActive })
       });
@@ -726,9 +758,13 @@ The Fixwell Team`);
 
   const updateUserRole = async (userId: string, role: string) => {
     try {
+      const token = localStorage.getItem('auth_token');
       const res = await fetch(`/api/admin/users/${userId}/role`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        },
         credentials: 'include',
         body: JSON.stringify({ role })
       });
@@ -745,9 +781,13 @@ The Fixwell Team`);
 
   const assignEmployeeToCustomer = async (customerId: string, employeeId: string) => {
     try {
+      const token = localStorage.getItem('auth_token');
       const res = await fetch(`/api/admin/users/${customerId}/assign-employee`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        },
         credentials: 'include',
         body: JSON.stringify({ employeeId })
       });
