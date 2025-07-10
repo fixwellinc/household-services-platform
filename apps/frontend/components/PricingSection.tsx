@@ -133,20 +133,20 @@ export default function PricingSection() {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-br from-gray-50 via-white to-blue-50">
+    <section className="py-12 md:py-20 bg-gradient-to-br from-gray-50 via-white to-blue-50">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+        <div className="text-center mb-12 md:mb-16">
+          <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-4 md:mb-6">
             <Award className="h-4 w-4" />
             Choose Your Plan
           </div>
           
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 md:mb-6">
             Simple, Transparent Pricing
           </h2>
           
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-6 md:mb-8 px-4">
             Choose the perfect plan for your fixwell needs. All plans include our core services with different levels of convenience and support.
           </p>
 
@@ -179,7 +179,7 @@ export default function PricingSection() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto mb-16 md:mb-20">
           {plans.map((plan) => (
             <Card 
               key={plan.name}
@@ -199,29 +199,29 @@ export default function PricingSection() {
                 </div>
               )}
 
-              <CardHeader className="text-center pb-8">
-                <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r ${plan.color} mb-4`}>
-                  <plan.icon className="h-8 w-8 text-white" />
+              <CardHeader className="text-center pb-6 md:pb-8">
+                <div className={`inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full bg-gradient-to-r ${plan.color} mb-3 md:mb-4`}>
+                  <plan.icon className="h-6 w-6 md:h-8 md:w-8 text-white" />
                 </div>
                 
-                <CardTitle className="text-2xl font-bold text-gray-900 mb-2">
+                <CardTitle className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
                   {plan.name}
                 </CardTitle>
                 
-                <CardDescription className="text-gray-600 text-base">
+                <CardDescription className="text-gray-600 text-sm md:text-base">
                   {plan.description}
                 </CardDescription>
 
                 {/* Price */}
-                <div className="mt-6">
+                <div className="mt-4 md:mt-6">
                   <div className="flex items-baseline justify-center gap-2">
-                    <span className="text-4xl font-bold text-gray-900">
+                    <span className="text-3xl md:text-4xl font-bold text-gray-900">
                       ${getDiscountedPrice(plan.price)}
                     </span>
-                    <span className="text-gray-500">/{billingPeriod}</span>
+                    <span className="text-gray-500 text-sm md:text-base">/{billingPeriod}</span>
                   </div>
                   {billingPeriod === 'year' && (
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-xs md:text-sm text-gray-500 mt-1">
                       Billed annually (${plan.price}/month)
                     </p>
                   )}
@@ -230,18 +230,18 @@ export default function PricingSection() {
 
               <CardContent className="pt-0">
                 {/* Features */}
-                <ul className="space-y-4 mb-8">
+                <ul className="space-y-3 md:space-y-4 mb-6 md:mb-8">
                   {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-start gap-3">
-                      <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">{feature}</span>
+                    <li key={featureIndex} className="flex items-start gap-2 md:gap-3">
+                      <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700 text-sm md:text-base">{feature}</span>
                     </li>
                   ))}
                 </ul>
 
                 {/* CTA Button */}
                 <Button 
-                  className={`w-full ${plan.ctaColor} text-white font-semibold py-3 text-lg transition-all duration-300 transform hover:scale-105`}
+                  className={`w-full ${plan.ctaColor} text-white font-semibold py-2 md:py-3 text-base md:text-lg transition-all duration-300 transform hover:scale-105`}
                 >
                   <span className="flex items-center gap-2">
                     {plan.cta}
@@ -250,7 +250,7 @@ export default function PricingSection() {
                 </Button>
 
                 {/* Additional Info */}
-                <p className="text-xs text-gray-500 text-center mt-4">
+                <p className="text-xs text-gray-500 text-center mt-3 md:mt-4">
                   {plan.name === 'VIP' ? 'Contact us for custom enterprise solutions' : 'No setup fees • Cancel anytime'}
                 </p>
               </CardContent>
@@ -259,12 +259,12 @@ export default function PricingSection() {
         </div>
 
         {/* Feature Comparison Table */}
-        <div className="max-w-6xl mx-auto mb-20">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">
+        <div className="max-w-6xl mx-auto mb-16 md:mb-20">
+          <div className="text-center mb-8 md:mb-12">
+            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
               Compare Plans
             </h3>
-            <p className="text-lg text-gray-600">
+            <p className="text-base md:text-lg text-gray-600">
               See exactly what&apos;s included in each plan
             </p>
           </div>
@@ -330,39 +330,39 @@ export default function PricingSection() {
         </div>
 
         {/* Testimonials */}
-        <div className="max-w-6xl mx-auto mb-20">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">
+        <div className="max-w-6xl mx-auto mb-16 md:mb-20">
+          <div className="text-center mb-8 md:mb-12">
+            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
               What Our Members Say
             </h3>
-            <p className="text-lg text-gray-600">
+            <p className="text-base md:text-lg text-gray-600">
               Join thousands of satisfied customers
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {testimonials.map((testimonial, index) => (
               <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-1 mb-4">
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex items-center gap-1 mb-3 md:mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
                       <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
                   
-                  <Quote className="h-8 w-8 text-blue-600 mb-4" />
+                  <Quote className="h-6 w-6 md:h-8 md:w-8 text-blue-600 mb-3 md:mb-4" />
                   
-                  <p className="text-gray-600 mb-6 leading-relaxed">
+                  <p className="text-gray-600 mb-4 md:mb-6 leading-relaxed text-sm md:text-base">
                     &ldquo;{testimonial.content}&rdquo;
                   </p>
                   
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-xs md:text-sm">
                       {testimonial.avatar}
                     </div>
                     <div>
-                      <div className="font-semibold text-gray-900">{testimonial.name}</div>
-                      <div className="text-sm text-gray-500">{testimonial.role}</div>
+                      <div className="font-semibold text-gray-900 text-sm md:text-base">{testimonial.name}</div>
+                      <div className="text-xs md:text-sm text-gray-500">{testimonial.role}</div>
                     </div>
                   </div>
                 </CardContent>
@@ -373,19 +373,19 @@ export default function PricingSection() {
 
         {/* Bottom CTA */}
         <div className="text-center">
-          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+          <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 max-w-4xl mx-auto">
+            <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">
               Need a Custom Solution?
             </h3>
-            <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+            <p className="text-gray-600 mb-4 md:mb-6 max-w-2xl mx-auto text-sm md:text-base">
               We offer enterprise solutions for property management companies, hotels, and large fixwells with custom requirements.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="outline" size="lg" className="border-2 border-gray-300 hover:border-blue-500">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
+              <Button variant="outline" size="lg" className="border-2 border-gray-300 hover:border-blue-500 text-sm md:text-base">
                 <Phone className="h-4 w-4 mr-2" />
                 Contact Sales
               </Button>
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-sm md:text-base">
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Schedule Demo
               </Button>
