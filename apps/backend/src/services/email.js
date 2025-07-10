@@ -48,7 +48,7 @@ class EmailService {
     const secure = this.settings.emailSecure === 'true' || config.smtp.secure;
 
     if (host && user && pass) {
-      this.transporter = nodemailer.createTransporter({
+      this.transporter = nodemailer.createTransport({
         host,
         port,
         secure,
