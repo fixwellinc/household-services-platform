@@ -607,31 +607,31 @@ The Fixwell Team
       </div>
 
       <!-- Benefits Section -->
-      <h3 style="color: #1f2937; margin: 40px 0 25px 0; font-size: 22px; font-weight: 600; text-align: center;">💎 WHY FIXWELL MEMBERS LOVE US</h3>
-      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom: 35px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 16px; border: 2px solid #16a34a; padding: 30px;">
+      <h3 style="color:#1f2937;margin:40px 0 25px 0;font-size:22px;font-weight:600;text-align:center;">💎 WHY FIXWELL MEMBERS LOVE US</h3>
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:35px;background:#f0fdf4;border-radius:16px;border:2px solid #16a34a;padding:24px;">
         <tr>
-          <td style="vertical-align: top; width: 32px; padding: 12px 0;"><span style="font-size: 20px; color: #16a34a;">✅</span></td>
-          <td style="vertical-align: middle; color: #4b5563; font-weight: 500; font-size: 16px; padding: 12px 0;">No More Contractor Hunting</td>
+          <td style="width:32px;padding:8px 0;vertical-align:top;"><span style="font-size:20px;color:#16a34a;">✅</span></td>
+          <td style="color:#4b5563;font-weight:500;font-size:16px;padding:8px 0;vertical-align:middle;">No More Contractor Hunting</td>
         </tr>
         <tr>
-          <td style="vertical-align: top; width: 32px; padding: 12px 0;"><span style="font-size: 20px; color: #16a34a;">✅</span></td>
-          <td style="vertical-align: middle; color: #4b5563; font-weight: 500; font-size: 16px; padding: 12px 0;">Proactive Maintenance</td>
+          <td style="width:32px;padding:8px 0;vertical-align:top;"><span style="font-size:20px;color:#16a34a;">✅</span></td>
+          <td style="color:#4b5563;font-weight:500;font-size:16px;padding:8px 0;vertical-align:middle;">Proactive Maintenance</td>
         </tr>
         <tr>
-          <td style="vertical-align: top; width: 32px; padding: 12px 0;"><span style="font-size: 20px; color: #16a34a;">✅</span></td>
-          <td style="vertical-align: middle; color: #4b5563; font-weight: 500; font-size: 16px; padding: 12px 0;">Predictable Costs</td>
+          <td style="width:32px;padding:8px 0;vertical-align:top;"><span style="font-size:20px;color:#16a34a;">✅</span></td>
+          <td style="color:#4b5563;font-weight:500;font-size:16px;padding:8px 0;vertical-align:middle;">Predictable Costs</td>
         </tr>
         <tr>
-          <td style="vertical-align: top; width: 32px; padding: 12px 0;"><span style="font-size: 20px; color: #16a34a;">✅</span></td>
-          <td style="vertical-align: middle; color: #4b5563; font-weight: 500; font-size: 16px; padding: 12px 0;">Quality Guaranteed</td>
+          <td style="width:32px;padding:8px 0;vertical-align:top;"><span style="font-size:20px;color:#16a34a;">✅</span></td>
+          <td style="color:#4b5563;font-weight:500;font-size:16px;padding:8px 0;vertical-align:middle;">Quality Guaranteed</td>
         </tr>
         <tr>
-          <td style="vertical-align: top; width: 32px; padding: 12px 0;"><span style="font-size: 20px; color: #16a34a;">✅</span></td>
-          <td style="vertical-align: middle; color: #4b5563; font-weight: 500; font-size: 16px; padding: 12px 0;">Fully Insured &amp; Bonded</td>
+          <td style="width:32px;padding:8px 0;vertical-align:top;"><span style="font-size:20px;color:#16a34a;">✅</span></td>
+          <td style="color:#4b5563;font-weight:500;font-size:16px;padding:8px 0;vertical-align:middle;">Fully Insured &amp; Bonded</td>
         </tr>
         <tr>
-          <td style="vertical-align: top; width: 32px; padding: 12px 0;"><span style="font-size: 20px; color: #16a34a;">✅</span></td>
-          <td style="vertical-align: middle; color: #4b5563; font-weight: 500; font-size: 16px; padding: 12px 0;">Same-Day Response</td>
+          <td style="width:32px;padding:8px 0;vertical-align:top;"><span style="font-size:20px;color:#16a34a;">✅</span></td>
+          <td style="color:#4b5563;font-weight:500;font-size:16px;padding:8px 0;vertical-align:middle;">Same-Day Response</td>
         </tr>
       </table>
 
