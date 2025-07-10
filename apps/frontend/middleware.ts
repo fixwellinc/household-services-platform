@@ -106,7 +106,6 @@ function getDashboardForRole(role: string | undefined): string {
 
 export const config = {
   matcher: [
-    '/dashboard/admin/:path*',
     '/dashboard/:path*',
     '/customer/:path*',
     '/settings/:path*',

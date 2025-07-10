@@ -101,7 +101,7 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-lg font-semibold text-gray-900">Total Users</h3>
             <p className="text-gray-600 text-sm">Platform customers</p>
-            <Link href="/dashboard/admin/users" className="mt-4 inline-block text-primary hover:text-primary/80 text-sm font-medium">
+            <Link href="/admin" className="mt-4 inline-block text-primary hover:text-primary/80 text-sm font-medium">
               Manage users →
             </Link>
           </div>
@@ -113,7 +113,7 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-lg font-semibold text-gray-900">Active Bookings</h3>
             <p className="text-gray-600 text-sm">Scheduled this week</p>
-            <Link href="/dashboard/admin/bookings" className="mt-4 inline-block text-primary hover:text-primary/80 text-sm font-medium">
+            <Link href="/admin" className="mt-4 inline-block text-primary hover:text-primary/80 text-sm font-medium">
               View all bookings →
             </Link>
           </div>
@@ -125,7 +125,7 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-lg font-semibold text-gray-900">Platform Revenue</h3>
             <p className="text-gray-600 text-sm">This month&apos;s total</p>
-            <Link href="/dashboard/admin/analytics" className="mt-4 inline-block text-primary hover:text-primary/80 text-sm font-medium">
+            <Link href="/admin" className="mt-4 inline-block text-primary hover:text-primary/80 text-sm font-medium">
               View analytics →
             </Link>
           </div>
@@ -169,25 +169,25 @@ export default function DashboardPage() {
 
           {user.role === 'ADMIN' && (
             <>
-              <Link href="/dashboard/admin/users">
+              <Link href="/admin">
                 <Button className="w-full h-20 flex flex-col items-center justify-center">
                   <Users className="h-6 w-6 mb-2" />
                   Manage Users
                 </Button>
               </Link>
-              <Link href="/dashboard/admin/services">
+              <Link href="/admin">
                 <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center">
                   <Settings className="h-6 w-6 mb-2" />
                   Manage Services
                 </Button>
               </Link>
-              <Link href="/dashboard/admin/analytics">
+              <Link href="/admin">
                 <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center">
                   <DollarSign className="h-6 w-6 mb-2" />
                   View Analytics
                 </Button>
               </Link>
-              <Link href="/dashboard/admin/settings">
+              <Link href="/settings">
                 <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center">
                   <Settings className="h-6 w-6 mb-2" />
                   System Settings
