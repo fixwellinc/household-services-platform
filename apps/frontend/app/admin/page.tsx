@@ -646,22 +646,29 @@ The Fixwell Team`);
       return;
     }
     setSendingTest(true);
-    const formData = new FormData();
-    formData.append('subject', emailSubject);
-    formData.append('message', emailBody);
-    if (isHtmlMode && emailHtml) formData.append('html', emailHtml);
-    formData.append('to', testEmail);
     try {
+      const token = localStorage.getItem('auth_token');
       const response = await fetch('/api/quotes/email-blast-test', {
         method: 'POST',
-        body: formData,
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          subject: emailSubject,
+          message: emailBody,
+          html: isHtmlMode && emailHtml ? emailHtml : undefined,
+          to: testEmail
+        }),
       });
       if (response.ok) {
         toast.success('Test email sent!');
       } else {
-        toast.error('Failed to send test email');
+        const error = await response.json();
+        toast.error(error.error || 'Failed to send test email');
       }
-    } catch {
+    } catch (error) {
       toast.error('Error sending test email');
     } finally {
       setSendingTest(false);

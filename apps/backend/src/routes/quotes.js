@@ -265,7 +265,7 @@ router.get('/email-track/click/:id', (req, res) => {
 });
 
 // Admin: Send a test email for email blast
-router.post('/email-blast-test', async (req, res) => {
+router.post('/email-blast-test', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const { subject, message, html, to } = req.body;
     if (!to || !subject || !(message || html)) {
