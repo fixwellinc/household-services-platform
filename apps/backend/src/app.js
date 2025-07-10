@@ -26,7 +26,7 @@ import docsRoutes from './routes/docs.js';
 // import webhookRoutes from './routes/webhooks.js';
 
 // Import middleware
-import { authMiddleware } from './middleware/auth.js';
+import { authMiddleware, requireAdmin } from './middleware/auth.js';
 import { errorHandler } from './middleware/error.js';
 import { requestLogger, errorLogger, performanceMonitor } from './middleware/logging.js';
 import { generalLimiter, authLimiter, apiLimiter } from './middleware/rateLimit.js';
@@ -151,12 +151,15 @@ app.use('/api/quotes', quotesRoutes);
 app.use('/api/docs', docsRoutes);
 // app.use('/api/webhooks', webhookRoutes);
 
-function requireAdmin(req, res, next) {
+function requireAdminLocal(req, res, next) {
   if (!req.user || req.user.role !== 'ADMIN') {
     return res.status(403).json({ error: 'Admin access required' });
   }
   next();
 }
+
+// Apply authentication middleware to all admin routes
+app.use('/api/admin', authMiddleware);
 
 // Admin: Get all services
 app.get('/api/admin/services', requireAdmin, async (req, res) => {
