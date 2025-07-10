@@ -146,7 +146,7 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="container mx-auto py-10 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">Admin Settings</h1>
+      <h1 className="text-3xl font-bold mb-8">Email Settings</h1>
 
       {/* Email Configuration */}
       <section className="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -262,21 +262,27 @@ export default function AdminSettingsPage() {
         </div>
       </section>
 
-      {/* System Information */}
+      {/* Email Status */}
       <section className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-6">System Information</h2>
+        <h2 className="text-xl font-semibold mb-6">Email Service Status</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div>
-            <span className="font-medium">Environment:</span> {process.env.NODE_ENV || 'development'}
+            <span className="font-medium">SMTP Configuration:</span> 
+            <span className={`ml-2 px-2 py-1 rounded text-xs ${emailSettings.emailHost ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+              {emailSettings.emailHost ? 'Configured' : 'Not Configured'}
+            </span>
           </div>
           <div>
-            <span className="font-medium">Database:</span> Connected
+            <span className="font-medium">Last Test:</span> 
+            <span className="ml-2 text-gray-600">Not tested yet</span>
           </div>
           <div>
-            <span className="font-medium">Email Service:</span> {emailSettings.emailHost ? 'Configured' : 'Not Configured'}
+            <span className="font-medium">SMTP Host:</span> 
+            <span className="ml-2 text-gray-600">{emailSettings.emailHost || 'Not set'}</span>
           </div>
           <div>
-            <span className="font-medium">Last Updated:</span> {new Date().toLocaleString()}
+            <span className="font-medium">From Email:</span> 
+            <span className="ml-2 text-gray-600">{emailSettings.emailFrom || 'Not set'}</span>
           </div>
         </div>
       </section>

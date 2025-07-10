@@ -826,7 +826,7 @@ The Fixwell Team`);
     { name: 'Quotes', icon: MessageSquare, id: 'quotes' },
     { name: 'Email Blast', icon: Mail, id: 'email-blast' },
     { name: 'Analytics', icon: BarChart3, id: 'analytics' },
-    { name: 'Settings', icon: Settings, id: 'external-settings', external: true },
+    { name: 'Email Settings', icon: Settings, id: 'external-settings', external: true },
   ];
 
   const renderDashboard = () => (
