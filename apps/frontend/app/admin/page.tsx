@@ -31,6 +31,13 @@ interface Quote {
   createdAt: string;
 }
 
+interface NavigationItem {
+  name: string;
+  icon: React.ComponentType<{ className?: string }>;
+  id: string;
+  external?: boolean;
+}
+
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
 export default function AdminPage() {
@@ -627,12 +634,12 @@ The Fixwell Team`);
     }
   };
 
-  const navigation = [
+  const navigation: NavigationItem[] = [
     { name: 'Dashboard', icon: Home, id: 'dashboard' },
     { name: 'Quotes', icon: MessageSquare, id: 'quotes' },
     { name: 'Email Blast', icon: Mail, id: 'email-blast' },
     { name: 'Analytics', icon: BarChart3, id: 'analytics' },
-    { name: 'Settings', icon: Settings, id: 'settings' },
+    { name: 'Settings', icon: Settings, id: 'external-settings', external: true },
   ];
 
   const renderDashboard = () => (
@@ -1221,18 +1228,29 @@ The Fixwell Team`);
           <nav className="flex-1 overflow-y-auto px-3 py-6">
             <div className="space-y-1">
               {navigation.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    activeTab === item.id
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                  }`}
-                >
-                  <item.icon className="mr-3 h-5 w-5" />
-                  {item.name}
-                </button>
+                item.external ? (
+                  <a
+                    key={item.id}
+                    href="/settings"
+                    className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  >
+                    <item.icon className="mr-3 h-5 w-5" />
+                    {item.name}
+                  </a>
+                ) : (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                      activeTab === item.id
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
+                  >
+                    <item.icon className="mr-3 h-5 w-5" />
+                    {item.name}
+                  </button>
+                )
               ))}
             </div>
           </nav>
