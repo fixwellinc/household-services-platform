@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
-    const response = await fetch(`${backendUrl}/admin/settings`, {
+    const response = await fetch(`${backendUrl}/api/admin/settings`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
     
-    const response = await fetch(`${backendUrl}/admin/settings`, {
+    const response = await fetch(`${backendUrl}/api/admin/settings`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

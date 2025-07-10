@@ -6,18 +6,18 @@ import LoginForm from '@/components/auth/LoginForm';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isHydrated } = useAuth();
   const router = useRouter();
 
   // Redirect to home page if user is already logged in
   useEffect(() => {
-    if (user && !isLoading) {
+    if (user && !isLoading && isHydrated) {
       router.push('/');
     }
-  }, [user, isLoading, router]);
+  }, [user, isLoading, isHydrated, router]);
 
-  // Show loading while checking authentication
-  if (isLoading) {
+  // Show loading while checking authentication or during hydration
+  if (isLoading || !isHydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">

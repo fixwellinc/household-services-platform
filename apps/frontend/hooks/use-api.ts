@@ -12,13 +12,13 @@ export const queryKeys = {
 };
 
 // Authentication hooks
-export const useCurrentUser = () => {
+export const useCurrentUser = (isHydrated: boolean = true) => {
   return useQuery({
     queryKey: queryKeys.user,
     queryFn: () => api.getCurrentUser(),
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    enabled: typeof window !== 'undefined' && !!localStorage.getItem('auth_token'),
+    enabled: isHydrated && typeof window !== 'undefined' && !!localStorage.getItem('auth_token'),
   });
 };
 

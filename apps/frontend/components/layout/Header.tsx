@@ -22,15 +22,9 @@ import {
 } from 'lucide-react'
 
 const Header: React.FC = () => {
-  const { user, isLoading, logout } = useAuth();
+  const { user, isLoading, logout, isHydrated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
-
-  // Handle hydration
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
 
   const handleLogout = async () => {
     try {

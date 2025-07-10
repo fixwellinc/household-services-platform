@@ -103,6 +103,9 @@ if (process.env.NODE_ENV === 'production') {
 }
 app.use('/api/', apiLimiter);
 
+// Trust proxy for rate limiting behind Railway
+app.set('trust proxy', 1);
+
 // PATTERN: Body parsing for JSON and form data
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -156,7 +159,7 @@ function requireAdmin(req, res, next) {
 }
 
 // Admin: Get all services
-app.get('/admin/services', requireAdmin, async (req, res) => {
+app.get('/api/admin/services', requireAdmin, async (req, res) => {
   if (!prisma) {
     return res.status(503).json({ error: 'Database not available' });
   }
@@ -165,7 +168,7 @@ app.get('/admin/services', requireAdmin, async (req, res) => {
 });
 
 // Admin: Get all users
-app.get('/admin/users', requireAdmin, async (req, res) => {
+app.get('/api/admin/users', requireAdmin, async (req, res) => {
   if (!prisma) {
     return res.status(503).json({ error: 'Database not available' });
   }
@@ -174,7 +177,7 @@ app.get('/admin/users', requireAdmin, async (req, res) => {
 });
 
 // Admin: Get all bookings
-app.get('/admin/bookings', requireAdmin, async (req, res) => {
+app.get('/api/admin/bookings', requireAdmin, async (req, res) => {
   if (!prisma) {
     return res.status(503).json({ error: 'Database not available' });
   }
@@ -188,7 +191,7 @@ app.get('/admin/bookings', requireAdmin, async (req, res) => {
 });
 
 // Admin: Analytics summary (real data for counts, dummy for email stats)
-app.get('/admin/analytics', requireAdmin, async (req, res) => {
+app.get('/api/admin/analytics', requireAdmin, async (req, res) => {
   if (!prisma) {
     return res.status(503).json({ error: 'Database not available' });
   }
@@ -215,7 +218,7 @@ const allowedKeys = [
   'emailHost', 'emailPort', 'emailUser', 'emailPassword', 'emailFrom', 'emailSecure', 'emailReplyTo'
 ];
 
-app.get('/admin/settings', requireAdmin, async (req, res) => {
+app.get('/api/admin/settings', requireAdmin, async (req, res) => {
   if (!prisma) {
     return res.status(503).json({ error: 'Database not available' });
   }
@@ -223,7 +226,7 @@ app.get('/admin/settings', requireAdmin, async (req, res) => {
   res.json({ settings });
 });
 
-app.post('/admin/settings', requireAdmin, async (req, res) => {
+app.post('/api/admin/settings', requireAdmin, async (req, res) => {
   if (!prisma) {
     return res.status(503).json({ error: 'Database not available' });
   }

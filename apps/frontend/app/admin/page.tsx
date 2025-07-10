@@ -139,7 +139,7 @@ export default function AdminPage() {
   const fetchAnalytics = async () => {
     setAnalyticsLoading(true);
     try {
-      const res = await fetch('/admin/analytics');
+      const res = await fetch('/api/admin/analytics');
       if (res.ok) {
         const data = await res.json();
         setAnalytics({

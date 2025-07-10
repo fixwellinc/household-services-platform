@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
-    const response = await fetch(`${backendUrl}/admin/users`, {
+    const response = await fetch(`${backendUrl}/api/admin/users`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

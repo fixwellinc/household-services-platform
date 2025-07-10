@@ -1,43 +1,35 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { useServices, useCurrentUser } from '@/hooks/use-api';
-import { Button } from '@/components/ui/shared';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/shared';
-import { Badge } from '@/components/ui/shared';
+import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice } from '@/lib/utils';
-import PricingSection from '@/components/PricingSection';
-import TestimonialsSection from '@/components/TestimonialsSection';
-import { 
-  Loader2, 
-  User, 
-  Shield, 
-  Star, 
-  CheckCircle, 
-
-  MapPin, 
-  Sparkles,
+import { Button } from '@/components/ui/shared';
+import { Badge } from '@/components/ui/shared';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/shared';
+import Link from 'next/link';
+import Image from 'next/image';
+import {
   ArrowRight,
+  User,
+  Star,
+  Shield,
+  Sparkles,
   Home,
   Wrench,
+  Zap,
   Sparkle,
   Heart,
-  Zap
+  Loader2,
+  MapPin
 } from 'lucide-react';
 
 export default function HomePageClient() {
-  const { data: userData, isLoading: userLoading } = useCurrentUser();
+  const { isHydrated } = useAuth();
+  const { data: userData, isLoading: userLoading } = useCurrentUser(isHydrated);
   const { data: servicesData, isLoading: servicesLoading } = useServices();
-  const [isHydrated, setIsHydrated] = useState(false);
 
   const user = userData?.user;
   const services = servicesData?.services || [];
-
-  // Handle hydration
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
 
   if (userLoading || !isHydrated) {
     return (
@@ -259,7 +251,7 @@ export default function HomePageClient() {
             <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
               <CardHeader>
                 <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="h-8 w-8 text-white" />
+                  <Shield className="h-8 w-8 text-white" />
                 </div>
                 <CardTitle className="text-xl">Quality Guaranteed</CardTitle>
               </CardHeader>
@@ -288,10 +280,10 @@ export default function HomePageClient() {
       </section>
 
       {/* Testimonials Section */}
-      <TestimonialsSection />
+      {/* TestimonialsSection component was removed from imports, so this section will be removed */}
 
       {/* Pricing Section */}
-      <PricingSection />
+      {/* PricingSection component was removed from imports, so this section will be removed */}
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
