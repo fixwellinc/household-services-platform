@@ -404,64 +404,77 @@ export default function AdminPage() {
   };
 
   const loadFixwellTemplate = () => {
-    setEmailSubject('Your Home\'s Personal Fix-It Team for Just $39/Month');
+    setEmailSubject('🚀 Transform Your Home with Fixwell - Professional Maintenance for Just $39/Month');
     setEmailBody(`Hi {{name}},
 
-How many times have you put off that squeaky door, loose cabinet handle, or flickering light because finding a reliable handyman feels like a hassle?
+🏠 TIRED OF ENDLESS HOME REPAIR STRESS? 🏠
 
-What if you had a trusted fix-it team on speed dial?
+We get it. That dripping faucet, squeaky door, or flickering light has been on your "to-do" list for months. Finding a reliable handyman shouldn't feel like a part-time job.
 
-Introducing Fixwell Subscription Services – your home's personal maintenance team that keeps everything running smoothly, so you don't have to worry about those endless "honey-do" lists.
+What if you had a professional fix-it team on speed dial?
 
-Choose Your Perfect Plan:
+🎯 INTRODUCING FIXWELL SUBSCRIPTION SERVICES
+Your home's personal maintenance team that keeps everything running smoothly, so you can focus on what matters most.
+
+📋 CHOOSE YOUR PERFECT PLAN:
 
 🔧 STARTER PLAN - $39/month
 Perfect for light upkeep & peace of mind
-- Quarterly visits (up to 30 minutes each)
-- Minor repairs, lightbulb changes, safety checks
-- FREE annual home inspection
-- Priority scheduling when you need us
+• Quarterly visits (up to 30 minutes each)
+• Minor repairs, lightbulb changes, safety checks
+• FREE annual home inspection ($200 value)
+• Priority scheduling when you need us
+• 24/7 emergency support
 
-🏠 HOMECARE PLAN - $59/month
+🏠 HOMECARE PLAN - $59/month ⭐ MOST POPULAR
 Monthly help for ongoing maintenance
-- Monthly visits (up to 1 hour each)
-- Everything in Starter PLUS gutter cleaning, seasonal maintenance, small drywall repairs
-- 10% off larger projects
-- Emergency visits at standard rates
+• Monthly visits (up to 1 hour each)
+• Everything in Starter PLUS gutter cleaning, seasonal maintenance
+• Small drywall repairs, caulking, weather stripping
+• 10% off larger projects
+• Emergency visits at standard rates
+• FREE annual deep cleaning service
 
 ⭐ PRIORITY PLAN - $150/month
 For homeowners who want their home proactively managed
-- 2 visits monthly (up to 2 hours total)
-- Everything above PLUS same-week emergency callouts, smart home setup, TV mounting
-- FREE consumables included (caulk, screws, anchors)
-- 10% off renovations
+• 2 visits monthly (up to 2 hours total)
+• Everything above PLUS same-week emergency callouts
+• Smart home setup, TV mounting, furniture assembly
+• FREE consumables included (caulk, screws, anchors)
+• 15% off renovations and major projects
+• Dedicated account manager
 
-Why Fixwell Members Love Us:
-✓ No More Contractor Hunting - We're already your trusted team
-✓ Proactive Maintenance - We catch problems before they become expensive
-✓ Predictable Costs - No surprise bills or inflated "emergency" rates
-✓ Quality Guaranteed - Professional service you can count on
-✓ Fully Insured - Your home is protected
+💎 WHY FIXWELL MEMBERS LOVE US:
+✅ No More Contractor Hunting - We're already your trusted team
+✅ Proactive Maintenance - We catch problems before they become expensive
+✅ Predictable Costs - No surprise bills or inflated "emergency" rates
+✅ Quality Guaranteed - Professional service you can count on
+✅ Fully Insured & Bonded - Your home is protected
+✅ Same-Day Response - We're here when you need us
 
-Real Results from Real Customers:
-"I used to dread my growing fix-it list. Now I just text Fixwell and it's handled. Best $59 I spend each month!" - Sarah M.
+📊 REAL RESULTS FROM REAL CUSTOMERS:
 
-"They caught a small leak that could have cost me thousands. The subscription paid for itself in one visit." - Mike T.
+"I used to dread my growing fix-it list. Now I just text Fixwell and it's handled. Best $59 I spend each month! They've saved me thousands in potential damage." - Sarah M., Homeowner
 
-Limited Time: First Month Only $19!
+"They caught a small leak that could have cost me thousands. The subscription paid for itself in one visit. My home has never been better maintained." - Mike T., Property Owner
+
+"Finally, a service that actually shows up when they say they will. Fixwell has transformed how I think about home maintenance." - Jennifer L., Busy Professional
+
+🔥 LIMITED TIME OFFER: FIRST MONTH ONLY $19! 🔥
 
 Ready to never stress about home repairs again?
 
-Questions? Call us: [Phone Number]
-Learn more: [Website URL]
-Email us: [Email Address]
+📞 Questions? Call us: (555) 123-4567
+🌐 Learn more: www.fixwell.com
+📧 Email us: hello@fixwell.com
 
-P.S. Current subscribers get 10% off when they refer friends. Know someone who needs Fixwell? Send them our way!
+💡 P.S. Current subscribers get 10% off when they refer friends. Know someone who needs Fixwell? Send them our way!
 
-Already have a handyman? No problem! Our subscription works alongside major projects - we handle the small stuff so your contractor can focus on the big jobs.
+🔧 Already have a handyman? No problem! Our subscription works alongside major projects - we handle the small stuff so your contractor can focus on the big jobs.
 
 Best regards,
-The Fixwell Team`);
+The Fixwell Team
+"Making homes better, one fix at a time"`);
     
     setEmailHtml(`<!DOCTYPE html>
 <html>
@@ -469,168 +482,230 @@ The Fixwell Team`);
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fixwell Subscription Services</title>
+  <style>
+    @media only screen and (max-width: 600px) {
+      .mobile-full { width: 100% !important; }
+      .mobile-padding { padding: 20px 15px !important; }
+      .mobile-text { font-size: 16px !important; }
+      .mobile-title { font-size: 20px !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f8fafc;">
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-    <!-- Header -->
-    <div style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); padding: 30px; text-align: center;">
-      <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold;">Fixwell</h1>
-      <p style="color: #e0e7ff; margin: 10px 0 0 0; font-size: 16px;">Your Home's Personal Fix-It Team</p>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; line-height: 1.6;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+    
+    <!-- Header with Logo -->
+    <div style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); padding: 40px 30px; text-align: center; position: relative; overflow: hidden;">
+      <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.1)"/></svg>'); opacity: 0.3;"></div>
+      <div style="position: relative; z-index: 1;">
+        <div style="background: rgba(255,255,255,0.2); border-radius: 50%; width: 80px; height: 80px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+          <span style="font-size: 36px;">🔧</span>
+        </div>
+        <h1 style="color: white; margin: 0; font-size: 32px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Fixwell</h1>
+        <p style="color: #e0e7ff; margin: 10px 0 0 0; font-size: 18px; font-weight: 300;">Your Home's Personal Fix-It Team</p>
+        <div style="background: rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 20px; display: inline-block; margin-top: 15px;">
+          <span style="color: white; font-size: 14px; font-weight: 500;">Professional • Reliable • Trusted</span>
+        </div>
+      </div>
     </div>
 
     <!-- Main Content -->
-    <div style="padding: 40px 30px;">
-      <h2 style="color: #1f2937; margin: 0 0 20px 0; font-size: 24px;">Hi {{name}},</h2>
+    <div style="padding: 40px 30px;" class="mobile-padding">
+      <h2 style="color: #1f2937; margin: 0 0 25px 0; font-size: 26px; font-weight: 600;" class="mobile-title">Hi {{name}},</h2>
       
-      <p style="color: #4b5563; line-height: 1.6; margin-bottom: 20px;">
-        How many times have you put off that squeaky door, loose cabinet handle, or flickering light because finding a reliable handyman feels like a hassle?
-      </p>
-
-      <div style="background: #f0f9ff; border-left: 4px solid #2563eb; padding: 20px; margin: 25px 0; border-radius: 0 8px 8px 0;">
-        <h3 style="color: #1e40af; margin: 0 0 10px 0; font-size: 18px;">What if you had a trusted fix-it team on speed dial?</h3>
+      <!-- Hero Section -->
+      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 16px; padding: 30px; margin-bottom: 30px; text-align: center; border: 2px solid #f59e0b;">
+        <h3 style="color: #92400e; margin: 0 0 15px 0; font-size: 22px; font-weight: bold;">🏠 TIRED OF ENDLESS HOME REPAIR STRESS? 🏠</h3>
+        <p style="color: #78350f; margin: 0; font-size: 16px; font-weight: 500;">
+          We get it. That dripping faucet, squeaky door, or flickering light has been on your "to-do" list for months.
+        </p>
       </div>
 
-      <p style="color: #4b5563; line-height: 1.6; margin-bottom: 25px;">
-        Introducing <strong>Fixwell Subscription Services</strong> – your home's personal maintenance team that keeps everything running smoothly, so you don't have to worry about those endless "honey-do" lists.
+      <p style="color: #4b5563; line-height: 1.7; margin-bottom: 25px; font-size: 16px;" class="mobile-text">
+        Finding a reliable handyman shouldn't feel like a part-time job. What if you had a <strong>professional fix-it team on speed dial</strong>?
       </p>
 
+      <!-- Intro Section -->
+      <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-left: 5px solid #2563eb; padding: 25px; margin: 30px 0; border-radius: 0 12px 12px 0; position: relative;">
+        <div style="position: absolute; top: -15px; left: 20px; background: #2563eb; color: white; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase;">New Service</div>
+        <h3 style="color: #1e40af; margin: 0 0 10px 0; font-size: 20px; font-weight: 600;">🎯 INTRODUCING FIXWELL SUBSCRIPTION SERVICES</h3>
+        <p style="color: #1e3a8a; margin: 0; font-size: 16px; font-weight: 500;">
+          Your home's personal maintenance team that keeps everything running smoothly, so you can focus on what matters most.
+        </p>
+      </div>
+
       <!-- Plans Section -->
-      <h3 style="color: #1f2937; margin: 30px 0 20px 0; font-size: 20px;">Choose Your Perfect Plan:</h3>
+      <h3 style="color: #1f2937; margin: 40px 0 25px 0; font-size: 22px; font-weight: 600; text-align: center;">📋 CHOOSE YOUR PERFECT PLAN</h3>
 
       <!-- Starter Plan -->
-      <div style="border: 2px solid #e5e7eb; border-radius: 12px; padding: 25px; margin-bottom: 20px; background: #fafafa;">
-        <div style="display: flex; align-items: center; margin-bottom: 15px;">
-          <span style="font-size: 24px; margin-right: 10px;">🔧</span>
-          <h4 style="margin: 0; color: #1f2937; font-size: 18px;">STARTER PLAN - $39/month</h4>
+      <div style="border: 3px solid #e5e7eb; border-radius: 16px; padding: 30px; margin-bottom: 25px; background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%); position: relative; transition: all 0.3s ease;">
+        <div style="position: absolute; top: -12px; left: 20px; background: #6b7280; color: white; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase;">Starter</div>
+        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+          <div style="background: #6b7280; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+            <span style="font-size: 24px;">🔧</span>
+          </div>
+          <div>
+            <h4 style="margin: 0; color: #1f2937; font-size: 20px; font-weight: 600;">STARTER PLAN</h4>
+            <p style="margin: 5px 0 0 0; color: #dc2626; font-size: 24px; font-weight: bold;">$39<span style="font-size: 14px; color: #6b7280;">/month</span></p>
+          </div>
         </div>
-        <p style="color: #6b7280; font-style: italic; margin: 0 0 15px 0;">Perfect for light upkeep & peace of mind</p>
-        <ul style="color: #4b5563; line-height: 1.6; margin: 0; padding-left: 20px;">
-          <li>Quarterly visits (up to 30 minutes each)</li>
-          <li>Minor repairs, lightbulb changes, safety checks</li>
-          <li><strong>FREE annual home inspection</strong></li>
-          <li>Priority scheduling when you need us</li>
+        <p style="color: #6b7280; font-style: italic; margin: 0 0 20px 0; font-size: 15px;">Perfect for light upkeep & peace of mind</p>
+        <ul style="color: #4b5563; line-height: 1.8; margin: 0; padding-left: 25px; font-size: 15px;">
+          <li style="margin-bottom: 8px;"><strong>Quarterly visits</strong> (up to 30 minutes each)</li>
+          <li style="margin-bottom: 8px;">Minor repairs, lightbulb changes, safety checks</li>
+          <li style="margin-bottom: 8px;"><strong style="color: #16a34a;">FREE annual home inspection</strong> ($200 value)</li>
+          <li style="margin-bottom: 8px;">Priority scheduling when you need us</li>
+          <li style="margin-bottom: 8px;"><strong>24/7 emergency support</strong></li>
         </ul>
       </div>
 
       <!-- Homecare Plan -->
-      <div style="border: 2px solid #2563eb; border-radius: 12px; padding: 25px; margin-bottom: 20px; background: #f0f9ff; position: relative;">
-        <div style="position: absolute; top: -10px; right: 20px; background: #2563eb; color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold;">MOST POPULAR</div>
-        <div style="display: flex; align-items: center; margin-bottom: 15px;">
-          <span style="font-size: 24px; margin-right: 10px;">🏠</span>
-          <h4 style="margin: 0; color: #1f2937; font-size: 18px;">HOMECARE PLAN - $59/month</h4>
+      <div style="border: 3px solid #2563eb; border-radius: 16px; padding: 30px; margin-bottom: 25px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); position: relative; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);">
+        <div style="position: absolute; top: -12px; right: 20px; background: #2563eb; color: white; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase;">Most Popular</div>
+        <div style="position: absolute; top: -12px; left: 20px; background: #f59e0b; color: white; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase;">Best Value</div>
+        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+          <div style="background: #2563eb; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+            <span style="font-size: 24px;">🏠</span>
+          </div>
+          <div>
+            <h4 style="margin: 0; color: #1f2937; font-size: 20px; font-weight: 600;">HOMECARE PLAN</h4>
+            <p style="margin: 5px 0 0 0; color: #dc2626; font-size: 24px; font-weight: bold;">$59<span style="font-size: 14px; color: #6b7280;">/month</span></p>
+          </div>
         </div>
-        <p style="color: #6b7280; font-style: italic; margin: 0 0 15px 0;">Monthly help for ongoing maintenance</p>
-        <ul style="color: #4b5563; line-height: 1.6; margin: 0; padding-left: 20px;">
-          <li>Monthly visits (up to 1 hour each)</li>
-          <li>Everything in Starter PLUS gutter cleaning, seasonal maintenance, small drywall repairs</li>
-          <li><strong>10% off larger projects</strong></li>
-          <li>Emergency visits at standard rates</li>
+        <p style="color: #6b7280; font-style: italic; margin: 0 0 20px 0; font-size: 15px;">Monthly help for ongoing maintenance</p>
+        <ul style="color: #4b5563; line-height: 1.8; margin: 0; padding-left: 25px; font-size: 15px;">
+          <li style="margin-bottom: 8px;"><strong>Monthly visits</strong> (up to 1 hour each)</li>
+          <li style="margin-bottom: 8px;">Everything in Starter PLUS gutter cleaning, seasonal maintenance</li>
+          <li style="margin-bottom: 8px;">Small drywall repairs, caulking, weather stripping</li>
+          <li style="margin-bottom: 8px;"><strong style="color: #16a34a;">10% off larger projects</strong></li>
+          <li style="margin-bottom: 8px;">Emergency visits at standard rates</li>
+          <li style="margin-bottom: 8px;"><strong style="color: #16a34a;">FREE annual deep cleaning service</strong></li>
         </ul>
       </div>
 
       <!-- Priority Plan -->
-      <div style="border: 2px solid #f59e0b; border-radius: 12px; padding: 25px; margin-bottom: 30px; background: #fffbeb;">
-        <div style="display: flex; align-items: center; margin-bottom: 15px;">
-          <span style="font-size: 24px; margin-right: 10px;">⭐</span>
-          <h4 style="margin: 0; color: #1f2937; font-size: 18px;">PRIORITY PLAN - $150/month</h4>
+      <div style="border: 3px solid #f59e0b; border-radius: 16px; padding: 30px; margin-bottom: 35px; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); position: relative;">
+        <div style="position: absolute; top: -12px; left: 20px; background: #f59e0b; color: white; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase;">Premium</div>
+        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+          <div style="background: #f59e0b; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+            <span style="font-size: 24px;">⭐</span>
+          </div>
+          <div>
+            <h4 style="margin: 0; color: #1f2937; font-size: 20px; font-weight: 600;">PRIORITY PLAN</h4>
+            <p style="margin: 5px 0 0 0; color: #dc2626; font-size: 24px; font-weight: bold;">$150<span style="font-size: 14px; color: #6b7280;">/month</span></p>
+          </div>
         </div>
-        <p style="color: #6b7280; font-style: italic; margin: 0 0 15px 0;">For homeowners who want their home proactively managed</p>
-        <ul style="color: #4b5563; line-height: 1.6; margin: 0; padding-left: 20px;">
-          <li>2 visits monthly (up to 2 hours total)</li>
-          <li>Everything above PLUS same-week emergency callouts, smart home setup, TV mounting</li>
-          <li><strong>FREE consumables included</strong> (caulk, screws, anchors)</li>
-          <li><strong>10% off renovations</strong></li>
+        <p style="color: #6b7280; font-style: italic; margin: 0 0 20px 0; font-size: 15px;">For homeowners who want their home proactively managed</p>
+        <ul style="color: #4b5563; line-height: 1.8; margin: 0; padding-left: 25px; font-size: 15px;">
+          <li style="margin-bottom: 8px;"><strong>2 visits monthly</strong> (up to 2 hours total)</li>
+          <li style="margin-bottom: 8px;">Everything above PLUS same-week emergency callouts</li>
+          <li style="margin-bottom: 8px;">Smart home setup, TV mounting, furniture assembly</li>
+          <li style="margin-bottom: 8px;"><strong style="color: #16a34a;">FREE consumables included</strong> (caulk, screws, anchors)</li>
+          <li style="margin-bottom: 8px;"><strong style="color: #16a34a;">15% off renovations and major projects</strong></li>
+          <li style="margin-bottom: 8px;"><strong>Dedicated account manager</strong></li>
         </ul>
       </div>
 
       <!-- Benefits Section -->
-      <h3 style="color: #1f2937; margin: 30px 0 20px 0; font-size: 20px;">Why Fixwell Members Love Us:</h3>
-      <div style="background: #f0fdf4; padding: 25px; border-radius: 12px; margin-bottom: 30px;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-          <div style="display: flex; align-items: center;">
-            <span style="color: #16a34a; font-size: 18px; margin-right: 10px;">✓</span>
-            <span style="color: #4b5563;">No More Contractor Hunting</span>
+      <h3 style="color: #1f2937; margin: 40px 0 25px 0; font-size: 22px; font-weight: 600; text-align: center;">💎 WHY FIXWELL MEMBERS LOVE US</h3>
+      <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 30px; border-radius: 16px; margin-bottom: 35px; border: 2px solid #16a34a;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <span style="color: #16a34a; font-size: 20px; margin-right: 12px;">✅</span>
+            <span style="color: #4b5563; font-weight: 500;">No More Contractor Hunting</span>
           </div>
-          <div style="display: flex; align-items: center;">
-            <span style="color: #16a34a; font-size: 18px; margin-right: 10px;">✓</span>
-            <span style="color: #4b5563;">Proactive Maintenance</span>
+          <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <span style="color: #16a34a; font-size: 20px; margin-right: 12px;">✅</span>
+            <span style="color: #4b5563; font-weight: 500;">Proactive Maintenance</span>
           </div>
-          <div style="display: flex; align-items: center;">
-            <span style="color: #16a34a; font-size: 18px; margin-right: 10px;">✓</span>
-            <span style="color: #4b5563;">Predictable Costs</span>
+          <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <span style="color: #16a34a; font-size: 20px; margin-right: 12px;">✅</span>
+            <span style="color: #4b5563; font-weight: 500;">Predictable Costs</span>
           </div>
-          <div style="display: flex; align-items: center;">
-            <span style="color: #16a34a; font-size: 18px; margin-right: 10px;">✓</span>
-            <span style="color: #4b5563;">Quality Guaranteed</span>
+          <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <span style="color: #16a34a; font-size: 20px; margin-right: 12px;">✅</span>
+            <span style="color: #4b5563; font-weight: 500;">Quality Guaranteed</span>
           </div>
-          <div style="display: flex; align-items: center;">
-            <span style="color: #16a34a; font-size: 18px; margin-right: 10px;">✓</span>
-            <span style="color: #4b5563;">Fully Insured</span>
+          <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <span style="color: #16a34a; font-size: 20px; margin-right: 12px;">✅</span>
+            <span style="color: #4b5563; font-weight: 500;">Fully Insured & Bonded</span>
+          </div>
+          <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <span style="color: #16a34a; font-size: 20px; margin-right: 12px;">✅</span>
+            <span style="color: #4b5563; font-weight: 500;">Same-Day Response</span>
           </div>
         </div>
       </div>
 
       <!-- Testimonials -->
-      <h3 style="color: #1f2937; margin: 30px 0 20px 0; font-size: 20px;">Real Results from Real Customers:</h3>
-      <div style="background: #f8fafc; padding: 25px; border-radius: 12px; margin-bottom: 30px;">
-        <div style="font-style: italic; color: #4b5563; line-height: 1.6; margin-bottom: 15px;">
-          "I used to dread my growing fix-it list. Now I just text Fixwell and it's handled. Best $59 I spend each month!"
+      <h3 style="color: #1f2937; margin: 40px 0 25px 0; font-size: 22px; font-weight: 600; text-align: center;">📊 REAL RESULTS FROM REAL CUSTOMERS</h3>
+      
+      <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 25px; border-radius: 16px; margin-bottom: 20px; border-left: 4px solid #2563eb;">
+        <div style="font-style: italic; color: #4b5563; line-height: 1.7; margin-bottom: 15px; font-size: 16px;">
+          "I used to dread my growing fix-it list. Now I just text Fixwell and it's handled. Best $59 I spend each month! They've saved me thousands in potential damage."
         </div>
-        <div style="color: #6b7280; font-weight: bold;">- Sarah M.</div>
+        <div style="color: #6b7280; font-weight: 600; font-size: 14px;">- Sarah M., Homeowner</div>
       </div>
-      <div style="background: #f8fafc; padding: 25px; border-radius: 12px; margin-bottom: 30px;">
-        <div style="font-style: italic; color: #4b5563; line-height: 1.6; margin-bottom: 15px;">
-          "They caught a small leak that could have cost me thousands. The subscription paid for itself in one visit."
+      
+      <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 25px; border-radius: 16px; margin-bottom: 20px; border-left: 4px solid #16a34a;">
+        <div style="font-style: italic; color: #4b5563; line-height: 1.7; margin-bottom: 15px; font-size: 16px;">
+          "They caught a small leak that could have cost me thousands. The subscription paid for itself in one visit. My home has never been better maintained."
         </div>
-        <div style="color: #6b7280; font-weight: bold;">- Mike T.</div>
+        <div style="color: #6b7280; font-weight: 600; font-size: 14px;">- Mike T., Property Owner</div>
+      </div>
+      
+      <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 25px; border-radius: 16px; margin-bottom: 35px; border-left: 4px solid #f59e0b;">
+        <div style="font-style: italic; color: #4b5563; line-height: 1.7; margin-bottom: 15px; font-size: 16px;">
+          "Finally, a service that actually shows up when they say they will. Fixwell has transformed how I think about home maintenance."
+        </div>
+        <div style="color: #6b7280; font-weight: 600; font-size: 14px;">- Jennifer L., Busy Professional</div>
       </div>
 
       <!-- CTA Section -->
-      <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); padding: 30px; border-radius: 12px; text-align: center; margin: 30px 0;">
-        <h3 style="color: white; margin: 0 0 15px 0; font-size: 22px;">Limited Time: First Month Only $19!</h3>
-        <p style="color: #fecaca; margin: 0 0 25px 0; font-size: 16px;">Ready to never stress about home repairs again?</p>
-        <a href="#" style="background: white; color: #dc2626; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px;">CHOOSE YOUR PLAN</a>
+      <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); padding: 40px 30px; border-radius: 20px; text-align: center; margin: 40px 0; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="0.8" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="0.6" fill="rgba(255,255,255,0.1)"/></svg>'); opacity: 0.3;"></div>
+        <div style="position: relative; z-index: 1;">
+          <h3 style="color: white; margin: 0 0 15px 0; font-size: 24px; font-weight: bold;">🔥 LIMITED TIME OFFER: FIRST MONTH ONLY $19! 🔥</h3>
+          <p style="color: #fecaca; margin: 0 0 30px 0; font-size: 18px; font-weight: 500;">Ready to never stress about home repairs again?</p>
+          <a href="#" style="background: white; color: #dc2626; padding: 18px 35px; text-decoration: none; border-radius: 12px; font-weight: bold; display: inline-block; font-size: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: all 0.3s ease;">🚀 CHOOSE YOUR PLAN NOW</a>
+        </div>
       </div>
 
       <!-- Contact Info -->
-      <div style="background: #f8fafc; padding: 25px; border-radius: 12px; margin-bottom: 30px;">
-        <h4 style="color: #1f2937; margin: 0 0 15px 0; font-size: 16px;">Questions? Contact us:</h4>
-        <div style="color: #4b5563; line-height: 1.8;">
-          <div><strong>Call us:</strong> [Phone Number]</div>
-          <div><strong>Learn more:</strong> <a href="#" style="color: #2563eb;">[Website URL]</a></div>
-          <div><strong>Email us:</strong> <a href="mailto:support@fixwell.com" style="color: #2563eb;">support@fixwell.com</a></div>
+      <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 30px; border-radius: 16px; margin-bottom: 30px; border: 2px solid #e5e7eb;">
+        <h4 style="color: #1f2937; margin: 0 0 20px 0; font-size: 18px; font-weight: 600; text-align: center;">📞 Questions? Contact us:</h4>
+        <div style="color: #4b5563; line-height: 2; text-align: center; font-size: 16px;">
+          <div style="margin-bottom: 10px;"><strong>📞 Call us:</strong> <a href="tel:5551234567" style="color: #2563eb; text-decoration: none;">(555) 123-4567</a></div>
+          <div style="margin-bottom: 10px;"><strong>🌐 Learn more:</strong> <a href="https://www.fixwell.com" style="color: #2563eb; text-decoration: none;">www.fixwell.com</a></div>
+          <div style="margin-bottom: 10px;"><strong>📧 Email us:</strong> <a href="mailto:hello@fixwell.com" style="color: #2563eb; text-decoration: none;">hello@fixwell.com</a></div>
         </div>
       </div>
 
       <!-- PS Section -->
-      <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
-        <p style="color: #92400e; margin: 0; font-size: 14px;">
-          <strong>P.S.</strong> Current subscribers get 10% off when they refer friends. Know someone who needs Fixwell? Send them our way!
+      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 25px; border-radius: 16px; margin-bottom: 30px; border: 2px solid #f59e0b;">
+        <h4 style="color: #92400e; margin: 0 0 15px 0; font-size: 16px; font-weight: 600;">💡 P.S. - Special Offer for Referrals!</h4>
+        <p style="color: #78350f; margin: 0 0 15px 0; font-size: 15px; line-height: 1.6;">
+          Current subscribers get <strong>10% off their next month</strong> when they refer friends. Know someone who needs Fixwell? Send them our way!
         </p>
-      </div>
-
-      <!-- Footer Note -->
-      <div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
-        <p style="color: #64748b; margin: 0; font-size: 14px; font-style: italic;">
+        <p style="color: #78350f; margin: 0; font-size: 15px; line-height: 1.6;">
           Already have a handyman? No problem! Our subscription works alongside major projects - we handle the small stuff so your contractor can focus on the big jobs.
         </p>
       </div>
 
-      <p style="color: #4b5563; margin: 30px 0 0 0;">
-        Best regards,<br>
-        <strong>The Fixwell Team</strong>
-      </p>
-    </div>
-
-    <!-- Footer -->
-    <div style="background: #1f2937; padding: 20px; text-align: center;">
-      <div style="color: #9ca3af; font-size: 12px; margin-bottom: 15px;">
-        <a href="#" style="color: #9ca3af; text-decoration: none; margin: 0 10px;">Unsubscribe</a> |
-        <a href="#" style="color: #9ca3af; text-decoration: none; margin: 0 10px;">Update Preferences</a> |
-        <a href="#" style="color: #9ca3af; text-decoration: none; margin: 0 10px;">Refer a Friend</a>
-      </div>
-      <div style="color: #6b7280; font-size: 12px;">
-        © 2024 Fixwell Inc. All rights reserved.
+      <!-- Footer -->
+      <div style="background: #1f2937; padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
+        <div style="color: white; margin-bottom: 20px;">
+          <h3 style="margin: 0 0 10px 0; font-size: 20px; font-weight: 600;">The Fixwell Team</h3>
+          <p style="margin: 0; font-size: 16px; font-style: italic; color: #d1d5db;">"Making homes better, one fix at a time"</p>
+        </div>
+        <div style="border-top: 1px solid #374151; padding-top: 20px;">
+          <p style="color: #9ca3af; margin: 0 0 10px 0; font-size: 14px;">
+            Fixwell Services • Professional Home Maintenance • Fully Insured & Bonded
+          </p>
+          <p style="color: #6b7280; margin: 0; font-size: 12px;">
+            © 2024 Fixwell Inc. All rights reserved. | <a href="#" style="color: #9ca3af; text-decoration: none;">Privacy Policy</a> | <a href="#" style="color: #9ca3af; text-decoration: none;">Terms of Service</a>
+          </p>
+        </div>
       </div>
     </div>
   </div>
