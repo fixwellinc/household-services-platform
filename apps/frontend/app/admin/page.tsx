@@ -140,7 +140,9 @@ export default function AdminPage() {
   const fetchSettings = async () => {
     setSettingsLoading(true);
     try {
-      const res = await fetch('/api/admin/settings');
+      const res = await fetch('/api/admin/settings', {
+        credentials: 'include'
+      });
       if (res.ok) {
         const data = await res.json();
         const map = Object.fromEntries((data.settings || []).map((s: { key: string; value: string }) => [s.key, s.value]));
@@ -165,7 +167,9 @@ export default function AdminPage() {
   const fetchAnalytics = async () => {
     setAnalyticsLoading(true);
     try {
-      const res = await fetch('/api/admin/analytics');
+      const res = await fetch('/api/admin/analytics', {
+        credentials: 'include'
+      });
       if (res.ok) {
         const data = await res.json();
         setAnalytics({
@@ -195,7 +199,9 @@ export default function AdminPage() {
   const fetchUsers = async () => {
     setUsersLoading(true);
     try {
-      const res = await fetch('/api/admin/users');
+      const res = await fetch('/api/admin/users', {
+        credentials: 'include'
+      });
       if (res.ok) {
         const data = await res.json();
         setUsers(data.users || []);
@@ -210,7 +216,9 @@ export default function AdminPage() {
 
   const fetchAvailableEmployees = async () => {
     try {
-      const res = await fetch('/api/admin/users?role=EMPLOYEE');
+      const res = await fetch('/api/admin/users?role=EMPLOYEE', {
+        credentials: 'include'
+      });
       if (res.ok) {
         const data = await res.json();
         setAvailableEmployees(data.users || []);
@@ -266,6 +274,7 @@ export default function AdminPage() {
       const res = await fetch('/api/admin/email-blast', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           subject: emailSubject,
           body: emailBody,
@@ -681,6 +690,7 @@ The Fixwell Team`);
       const res = await fetch('/api/admin/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ key, value })
       });
       if (res.ok) {
@@ -700,6 +710,7 @@ The Fixwell Team`);
       const res = await fetch(`/api/admin/users/${userId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ isActive })
       });
       if (res.ok) {
@@ -718,6 +729,7 @@ The Fixwell Team`);
       const res = await fetch(`/api/admin/users/${userId}/role`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ role })
       });
       if (res.ok) {
@@ -736,6 +748,7 @@ The Fixwell Team`);
       const res = await fetch(`/api/admin/users/${customerId}/assign-employee`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ employeeId })
       });
       if (res.ok) {

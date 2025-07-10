@@ -35,7 +35,9 @@ export default function AdminSettingsPage() {
 
   const fetchSettings = async () => {
     try {
-      const res = await fetch('/api/admin/settings');
+      const res = await fetch('/api/admin/settings', {
+        credentials: 'include'
+      });
       if (res.ok) {
         const data = await res.json();
         const settings = data.settings || {};
@@ -49,6 +51,8 @@ export default function AdminSettingsPage() {
           emailSecure: settings.emailSecure === 'true',
           emailReplyTo: settings.emailReplyTo || ''
         });
+      } else {
+        toast.error('Failed to load settings');
       }
     } catch (error) {
       toast.error('Failed to load settings');
@@ -67,6 +71,7 @@ export default function AdminSettingsPage() {
       const res = await fetch('/api/admin/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           settings: Object.entries(emailSettings).map(([key, value]) => ({
             key,
@@ -94,6 +99,7 @@ export default function AdminSettingsPage() {
       const res = await fetch('/api/admin/test-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ emailSettings })
       });
 
