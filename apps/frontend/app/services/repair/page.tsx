@@ -66,7 +66,7 @@ export default function RepairPage() {
             <div className="text-3xl mb-4">🏠</div>
             <h3 className="text-xl font-semibold mb-2">Appliance Repairs</h3>
             <p className="text-gray-600 mb-4">
-              Repair services for all major household appliances.
+              Repair services for all major fixwell appliances.
             </p>
             <ul className="text-sm text-gray-600 space-y-1">
               <li>• Refrigerator repairs</li>

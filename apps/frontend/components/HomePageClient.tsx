@@ -67,7 +67,7 @@ export default function HomePageClient() {
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
               <Sparkles className="h-4 w-4" />
-              Trusted by thousands of households
+              Trusted by thousands of fixwells
             </div>
             
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
@@ -77,7 +77,7 @@ export default function HomePageClient() {
             </h1>
             
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Connect with verified professionals for all your household needs. 
+              Connect with verified professionals for all your fixwell needs. 
               From cleaning to repairs, we&apos;ve got you covered.
             </p>
             
@@ -141,7 +141,7 @@ export default function HomePageClient() {
               Professional Services
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Choose from our wide range of household services, all professionally managed and delivered
+              Choose from our wide range of fixwell services, all professionally managed and delivered
             </p>
           </div>
 
@@ -237,7 +237,7 @@ export default function HomePageClient() {
               Why Choose Us?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              We make household services simple, reliable, and hassle-free
+              We make fixwell services simple, reliable, and hassle-free
             </p>
           </div>
 
@@ -300,7 +300,7 @@ export default function HomePageClient() {
             Ready to Get Started?
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of satisfied customers who trust us with their household needs
+            Join thousands of satisfied customers who trust us with their fixwell needs
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register">

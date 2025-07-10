@@ -1,8 +1,8 @@
 import PricingSection from '@/components/PricingSection';
 
 export const metadata = {
-  title: 'Pricing | Household Services',
-  description: 'Compare Basic, Premium, and VIP plans for household services. Transparent pricing and flexible options.',
+  title: 'Pricing | Fixwell Services',
+  description: 'Compare Basic, Premium, and VIP plans for fixwell services. Transparent pricing and flexible options.',
 };
 
 export default function PricingPage() {
@@ -15,7 +15,7 @@ export default function PricingPage() {
             Choose Your Perfect Plan
           </h1>
           <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-            From basic household services to luxury concierge care, we have a plan that fits your lifestyle and budget.
+            From basic fixwell services to luxury concierge care, we have a plan that fits your lifestyle and budget.
           </p>
         </div>
       </section>

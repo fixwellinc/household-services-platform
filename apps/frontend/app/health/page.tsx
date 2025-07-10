@@ -22,7 +22,7 @@ export default function HealthPage() {
         <div>
           <h2 className="text-lg font-semibold">Next Steps:</h2>
           <ol className="list-decimal list-inside space-y-1 mt-2">
-            <li>Check if environment variables are set in Vercel dashboard</li>
+                            <li>Check if environment variables are set in Railway dashboard</li>
             <li>Visit <a href="/test-api" className="text-blue-600 hover:underline">/test-api</a> to test API connection</li>
             <li>Visit <a href="/" className="text-blue-600 hover:underline">home page</a> to see the full application</li>
           </ol>

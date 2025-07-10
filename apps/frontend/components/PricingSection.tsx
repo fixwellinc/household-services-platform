@@ -23,13 +23,13 @@ const plans = [
     name: 'Basic',
     price: 9.99,
     period: 'month',
-    description: 'Perfect for individual households',
+            description: 'Perfect for individual fixwells',
     icon: Star,
     color: 'from-blue-500 to-blue-600',
     bgColor: 'bg-blue-50',
     borderColor: 'border-blue-200',
     features: [
-      'Access to basic household services',
+              'Access to basic fixwell services',
       'Standard booking system',
       'Email support',
       'Basic service categories',
@@ -73,7 +73,7 @@ const plans = [
     name: 'VIP',
     price: 39.99,
     period: 'month',
-    description: 'Ultimate convenience for luxury households',
+            description: 'Ultimate convenience for luxury fixwells',
     icon: Sparkles,
     color: 'from-amber-500 to-amber-600',
     bgColor: 'bg-amber-50',
@@ -105,7 +105,7 @@ const testimonials = [
   {
     name: 'Sarah Johnson',
     role: 'Premium Member',
-    content: 'The Premium plan has transformed how I manage my household. The priority booking and faster response times make all the difference for my busy schedule.',
+            content: 'The Premium plan has transformed how I manage my fixwell. The priority booking and faster response times make all the difference for my busy schedule.',
     rating: 5,
     avatar: 'SJ'
   },
@@ -147,7 +147,7 @@ export default function PricingSection() {
           </h2>
           
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-            Choose the perfect plan for your household needs. All plans include our core services with different levels of convenience and support.
+            Choose the perfect plan for your fixwell needs. All plans include our core services with different levels of convenience and support.
           </p>
 
           {/* Billing Toggle */}
@@ -378,7 +378,7 @@ export default function PricingSection() {
               Need a Custom Solution?
             </h3>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              We offer enterprise solutions for property management companies, hotels, and large households with custom requirements.
+              We offer enterprise solutions for property management companies, hotels, and large fixwells with custom requirements.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button variant="outline" size="lg" className="border-2 border-gray-300 hover:border-blue-500">

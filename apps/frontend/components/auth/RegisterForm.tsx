@@ -39,7 +39,7 @@ export default function RegisterForm() {
       // Always register as CUSTOMER since we removed provider option
       const registrationData = { ...data, role: 'CUSTOMER' as const };
       await registerMutation.mutateAsync(registrationData);
-      toast.success('Registration successful! Welcome to Household Services!');
+              toast.success('Registration successful! Welcome to Fixwell Services!');
       // Redirect to dashboard or home page
       window.location.href = '/';
     } catch (error) {

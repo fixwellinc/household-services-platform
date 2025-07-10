@@ -1,6 +1,6 @@
-# Household Services Platform
+# Fixwell Services Platform
 
-A unified full-stack application for household services, combining Next.js frontend and Express.js backend in a single deployment.
+A unified full-stack application for fixwell services, combining Next.js frontend and Express.js backend in a single deployment.
 
 ## 🚀 Unified Deployment
 
@@ -27,7 +27,7 @@ This project is now configured for **single deployment** on Railway, eliminating
 1. **Clone and install dependencies:**
    ```bash
    git clone <repository-url>
-   cd Household
+   cd Fixwell
    npm install
    ```
 
@@ -103,7 +103,7 @@ STRIPE_PUBLISHABLE_KEY=your-stripe-publishable-key
 ## 📁 Project Structure
 
 ```
-Household/
+Fixwell/
 ├── apps/
 │   ├── frontend/          # Next.js frontend
 │   │   ├── app/          # App router pages

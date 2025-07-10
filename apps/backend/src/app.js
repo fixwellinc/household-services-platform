@@ -47,14 +47,8 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    // Allow all Vercel domains
-    if (origin.includes('vercel.app')) {
-      return callback(null, true);
-    }
-    
-    // Allow the specific Vercel domains being used
-    if (origin === 'https://frontend-lovat-sigma-87.vercel.app' || 
-        origin === 'https://frontend-mq2e2lnbj-jms-projects-46d87d50.vercel.app') {
+    // Allow all Railway domains
+    if (origin.includes('railway.app')) {
       return callback(null, true);
     }
     
@@ -80,7 +74,7 @@ const corsOptions = {
 };
 
 console.log('🔧 CORS Configuration (Production Ready):', {
-  origin: 'Dynamic function (allows Vercel, localhost, Railway)',
+  origin: 'Dynamic function (allows Railway, localhost)',
   credentials: corsOptions.credentials,
   methods: corsOptions.methods
 });

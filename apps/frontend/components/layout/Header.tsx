@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/shared'
 import { useAuth } from '@/contexts/AuthContext'
 import { 
@@ -56,11 +57,17 @@ const Header: React.FC = () => {
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <Home className="h-6 w-6 text-white" />
+              <div className="w-10 h-10 flex items-center justify-center">
+                <Image 
+                  src="/fw.webp" 
+                  alt="Fixwell Logo" 
+                  width={40} 
+                  height={40}
+                  className="rounded-lg"
+                />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent ml-2">
-                Household
+                Fixwell
               </span>
             </div>
 
@@ -82,11 +89,17 @@ const Header: React.FC = () => {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2 group">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <Home className="h-6 w-6 text-white" />
+              <div className="w-10 h-10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <Image 
+                  src="/fw.webp" 
+                  alt="Fixwell Logo" 
+                  width={40} 
+                  height={40}
+                  className="rounded-lg"
+                />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
-                Household
+                Fixwell
               </span>
             </Link>
           </div>

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the Fixwell subscription services email marketing template that has been integrated into the Household Services platform.
+This document describes the Fixwell subscription services email marketing template that has been integrated into the Fixwell Services platform.
 
 ## Features
 

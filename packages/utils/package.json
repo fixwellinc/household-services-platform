@@ -1,7 +1,7 @@
 {
-  "name": "@household/utils",
+  "name": "@fixwell/utils",
   "version": "1.0.0",
-  "description": "Shared utilities for Household Services Platform",
+  "description": "Shared utilities for Fixwell Services Platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -14,14 +14,14 @@
     "@types/node": "^20.0.0"
   },
   "dependencies": {
-    "@household/types": "file:../types"
+    "@fixwell/types": "file:../types"
   },
   "files": [
     "dist"
   ],
   "keywords": [
     "utilities",
-    "household",
+    "fixwell",
     "services",
     "shared"
   ],

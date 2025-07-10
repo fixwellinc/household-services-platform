@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Shopping Services - Fixwell',
-  description: 'Professional shopping and errand services for busy households',
+  description: 'Professional shopping and errand services for busy fixwells',
 };
 
 export default function ShoppingPage() {

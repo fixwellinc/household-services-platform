@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://household-services-omega.vercel.app/sitemap.xml 
+Sitemap: https://fixwell-services-platform-production.up.railway.app/sitemap.xml 

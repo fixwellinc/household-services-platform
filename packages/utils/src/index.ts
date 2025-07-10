@@ -1,6 +1,6 @@
-// Shared utilities for Household Services Platform
+// Shared utilities for Fixwell Services Platform
 
-import { ServiceCategory, ServiceComplexity, BookingStatus } from '@household/types';
+import { ServiceCategory, ServiceComplexity, BookingStatus } from '@fixwell/types';
 
 // Validation utilities
 export const validateEmail = (email: string): boolean => {

@@ -61,11 +61,11 @@ class EmailService {
 
   // Welcome email for new users
   async sendWelcomeEmail(user) {
-    const subject = 'Welcome to Household Services!';
+    const subject = 'Welcome to Fixwell Services!';
     const text = `
       Hi ${user.name},
       
-      Welcome to Household Services! We're excited to have you on board.
+      Welcome to Fixwell Services! We're excited to have you on board.
       
       You can now:
       - Browse our services
@@ -75,14 +75,14 @@ class EmailService {
       If you have any questions, feel free to contact our support team.
       
       Best regards,
-      The Household Services Team
+      The Fixwell Services Team
     `;
 
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #2563eb;">Welcome to Household Services!</h2>
+        <h2 style="color: #2563eb;">Welcome to Fixwell Services!</h2>
         <p>Hi ${user.name},</p>
-        <p>Welcome to Household Services! We're excited to have you on board.</p>
+        <p>Welcome to Fixwell Services! We're excited to have you on board.</p>
         <h3>You can now:</h3>
         <ul>
           <li>Browse our services</li>
@@ -90,7 +90,7 @@ class EmailService {
           <li>Manage your profile</li>
         </ul>
         <p>If you have any questions, feel free to contact our support team.</p>
-        <p>Best regards,<br>The Household Services Team</p>
+        <p>Best regards,<br>The Fixwell Services Team</p>
       </div>
     `;
 
@@ -104,7 +104,7 @@ class EmailService {
 
   // Booking confirmation email
   async sendBookingConfirmation(booking, user, service) {
-    const subject = 'Booking Confirmation - Household Services';
+    const subject = 'Booking Confirmation - Fixwell Services';
     const text = `
       Hi ${user.name},
       
@@ -118,7 +118,7 @@ class EmailService {
       We'll send you a reminder before your appointment.
       
       Best regards,
-      The Household Services Team
+      The Fixwell Services Team
     `;
 
     const html = `
@@ -133,7 +133,7 @@ class EmailService {
           <p><strong>Amount:</strong> $${booking.finalAmount}</p>
         </div>
         <p>We'll send you a reminder before your appointment.</p>
-        <p>Best regards,<br>The Household Services Team</p>
+        <p>Best regards,<br>The Fixwell Services Team</p>
       </div>
     `;
 
@@ -160,7 +160,7 @@ class EmailService {
       Please ensure someone is available at the scheduled time.
       
       Best regards,
-      The Household Services Team
+      The Fixwell Services Team
     `;
 
     const html = `
@@ -174,7 +174,7 @@ class EmailService {
           <p><strong>Time:</strong> ${new Date(booking.scheduledDate).toLocaleTimeString()}</p>
         </div>
         <p>Please ensure someone is available at the scheduled time.</p>
-        <p>Best regards,<br>The Household Services Team</p>
+        <p>Best regards,<br>The Fixwell Services Team</p>
       </div>
     `;
 
@@ -204,7 +204,7 @@ class EmailService {
       If you didn't request this reset, please ignore this email.
       
       Best regards,
-      The Household Services Team
+      The Fixwell Services Team
     `;
 
     const html = `
@@ -220,7 +220,7 @@ class EmailService {
         </div>
         <p>This link will expire in 1 hour.</p>
         <p>If you didn't request this reset, please ignore this email.</p>
-        <p>Best regards,<br>The Household Services Team</p>
+        <p>Best regards,<br>The Fixwell Services Team</p>
       </div>
     `;
 
@@ -248,7 +248,7 @@ class EmailService {
       Please contact us if you have any questions or would like to proceed with the service.
       
       Best regards,
-      The Household Services Team
+      The Fixwell Services Team
     `;
 
     const html = `
@@ -261,7 +261,7 @@ class EmailService {
           ${price ? `<p><strong>Estimated Price:</strong> $${price}</p>` : ''}
         </div>
         <p>Please contact us if you have any questions or would like to proceed with the service.</p>
-        <p>Best regards,<br>The Household Services Team</p>
+        <p>Best regards,<br>The Fixwell Services Team</p>
       </div>
     `;
 

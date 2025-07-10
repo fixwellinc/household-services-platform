@@ -20,7 +20,7 @@ const testimonials = [
     role: 'Premium Member',
     avatar: 'SJ',
     rating: 5,
-    content: 'The Premium plan has transformed how I manage my household. The priority booking and faster response times make all the difference for my busy schedule. I can\'t imagine going back to managing everything manually!',
+            content: 'The Premium plan has transformed how I manage my fixwell. The priority booking and faster response times make all the difference for my busy schedule. I can\'t imagine going back to managing everything manually!',
     service: 'House Cleaning',
     date: '2 weeks ago'
   },
@@ -121,7 +121,7 @@ export default function TestimonialsSection() {
           </h2>
           
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Join thousands of satisfied customers who trust us with their household needs
+            Join thousands of satisfied customers who trust us with their fixwell needs
           </p>
         </div>
 

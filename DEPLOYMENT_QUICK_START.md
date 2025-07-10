@@ -1,6 +1,6 @@
 # 🚀 Unified Deployment Quick Start
 
-This guide will help you deploy the Household Services Platform as a **single unified application** on Railway.
+This guide will help you deploy the Fixwell Services Platform as a **single unified application** on Railway.
 
 ## ✅ What You'll Get
 
@@ -22,7 +22,7 @@ This guide will help you deploy the Household Services Platform as a **single un
 ```bash
 # Clone the repository
 git clone <your-repo-url>
-cd Household
+cd Fixwell
 
 # Install dependencies
 npm install
@@ -34,7 +34,7 @@ Create a `.env` file in the root directory:
 
 ```env
 # Database
-DATABASE_URL="mongodb+srv://username:password@cluster.mongodb.net/household?retryWrites=true&w=majority"
+DATABASE_URL="mongodb+srv://username:password@cluster.mongodb.net/fixwell?retryWrites=true&w=majority"
 
 # Authentication
 JWT_SECRET="your-super-secret-jwt-key-here"
@@ -165,7 +165,7 @@ npm run deploy:unified
 railway logs
 
 # Verify Dockerfile syntax
-docker build -t household .
+docker build -t fixwell .
 ```
 
 **Database Connection Issues**
@@ -203,7 +203,7 @@ railway variables
 
 ## 🎉 Success!
 
-Your unified Household Services Platform is now deployed with:
+Your unified Fixwell Services Platform is now deployed with:
 
 - ✅ Single Railway deployment
 - ✅ No CORS configuration needed

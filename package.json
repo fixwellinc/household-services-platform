@@ -1,7 +1,7 @@
 {
-  "name": "household-services-monorepo",
+  "name": "fixwell-services-monorepo",
   "version": "1.0.0",
-  "description": "Household Services Platform - Monorepo",
+  "description": "Fixwell Services Platform - Monorepo",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -25,7 +25,7 @@
     "lint": "npm run lint --workspaces",
     "clean": "npm run clean --workspaces && rm -rf node_modules",
     "deploy:railway": "railway up",
-    "deploy:vercel": "vercel --prod",
+
     "deploy:unified": "railway up",
     "setup": "npm install && npm run build:unified"
   },
@@ -44,10 +44,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/fixwellinc/household-services-platform.git"
+    "url": "https://github.com/fixwellinc/fixwell-services-platform.git"
   },
   "keywords": [
-    "household",
+    "fixwell",
     "services",
     "monorepo",
     "nextjs",

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Deployment Setup Script for Household Services Platform
+# Deployment Setup Script for Fixwell Services Platform
 # This script helps prepare your project for deployment
 
 set -e
@@ -108,5 +108,5 @@ print_status "Next steps:"
 print_status "1. Update environment variables in frontend/.env.local and backend/.env"
 print_status "2. Set up MongoDB Atlas database"
 print_status "3. Configure Stripe keys"
-print_status "4. Run deploy-vercel.sh to deploy frontend"
+print_status "4. Run deploy.sh to deploy unified application"
 print_status "5. Deploy backend to Railway/Render" 

@@ -4,15 +4,15 @@ services:
     image: postgres:15
     restart: always
     environment:
-      POSTGRES_USER: household
-      POSTGRES_PASSWORD: household
-      POSTGRES_DB: household_services
+          POSTGRES_USER: fixwell
+    POSTGRES_PASSWORD: fixwell
+    POSTGRES_DB: fixwell_services
     ports:
       - '5432:5432'
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U household -d household_services"]
+      test: ["CMD-SHELL", "pg_isready -U fixwell -d fixwell_services"]
       interval: 10s
       timeout: 5s
       retries: 5

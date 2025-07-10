@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🚀 Household Services Platform - Railway Deployment Script
+# 🚀 Fixwell Services Platform - Railway Deployment Script
 # This script automates the deployment process to Railway
 
 set -e  # Exit on any error
@@ -72,9 +72,9 @@ deploy_backend() {
     cd backend
     
     # Check if Railway service exists, create if not
-    if ! railway service list | grep -q "household-backend"; then
+    if ! railway service list | grep -q "fixwell-backend"; then
         print_status "Creating backend service..."
-        railway service create household-backend
+        railway service create fixwell-backend
     fi
     
     # Set environment variables
@@ -113,9 +113,9 @@ deploy_frontend() {
     cd frontend
     
     # Check if Railway service exists, create if not
-    if ! railway service list | grep -q "household-frontend"; then
+    if ! railway service list | grep -q "fixwell-frontend"; then
         print_status "Creating frontend service..."
-        railway service create household-frontend
+        railway service create fixwell-frontend
     fi
     
     # Set environment variables
@@ -213,7 +213,7 @@ show_summary() {
 
 # Main deployment function
 main() {
-    echo "🚀 Household Services Platform - Railway Deployment"
+    echo "🚀 Fixwell Services Platform - Railway Deployment"
     echo "=================================================="
     echo
     

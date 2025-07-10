@@ -25,7 +25,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-semibold text-gray-900 mb-3">2. Description of Service</h2>
               <p className="mb-3">
-                Fixwell provides household services including but not limited to:
+                Fixwell provides fixwell services including but not limited to:
               </p>
               <ul className="list-disc pl-6 space-y-1">
                 <li>Cleaning services</li>

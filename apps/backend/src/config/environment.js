@@ -44,12 +44,10 @@ export const config = {
   corsOrigins: process.env.CORS_ORIGINS 
     ? process.env.CORS_ORIGINS.split(',') 
     : ['http://localhost:3000', 'http://localhost:3001'],
-  // Additional production origins for Vercel deployments
+  // Additional production origins for Railway deployments
   productionOrigins: [
-    'https://household-services-zeta.vercel.app',
-    'https://household-services-zeta-git-main.vercel.app',
-    'https://household-services-zeta-git-develop.vercel.app',
-    'https://household-services-zeta-git-feature.vercel.app'
+    'https://fixwell-services-platform-production.up.railway.app',
+    'https://fixwell-services-platform-staging.up.railway.app'
   ],
   
   // Stripe
@@ -113,17 +111,17 @@ export const isTest = config.nodeEnv === 'test';
 
 // Security helpers
 export const getCorsOptions = () => {
-  // For production, allow all Vercel domains to prevent CORS issues
+  // For production, allow all Railway domains to prevent CORS issues
   let allowedOrigins;
   
   if (isProduction) {
-    // Allow all Vercel domains in production
+    // Allow all Railway domains in production
     allowedOrigins = (origin, callback) => {
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
       
-      // Allow all Vercel domains
-      if (origin.includes('vercel.app') || origin.includes('localhost')) {
+      // Allow all Railway domains
+      if (origin.includes('railway.app') || origin.includes('localhost')) {
         return callback(null, true);
       }
       

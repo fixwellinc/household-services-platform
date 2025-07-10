@@ -1,7 +1,7 @@
 {
-  "name": "@household/types",
+  "name": "@fixwell/types",
   "version": "1.0.0",
-  "description": "Shared TypeScript types for Household Services Platform",
+  "description": "Shared TypeScript types for Fixwell Services Platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -18,7 +18,7 @@
   "keywords": [
     "typescript",
     "types",
-    "household",
+    "fixwell",
     "services"
   ],
   "author": "FixWell Inc",

@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['localhost', 'household-services-platform-production.up.railway.app'],
+            domains: ['localhost', 'fixwell-services-platform-production.up.railway.app'],
   },
   async headers() {
     return [
@@ -15,7 +15,7 @@ const nextConfig = {
       },
     ];
   },
-  // Configure for Vercel deployment
+  // Configure for production deployment
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client'],
   },

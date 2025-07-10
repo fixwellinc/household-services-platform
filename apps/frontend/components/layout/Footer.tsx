@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { 
-  Home, 
   Wrench, 
   Info, 
   MessageCircle, 
@@ -23,13 +23,19 @@ const Footer: React.FC = () => {
           {/* Company Info */}
           <div className="space-y-6">
             <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                <Home className="h-6 w-6 text-white" />
+              <div className="w-10 h-10 flex items-center justify-center">
+                <Image 
+                  src="/fw.webp" 
+                  alt="Fixwell Logo" 
+                  width={40} 
+                  height={40}
+                  className="rounded-lg"
+                />
               </div>
-              <span className="text-xl font-bold">Household</span>
+              <span className="text-xl font-bold">Fixwell</span>
             </div>
             <p className="text-gray-300 leading-relaxed">
-              Connect with verified professionals for all your household needs. 
+                              Connect with verified professionals for all your fixwell needs. 
               From cleaning to repairs, we&apos;ve got you covered with quality service.
             </p>
             <div className="flex space-x-4">
@@ -131,7 +137,7 @@ const Footer: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center gap-3 text-gray-300">
                 <Mail className="h-4 w-4 text-blue-400" />
-                <span>hello@household.com</span>
+                <span>hello@fixwell.com</span>
               </div>
               <div className="flex items-center gap-3 text-gray-300">
                 <Phone className="h-4 w-4 text-blue-400" />
@@ -156,7 +162,7 @@ const Footer: React.FC = () => {
         <div className="mt-12 pt-8 border-t border-gray-700">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="flex items-center gap-2 text-gray-300">
-              <span>© 2024 Household Services. Made with</span>
+                              <span>© 2024 Fixwell Services. Made with</span>
               <Heart className="h-4 w-4 text-red-400" />
               <span>for your home.</span>
             </div>

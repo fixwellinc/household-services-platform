@@ -1,9 +1,9 @@
 {
-  "name": "@household/backend",
+  "name": "@fixwell/backend",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Backend for Household Services Platform (Express, Prisma)",
+  "description": "Backend for Fixwell Services Platform (Express, Prisma)",
   "scripts": {
     "dev": "nodemon src/app.js",
     "build": "npx prisma generate",
@@ -18,8 +18,8 @@
     "postinstall": "npx prisma generate"
   },
   "dependencies": {
-    "@household/types": "file:../../packages/types",
-    "@household/utils": "file:../../packages/utils",
+    "@fixwell/types": "file:../../packages/types",
+    "@fixwell/utils": "file:../../packages/utils",
     "@prisma/client": "^6.11.1",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",

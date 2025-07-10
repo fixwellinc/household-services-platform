@@ -67,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await registerMutation.mutateAsync(data);
       toast.success('Account created!', {
-        description: 'Welcome to Household Services.',
+        description: 'Welcome to Fixwell Services.',
       });
       refetch();
       

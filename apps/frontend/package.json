@@ -1,12 +1,12 @@
 {
-  "name": "household-frontend",
+  "name": "fixwell-frontend",
   "version": "0.1.0",
   "private": true,
-  "description": "Frontend for Household Services Subscription Platform (Next.js 14)",
+  "description": "Frontend for Fixwell Services Subscription Platform (Next.js 14)",
   "scripts": {
     "dev": "next dev",
     "build": "echo 'Setting up environment...' && prisma generate && next build",
-    "build:vercel": "prisma generate && SKIP_ENV_VALIDATION=true next build",
+
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "next lint",

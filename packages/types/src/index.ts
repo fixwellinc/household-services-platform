@@ -1,4 +1,4 @@
-// Shared types for Household Services Platform
+// Shared types for Fixwell Services Platform
 
 export interface User {
   id: string;
