@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Terms of Service - Household Services',
-  description: 'Terms and conditions for using Household Services in British Columbia',
+  description: 'Terms and conditions for using Household Services in the Lower Mainland',
 };
 
 export default function TermsPage() {
@@ -25,12 +25,12 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-semibold text-gray-900 mb-3">2. Service Area</h2>
               <p className="mb-3">
-                Our services are currently available only to residents of British Columbia, Canada. By using our services, you confirm that:
+                Our services are currently available only to residents of the Lower Mainland within 50km of Surrey, British Columbia, Canada. By using our services, you confirm that:
               </p>
               <ul className="list-disc pl-6 space-y-1">
-                <li>You are a resident of British Columbia</li>
+                <li>You are a resident of the Lower Mainland</li>
                 <li>You have provided a valid BC postal code</li>
-                <li>You understand that services are not available outside of BC</li>
+                <li>You understand that services are not available outside of the Lower Mainland</li>
                 <li>You agree to comply with all applicable BC laws and regulations</li>
               </ul>
             </section>
@@ -48,7 +48,7 @@ export default function TermsPage() {
                 <li>Subscription maintenance plans</li>
               </ul>
               <p className="mt-3 text-sm text-gray-600">
-                All services are provided in accordance with British Columbia regulations and standards.
+                All services are provided in accordance with British Columbia regulations and standards within the Lower Mainland service area.
               </p>
             </section>
 
@@ -60,7 +60,7 @@ export default function TermsPage() {
               <ul className="list-disc pl-6 space-y-1">
                 <li>Maintaining the confidentiality of your account information</li>
                 <li>All activities that occur under your account</li>
-                <li>Providing accurate and complete information, including your BC address</li>
+                <li>Providing accurate and complete information, including your Lower Mainland address</li>
                 <li>Notifying us immediately of any unauthorized use</li>
                 <li>Ensuring your location information remains current and accurate</li>
               </ul>
@@ -72,7 +72,7 @@ export default function TermsPage() {
                 When booking services through our platform:
               </p>
               <ul className="list-disc pl-6 space-y-1">
-                <li>All bookings are subject to availability in your BC service area</li>
+                <li>All bookings are subject to availability in your Lower Mainland service area</li>
                 <li>Cancellations must be made at least 24 hours in advance</li>
                 <li>Late cancellations may incur charges</li>
                 <li>We reserve the right to reschedule due to circumstances beyond our control</li>
@@ -104,7 +104,7 @@ export default function TermsPage() {
                 <li>We offer satisfaction guarantees for our services</li>
                 <li>Issues should be reported within 24 hours of service completion</li>
                 <li>We will work to resolve any concerns promptly</li>
-                <li>All services comply with BC health and safety regulations</li>
+                <li>All services comply with BC health and safety regulations within the Lower Mainland</li>
               </ul>
             </section>
 
@@ -117,7 +117,7 @@ export default function TermsPage() {
                 <li>Transmit harmful or malicious content</li>
                 <li>Attempt to gain unauthorized access to our systems</li>
                 <li>Interfere with the proper functioning of our services</li>
-                <li>Book services for locations outside of British Columbia</li>
+                <li>Book services for locations outside of the Lower Mainland service area</li>
               </ul>
             </section>
 
@@ -181,7 +181,7 @@ export default function TermsPage() {
                 <p>Phone: (555) 123-4567</p>
                 <p>Address: 123 Service Street, Vancouver, BC V6B 2Z9</p>
                 <p className="text-sm text-gray-600 mt-2">
-                  Serving British Columbia residents only
+                  Serving Lower Mainland residents only (within 50km of Surrey)
                 </p>
               </div>
             </section>

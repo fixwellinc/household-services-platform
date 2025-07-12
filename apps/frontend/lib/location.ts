@@ -3,24 +3,32 @@
 // BC postal codes start with V (Vancouver Island) and T (Mainland)
 const BC_POSTAL_CODE_PREFIXES = ['V', 'T'];
 
-// Major BC cities and their postal code ranges
+// Service area: Within 50km of Surrey, excluding islands
+// Focus on Lower Mainland cities around Surrey
 export const BC_CITIES = {
-  'Vancouver': { prefix: 'V', ranges: ['V1A', 'V1B', 'V1C', 'V1E', 'V1G', 'V1H', 'V1J', 'V1K', 'V1L', 'V1M', 'V1N', 'V1P', 'V1R', 'V1S', 'V1T', 'V1V', 'V1W', 'V1X', 'V1Y', 'V1Z', 'V2A', 'V2B', 'V2C', 'V2E', 'V2G', 'V2H', 'V2J', 'V2K', 'V2L', 'V2M', 'V2N', 'V2P', 'V2R', 'V2S', 'V2T', 'V2V', 'V2W', 'V2X', 'V2Y', 'V2Z', 'V3A', 'V3B', 'V3C', 'V3E', 'V3G', 'V3H', 'V3J', 'V3K', 'V3L', 'V3M', 'V3N', 'V3P', 'V3R', 'V3S', 'V3T', 'V3V', 'V3W', 'V3X', 'V3Y', 'V3Z', 'V4A', 'V4B', 'V4C', 'V4E', 'V4G', 'V4H', 'V4J', 'V4K', 'V4L', 'V4M', 'V4N', 'V4P', 'V4R', 'V4S', 'V4T', 'V4V', 'V4W', 'V4X', 'V4Y', 'V4Z', 'V5A', 'V5B', 'V5C', 'V5E', 'V5G', 'V5H', 'V5J', 'V5K', 'V5L', 'V5M', 'V5N', 'V5P', 'V5R', 'V5S', 'V5T', 'V5V', 'V5W', 'V5X', 'V5Y', 'V5Z', 'V6A', 'V6B', 'V6C', 'V6E', 'V6G', 'V6H', 'V6J', 'V6K', 'V6L', 'V6M', 'V6N', 'V6P', 'V6R', 'V6S', 'V6T', 'V6V', 'V6W', 'V6X', 'V6Y', 'V6Z', 'V7A', 'V7B', 'V7C', 'V7E', 'V7G', 'V7H', 'V7J', 'V7K', 'V7L', 'V7M', 'V7N', 'V7P', 'V7R', 'V7S', 'V7T', 'V7V', 'V7W', 'V7X', 'V7Y', 'V7Z'] },
-  'Victoria': { prefix: 'V', ranges: ['V8A', 'V8B', 'V8C', 'V8E', 'V8G', 'V8H', 'V8J', 'V8K', 'V8L', 'V8M', 'V8N', 'V8P', 'V8R', 'V8S', 'V8T', 'V8V', 'V8W', 'V8X', 'V8Y', 'V8Z', 'V9A', 'V9B', 'V9C', 'V9E', 'V9G', 'V9H', 'V9J', 'V9K', 'V9L', 'V9M', 'V9N', 'V9P', 'V9R', 'V9S', 'V9T', 'V9V', 'V9W', 'V9X', 'V9Y', 'V9Z'] },
   'Surrey': { prefix: 'V', ranges: ['V3S', 'V3T', 'V3V', 'V3W', 'V3X', 'V3Y', 'V3Z', 'V4A', 'V4B', 'V4C'] },
+  'Vancouver': { prefix: 'V', ranges: ['V5A', 'V5B', 'V5C', 'V5E', 'V5G', 'V5H', 'V5J', 'V5K', 'V5L', 'V5M', 'V5N', 'V5P', 'V5R', 'V5S', 'V5T', 'V5V', 'V5W', 'V5X', 'V5Y', 'V5Z', 'V6A', 'V6B', 'V6C', 'V6E', 'V6G', 'V6H', 'V6J', 'V6K', 'V6L', 'V6M', 'V6N', 'V6P', 'V6R', 'V6S', 'V6T', 'V6V', 'V6W', 'V6X', 'V6Y', 'V6Z', 'V7A', 'V7B', 'V7C', 'V7E', 'V7G', 'V7H', 'V7J', 'V7K', 'V7L', 'V7M', 'V7N', 'V7P', 'V7R', 'V7S', 'V7T', 'V7V', 'V7W', 'V7X', 'V7Y', 'V7Z'] },
   'Burnaby': { prefix: 'V', ranges: ['V3J', 'V3K', 'V3L', 'V3M', 'V3N', 'V3P', 'V3R', 'V3S', 'V3T', 'V3V', 'V3W', 'V3X', 'V3Y', 'V3Z', 'V5A', 'V5B', 'V5C', 'V5E', 'V5G', 'V5H', 'V5J', 'V5K', 'V5L', 'V5M', 'V5N', 'V5P', 'V5R', 'V5S', 'V5T', 'V5V', 'V5W', 'V5X', 'V5Y', 'V5Z'] },
   'Richmond': { prefix: 'V', ranges: ['V6V', 'V6W', 'V6X', 'V6Y', 'V6Z', 'V7A', 'V7B', 'V7C', 'V7E', 'V7G', 'V7H', 'V7J', 'V7K', 'V7L', 'V7M', 'V7N', 'V7P', 'V7R', 'V7S', 'V7T', 'V7V', 'V7W', 'V7X', 'V7Y', 'V7Z'] },
-  'Kelowna': { prefix: 'V', ranges: ['V1P', 'V1R', 'V1S', 'V1T', 'V1V', 'V1W', 'V1X', 'V1Y', 'V1Z'] },
-  'Nanaimo': { prefix: 'V', ranges: ['V9R', 'V9S', 'V9T', 'V9V', 'V9W', 'V9X', 'V9Y', 'V9Z'] },
-  'Kamloops': { prefix: 'V', ranges: ['V1S', 'V1T', 'V1V', 'V1W', 'V1X', 'V1Y', 'V1Z', 'V2B', 'V2C', 'V2E', 'V2G', 'V2H'] },
+  'Coquitlam': { prefix: 'V', ranges: ['V3C', 'V3E', 'V3G', 'V3H', 'V3J', 'V3K', 'V3L', 'V3M', 'V3N', 'V3P', 'V3R', 'V3S', 'V3T', 'V3V', 'V3W', 'V3X', 'V3Y', 'V3Z'] },
+  'New Westminster': { prefix: 'V', ranges: ['V3L', 'V3M', 'V3N', 'V3P', 'V3R', 'V3S', 'V3T', 'V3V', 'V3W', 'V3X', 'V3Y', 'V3Z'] },
+  'Delta': { prefix: 'V', ranges: ['V4K', 'V4L', 'V4M', 'V4N', 'V4P', 'V4R', 'V4S', 'V4T', 'V4V', 'V4W', 'V4X', 'V4Y', 'V4Z'] },
+  'Langley': { prefix: 'V', ranges: ['V1M', 'V1N', 'V1P', 'V1R', 'V1S', 'V1T', 'V1V', 'V1W', 'V1X', 'V1Y', 'V1Z', 'V2Y', 'V2Z'] },
+  'Maple Ridge': { prefix: 'V', ranges: ['V2W', 'V2X', 'V2Y', 'V2Z'] },
+  'Pitt Meadows': { prefix: 'V', ranges: ['V3Y', 'V3Z'] },
+  'Port Coquitlam': { prefix: 'V', ranges: ['V3C', 'V3E', 'V3G', 'V3H', 'V3J', 'V3K', 'V3L', 'V3M', 'V3N', 'V3P', 'V3R', 'V3S', 'V3T', 'V3V', 'V3W', 'V3X', 'V3Y', 'V3Z'] },
+  'Port Moody': { prefix: 'V', ranges: ['V3H', 'V3J', 'V3K', 'V3L', 'V3M', 'V3N', 'V3P', 'V3R', 'V3S', 'V3T', 'V3V', 'V3W', 'V3X', 'V3Y', 'V3Z'] },
+  'White Rock': { prefix: 'V', ranges: ['V4A', 'V4B', 'V4C'] },
+  'North Vancouver': { prefix: 'V', ranges: ['V7G', 'V7H', 'V7J', 'V7K', 'V7L', 'V7M', 'V7N', 'V7P', 'V7R', 'V7S', 'V7T', 'V7V', 'V7W', 'V7X', 'V7Y', 'V7Z'] },
+  'West Vancouver': { prefix: 'V', ranges: ['V7S', 'V7T', 'V7V', 'V7W', 'V7X', 'V7Y', 'V7Z'] },
   'Abbotsford': { prefix: 'V', ranges: ['V2S', 'V2T', 'V2V', 'V2W', 'V2X', 'V2Y', 'V2Z'] },
-  'Coquitlam': { prefix: 'V', ranges: ['V3C', 'V3E', 'V3G', 'V3H', 'V3J', 'V3K', 'V3L', 'V3M', 'V3N', 'V3P', 'V3R', 'V3S', 'V3T', 'V3V', 'V3W', 'V3X', 'V3Y', 'V3Z'] }
+  'Mission': { prefix: 'V', ranges: ['V2V', 'V2W', 'V2X', 'V2Y', 'V2Z'] }
 };
 
 /**
- * Validates if a postal code is in British Columbia
+ * Validates if a postal code is in the service area (within 50km of Surrey)
  * @param postalCode - The postal code to validate (e.g., "V6B 2Z9")
- * @returns boolean - True if the postal code is in BC
+ * @returns boolean - True if the postal code is in the service area
  */
 export function isBCPostalCode(postalCode: string): boolean {
   if (!postalCode) return false;
@@ -36,11 +44,23 @@ export function isBCPostalCode(postalCode: string): boolean {
   
   // Basic format validation (A1A 1A1 format)
   const postalCodeRegex = /^[VT]\d[A-Z]\d[A-Z]\d$/;
-  return postalCodeRegex.test(cleanPostalCode);
+  if (!postalCodeRegex.test(cleanPostalCode)) {
+    return false;
+  }
+  
+  // Check if it's in our service area (within 50km of Surrey)
+  const prefix = cleanPostalCode.substring(0, 3);
+  for (const cityData of Object.values(BC_CITIES)) {
+    if (cityData.ranges.includes(prefix)) {
+      return true;
+    }
+  }
+  
+  return false;
 }
 
 /**
- * Gets the city name for a BC postal code
+ * Gets the city name for a postal code in the service area
  * @param postalCode - The postal code to check
  * @returns string | null - The city name or null if not found
  */
@@ -60,8 +80,8 @@ export function getBCCityFromPostalCode(postalCode: string): string | null {
 }
 
 /**
- * Gets all available BC cities
- * @returns string[] - Array of BC city names
+ * Gets all available cities in the service area
+ * @returns string[] - Array of city names
  */
 export function getAvailableBCCities(): string[] {
   return Object.keys(BC_CITIES);

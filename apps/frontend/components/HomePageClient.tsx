@@ -61,7 +61,7 @@ export default function HomePageClient() {
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
               <Sparkles className="h-4 w-4" />
-              {isInBC && userCity ? `Trusted by ${userCity} homeowners` : 'Trusted by BC homeowners'}
+              {isInBC && userCity ? `Trusted by ${userCity} homeowners` : 'Trusted by Lower Mainland homeowners'}
             </div>
             
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
@@ -72,7 +72,7 @@ export default function HomePageClient() {
             
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
               Connect with verified professionals for all your household needs. 
-              {isInBC && userCity ? ` Serving ${userCity} and surrounding areas.` : ' Currently serving British Columbia residents.'}
+              {isInBC && userCity ? ` Serving ${userCity} and surrounding areas.` : ' Currently serving Lower Mainland residents (within 50km of Surrey).'}
             </p>
             
             {user ? (
@@ -116,7 +116,7 @@ export default function HomePageClient() {
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-purple-600 mb-2">10k+</div>
-                <div className="text-gray-600">BC Customers</div>
+                <div className="text-gray-600">Lower Mainland Customers</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-green-600 mb-2">24/7</div>
@@ -135,7 +135,7 @@ export default function HomePageClient() {
               Professional Services
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Choose from our wide range of household services, all professionally managed and delivered across British Columbia
+              Choose from our wide range of household services, all professionally managed and delivered across the Lower Mainland
             </p>
           </div>
 
@@ -231,7 +231,7 @@ export default function HomePageClient() {
               Why Choose Us?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              We make household services simple, reliable, and hassle-free for BC residents
+              We make household services simple, reliable, and hassle-free for Lower Mainland residents
             </p>
           </div>
 
@@ -245,7 +245,7 @@ export default function HomePageClient() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 leading-relaxed">
-                  All our services are professionally managed, thoroughly vetted, and insured for your complete peace of mind across British Columbia.
+                  All our services are professionally managed, thoroughly vetted, and insured for your complete peace of mind across the Lower Mainland.
                 </p>
               </CardContent>
             </Card>
@@ -288,7 +288,7 @@ export default function HomePageClient() {
             Ready to Get Started?
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of satisfied BC customers who trust us with their household needs
+            Join thousands of satisfied Lower Mainland customers who trust us with their household needs
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register">

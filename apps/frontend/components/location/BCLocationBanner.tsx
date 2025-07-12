@@ -57,10 +57,10 @@ export default function BCLocationBanner() {
                 <AlertCircle className="h-5 w-5 text-yellow-600" />
                 <div>
                   <span className="text-sm font-medium text-yellow-800">
-                    Currently serving British Columbia residents only
+                    Currently serving Lower Mainland residents only
                   </span>
                   <span className="text-xs text-yellow-600 ml-2">
-                    Your postal code ({userLocation}) is outside our service area
+                    Your postal code ({userLocation}) is outside our service area (within 50km of Surrey)
                   </span>
                 </div>
               </div>
@@ -82,10 +82,10 @@ export default function BCLocationBanner() {
                 <MapPin className="h-5 w-5 text-blue-600" />
                 <div>
                   <span className="text-sm font-medium text-blue-800">
-                    Currently serving British Columbia residents
+                    Currently serving Lower Mainland residents
                   </span>
                   <span className="text-xs text-blue-600 ml-2">
-                    Enter your postal code to check availability
+                    Enter your postal code to check availability (within 50km of Surrey)
                   </span>
                 </div>
               </div>
@@ -138,7 +138,7 @@ export default function BCLocationBanner() {
                   maxLength={7}
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  We currently serve British Columbia residents only
+                  We currently serve Lower Mainland residents only (within 50km of Surrey)
                 </p>
               </div>
               
@@ -190,7 +190,7 @@ export default function BCLocationBanner() {
               {postalCodeInput && !isBCPostalCode(postalCodeInput) && postalCodeInput.length >= 6 && (
                 <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
                   <AlertCircle className="h-4 w-4 inline mr-1" />
-                  This postal code is not in British Columbia. We currently serve BC residents only.
+                  This postal code is not in our service area. We currently serve Lower Mainland residents only (within 50km of Surrey).
                 </div>
               )}
             </div>
