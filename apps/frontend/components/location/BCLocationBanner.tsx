@@ -7,10 +7,16 @@ import { MapPin, X, CheckCircle, AlertCircle } from 'lucide-react';
 import { validateAndFormatPostalCode, isBCPostalCode } from '@/lib/location';
 
 export default function BCLocationBanner() {
-  const { userLocation, userCity, isInBC, setUserLocation, isLoading } = useLocation();
+  const { userLocation, userCity, isInBC, setUserLocation, clearUserLocation, isLoading } = useLocation();
   const [showLocationInput, setShowLocationInput] = useState(false);
   const [postalCodeInput, setPostalCodeInput] = useState('');
   const [isValidating, setIsValidating] = useState(false);
+
+  // When opening the modal, pre-fill with current location
+  const handleOpenLocationModal = () => {
+    setPostalCodeInput(userLocation || '');
+    setShowLocationInput(true);
+  };
 
   // Don't show banner while loading
   if (isLoading) return null;
@@ -33,7 +39,7 @@ export default function BCLocationBanner() {
               </div>
             </div>
             <button
-              onClick={() => setShowLocationInput(true)}
+              onClick={handleOpenLocationModal}
               className="text-sm text-green-600 hover:text-green-800 underline"
             >
               Change location
@@ -62,7 +68,7 @@ export default function BCLocationBanner() {
               </div>
             </div>
             <button
-              onClick={() => setShowLocationInput(true)}
+              onClick={handleOpenLocationModal}
               className="text-sm text-yellow-600 hover:text-yellow-800 underline"
             >
               Update location
@@ -90,7 +96,7 @@ export default function BCLocationBanner() {
             </div>
           </div>
           <Button
-            onClick={() => setShowLocationInput(true)}
+            onClick={handleOpenLocationModal}
             size="sm"
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
@@ -110,7 +116,7 @@ export default function BCLocationBanner() {
               <button
                 onClick={() => {
                   setShowLocationInput(false);
-                  setPostalCodeInput('');
+                  setPostalCodeInput(userLocation || '');
                 }}
                 className="text-gray-400 hover:text-gray-600"
               >
@@ -139,7 +145,6 @@ export default function BCLocationBanner() {
                   We currently serve British Columbia residents only
                 </p>
               </div>
-              
               <div className="flex space-x-3">
                 <Button
                   onClick={() => {
@@ -159,7 +164,7 @@ export default function BCLocationBanner() {
                 <Button
                   onClick={() => {
                     setShowLocationInput(false);
-                    setPostalCodeInput('');
+                    setPostalCodeInput(userLocation || '');
                   }}
                   variant="outline"
                   className="flex-1"
@@ -167,7 +172,22 @@ export default function BCLocationBanner() {
                   Cancel
                 </Button>
               </div>
-              
+              {/* Clear Location Button */}
+              {userLocation && (
+                <div className="flex justify-end mt-2">
+                  <Button
+                    onClick={() => {
+                      clearUserLocation();
+                      setShowLocationInput(false);
+                      setPostalCodeInput('');
+                    }}
+                    variant="ghost"
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    Clear Location
+                  </Button>
+                </div>
+              )}
               {postalCodeInput && !isBCPostalCode(postalCodeInput) && postalCodeInput.length >= 6 && (
                 <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
                   <AlertCircle className="h-4 w-4 inline mr-1" />
