@@ -3,6 +3,8 @@ import { JetBrains_Mono } from 'next/font/google'
 import Providers from '@/components/Providers'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import ChatWidget from '@/components/chat/ChatWidget'
+import BCLocationBanner from '@/components/location/BCLocationBanner'
 import { Toaster } from 'sonner'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import React from 'react'
@@ -16,6 +18,12 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata = {
       title: 'Household Services | Professional Home Services',
   description: 'Book cleaning, repairs, and more with trusted, verified professionals. Choose from Basic, Premium, or VIP plans.',
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+  },
   openGraph: {
     title: 'Household Services',
     description: 'Book cleaning, repairs, and more with trusted, verified professionals.',
@@ -43,6 +51,9 @@ export const metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({
@@ -53,6 +64,24 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            // Suppress DOMNodeInserted deprecation warnings
+            const originalWarn = console.warn;
+            console.warn = function(...args) {
+              if (args[0] && typeof args[0] === 'string' && args[0].includes('DOMNodeInserted')) {
+                return;
+              }
+              originalWarn.apply(console, args);
+            };
+          `
+        }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -75,11 +104,13 @@ export default function RootLayout({
           <Providers>
             <div className="flex min-h-screen flex-col">
               <Header />
+              <BCLocationBanner />
               <main className="flex-1">
                 {children}
               </main>
               <Footer />
             </div>
+            <ChatWidget />
             <Toaster position="top-right" richColors />
           </Providers>
         </ErrorBoundary>

@@ -125,3 +125,15 @@ model Setting {
 // ServiceCategory: "CLEANING", "MAINTENANCE", "REPAIR", "ORGANIZATION", "SHOPPING", "OTHER"
 // ServiceComplexity: "SIMPLE", "MODERATE", "COMPLEX"
 // BookingStatus: "PENDING", "CONFIRMED", "IN_PROGRESS", "COMPLETED", "CANCELLED" 
+
+model EmailTemplate {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  subject   String
+  body      String?
+  html      String?
+  isHtmlMode Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+} 

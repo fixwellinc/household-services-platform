@@ -17,7 +17,9 @@ import {
   Mail,
   DollarSign,
   Activity,
-  Send
+  Send,
+  Smartphone,
+  Bell
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import dynamic from 'next/dynamic';
@@ -99,6 +101,16 @@ export default function AdminPage() {
   const [userSearch, setUserSearch] = useState('');
   const [userFilter, setUserFilter] = useState<'all' | 'customers' | 'employees' | 'admins'>('all');
   const [availableEmployees, setAvailableEmployees] = useState<any[]>([]);
+
+  // Mobile notifications state
+  const [notificationSettings, setNotificationSettings] = useState({
+    smsEnabled: false,
+    ownerPhone: '',
+    managerPhones: '',
+    notificationTypes: ['new_chat', 'urgent_chat'],
+    testPhone: ''
+  });
+  const [testingNotifications, setTestingNotifications] = useState(false);
 
   const { data: userData, isLoading: userLoading } = useCurrentUser();
 
@@ -671,8 +683,10 @@ The Fixwell Team
   const navigation: NavigationItem[] = [
     { name: 'Dashboard', icon: Home, id: 'dashboard' },
     { name: 'Users', icon: Users, id: 'users' },
+    { name: 'Live Chat', icon: MessageSquare, id: 'live-chat' },
     { name: 'Quotes', icon: MessageSquare, id: 'quotes' },
     { name: 'Email Blast', icon: Mail, id: 'email-blast' },
+    { name: 'Mobile Notifications', icon: Smartphone, id: 'mobile-notifications' },
     { name: 'Analytics', icon: BarChart3, id: 'analytics' },
     { name: 'Email Settings', icon: Settings, id: 'external-settings', external: true },
   ];
@@ -1299,16 +1313,316 @@ The Fixwell Team
     </div>
   );
 
+  const renderMobileNotifications = () => (
+    <div className="space-y-6">
+      {/* SMS Configuration */}
+      <div className="bg-white rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h3 className="text-lg font-medium text-gray-900 flex items-center">
+            <Smartphone className="h-5 w-5 mr-2" />
+            SMS Notifications
+          </h3>
+        </div>
+        <div className="p-6 space-y-4">
+          {/* Enable/Disable SMS */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-medium text-gray-900">Enable SMS Notifications</h4>
+              <p className="text-sm text-gray-500">Send chat notifications to owner and managers via SMS</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={notificationSettings.smsEnabled}
+                onChange={(e) => setNotificationSettings({
+                  ...notificationSettings,
+                  smsEnabled: e.target.checked
+                })}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+
+          {/* Owner Phone Number */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Owner Phone Number
+            </label>
+            <input
+              type="tel"
+              value={notificationSettings.ownerPhone}
+              onChange={(e) => setNotificationSettings({
+                ...notificationSettings,
+                ownerPhone: e.target.value
+              })}
+              placeholder="+1234567890"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <p className="text-xs text-gray-500 mt-1">Include country code (e.g., +1 for US)</p>
+          </div>
+
+          {/* Manager Phone Numbers */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Manager Phone Numbers
+            </label>
+            <textarea
+              value={notificationSettings.managerPhones}
+              onChange={(e) => setNotificationSettings({
+                ...notificationSettings,
+                managerPhones: e.target.value
+              })}
+              placeholder="+1234567890, +1987654321"
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <p className="text-xs text-gray-500 mt-1">Separate multiple numbers with commas</p>
+          </div>
+
+          {/* Notification Types */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Notification Types
+            </label>
+            <div className="space-y-2">
+              {['new_chat', 'urgent_chat', 'offline_hours', 'unassigned_chat'].map((type) => (
+                <label key={type} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={notificationSettings.notificationTypes.includes(type)}
+                    onChange={(e) => {
+                      const updatedTypes = e.target.checked
+                        ? [...notificationSettings.notificationTypes, type]
+                        : notificationSettings.notificationTypes.filter(t => t !== type);
+                      setNotificationSettings({
+                        ...notificationSettings,
+                        notificationTypes: updatedTypes
+                      });
+                    }}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 capitalize">
+                    {type.replace('_', ' ')}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Save Settings */}
+          <div className="flex justify-end">
+            <Button
+              onClick={async () => {
+                try {
+                  const token = localStorage.getItem('auth_token');
+                  if (!token) {
+                    toast.error('Not authenticated. Please log in again.');
+                    return;
+                  }
+
+                  const res = await fetch('/api/admin/notifications/settings', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${token}`
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(notificationSettings)
+                  });
+                  
+                  if (res.ok) {
+                    toast.success('Notification settings saved');
+                  } else {
+                    const errorData = await res.json().catch(() => ({}));
+                    console.error('Settings save error:', errorData);
+                    toast.error(errorData.error || 'Failed to save settings');
+                  }
+                } catch (error) {
+                  console.error('Settings save error:', error);
+                  toast.error('Error saving settings');
+                }
+              }}
+            >
+              Save Settings
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Test Notifications */}
+      <div className="bg-white rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h3 className="text-lg font-medium text-gray-900 flex items-center">
+            <Bell className="h-5 w-5 mr-2" />
+            Test Notifications
+          </h3>
+        </div>
+        <div className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Test Phone Number
+            </label>
+            <input
+              type="tel"
+              value={notificationSettings.testPhone}
+              onChange={(e) => setNotificationSettings({
+                ...notificationSettings,
+                testPhone: e.target.value
+              })}
+              placeholder="+1234567890"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="flex space-x-2">
+            <Button
+              onClick={async () => {
+                if (!notificationSettings.testPhone) {
+                  toast.error('Please enter a test phone number');
+                  return;
+                }
+                setTestingNotifications(true);
+                try {
+                  // Get the current token from localStorage
+                  const token = localStorage.getItem('auth_token');
+                  if (!token) {
+                    toast.error('Not authenticated. Please log in again.');
+                    return;
+                  }
+
+                  console.log('Sending test notification with token:', token ? `${token.substring(0, 20)}...` : 'null');
+                  console.log('Token length:', token?.length);
+                  console.log('Token format check:', token?.split('.').length === 3 ? 'Valid JWT format' : 'Invalid JWT format');
+                  
+                  // Decode the JWT payload (without verification) to see what's in it
+                  try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    console.log('Token payload:', payload);
+                    console.log('Token expiration:', new Date(payload.exp * 1000));
+                    console.log('Token is expired:', Date.now() > payload.exp * 1000);
+                  } catch (e) {
+                    console.log('Could not decode token payload:', e);
+                  }
+
+                  const res = await fetch('/api/admin/notifications/test', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${token}`
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                      phoneNumber: notificationSettings.testPhone,
+                      type: 'new_chat'
+                    })
+                  });
+                  
+                  console.log('Response status:', res.status);
+                  console.log('Response headers:', Object.fromEntries(res.headers.entries()));
+                  
+                  if (res.ok) {
+                    const data = await res.json();
+                    console.log('Success response:', data);
+                    toast.success('Test notification sent!');
+                  } else {
+                    const errorData = await res.json().catch(() => ({}));
+                    console.error('Test notification error:', errorData);
+                    toast.error(errorData.error || 'Failed to send test notification');
+                  }
+                } catch (error) {
+                  console.error('Test notification error:', error);
+                  toast.error('Error sending test notification');
+                } finally {
+                  setTestingNotifications(false);
+                }
+              }}
+              disabled={testingNotifications}
+            >
+              {testingNotifications ? 'Sending...' : 'Send Test SMS'}
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={async () => {
+                setTestingNotifications(true);
+                try {
+                  // Get the current token from localStorage
+                  const token = localStorage.getItem('auth_token');
+                  if (!token) {
+                    toast.error('Not authenticated. Please log in again.');
+                    return;
+                  }
+
+                  const res = await fetch('/api/admin/notifications/test-urgent', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${token}`
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                      phoneNumber: notificationSettings.testPhone
+                    })
+                  });
+                  
+                  if (res.ok) {
+                    toast.success('Urgent test notification sent!');
+                  } else {
+                    const errorData = await res.json().catch(() => ({}));
+                    console.error('Urgent test notification error:', errorData);
+                    toast.error(errorData.error || 'Failed to send urgent test notification');
+                  }
+                } catch (error) {
+                  console.error('Urgent test notification error:', error);
+                  toast.error('Error sending urgent test notification');
+                } finally {
+                  setTestingNotifications(false);
+                }
+              }}
+              disabled={testingNotifications}
+            >
+              {testingNotifications ? 'Sending...' : 'Test Urgent Alert'}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Notification Log */}
+      <div className="bg-white rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h3 className="text-lg font-medium text-gray-900">Recent Notifications</h3>
+        </div>
+        <div className="p-6">
+          <div className="text-center text-gray-500">
+            <Bell className="h-12 w-12 mx-auto mb-2" />
+            <p>Notification log will appear here</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return renderDashboard();
       case 'users':
         return renderUsers();
+      case 'live-chat':
+        return (
+          <div className="text-center py-8">
+            <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Live Chat Management</h3>
+            <p className="text-gray-600">Chat management interface coming soon...</p>
+          </div>
+        );
       case 'quotes':
         return renderQuotes();
       case 'email-blast':
         return renderEmailBlast();
+      case 'mobile-notifications':
+        return renderMobileNotifications();
       case 'analytics':
         return renderAnalytics();
       case 'settings':

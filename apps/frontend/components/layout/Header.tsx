@@ -12,7 +12,6 @@ import {
   X, 
   Home, 
   Wrench, 
-
   Info, 
   MessageCircle,
   ChevronDown,
@@ -36,12 +35,44 @@ const Header: React.FC = () => {
   };
 
   const toggleMobileMenu = () => {
+    console.log('Mobile menu toggle clicked, current state:', isMobileMenuOpen);
     setIsMobileMenuOpen(!isMobileMenuOpen);
+    // Close user menu when mobile menu opens
+    if (isUserMenuOpen) {
+      setIsUserMenuOpen(false);
+    }
   };
 
   const toggleUserMenu = () => {
     setIsUserMenuOpen(!isUserMenuOpen);
+    // Close mobile menu when user menu opens
+    if (isMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
+    }
   };
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.mobile-menu-container') && !target.closest('.mobile-menu-button')) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      // Prevent body scroll when mobile menu is open
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileMenuOpen]);
 
   // Show loading skeleton during hydration to prevent mismatch
   if (!isHydrated) {
@@ -218,10 +249,11 @@ const Header: React.FC = () => {
               </div>
             )}
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button - Improved touch target */}
             <button
               onClick={toggleMobileMenu}
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+              className="mobile-menu-button md:hidden p-3 rounded-lg hover:bg-gray-100 transition-colors duration-200 touch-manipulation"
+              aria-label="Toggle mobile menu"
             >
               {isMobileMenuOpen ? (
                 <X className="h-6 w-6 text-gray-700" />
@@ -232,53 +264,56 @@ const Header: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - Improved positioning and z-index */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
+          <div className="mobile-menu-container md:hidden border-t border-gray-200 py-4 bg-white relative z-50 shadow-lg">
+            <div className="px-4 mb-2">
+              <span className="text-sm text-gray-500 font-medium">Navigation Menu</span>
+            </div>
             <nav className="flex flex-col space-y-4">
               <Link 
                 href="/services" 
-                className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+                className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <Wrench className="h-4 w-4" />
+                <Wrench className="h-5 w-5" />
                 Services
               </Link>
               <Link 
                 href="/pricing" 
-                className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+                className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <DollarSign className="h-4 w-4" />
+                <DollarSign className="h-5 w-5" />
                 Pricing
               </Link>
 
               <Link 
                 href="/about" 
-                className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+                className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <Info className="h-4 w-4" />
+                <Info className="h-5 w-5" />
                 About
               </Link>
               <Link 
                 href="/contact" 
-                className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+                className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <MessageCircle className="h-4 w-4" />
+                <MessageCircle className="h-5 w-5" />
                 Contact
               </Link>
               
               {!user && (
-                <div className="pt-4 border-t border-gray-200">
+                <div className="pt-4 border-t border-gray-200 space-y-3">
                   <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                    <Button variant="ghost" className="w-full justify-start text-gray-700 hover:text-blue-600 hover:bg-blue-50 py-3">
                       Sign In
                     </Button>
                   </Link>
                   <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button className="w-full justify-start bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
+                    <Button className="w-full justify-start bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3">
                       Get Started
                     </Button>
                   </Link>
@@ -289,7 +324,7 @@ const Header: React.FC = () => {
         )}
       </div>
 
-      {/* Backdrop for mobile menu */}
+      {/* Backdrop for mobile menu - Improved z-index */}
       {isMobileMenuOpen && (
         <div 
           className="fixed inset-0 bg-black/20 z-40 md:hidden"

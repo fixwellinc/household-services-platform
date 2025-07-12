@@ -23,6 +23,8 @@ import bookingRoutes from './routes/bookings.js';
 import paymentRoutes from './routes/payments.js';
 import quotesRoutes from './routes/quotes.js';
 import docsRoutes from './routes/docs.js';
+import notificationRoutes from './routes/notifications.js';
+import chatRoutes from './routes/chat.js';
 // import webhookRoutes from './routes/webhooks.js';
 
 // Import middleware
@@ -149,6 +151,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/quotes', quotesRoutes);
 app.use('/api/docs', docsRoutes);
+app.use('/api/chat', chatRoutes);
 // app.use('/api/webhooks', webhookRoutes);
 
 function requireAdminLocal(req, res, next) {
@@ -160,6 +163,22 @@ function requireAdminLocal(req, res, next) {
 
 // Apply authentication middleware to all admin routes
 app.use('/api/admin', authMiddleware);
+
+// Mount admin routes AFTER auth middleware
+app.use('/api/admin/notifications', notificationRoutes);
+
+// Test endpoint to verify authentication
+app.get('/api/admin/test-auth', requireAdmin, (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'Authentication working',
+    user: {
+      id: req.user.id,
+      email: req.user.email,
+      role: req.user.role
+    }
+  });
+});
 
 // Admin: Get all services
 app.get('/api/admin/services', requireAdmin, async (req, res) => {

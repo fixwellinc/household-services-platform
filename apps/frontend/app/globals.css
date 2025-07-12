@@ -77,6 +77,32 @@
     font-family: inherit;
   }
 
+  /* Mobile-specific improvements */
+  @media (max-width: 768px) {
+    /* Ensure proper touch targets */
+    button, a {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    /* Improve mobile menu visibility */
+    .mobile-menu-container {
+      position: relative;
+      z-index: 60;
+      background: white;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Better touch targets for mobile menu items */
+    .mobile-menu-container a,
+    .mobile-menu-container button {
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+    }
+  }
+
   /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
