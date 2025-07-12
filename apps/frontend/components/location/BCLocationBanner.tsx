@@ -21,91 +21,87 @@ export default function BCLocationBanner() {
   // Don't show banner while loading
   if (isLoading) return null;
 
-  // If user is in BC and has a location, show success banner
-  if (isInBC && userLocation && userCity) {
-    return (
-      <div className="bg-green-50 border-b border-green-200">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <div>
-                <span className="text-sm font-medium text-green-800">
-                  Service available in {userCity}, BC
-                </span>
-                <span className="text-xs text-green-600 ml-2">
-                  ({userLocation})
-                </span>
-              </div>
-            </div>
-            <button
-              onClick={handleOpenLocationModal}
-              className="text-sm text-green-600 hover:text-green-800 underline"
-            >
-              Change location
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // If user is not in BC, show warning banner
-  if (userLocation && !isInBC) {
-    return (
-      <div className="bg-yellow-50 border-b border-yellow-200">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <AlertCircle className="h-5 w-5 text-yellow-600" />
-              <div>
-                <span className="text-sm font-medium text-yellow-800">
-                  Currently serving British Columbia residents only
-                </span>
-                <span className="text-xs text-yellow-600 ml-2">
-                  Your postal code ({userLocation}) is outside our service area
-                </span>
-              </div>
-            </div>
-            <button
-              onClick={handleOpenLocationModal}
-              className="text-sm text-yellow-600 hover:text-yellow-800 underline"
-            >
-              Update location
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Default banner for users without location
   return (
-    <div className="bg-blue-50 border-b border-blue-200">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <MapPin className="h-5 w-5 text-blue-600" />
-            <div>
-              <span className="text-sm font-medium text-blue-800">
-                Currently serving British Columbia residents
-              </span>
-              <span className="text-xs text-blue-600 ml-2">
-                Enter your postal code to check availability
-              </span>
+    <>
+      {/* If user is in BC and has a location, show success banner */}
+      {isInBC && userLocation && userCity ? (
+        <div className="bg-green-50 border-b border-green-200">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <div>
+                  <span className="text-sm font-medium text-green-800">
+                    Service available in {userCity}, BC
+                  </span>
+                  <span className="text-xs text-green-600 ml-2">
+                    ({userLocation})
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={handleOpenLocationModal}
+                className="text-sm text-green-600 hover:text-green-800 underline"
+              >
+                Change location
+              </button>
             </div>
           </div>
-          <Button
-            onClick={handleOpenLocationModal}
-            size="sm"
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            Check Availability
-          </Button>
         </div>
-      </div>
+      ) : userLocation && !isInBC ? (
+        /* If user is not in BC, show warning banner */
+        <div className="bg-yellow-50 border-b border-yellow-200">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <AlertCircle className="h-5 w-5 text-yellow-600" />
+                <div>
+                  <span className="text-sm font-medium text-yellow-800">
+                    Currently serving British Columbia residents only
+                  </span>
+                  <span className="text-xs text-yellow-600 ml-2">
+                    Your postal code ({userLocation}) is outside our service area
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={handleOpenLocationModal}
+                className="text-sm text-yellow-600 hover:text-yellow-800 underline"
+              >
+                Update location
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Default banner for users without location */
+        <div className="bg-blue-50 border-b border-blue-200">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <MapPin className="h-5 w-5 text-blue-600" />
+                <div>
+                  <span className="text-sm font-medium text-blue-800">
+                    Currently serving British Columbia residents
+                  </span>
+                  <span className="text-xs text-blue-600 ml-2">
+                    Enter your postal code to check availability
+                  </span>
+                </div>
+              </div>
+              <Button
+                onClick={handleOpenLocationModal}
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Check Availability
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* Location Input Modal */}
+      {/* Location Input Modal - Always rendered */}
       {showLocationInput && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
@@ -145,6 +141,7 @@ export default function BCLocationBanner() {
                   We currently serve British Columbia residents only
                 </p>
               </div>
+              
               <div className="flex space-x-3">
                 <Button
                   onClick={() => {
@@ -172,6 +169,7 @@ export default function BCLocationBanner() {
                   Cancel
                 </Button>
               </div>
+              
               {/* Clear Location Button */}
               {userLocation && (
                 <div className="flex justify-end mt-2">
@@ -188,6 +186,7 @@ export default function BCLocationBanner() {
                   </Button>
                 </div>
               )}
+              
               {postalCodeInput && !isBCPostalCode(postalCodeInput) && postalCodeInput.length >= 6 && (
                 <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
                   <AlertCircle className="h-4 w-4 inline mr-1" />
@@ -198,6 +197,6 @@ export default function BCLocationBanner() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 } 
