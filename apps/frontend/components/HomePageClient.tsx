@@ -66,12 +66,12 @@ export default function HomePageClient() {
             </div>
             
             <div className="flex justify-center mb-8">
-              <div className="w-24 h-24 bg-white rounded-2xl shadow-lg flex items-center justify-center p-4">
+              <div className="w-40 h-40 bg-white rounded-2xl shadow-lg flex items-center justify-center p-4">
                 <Image 
                   src="/fixwell.png" 
                   alt="Fixwell Logo" 
-                  width={80} 
-                  height={80}
+                  width={160} 
+                  height={160}
                   className="rounded-lg"
                   priority
                 />
