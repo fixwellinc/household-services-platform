@@ -2,12 +2,14 @@
 
 import React, { useState } from 'react';
 import { useLocation } from '@/contexts/LocationContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/shared';
 import { MapPin, X, CheckCircle, AlertCircle } from 'lucide-react';
 import { validateAndFormatPostalCode, isBCPostalCode } from '@/lib/location';
 
 export default function BCLocationBanner() {
   const { userLocation, userCity, isInBC, setUserLocation, clearUserLocation, isLoading } = useLocation();
+  const { user } = useAuth();
   const [showLocationInput, setShowLocationInput] = useState(false);
   const [postalCodeInput, setPostalCodeInput] = useState('');
   const [isValidating, setIsValidating] = useState(false);
@@ -20,6 +22,9 @@ export default function BCLocationBanner() {
 
   // Don't show banner while loading
   if (isLoading) return null;
+
+  // Don't show banner for admin users
+  if (user?.role === 'ADMIN') return null;
 
   return (
     <>
