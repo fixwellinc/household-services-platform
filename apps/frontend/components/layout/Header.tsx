@@ -82,7 +82,7 @@ const Header: React.FC = () => {
           <div className="flex h-20 items-center justify-between">
             {/* Logo */}
             <div className="flex items-center">
-              <div className="w-16 h-16 animate-pulse bg-gray-200 rounded-lg shadow-md mr-3"></div>
+              <div className="w-12 h-12 animate-pulse bg-gray-200 rounded-lg shadow-md mr-3"></div>
               <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
                 Fixwell
               </span>
@@ -106,12 +106,12 @@ const Header: React.FC = () => {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-3 group">
-              <div className="w-16 h-16 flex items-center justify-center bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-110">
+              <div className="w-12 h-12 flex items-center justify-center bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-110">
                 <Image 
-                  src="/fixwell.png" 
+                  src="/fixwelltop.png" 
                   alt="Fixwell Logo" 
-                  width={64} 
-                  height={64}
+                  width={48} 
+                  height={48}
                   className="rounded-lg"
                   priority
                 />
