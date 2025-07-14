@@ -77,21 +77,22 @@ const Header: React.FC = () => {
   // Show loading skeleton during hydration to prevent mismatch
   if (!isHydrated) {
     return (
-      <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur-md shadow-sm">
+      <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/98 backdrop-blur-md shadow-lg">
         <div className="container mx-auto px-4">
-          <div className="flex h-16 items-center justify-between">
+          <div className="flex h-20 items-center justify-between">
             {/* Logo */}
             <div className="flex items-center">
-              <div className="w-10 h-10 flex items-center justify-center">
+              <div className="w-12 h-12 flex items-center justify-center">
                 <Image 
-                  src="/fw.webp" 
+                  src="/fixwell.png" 
                   alt="Fixwell Logo" 
-                  width={40} 
-                  height={40}
-                  className="rounded-lg"
+                  width={48} 
+                  height={48}
+                  className="rounded-lg shadow-sm"
+                  priority
                 />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent ml-2">
+              <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent ml-3">
                 Fixwell
               </span>
             </div>
@@ -108,19 +109,20 @@ const Header: React.FC = () => {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur-md shadow-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/98 backdrop-blur-md shadow-lg">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-20 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2 group">
-              <div className="w-10 h-10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+            <Link href="/" className="flex items-center space-x-3 group">
+              <div className="w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <Image 
-                  src="/fw.webp" 
+                  src="/fixwell.png" 
                   alt="Fixwell Logo" 
-                  width={40} 
-                  height={40}
-                  className="rounded-lg"
+                  width={48} 
+                  height={48}
+                  className="rounded-lg shadow-sm"
+                  priority
                 />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
@@ -133,14 +135,14 @@ const Header: React.FC = () => {
           <nav className="hidden md:flex items-center space-x-8">
             <Link 
               href="/services" 
-              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50"
             >
               <Wrench className="h-4 w-4" />
               Services
             </Link>
             <Link 
               href="/pricing" 
-              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50"
             >
               <DollarSign className="h-4 w-4" />
               Pricing
@@ -148,14 +150,14 @@ const Header: React.FC = () => {
 
             <Link 
               href="/about" 
-              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50"
             >
               <Info className="h-4 w-4" />
               About
             </Link>
             <Link 
               href="/contact" 
-              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50"
             >
               <MessageCircle className="h-4 w-4" />
               Contact
@@ -170,9 +172,9 @@ const Header: React.FC = () => {
               <div className="relative">
                 <button
                   onClick={toggleUserMenu}
-                  className="flex items-center space-x-3 bg-gray-50 hover:bg-gray-100 px-4 py-2 rounded-full transition-colors duration-200"
+                  className="flex items-center space-x-3 bg-gradient-to-r from-gray-50 to-blue-50 hover:from-blue-50 hover:to-purple-50 px-4 py-2 rounded-full transition-all duration-200 shadow-sm hover:shadow-md"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-sm">
                     <User className="h-4 w-4 text-white" />
                   </div>
                   <div className="hidden sm:block text-left">
@@ -237,12 +239,12 @@ const Header: React.FC = () => {
             ) : (
               <div className="hidden sm:flex items-center space-x-3">
                 <Link href="/login">
-                  <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                  <Button variant="ghost" className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-6 py-2 font-medium">
                     Sign In
                   </Button>
                 </Link>
                 <Link href="/register">
-                  <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+                  <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2 font-medium transform hover:scale-105">
                     Get Started
                   </Button>
                 </Link>

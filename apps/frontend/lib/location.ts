@@ -20,9 +20,7 @@ export const BC_CITIES = {
   'Port Moody': { prefix: 'V', ranges: ['V3H', 'V3J', 'V3K', 'V3L', 'V3M', 'V3N', 'V3P', 'V3R', 'V3S', 'V3T', 'V3V', 'V3W', 'V3X', 'V3Y', 'V3Z'] },
   'White Rock': { prefix: 'V', ranges: ['V4A', 'V4B', 'V4C'] },
   'North Vancouver': { prefix: 'V', ranges: ['V7G', 'V7H', 'V7J', 'V7K', 'V7L', 'V7M', 'V7N', 'V7P', 'V7R', 'V7S', 'V7T', 'V7V', 'V7W', 'V7X', 'V7Y', 'V7Z'] },
-  'West Vancouver': { prefix: 'V', ranges: ['V7S', 'V7T', 'V7V', 'V7W', 'V7X', 'V7Y', 'V7Z'] },
-  'Abbotsford': { prefix: 'V', ranges: ['V2S', 'V2T', 'V2V', 'V2W', 'V2X', 'V2Y', 'V2Z'] },
-  'Mission': { prefix: 'V', ranges: ['V2V', 'V2W', 'V2X', 'V2Y', 'V2Z'] }
+  'West Vancouver': { prefix: 'V', ranges: ['V7S', 'V7T', 'V7V', 'V7W', 'V7X', 'V7Y', 'V7Z'] }
 };
 
 /**
