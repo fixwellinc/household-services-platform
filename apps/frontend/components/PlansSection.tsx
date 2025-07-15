@@ -116,14 +116,81 @@ export default function PlansSection() {
   const { data: plansData, isLoading: plansLoading } = usePlans();
   const { data: userPlanData } = useUserPlan();
 
-  const plans = (plansData as any)?.plans || [];
+  // Fallback plans in case API fails
+  const fallbackPlans = [
+    {
+      id: 'basic',
+      name: 'Basic',
+      description: 'Perfect for those who own a car and drive shorter distances. With 5km in FREE Roadside Assistance towing and over $1,500 in savings per year!',
+      monthlyPrice: 7.92,
+      yearlyPrice: 95,
+      originalPrice: 9.99,
+      features: [
+        'All GO Plan features',
+        '24/7 Roadside Assistance with distance up to 5km free',
+        'Add a family member at any time',
+        'Save up to 20% on BCAA Insurance',
+        'Access to on-demand services',
+        'Email support'
+      ],
+      savings: '$1,500+ saved per year',
+      popular: false,
+      cta: 'CHOOSE BASIC',
+      icon: Star
+    },
+    {
+      id: 'plus',
+      name: 'Plus',
+      description: 'Ideally suited to those who live in the suburbs, regularly commute and like weekend getaways. With 160km in FREE towing and over $1,500 in savings per year!',
+      monthlyPrice: 11.25,
+      yearlyPrice: 135,
+      originalPrice: 14.99,
+      features: [
+        'All Basic Plan features',
+        'With distance up to 160km free',
+        'Motorcycle & E-Bike coverage',
+        'Kids Go Free (15 years old and under)',
+        'FREE fuel delivery (up to 10L)',
+        'Road trip interruption coverage',
+        'Locksmith coverage (up to $100)',
+        'Phone & Email support'
+      ],
+      savings: '$1,500+ saved per year',
+      popular: true,
+      cta: 'CHOOSE PLUS',
+      icon: Crown
+    },
+    {
+      id: 'premier',
+      name: 'Premier',
+      description: 'Great for anyone who travels long distances across BC, or out of province. With 320km in FREE towing and over $1,500 in savings per year!',
+      monthlyPrice: 14.58,
+      yearlyPrice: 175,
+      originalPrice: 19.99,
+      features: [
+        'All Plus Plan features',
+        'With distance up to 320km free',
+        'Motorcycle & E-Bike coverage',
+        'FREE passport photos',
+        'Two Day Car Replacement',
+        'Dedicated account manager',
+        'Concierge service',
+        '24/7 Priority support'
+      ],
+      savings: '$1,500+ saved per year',
+      popular: false,
+      cta: 'CHOOSE PREMIER',
+      icon: Sparkles
+    }
+  ];
+
+  const plans = (plansData as any)?.plans || fallbackPlans;
   const userPlan = (userPlanData as any)?.subscription;
 
   // Debug logging
-  if (plans.length > 0 && process.env.NODE_ENV === 'development') {
-    console.log('Plans data:', plans);
-    console.log('User plan:', userPlan);
-  }
+  console.log('Plans data:', plans);
+  console.log('Plans loading:', plansLoading);
+  console.log('User plan:', userPlan);
 
   const getDiscountedPrice = (plan: any) => {
     if (billingPeriod === 'year') {
@@ -232,23 +299,23 @@ export default function PlansSection() {
           {plansLoading ? (
             // Loading skeleton
             Array.from({ length: 3 }).map((_, index) => (
-              <Card key={index} className="animate-pulse bg-gray-50 h-96">
+              <Card key={index} className="animate-pulse bg-blue-600 h-96">
                 <CardHeader className="text-center">
-                  <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4"></div>
-                  <div className="h-6 bg-gray-200 rounded w-3/4 mx-auto mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-full mb-4"></div>
-                  <div className="h-8 bg-gray-200 rounded w-1/2 mx-auto"></div>
+                  <div className="w-16 h-16 bg-white/20 rounded-full mx-auto mb-4"></div>
+                  <div className="h-8 bg-white/20 rounded w-3/4 mx-auto mb-2"></div>
+                  <div className="h-4 bg-white/20 rounded w-full mb-4"></div>
+                  <div className="h-12 bg-white/20 rounded w-1/2 mx-auto"></div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     {Array.from({ length: 8 }).map((_, i) => (
-                      <div key={i} className="h-4 bg-gray-200 rounded"></div>
+                      <div key={i} className="h-4 bg-white/20 rounded"></div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
             ))
-          ) : (
+                    ) : plans && plans.length > 0 ? (
             plans.map((plan: any) => {
               // Define background colors for each plan
               const getPlanBackground = (planName: string) => {
@@ -355,7 +422,114 @@ export default function PlansSection() {
                 </Card>
               );
             })
-        )}
+          ) : (
+            // Error state - show fallback plans
+            fallbackPlans.map((plan: any) => {
+              const getPlanBackground = (planName: string) => {
+                switch (planName.toLowerCase()) {
+                  case 'basic':
+                    return 'bg-blue-600';
+                  case 'plus':
+                    return 'bg-blue-600';
+                  case 'premier':
+                    return 'bg-blue-800';
+                  default:
+                    return 'bg-gray-800';
+                }
+              };
+
+              return (
+                <Card 
+                  key={plan.name}
+                  className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl ${getPlanBackground(plan.name)} h-full flex flex-col text-white`}
+                >
+                  {/* Popular Badge */}
+                  {plan.popular && (
+                    <div className="absolute top-4 left-4 transform -rotate-12">
+                      <div className="bg-blue-400 text-white px-3 py-1 text-xs font-bold rounded-sm shadow-md">
+                        MOST POPULAR
+                      </div>
+                    </div>
+                  )}
+
+                  <CardHeader className="text-center pb-6 pt-8">
+                    {/* Plan Name */}
+                    <div className="mb-6">
+                      <CardTitle className="text-3xl font-bold text-white mb-4">
+                        {plan.name}
+                      </CardTitle>
+                      
+                      <CardDescription className="text-white/90 text-sm leading-relaxed mb-6">
+                        {plan.description}
+                      </CardDescription>
+                    </div>
+
+                    {/* Price Section - BCAA Style */}
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-6 border border-white/20">
+                      <div className="text-center">
+                        <div className="flex items-baseline justify-center gap-1 mb-1">
+                          <span className="text-3xl font-bold text-white">
+                            ${getDiscountedPrice(plan)}
+                          </span>
+                          <span className="text-white/80 text-sm">/{billingPeriod}</span>
+                        </div>
+                        {plan.originalPrice && (
+                          <div className="flex items-center justify-center gap-2 mb-2">
+                            <span className="text-sm text-white/60 line-through">
+                              ${getOriginalPrice(plan)}/{billingPeriod}
+                            </span>
+                            <Badge className="bg-red-500 text-white border-red-500 text-xs px-2 py-1">
+                              Save ${calculateSavings(plan).toFixed(2)}
+                            </Badge>
+                          </div>
+                        )}
+                        {billingPeriod === 'year' && (
+                          <p className="text-xs text-white/70">
+                            Billed annually (${plan.monthlyPrice}/month)
+                          </p>
+                        )}
+                        {/* Savings Badge */}
+                        <div className="mt-3">
+                          <Badge className="bg-green-500 text-white border-green-500 text-xs px-3 py-1">
+                            {plan.savings}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="pt-0 flex-1 flex flex-col">
+                    {/* Features List */}
+                    <div className="flex-1">
+                      <ul className="space-y-3 mb-6">
+                        {plan.features.map((feature: string, featureIndex: number) => (
+                          <li key={featureIndex} className="flex items-start gap-3">
+                            <CheckCircle className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
+                            <span className="text-white/90 text-sm leading-relaxed">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* CTA Section */}
+                    <div className="mt-auto">
+                      {/* CTA Button */}
+                      <Button 
+                        className="w-full bg-white text-gray-900 font-semibold py-3 text-base transition-all duration-300 hover:bg-gray-100 hover:shadow-lg"
+                      >
+                        {plan.cta}
+                      </Button>
+
+                      {/* Additional Info */}
+                      <p className="text-xs text-white/70 text-center mt-3">
+                        {plan.name === 'Premier' ? 'Contact us for custom enterprise solutions' : 'No setup fees • Cancel anytime'}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
         </div>
 
         {/* Feature Comparison Table */}
