@@ -101,6 +101,66 @@
       align-items: center;
       padding: 12px 16px;
     }
+
+    /* Improve mobile card spacing */
+    .card {
+      margin-bottom: 1rem;
+    }
+
+    /* Better mobile text sizing */
+    h1 { font-size: 1.75rem; }
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.25rem; }
+    h4 { font-size: 1.125rem; }
+
+    /* Improve mobile button sizing */
+    .btn {
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+    }
+
+    /* Better mobile form inputs */
+    .input {
+      font-size: 16px; /* Prevents zoom on iOS */
+      padding: 0.75rem;
+    }
+
+    /* Improve mobile table readability */
+    table {
+      font-size: 0.875rem;
+    }
+
+    /* Better mobile spacing */
+    .container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+
+    /* Improve mobile navigation */
+    nav a {
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  /* Extra small mobile devices */
+  @media (max-width: 480px) {
+    /* Even smaller text for very small screens */
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.25rem; }
+    h3 { font-size: 1.125rem; }
+
+    /* Tighter spacing */
+    .container {
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+
+    /* Smaller buttons */
+    .btn {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+    }
   }
 
   /* Custom scrollbar */
@@ -351,6 +411,17 @@
   /* Container utilities */
   .container-custom {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Mobile-optimized container */
+  .container-mobile {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  @media (max-width: 640px) {
+    .container-mobile {
+      @apply px-3;
+    }
   }
 
   /* Section utilities */

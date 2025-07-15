@@ -119,6 +119,12 @@ export default function PlansSection() {
   const plans = (plansData as any)?.plans || [];
   const userPlan = (userPlanData as any)?.subscription;
 
+  // Debug logging
+  if (plans.length > 0 && process.env.NODE_ENV === 'development') {
+    console.log('Plans data:', plans);
+    console.log('User plan:', userPlan);
+  }
+
   const getDiscountedPrice = (plan: any) => {
     if (billingPeriod === 'year') {
       return plan.yearlyPrice;
@@ -141,7 +147,7 @@ export default function PlansSection() {
 
   return (
     <section className="py-12 md:py-20 bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      <div className="container mx-auto px-4">
+      <div className="container-mobile mx-auto">
         {/* Header */}
         <div className="text-center mb-12 md:mb-16">
           <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-4 md:mb-6">
@@ -158,34 +164,34 @@ export default function PlansSection() {
           </p>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center">
+              <div key={index} className="text-center p-3 md:p-4 bg-white rounded-lg shadow-sm">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <stat.icon className="h-5 w-5 text-blue-600" />
-                  <span className="text-2xl md:text-3xl font-bold text-gray-900">{stat.number}</span>
+                  <stat.icon className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
+                  <span className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">{stat.number}</span>
                 </div>
-                <p className="text-sm text-gray-600">{stat.label}</p>
+                <p className="text-xs md:text-sm text-gray-600">{stat.label}</p>
               </div>
             ))}
           </div>
 
           {/* Savings Highlight */}
-          <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-2xl p-6 md:p-8 max-w-2xl mx-auto mb-8">
-            <div className="flex items-center justify-center gap-3 mb-3">
-              <TrendingUp className="h-6 w-6 text-green-600" />
-              <h3 className="text-xl font-bold text-gray-900">Save $1,000+ Per Year</h3>
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-2xl p-4 md:p-6 lg:p-8 max-w-2xl mx-auto mb-8">
+            <div className="flex items-center justify-center gap-2 md:gap-3 mb-3">
+              <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-green-600" />
+              <h3 className="text-lg md:text-xl font-bold text-gray-900">Save $1,000+ Per Year</h3>
             </div>
-            <p className="text-gray-600 text-center mb-4">
+            <p className="text-gray-600 text-center mb-4 text-sm md:text-base">
               Our members save an average of $1,000+ annually compared to hiring individual contractors for each service.
             </p>
-            <div className="flex items-center justify-center gap-4 text-sm">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 md:gap-4 text-xs md:text-sm">
               <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-green-600" />
+                <Shield className="h-3 w-3 md:h-4 md:w-4 text-green-600" />
                 <span>30-day money-back guarantee</span>
               </div>
               <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-blue-600" />
+                <MapPin className="h-3 w-3 md:h-4 md:w-4 text-blue-600" />
                 <span>Lower Mainland service area</span>
               </div>
             </div>
@@ -347,7 +353,8 @@ export default function PlansSection() {
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          {/* Desktop Table */}
+          <div className="hidden md:block bg-white rounded-2xl shadow-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
@@ -429,6 +436,56 @@ export default function PlansSection() {
               </table>
             </div>
           </div>
+
+          {/* Mobile Comparison Cards */}
+          <div className="md:hidden space-y-6">
+            {[
+              { name: 'Basic', color: 'blue', icon: Star },
+              { name: 'Plus', color: 'purple', icon: Crown },
+              { name: 'Premier', color: 'amber', icon: Sparkles }
+            ].map((plan, index) => (
+              <Card key={index} className="bg-white shadow-lg">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`w-10 h-10 rounded-full bg-gradient-to-r from-${plan.color}-500 to-${plan.color}-600 flex items-center justify-center`}>
+                      <plan.icon className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-bold text-gray-900">{plan.name} Plan</h4>
+                      <p className="text-sm text-gray-600">Key features and benefits</p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="font-medium text-gray-900">Response Time</p>
+                      <p className="text-gray-600">{index === 0 ? '24 hours' : index === 1 ? '12 hours' : 'Same day'}</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">Support</p>
+                      <p className="text-gray-600">{index === 0 ? 'Email only' : index === 1 ? 'Phone & Email' : '24/7 Priority'}</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">Service Discount</p>
+                      <p className="text-gray-600">{index === 0 ? 'None' : index === 1 ? '10% off' : '20% off'}</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">Account Manager</p>
+                      <p className="text-gray-600">{index === 2 ? '✓ Included' : '✗ Not included'}</p>
+                    </div>
+                  </div>
+                  <div className="pt-4 border-t border-gray-200">
+                    <p className="text-sm text-gray-600">
+                      {index === 0 ? 'Essential services for everyday needs' : 
+                       index === 1 ? 'Enhanced features for busy families' : 
+                       'Ultimate convenience for luxury households'}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
 
         {/* Testimonials */}
@@ -442,25 +499,25 @@ export default function PlansSection() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
             {testimonials.map((testimonial, index) => (
               <Card key={index} className="bg-white shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-4">
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex items-center gap-1 md:gap-2 mb-3 md:mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <Star key={i} className="h-3 w-3 md:h-4 md:w-4 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <p className="text-gray-600 mb-4 text-sm md:text-base">
+                  <p className="text-gray-600 mb-3 md:mb-4 text-sm md:text-base leading-relaxed">
                     "{testimonial.content}"
                   </p>
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                  <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-xs md:text-sm">
                       {testimonial.avatar}
                     </div>
-                    <div>
-                      <p className="font-semibold text-gray-900 text-sm">{testimonial.name}</p>
-                      <p className="text-gray-500 text-xs">{testimonial.role} • {testimonial.location}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 text-sm truncate">{testimonial.name}</p>
+                      <p className="text-gray-500 text-xs truncate">{testimonial.role} • {testimonial.location}</p>
                     </div>
                   </div>
                   <div className="bg-green-50 rounded-lg p-2">
@@ -474,24 +531,24 @@ export default function PlansSection() {
 
         {/* Bottom CTA */}
         <div className="text-center">
-          <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 max-w-4xl mx-auto">
-            <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">
+          <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">
+            <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 mb-3 md:mb-4">
               Ready to Get Started?
             </h3>
             <p className="text-gray-600 mb-4 md:mb-6 max-w-2xl mx-auto text-sm md:text-base">
               Join thousands of satisfied households who trust us with their home services. Start saving today with our 30-day money-back guarantee.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-              <Button variant="outline" size="lg" className="border-2 border-gray-300 hover:border-blue-500 text-sm md:text-base">
+              <Button variant="outline" size="lg" className="border-2 border-gray-300 hover:border-blue-500 text-sm md:text-base py-3 md:py-4">
                 <Phone className="h-4 w-4 mr-2" />
                 Contact Sales
               </Button>
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-sm md:text-base">
+              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-sm md:text-base py-3 md:py-4">
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Schedule Demo
               </Button>
             </div>
-            <div className="mt-4 flex items-center justify-center gap-6 text-xs text-gray-500">
+            <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-2 md:gap-6 text-xs text-gray-500">
               <div className="flex items-center gap-1">
                 <Shield className="h-3 w-3" />
                 <span>30-day guarantee</span>

@@ -278,7 +278,7 @@ const Header: React.FC = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <DollarSign className="h-5 w-5" />
-                Pricing
+                Plans
               </Link>
 
               <Link 
