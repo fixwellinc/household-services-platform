@@ -152,9 +152,20 @@ router.post('/', authMiddleware, requireCustomer, async (req, res, next) => {
       throw new ValidationError('Scheduled date must be in the future');
     }
     
-    // Calculate amounts
+    // Calculate amounts with plan discounts
     const totalAmount = service.basePrice;
-    const discountAmount = 0; // TODO: Apply subscription discounts
+    let discountAmount = 0;
+    
+    // Check if user has an active subscription and apply discount
+    const userSubscription = await prisma.subscription.findUnique({
+      where: { userId: req.user.id }
+    });
+    
+    if (userSubscription && userSubscription.status === 'ACTIVE') {
+      const { calculateServiceDiscount } = await import('../config/plans.js');
+      discountAmount = calculateServiceDiscount(userSubscription.tier, totalAmount);
+    }
+    
     const finalAmount = totalAmount - discountAmount;
     
     const booking = await prisma.booking.create({

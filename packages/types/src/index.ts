@@ -11,6 +11,19 @@ export interface User {
   createdAt: string;
 }
 
+export interface Subscription {
+  id: string;
+  userId: string;
+  tier: 'BASIC' | 'PLUS' | 'PREMIER';
+  status: 'ACTIVE' | 'CANCELLED' | 'PAST_DUE' | 'UNPAID';
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  currentPeriodStart?: string;
+  currentPeriodEnd?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Service {
   id: string;
   name: string;

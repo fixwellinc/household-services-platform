@@ -25,6 +25,7 @@ import quotesRoutes from './routes/quotes.js';
 import docsRoutes from './routes/docs.js';
 import notificationRoutes from './routes/notifications.js';
 import chatRoutes from './routes/chat.js';
+import plansRoutes from './routes/plans.js';
 // import webhookRoutes from './routes/webhooks.js';
 
 // Import middleware
@@ -152,6 +153,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/quotes', quotesRoutes);
 app.use('/api/docs', docsRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/plans', plansRoutes);
 // app.use('/api/webhooks', webhookRoutes);
 
 function requireAdminLocal(req, res, next) {

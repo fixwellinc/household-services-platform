@@ -16,8 +16,8 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata = {
-      title: 'Household Services | Professional Home Services',
-  description: 'Book cleaning, repairs, and more with trusted, verified professionals. Choose from Basic, Premium, or VIP plans.',
+      title: 'Fixwell Services | Professional Home Services',
+  description: 'Book cleaning, repairs, and more with trusted, verified professionals. Choose from Basic, Plus, or Premier plans.',
   icons: {
     icon: [
       { url: '/favicon.ico' },

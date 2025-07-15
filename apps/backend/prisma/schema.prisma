@@ -120,7 +120,7 @@ model Setting {
 
 // Enums are not supported in MongoDB, using strings instead
 // UserRole: "CUSTOMER", "ADMIN"
-// SubscriptionTier: "BASIC", "PREMIUM", "VIP"
+// SubscriptionTier: "BASIC", "PLUS", "PREMIER"
 // SubscriptionStatus: "ACTIVE", "CANCELLED", "PAST_DUE", "UNPAID"
 // ServiceCategory: "CLEANING", "MAINTENANCE", "REPAIR", "ORGANIZATION", "SHOPPING", "OTHER"
 // ServiceComplexity: "SIMPLE", "MODERATE", "COMPLEX"

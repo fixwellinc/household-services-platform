@@ -85,7 +85,7 @@ export default function HomePageClient() {
             </h1>
             
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Connect with verified professionals for all your household needs. 
+              Connect with verified professionals for all your household needs. Choose from Basic, Plus, or Premier plans.
               {isInBC && userCity ? ` Serving ${userCity} and surrounding areas.` : ' Currently serving Lower Mainland residents (within 50km of Surrey).'}
             </p>
             
@@ -103,18 +103,18 @@ export default function HomePageClient() {
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                <Link href="/register">
+                <Link href="/pricing">
                   <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
                     <span className="flex items-center gap-2">
-                      Get Started
+                      View Plans
                       <ArrowRight className="h-4 w-4" />
                     </span>
                   </Button>
                 </Link>
-                <Link href="/login">
+                <Link href="/register">
                   <Button variant="outline" size="lg" className="border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all duration-300">
                     <span className="flex items-center gap-2">
-                      Sign In
+                      Get Started
                       <User className="h-4 w-4" />
                     </span>
                   </Button>
@@ -130,11 +130,11 @@ export default function HomePageClient() {
               </div>
               <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <div className="text-4xl font-bold text-purple-600 mb-2">10k+</div>
-                <div className="text-gray-600 font-medium">Lower Mainland Customers</div>
+                <div className="text-gray-600 font-medium">Happy Members</div>
               </div>
               <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                <div className="text-4xl font-bold text-green-600 mb-2">24/7</div>
-                <div className="text-gray-600 font-medium">Support Available</div>
+                <div className="text-4xl font-bold text-green-600 mb-2">$1k+</div>
+                <div className="text-gray-600 font-medium">Annual Savings</div>
               </div>
             </div>
           </div>

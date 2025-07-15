@@ -359,6 +359,136 @@ export class ApiClient {
       method: 'DELETE',
     });
   }
+
+  // Plans endpoints
+  getPlans = async (): Promise<{
+    success: boolean;
+    plans: Array<{
+      id: string;
+      name: string;
+      description: string;
+      monthlyPrice: number;
+      yearlyPrice: number;
+      originalPrice: number;
+      stripePriceIds: {
+        monthly: string;
+        yearly: string;
+      };
+      features: string[];
+      savings: string;
+      color: string;
+      icon: string;
+      popular?: boolean;
+    }>;
+    userPlan?: {
+      tier: string;
+      status: string;
+      currentPeriodEnd: string;
+    };
+    message: string;
+  }> => {
+    return this.request('/plans');
+  }
+
+  getPlan = async (planId: string): Promise<{
+    success: boolean;
+    plan: {
+      id: string;
+      name: string;
+      description: string;
+      monthlyPrice: number;
+      yearlyPrice: number;
+      originalPrice: number;
+      stripePriceIds: {
+        monthly: string;
+        yearly: string;
+      };
+      features: string[];
+      savings: string;
+      color: string;
+      icon: string;
+      popular?: boolean;
+    };
+    message: string;
+  }> => {
+    return this.request(`/plans/${planId}`);
+  }
+
+  getUserPlan = async (): Promise<{
+    success: boolean;
+    hasPlan: boolean;
+    subscription?: {
+      tier: string;
+      status: string;
+      currentPeriodStart: string;
+      currentPeriodEnd: string;
+      createdAt: string;
+    };
+    plan?: {
+      id: string;
+      name: string;
+      description: string;
+      monthlyPrice: number;
+      yearlyPrice: number;
+      originalPrice: number;
+      stripePriceIds: {
+        monthly: string;
+        yearly: string;
+      };
+      features: string[];
+      savings: string;
+      color: string;
+      icon: string;
+      popular?: boolean;
+    };
+    message: string;
+  }> => {
+    return this.request('/plans/user/current');
+  }
+
+  calculateDiscount = async (servicePrice: number): Promise<{
+    success: boolean;
+    discount: number;
+    finalPrice: number;
+    planTier?: string;
+    message: string;
+  }> => {
+    return this.request('/plans/calculate-discount', {
+      method: 'POST',
+      body: JSON.stringify({ servicePrice }),
+    });
+  }
+
+  getPlanComparison = async (): Promise<{
+    success: boolean;
+    comparison: {
+      features: Array<{
+        name: string;
+        basic: string | boolean;
+        plus: string | boolean;
+        premier: string | boolean;
+      }>;
+    };
+    message: string;
+  }> => {
+    return this.request('/plans/comparison/table');
+  }
+
+  getPlanStats = async (): Promise<{
+    success: boolean;
+    stats: Array<{
+      tier: string;
+      status: string;
+      _count: { id: number };
+    }>;
+    totalRevenue: {
+      monthly: number;
+      yearly: number;
+    };
+    message: string;
+  }> => {
+    return this.request('/plans/admin/stats');
+  }
 }
 
 // Create and export API client instance
