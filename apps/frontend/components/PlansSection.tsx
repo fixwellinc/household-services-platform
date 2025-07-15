@@ -434,7 +434,7 @@ export default function PlansSection() {
                             Loading...
                           </span>
                         ) : (
-                          plan.cta
+                          plan.cta || (plan.name === 'Basic' ? 'Choose Basic' : plan.name === 'Plus' ? 'Choose Plus' : plan.name === 'Premier' ? 'Choose Premier' : 'Choose Plan')
                         )}
                       </Button>
 
@@ -563,7 +563,7 @@ export default function PlansSection() {
                             Loading...
                           </span>
                         ) : (
-                          plan.cta
+                          plan.cta || (plan.name === 'Premier' ? 'Contact us for custom enterprise solutions' : 'No setup fees • Cancel anytime')
                         )}
                       </Button>
 
