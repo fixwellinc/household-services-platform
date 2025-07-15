@@ -32,21 +32,21 @@ export default function BCLocationBanner() {
       {isInBC && userLocation && userCity ? (
         <div className="bg-green-50 border-b border-green-200">
           <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                <div>
-                  <span className="text-sm font-medium text-green-800">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+              <div className="flex items-center space-x-3 flex-1 min-w-0">
+                <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+                <div className="min-w-0">
+                  <span className="text-sm font-medium text-green-800 block">
                     Service available in {userCity}, BC
                   </span>
-                  <span className="text-xs text-green-600 ml-2">
+                  <span className="text-xs text-green-600 block sm:inline sm:ml-2">
                     ({userLocation})
                   </span>
                 </div>
               </div>
               <button
                 onClick={handleOpenLocationModal}
-                className="text-sm text-green-600 hover:text-green-800 underline"
+                className="text-sm text-green-600 hover:text-green-800 underline px-3 py-2 rounded-md hover:bg-green-100 transition-colors duration-200 min-h-[44px] flex items-center"
               >
                 Change location
               </button>
@@ -57,21 +57,21 @@ export default function BCLocationBanner() {
         /* If user is not in BC, show warning banner */
         <div className="bg-yellow-50 border-b border-yellow-200">
           <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <AlertCircle className="h-5 w-5 text-yellow-600" />
-                <div>
-                  <span className="text-sm font-medium text-yellow-800">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+              <div className="flex items-center space-x-3 flex-1 min-w-0">
+                <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0" />
+                <div className="min-w-0">
+                  <span className="text-sm font-medium text-yellow-800 block">
                     Currently serving Lower Mainland residents only
                   </span>
-                  <span className="text-xs text-yellow-600 ml-2">
+                  <span className="text-xs text-yellow-600 block sm:inline sm:ml-2">
                     Your postal code ({userLocation}) is outside our service area (within 50km of Surrey)
                   </span>
                 </div>
               </div>
               <button
                 onClick={handleOpenLocationModal}
-                className="text-sm text-yellow-600 hover:text-yellow-800 underline"
+                className="text-sm text-yellow-600 hover:text-yellow-800 underline px-3 py-2 rounded-md hover:bg-yellow-100 transition-colors duration-200 min-h-[44px] flex items-center"
               >
                 Update location
               </button>
@@ -82,22 +82,21 @@ export default function BCLocationBanner() {
         /* Default banner for users without location */
         <div className="bg-blue-50 border-b border-blue-200">
           <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <MapPin className="h-5 w-5 text-blue-600" />
-                <div>
-                  <span className="text-sm font-medium text-blue-800">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+              <div className="flex items-center space-x-3 flex-1 min-w-0">
+                <MapPin className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                <div className="min-w-0">
+                  <span className="text-sm font-medium text-blue-800 block">
                     Currently serving Lower Mainland residents
                   </span>
-                  <span className="text-xs text-blue-600 ml-2">
+                  <span className="text-xs text-blue-600 block sm:inline sm:ml-2">
                     Enter your postal code to check availability (within 50km of Surrey)
                   </span>
                 </div>
               </div>
               <Button
                 onClick={handleOpenLocationModal}
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-medium w-full sm:w-auto min-h-[44px] shadow-md hover:shadow-lg transition-all duration-200"
               >
                 Check Availability
               </Button>
@@ -109,7 +108,7 @@ export default function BCLocationBanner() {
       {/* Location Input Modal - Always rendered */}
       {showLocationInput && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+          <div className="bg-white rounded-lg p-4 md:p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
                 Check Service Availability
@@ -119,7 +118,7 @@ export default function BCLocationBanner() {
                   setShowLocationInput(false);
                   setPostalCodeInput(userLocation || '');
                 }}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 p-2 rounded-md hover:bg-gray-100 transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -139,15 +138,16 @@ export default function BCLocationBanner() {
                     setPostalCodeInput(formatted);
                   }}
                   placeholder="V6B 2Z9"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
                   maxLength={7}
+                  style={{ fontSize: '16px' }} // Prevents zoom on iOS
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   We currently serve Lower Mainland residents only (within 50km of Surrey)
                 </p>
               </div>
               
-              <div className="flex space-x-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Button
                   onClick={() => {
                     setIsValidating(true);
@@ -159,7 +159,7 @@ export default function BCLocationBanner() {
                     setIsValidating(false);
                   }}
                   disabled={!postalCodeInput || postalCodeInput.length < 6 || isValidating}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                  className="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 text-sm font-medium min-h-[44px] shadow-md hover:shadow-lg transition-all duration-200"
                 >
                   {isValidating ? 'Checking...' : 'Check Availability'}
                 </Button>
@@ -169,7 +169,7 @@ export default function BCLocationBanner() {
                     setPostalCodeInput(userLocation || '');
                   }}
                   variant="outline"
-                  className="flex-1"
+                  className="w-full sm:flex-1 py-3 px-4 text-sm font-medium min-h-[44px]"
                 >
                   Cancel
                 </Button>
@@ -177,7 +177,7 @@ export default function BCLocationBanner() {
               
               {/* Clear Location Button */}
               {userLocation && (
-                <div className="flex justify-end mt-2">
+                <div className="flex justify-center sm:justify-end mt-4">
                   <Button
                     onClick={() => {
                       clearUserLocation();
@@ -185,7 +185,7 @@ export default function BCLocationBanner() {
                       setPostalCodeInput('');
                     }}
                     variant="ghost"
-                    className="text-red-600 hover:text-red-800"
+                    className="text-red-600 hover:text-red-800 px-4 py-2 text-sm font-medium min-h-[44px] hover:bg-red-50 rounded-md transition-colors duration-200"
                   >
                     Clear Location
                   </Button>
