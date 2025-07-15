@@ -249,106 +249,112 @@ export default function PlansSection() {
               </Card>
             ))
           ) : (
-            plans.map((plan: any) => (
-            <Card 
-              key={plan.name}
-              className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl ${
-                plan.popular 
-                  ? 'ring-2 ring-blue-500 shadow-lg border-blue-200 bg-gradient-to-b from-blue-50 to-white' 
-                  : 'shadow-md border-gray-200 bg-white'
-              } h-full flex flex-col`}
-            >
-              {/* Popular Badge */}
-              {plan.popular && (
-                <div className="absolute top-4 right-4">
-                  <Badge className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium">
-                    MOST POPULAR
-                  </Badge>
-                </div>
-              )}
+            plans.map((plan: any) => {
+              // Define background colors for each plan
+              const getPlanBackground = (planName: string) => {
+                switch (planName.toLowerCase()) {
+                  case 'basic':
+                    return 'bg-blue-600';
+                  case 'plus':
+                    return 'bg-blue-600';
+                  case 'premier':
+                    return 'bg-blue-800';
+                  default:
+                    return 'bg-gray-800';
+                }
+              };
 
-              <CardHeader className="text-center pb-6 pt-8">
-                {/* Plan Icon and Title */}
-                <div className="mb-6">
-                  <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r ${plan.color} mb-4`}>
-                    <plan.icon className="h-8 w-8 text-white" />
-                  </div>
-                  
-                  <CardTitle className="text-2xl font-bold text-gray-900 mb-2">
-                    {plan.name}
-                  </CardTitle>
-                  
-                  <CardDescription className="text-gray-600 text-sm leading-relaxed">
-                    {plan.description}
-                  </CardDescription>
-                </div>
-
-                {/* Price Section - BCAA Style */}
-                <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                  <div className="text-center">
-                    <div className="flex items-baseline justify-center gap-1 mb-1">
-                      <span className="text-3xl font-bold text-gray-900">
-                        ${getDiscountedPrice(plan)}
-                      </span>
-                      <span className="text-gray-500 text-sm">/{billingPeriod}</span>
-                    </div>
-                    {plan.originalPrice && (
-                      <div className="flex items-center justify-center gap-2 mb-2">
-                        <span className="text-sm text-gray-500 line-through">
-                          ${getOriginalPrice(plan)}/{billingPeriod}
-                        </span>
-                        <Badge className="bg-red-100 text-red-700 border-red-200 text-xs px-2 py-1">
-                          Save ${calculateSavings(plan).toFixed(2)}
-                        </Badge>
+              return (
+                <Card 
+                  key={plan.name}
+                  className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl ${getPlanBackground(plan.name)} h-full flex flex-col text-white`}
+                >
+                  {/* Popular Badge */}
+                  {plan.popular && (
+                    <div className="absolute top-4 left-4 transform -rotate-12">
+                      <div className="bg-blue-400 text-white px-3 py-1 text-xs font-bold rounded-sm shadow-md">
+                        MOST POPULAR
                       </div>
-                    )}
-                    {billingPeriod === 'year' && (
-                      <p className="text-xs text-gray-500">
-                        Billed annually (${plan.monthlyPrice}/month)
-                      </p>
-                    )}
-                    {/* Savings Badge */}
-                    <div className="mt-3">
-                      <Badge className="bg-green-100 text-green-700 border-green-200 text-xs px-3 py-1">
-                        {plan.savings}
-                      </Badge>
                     </div>
-                  </div>
-                </div>
-              </CardHeader>
+                  )}
 
-              <CardContent className="pt-0 flex-1 flex flex-col">
-                {/* Features List */}
-                <div className="flex-1">
-                  <ul className="space-y-3 mb-6">
-                    {plan.features.map((feature: string, featureIndex: number) => (
-                      <li key={featureIndex} className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-700 text-sm leading-relaxed">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                  <CardHeader className="text-center pb-6 pt-8">
+                    {/* Plan Name */}
+                    <div className="mb-6">
+                      <CardTitle className="text-3xl font-bold text-white mb-4">
+                        {plan.name}
+                      </CardTitle>
+                      
+                      <CardDescription className="text-white/90 text-sm leading-relaxed mb-6">
+                        {plan.description}
+                      </CardDescription>
+                    </div>
 
-                {/* CTA Section */}
-                <div className="mt-auto">
-                  {/* CTA Button */}
-                  <Button 
-                    className={`w-full ${plan.ctaColor} text-white font-semibold py-3 text-base transition-all duration-300 hover:shadow-lg ${
-                      plan.popular ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-800 hover:bg-gray-900'
-                    }`}
-                  >
-                    {plan.cta}
-                  </Button>
+                    {/* Price Section - BCAA Style */}
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-6 border border-white/20">
+                      <div className="text-center">
+                        <div className="flex items-baseline justify-center gap-1 mb-1">
+                          <span className="text-3xl font-bold text-white">
+                            ${getDiscountedPrice(plan)}
+                          </span>
+                          <span className="text-white/80 text-sm">/{billingPeriod}</span>
+                        </div>
+                        {plan.originalPrice && (
+                          <div className="flex items-center justify-center gap-2 mb-2">
+                            <span className="text-sm text-white/60 line-through">
+                              ${getOriginalPrice(plan)}/{billingPeriod}
+                            </span>
+                            <Badge className="bg-red-500 text-white border-red-500 text-xs px-2 py-1">
+                              Save ${calculateSavings(plan).toFixed(2)}
+                            </Badge>
+                          </div>
+                        )}
+                        {billingPeriod === 'year' && (
+                          <p className="text-xs text-white/70">
+                            Billed annually (${plan.monthlyPrice}/month)
+                          </p>
+                        )}
+                        {/* Savings Badge */}
+                        <div className="mt-3">
+                          <Badge className="bg-green-500 text-white border-green-500 text-xs px-3 py-1">
+                            {plan.savings}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
 
-                  {/* Additional Info */}
-                  <p className="text-xs text-gray-500 text-center mt-3">
-                    {plan.name === 'Premier' ? 'Contact us for custom enterprise solutions' : 'No setup fees • Cancel anytime'}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                  <CardContent className="pt-0 flex-1 flex flex-col">
+                    {/* Features List */}
+                    <div className="flex-1">
+                      <ul className="space-y-3 mb-6">
+                        {plan.features.map((feature: string, featureIndex: number) => (
+                          <li key={featureIndex} className="flex items-start gap-3">
+                            <CheckCircle className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
+                            <span className="text-white/90 text-sm leading-relaxed">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* CTA Section */}
+                    <div className="mt-auto">
+                      {/* CTA Button */}
+                      <Button 
+                        className="w-full bg-white text-gray-900 font-semibold py-3 text-base transition-all duration-300 hover:bg-gray-100 hover:shadow-lg"
+                      >
+                        {plan.cta}
+                      </Button>
+
+                      {/* Additional Info */}
+                      <p className="text-xs text-white/70 text-center mt-3">
+                        {plan.name === 'Premier' ? 'Contact us for custom enterprise solutions' : 'No setup fees • Cancel anytime'}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
         )}
         </div>
 
