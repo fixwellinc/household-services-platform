@@ -315,7 +315,7 @@ export default function PlansSection() {
                 </CardContent>
               </Card>
             ))
-                    ) : plans && plans.length > 0 ? (
+          ) : plans && plans.length > 0 ? (
             plans.map((plan: any) => {
               // Define background colors for each plan
               const getPlanBackground = (planName: string) => {
