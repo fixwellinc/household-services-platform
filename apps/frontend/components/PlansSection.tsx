@@ -119,8 +119,24 @@ export default function PlansSection() {
   const plans = (plansData as any)?.plans || [];
   const userPlan = (userPlanData as any)?.subscription;
 
-  const getDiscountedPrice = (price: number) => {
-    return billingPeriod === 'year' ? price * 10 : price; // Yearly discount
+  const getDiscountedPrice = (plan: any) => {
+    if (billingPeriod === 'year') {
+      return plan.yearlyPrice;
+    }
+    return plan.monthlyPrice;
+  };
+
+  const getOriginalPrice = (plan: any) => {
+    if (billingPeriod === 'year') {
+      return plan.originalPrice * 12; // Yearly original price
+    }
+    return plan.originalPrice;
+  };
+
+  const calculateSavings = (plan: any) => {
+    const original = getOriginalPrice(plan);
+    const discounted = getDiscountedPrice(plan);
+    return original - discounted;
   };
 
   return (
@@ -261,23 +277,23 @@ export default function PlansSection() {
                 <div className="mt-4 md:mt-6">
                   <div className="flex items-baseline justify-center gap-2">
                     <span className="text-3xl md:text-4xl font-bold text-gray-900">
-                      ${getDiscountedPrice(plan.price)}
+                      ${getDiscountedPrice(plan)}
                     </span>
                     <span className="text-gray-500 text-sm md:text-base">/{billingPeriod}</span>
                   </div>
                   {plan.originalPrice && (
                     <div className="flex items-center justify-center gap-2 mt-1">
                       <span className="text-sm text-gray-500 line-through">
-                        ${plan.originalPrice}/{billingPeriod}
+                        ${getOriginalPrice(plan)}/{billingPeriod}
                       </span>
                       <Badge className="bg-red-100 text-red-700 border-red-200 text-xs">
-                        Save ${plan.originalPrice - getDiscountedPrice(plan.price)}
+                        Save ${calculateSavings(plan).toFixed(2)}
                       </Badge>
                     </div>
                   )}
                   {billingPeriod === 'year' && (
                     <p className="text-xs md:text-sm text-gray-500 mt-1">
-                      Billed annually (${plan.price}/month)
+                      Billed annually (${plan.monthlyPrice}/month)
                     </p>
                   )}
                   {/* Savings */}
