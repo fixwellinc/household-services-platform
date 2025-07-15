@@ -416,7 +416,10 @@ export default function PlansSection() {
                     <div className="mt-auto">
                       {/* CTA Button */}
                       <Button 
-                        className="w-full bg-gradient-to-r from-white to-gray-100 !text-gray-900 font-bold py-4 text-lg transition-all duration-300 hover:from-gray-100 hover:to-white hover:shadow-2xl hover:scale-105 rounded-xl border-0 shadow-lg"
+                        variant="outline"
+                        className="w-full bg-gradient-to-r from-white to-gray-100 font-bold py-4 text-lg transition-all duration-300 hover:from-gray-100 hover:to-white hover:shadow-2xl hover:scale-105 rounded-xl border-0 shadow-lg"
+                        onClick={() => alert(`Selected plan: ${plan.name}`)}
+                        aria-label={`Select the ${plan.name} plan`}
                       >
                         {plan.cta}
                       </Button>
@@ -531,7 +534,10 @@ export default function PlansSection() {
                     <div className="mt-auto">
                       {/* CTA Button */}
                       <Button 
-                        className="w-full bg-gradient-to-r from-white to-gray-100 !text-gray-900 font-bold py-4 text-lg transition-all duration-300 hover:from-gray-100 hover:to-white hover:shadow-2xl hover:scale-105 rounded-xl border-0 shadow-lg"
+                        variant="outline"
+                        className="w-full bg-gradient-to-r from-white to-gray-100 font-bold py-4 text-lg transition-all duration-300 hover:from-gray-100 hover:to-white hover:shadow-2xl hover:scale-105 rounded-xl border-0 shadow-lg"
+                        onClick={() => alert(`Selected plan: ${plan.name}`)}
+                        aria-label={`Select the ${plan.name} plan`}
                       >
                         {plan.cta}
                       </Button>
