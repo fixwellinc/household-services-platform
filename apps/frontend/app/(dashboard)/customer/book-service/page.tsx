@@ -1,13 +1,13 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import SubscribePlanForm from '@/components/customer/SubscribePlanForm';
 import { Button } from '@/components/ui/shared';
 import { CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
-export default function BookServicePage() {
+function BookServiceContent() {
   const searchParams = useSearchParams();
   const plan = searchParams.get('plan');
   const success = searchParams.get('success');
@@ -92,5 +92,23 @@ export default function BookServicePage() {
         {plan ? <SubscribePlanForm planId={plan} /> : <div className="text-center text-gray-500">No plan selected.</div>}
       </div>
     </div>
+  );
+}
+
+export default function BookServicePage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded mb-8"></div>
+            <div className="h-64 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    }>
+      <BookServiceContent />
+    </Suspense>
   );
 } 
