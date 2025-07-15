@@ -321,20 +321,20 @@ export default function PlansSection() {
               const getPlanBackground = (planName: string) => {
                 switch (planName.toLowerCase()) {
                   case 'basic':
-                    return 'bg-blue-600';
+                    return '!bg-blue-600';
                   case 'plus':
-                    return 'bg-blue-600';
+                    return '!bg-blue-600';
                   case 'premier':
-                    return 'bg-blue-800';
+                    return '!bg-blue-800';
                   default:
-                    return 'bg-gray-800';
+                    return '!bg-gray-800';
                 }
               };
 
               return (
                 <Card 
                   key={plan.name}
-                  className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl ${getPlanBackground(plan.name)} h-full flex flex-col text-white`}
+                  className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl ${getPlanBackground(plan.name)} h-full flex flex-col !text-white`}
                 >
                   {/* Popular Badge */}
                   {plan.popular && (
@@ -428,20 +428,20 @@ export default function PlansSection() {
               const getPlanBackground = (planName: string) => {
                 switch (planName.toLowerCase()) {
                   case 'basic':
-                    return 'bg-blue-600';
+                    return '!bg-blue-600';
                   case 'plus':
-                    return 'bg-blue-600';
+                    return '!bg-blue-600';
                   case 'premier':
-                    return 'bg-blue-800';
+                    return '!bg-blue-800';
                   default:
-                    return 'bg-gray-800';
+                    return '!bg-gray-800';
                 }
               };
 
               return (
                 <Card 
                   key={plan.name}
-                  className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl ${getPlanBackground(plan.name)} h-full flex flex-col text-white`}
+                  className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl ${getPlanBackground(plan.name)} h-full flex flex-col !text-white`}
                 >
                   {/* Popular Badge */}
                   {plan.popular && (
