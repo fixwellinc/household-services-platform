@@ -317,73 +317,79 @@ export default function PlansSection() {
             ))
           ) : plans && plans.length > 0 ? (
             plans.map((plan: any) => {
-              // Define background colors for each plan
+              // Define background colors for each plan with gradients
               const getPlanBackground = (planName: string) => {
                 switch (planName.toLowerCase()) {
                   case 'basic':
-                    return '!bg-blue-600';
+                    return 'bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800';
                   case 'plus':
-                    return '!bg-blue-600';
+                    return 'bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800';
                   case 'premier':
-                    return '!bg-blue-800';
+                    return 'bg-gradient-to-br from-indigo-700 via-indigo-800 to-indigo-900';
                   default:
-                    return '!bg-gray-800';
+                    return 'bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900';
                 }
               };
 
               return (
                 <Card 
                   key={plan.name}
-                  className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl ${getPlanBackground(plan.name)} h-full flex flex-col !text-white`}
+                  className={`relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:scale-105 ${getPlanBackground(plan.name)} h-full flex flex-col text-white border-0 shadow-xl`}
                 >
                   {/* Popular Badge */}
                   {plan.popular && (
-                    <div className="absolute top-4 left-4 transform -rotate-12">
-                      <div className="bg-blue-400 text-white px-3 py-1 text-xs font-bold rounded-sm shadow-md">
+                    <div className="absolute top-4 left-4 transform -rotate-12 z-10">
+                      <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 text-xs font-bold rounded-full shadow-lg border-2 border-white/20">
                         MOST POPULAR
                       </div>
                     </div>
                   )}
 
-                  <CardHeader className="text-center pb-6 pt-8">
+                  {/* Decorative background pattern */}
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12"></div>
+                  </div>
+
+                  <CardHeader className="text-center pb-6 pt-8 relative z-10">
                     {/* Plan Name */}
-                    <div className="mb-6">
-                      <CardTitle className="text-3xl font-bold text-white mb-4">
+                    <div className="mb-8">
+                      <CardTitle className="text-4xl font-bold text-white mb-4 tracking-tight">
                         {plan.name}
                       </CardTitle>
                       
-                      <CardDescription className="text-white/90 text-sm leading-relaxed mb-6">
+                      <CardDescription className="text-white/90 text-base leading-relaxed mb-6 max-w-xs mx-auto">
                         {plan.description}
                       </CardDescription>
                     </div>
 
-                    {/* Price Section - BCAA Style */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-6 border border-white/20">
+                    {/* Price Section - Enhanced BCAA Style */}
+                    <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20 shadow-inner">
                       <div className="text-center">
-                        <div className="flex items-baseline justify-center gap-1 mb-1">
-                          <span className="text-3xl font-bold text-white">
+                        <div className="flex items-baseline justify-center gap-2 mb-3">
+                          <span className="text-5xl font-black text-white">
                             ${getDiscountedPrice(plan)}
                           </span>
-                          <span className="text-white/80 text-sm">/{billingPeriod}</span>
+                          <span className="text-white/80 text-lg font-medium">/{billingPeriod}</span>
                         </div>
                         {plan.originalPrice && (
-                          <div className="flex items-center justify-center gap-2 mb-2">
-                            <span className="text-sm text-white/60 line-through">
+                          <div className="flex items-center justify-center gap-3 mb-3">
+                            <span className="text-lg text-white/60 line-through font-medium">
                               ${getOriginalPrice(plan)}/{billingPeriod}
                             </span>
-                            <Badge className="bg-red-500 text-white border-red-500 text-xs px-2 py-1">
+                            <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white border-0 text-sm px-4 py-2 font-bold shadow-lg">
                               Save ${calculateSavings(plan).toFixed(2)}
                             </Badge>
                           </div>
                         )}
                         {billingPeriod === 'year' && (
-                          <p className="text-xs text-white/70">
+                          <p className="text-sm text-white/70 font-medium">
                             Billed annually (${plan.monthlyPrice}/month)
                           </p>
                         )}
                         {/* Savings Badge */}
-                        <div className="mt-3">
-                          <Badge className="bg-green-500 text-white border-green-500 text-xs px-3 py-1">
+                        <div className="mt-4">
+                          <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0 text-sm px-4 py-2 font-bold shadow-lg">
                             {plan.savings}
                           </Badge>
                         </div>
@@ -391,14 +397,16 @@ export default function PlansSection() {
                     </div>
                   </CardHeader>
 
-                  <CardContent className="pt-0 flex-1 flex flex-col">
+                  <CardContent className="pt-0 flex-1 flex flex-col relative z-10">
                     {/* Features List */}
                     <div className="flex-1">
-                      <ul className="space-y-3 mb-6">
+                      <ul className="space-y-4 mb-8">
                         {plan.features.map((feature: string, featureIndex: number) => (
-                          <li key={featureIndex} className="flex items-start gap-3">
-                            <CheckCircle className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
-                            <span className="text-white/90 text-sm leading-relaxed">{feature}</span>
+                          <li key={featureIndex} className="flex items-start gap-4 group">
+                            <div className="flex-shrink-0 w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
+                              <CheckCircle className="h-4 w-4 text-green-400" />
+                            </div>
+                            <span className="text-white/95 text-sm leading-relaxed font-medium group-hover:text-white transition-colors">{feature}</span>
                           </li>
                         ))}
                       </ul>
@@ -408,13 +416,13 @@ export default function PlansSection() {
                     <div className="mt-auto">
                       {/* CTA Button */}
                       <Button 
-                        className="w-full bg-white text-gray-900 font-semibold py-3 text-base transition-all duration-300 hover:bg-gray-100 hover:shadow-lg"
+                        className="w-full bg-gradient-to-r from-white to-gray-100 text-gray-900 font-bold py-4 text-lg transition-all duration-300 hover:from-gray-100 hover:to-white hover:shadow-2xl hover:scale-105 rounded-xl border-0 shadow-lg"
                       >
                         {plan.cta}
                       </Button>
 
                       {/* Additional Info */}
-                      <p className="text-xs text-white/70 text-center mt-3">
+                      <p className="text-xs text-white/70 text-center mt-4 font-medium">
                         {plan.name === 'Premier' ? 'Contact us for custom enterprise solutions' : 'No setup fees • Cancel anytime'}
                       </p>
                     </div>
@@ -428,69 +436,75 @@ export default function PlansSection() {
               const getPlanBackground = (planName: string) => {
                 switch (planName.toLowerCase()) {
                   case 'basic':
-                    return '!bg-blue-600';
+                    return 'bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800';
                   case 'plus':
-                    return '!bg-blue-600';
+                    return 'bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800';
                   case 'premier':
-                    return '!bg-blue-800';
+                    return 'bg-gradient-to-br from-indigo-700 via-indigo-800 to-indigo-900';
                   default:
-                    return '!bg-gray-800';
+                    return 'bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900';
                 }
               };
 
               return (
                 <Card 
                   key={plan.name}
-                  className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl ${getPlanBackground(plan.name)} h-full flex flex-col !text-white`}
+                  className={`relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:scale-105 ${getPlanBackground(plan.name)} h-full flex flex-col text-white border-0 shadow-xl`}
                 >
                   {/* Popular Badge */}
                   {plan.popular && (
-                    <div className="absolute top-4 left-4 transform -rotate-12">
-                      <div className="bg-blue-400 text-white px-3 py-1 text-xs font-bold rounded-sm shadow-md">
+                    <div className="absolute top-4 left-4 transform -rotate-12 z-10">
+                      <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 text-xs font-bold rounded-full shadow-lg border-2 border-white/20">
                         MOST POPULAR
                       </div>
                     </div>
                   )}
 
-                  <CardHeader className="text-center pb-6 pt-8">
+                  {/* Decorative background pattern */}
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12"></div>
+                  </div>
+
+                  <CardHeader className="text-center pb-6 pt-8 relative z-10">
                     {/* Plan Name */}
-                    <div className="mb-6">
-                      <CardTitle className="text-3xl font-bold text-white mb-4">
+                    <div className="mb-8">
+                      <CardTitle className="text-4xl font-bold text-white mb-4 tracking-tight">
                         {plan.name}
                       </CardTitle>
                       
-                      <CardDescription className="text-white/90 text-sm leading-relaxed mb-6">
+                      <CardDescription className="text-white/90 text-base leading-relaxed mb-6 max-w-xs mx-auto">
                         {plan.description}
                       </CardDescription>
                     </div>
 
-                    {/* Price Section - BCAA Style */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-6 border border-white/20">
+                    {/* Price Section - Enhanced BCAA Style */}
+                    <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20 shadow-inner">
                       <div className="text-center">
-                        <div className="flex items-baseline justify-center gap-1 mb-1">
-                          <span className="text-3xl font-bold text-white">
+                        <div className="flex items-baseline justify-center gap-2 mb-3">
+                          <span className="text-5xl font-black text-white">
                             ${getDiscountedPrice(plan)}
                           </span>
-                          <span className="text-white/80 text-sm">/{billingPeriod}</span>
+                          <span className="text-white/80 text-lg font-medium">/{billingPeriod}</span>
                         </div>
                         {plan.originalPrice && (
-                          <div className="flex items-center justify-center gap-2 mb-2">
-                            <span className="text-sm text-white/60 line-through">
+                          <div className="flex items-center justify-center gap-3 mb-3">
+                            <span className="text-lg text-white/60 line-through font-medium">
                               ${getOriginalPrice(plan)}/{billingPeriod}
                             </span>
-                            <Badge className="bg-red-500 text-white border-red-500 text-xs px-2 py-1">
+                            <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white border-0 text-sm px-4 py-2 font-bold shadow-lg">
                               Save ${calculateSavings(plan).toFixed(2)}
                             </Badge>
                           </div>
                         )}
                         {billingPeriod === 'year' && (
-                          <p className="text-xs text-white/70">
+                          <p className="text-sm text-white/70 font-medium">
                             Billed annually (${plan.monthlyPrice}/month)
                           </p>
                         )}
                         {/* Savings Badge */}
-                        <div className="mt-3">
-                          <Badge className="bg-green-500 text-white border-green-500 text-xs px-3 py-1">
+                        <div className="mt-4">
+                          <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0 text-sm px-4 py-2 font-bold shadow-lg">
                             {plan.savings}
                           </Badge>
                         </div>
@@ -498,14 +512,16 @@ export default function PlansSection() {
                     </div>
                   </CardHeader>
 
-                  <CardContent className="pt-0 flex-1 flex flex-col">
+                  <CardContent className="pt-0 flex-1 flex flex-col relative z-10">
                     {/* Features List */}
                     <div className="flex-1">
-                      <ul className="space-y-3 mb-6">
+                      <ul className="space-y-4 mb-8">
                         {plan.features.map((feature: string, featureIndex: number) => (
-                          <li key={featureIndex} className="flex items-start gap-3">
-                            <CheckCircle className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
-                            <span className="text-white/90 text-sm leading-relaxed">{feature}</span>
+                          <li key={featureIndex} className="flex items-start gap-4 group">
+                            <div className="flex-shrink-0 w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
+                              <CheckCircle className="h-4 w-4 text-green-400" />
+                            </div>
+                            <span className="text-white/95 text-sm leading-relaxed font-medium group-hover:text-white transition-colors">{feature}</span>
                           </li>
                         ))}
                       </ul>
@@ -515,13 +531,13 @@ export default function PlansSection() {
                     <div className="mt-auto">
                       {/* CTA Button */}
                       <Button 
-                        className="w-full bg-white text-gray-900 font-semibold py-3 text-base transition-all duration-300 hover:bg-gray-100 hover:shadow-lg"
+                        className="w-full bg-gradient-to-r from-white to-gray-100 text-gray-900 font-bold py-4 text-lg transition-all duration-300 hover:from-gray-100 hover:to-white hover:shadow-2xl hover:scale-105 rounded-xl border-0 shadow-lg"
                       >
                         {plan.cta}
                       </Button>
 
                       {/* Additional Info */}
-                      <p className="text-xs text-white/70 text-center mt-3">
+                      <p className="text-xs text-white/70 text-center mt-4 font-medium">
                         {plan.name === 'Premier' ? 'Contact us for custom enterprise solutions' : 'No setup fees • Cancel anytime'}
                       </p>
                     </div>
