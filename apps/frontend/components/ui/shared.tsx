@@ -106,7 +106,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       icon: "h-10 w-10"
     }
     
-    const classes = `${baseClasses} ${variants[variant]} ${sizes[size]} ${className || ''}`
+    const classes = `${baseClasses} ${variants[variant]} ${sizes[size]}` + (className ? ` ${className}` : '')
     
     return (
       <button

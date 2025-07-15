@@ -420,7 +420,7 @@ export default function PlansSection() {
                       {/* CTA Button */}
                       <Button
                         variant="outline"
-                        className="w-full bg-gradient-to-r from-white to-gray-100 font-bold py-4 text-lg transition-all duration-300 hover:from-gray-100 hover:to-white hover:shadow-2xl hover:scale-105 rounded-xl border-0 shadow-lg !text-gray-900"
+                        className="w-full bg-gradient-to-r from-white to-gray-100 font-bold py-4 text-lg text-gray-900 border border-gray-300 transition-all duration-300 hover:from-gray-100 hover:to-white hover:shadow-2xl hover:scale-105 rounded-xl shadow-lg"
                         aria-label={`Select the ${plan.name} plan`}
                         disabled={loadingPlan === plan.id}
                         onClick={async () => {
@@ -549,7 +549,7 @@ export default function PlansSection() {
                       {/* CTA Button */}
                       <Button 
                         variant="outline"
-                        className="w-full bg-gradient-to-r from-white to-gray-100 font-bold py-4 text-lg transition-all duration-300 hover:from-gray-100 hover:to-white hover:shadow-2xl hover:scale-105 rounded-xl border-0 shadow-lg !text-gray-900"
+                        className="w-full bg-gradient-to-r from-white to-gray-100 font-bold py-4 text-lg text-gray-900 border border-gray-300 transition-all duration-300 hover:from-gray-100 hover:to-white hover:shadow-2xl hover:scale-105 rounded-xl shadow-lg"
                         aria-label={`Select the ${plan.name} plan`}
                         disabled={loadingPlan === plan.id}
                         onClick={async () => {
