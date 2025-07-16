@@ -30,7 +30,7 @@ export default function BCLocationBanner() {
     <>
       {/* If user is in BC and has a location, show success banner */}
       {isInBC && userLocation && userCity ? (
-        <div className="bg-green-50 border-b border-green-200">
+        <div className="bg-green-50 border-b border-green-200" data-location-banner>
           <div className="container mx-auto px-4 py-3">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
               <div className="flex items-center space-x-3 flex-1 min-w-0">
@@ -55,7 +55,7 @@ export default function BCLocationBanner() {
         </div>
       ) : userLocation && !isInBC ? (
         /* If user is not in BC, show warning banner */
-        <div className="bg-yellow-50 border-b border-yellow-200">
+        <div className="bg-yellow-50 border-b border-yellow-200" data-location-banner>
           <div className="container mx-auto px-4 py-3">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
               <div className="flex items-center space-x-3 flex-1 min-w-0">

@@ -30,6 +30,9 @@ import {
   Truck
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useSubscriptionPrerequisites } from '@/hooks/use-subscription-prerequisites';
+import { toast } from 'sonner';
+import LocationPromptModal from '@/components/location/LocationPromptModal';
 
 // Icon mapping for plans
 const getPlanIcon = (iconName: string) => {
@@ -117,7 +120,10 @@ export default function PlansSection() {
   const { data: plansData, isLoading: plansLoading } = usePlans();
   const { data: userPlanData, error: userPlanError } = useUserPlan();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [selectedPlanForLocation, setSelectedPlanForLocation] = useState<any>(null);
   const router = useRouter();
+  const prerequisites = useSubscriptionPrerequisites();
 
   // Fallback plans in case API fails
   const fallbackPlans = [
@@ -430,6 +436,26 @@ export default function PlansSection() {
                         disabled={loadingPlan === plan.id}
                         onClick={async () => {
                           setLoadingPlan(plan.id);
+                          
+                          // Check prerequisites before proceeding
+                          const canProceed = await prerequisites.checkAndRedirect(plan.id);
+                          
+                          if (!canProceed) {
+                            setLoadingPlan(null);
+                            // Show appropriate message based on what's missing
+                            if (!prerequisites.isAuthenticated) {
+                              toast.info('Please log in to subscribe to a plan', {
+                                description: 'You\'ll be redirected to the login page.',
+                              });
+                            } else if (!prerequisites.hasValidLocation) {
+                              // Show location modal instead of just a toast
+                              setSelectedPlanForLocation(plan);
+                              setShowLocationModal(true);
+                            }
+                            return;
+                          }
+                          
+                          // All prerequisites met, proceed to subscription
                           router.push(`/dashboard/customer/book-service?plan=${plan.id}`);
                         }}
                       >
@@ -559,6 +585,26 @@ export default function PlansSection() {
                         disabled={loadingPlan === plan.id}
                         onClick={async () => {
                           setLoadingPlan(plan.id);
+                          
+                          // Check prerequisites before proceeding
+                          const canProceed = await prerequisites.checkAndRedirect(plan.id);
+                          
+                          if (!canProceed) {
+                            setLoadingPlan(null);
+                            // Show appropriate message based on what's missing
+                            if (!prerequisites.isAuthenticated) {
+                              toast.info('Please log in to subscribe to a plan', {
+                                description: 'You\'ll be redirected to the login page.',
+                              });
+                            } else if (!prerequisites.hasValidLocation) {
+                              // Show location modal instead of just a toast
+                              setSelectedPlanForLocation(plan);
+                              setShowLocationModal(true);
+                            }
+                            return;
+                          }
+                          
+                          // All prerequisites met, proceed to subscription
                           router.push(`/dashboard/customer/book-service?plan=${plan.id}`);
                         }}
                       >
@@ -807,6 +853,22 @@ export default function PlansSection() {
           </div>
         </div>
       </div>
+
+      {/* Location Prompt Modal */}
+      <LocationPromptModal
+        isOpen={showLocationModal}
+        onClose={() => {
+          setShowLocationModal(false);
+          setSelectedPlanForLocation(null);
+        }}
+        onLocationSet={() => {
+          // After location is set, proceed with the subscription
+          if (selectedPlanForLocation) {
+            router.push(`/dashboard/customer/book-service?plan=${selectedPlanForLocation.id}`);
+          }
+        }}
+        planName={selectedPlanForLocation?.name}
+      />
     </section>
   );
 } 

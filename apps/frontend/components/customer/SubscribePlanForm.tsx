@@ -23,6 +23,8 @@ import {
 import { useCurrentUser } from '@/hooks/use-api';
 import { usePlans } from '@/hooks/use-plans';
 import Link from 'next/link';
+import { useSubscriptionPrerequisites } from '@/hooks/use-subscription-prerequisites';
+import LocationPromptModal from '@/components/location/LocationPromptModal';
 
 interface SubscribePlanFormProps {
   planId: string;
@@ -122,8 +124,10 @@ export default function SubscribePlanForm({ planId }: SubscribePlanFormProps) {
   const [subscribing, setSubscribing] = useState(false);
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [debugMode, setDebugMode] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const { data: userData, isLoading: userLoading } = useCurrentUser();
   const { data: plansData, isLoading: plansLoading } = usePlans();
+  const prerequisites = useSubscriptionPrerequisites();
 
   // Debug logging
   useEffect(() => {
@@ -169,6 +173,15 @@ export default function SubscribePlanForm({ planId }: SubscribePlanFormProps) {
   const handleSubscribe = async () => {
     if (!selectedPlan) {
       toast.error('Plan details not found. Please try again.');
+      return;
+    }
+
+    // Check location before proceeding with subscription
+    if (!prerequisites.hasValidLocation) {
+      setShowLocationModal(true);
+      toast.info('Please verify your location', {
+        description: 'We need to confirm you\'re in our BC service area.',
+      });
       return;
     }
 
@@ -369,11 +382,25 @@ export default function SubscribePlanForm({ planId }: SubscribePlanFormProps) {
               <Shield className="h-4 w-4" />
               <span>Secure registration • No setup fees • Cancel anytime</span>
             </div>
-          </div>
-        </Card>
-      </div>
-    );
-  }
+                  </div>
+      </Card>
+
+      {/* Location Prompt Modal */}
+      <LocationPromptModal
+        isOpen={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        onLocationSet={() => {
+          setShowLocationModal(false);
+          // After location is set, automatically proceed with subscription
+          setTimeout(() => {
+            handleSubscribe();
+          }, 500);
+        }}
+        planName={selectedPlan?.name}
+      />
+    </div>
+  );
+}
 
   // User authenticated - show subscription form
   return (
