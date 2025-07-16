@@ -21,7 +21,7 @@ const nextApp = next({
 const handle = nextApp.getRequestHandler();
 
 // Import backend app
-import('./apps/backend/src/app.js').then(({ default: backendApp }) => {
+import('./apps/backend/src/app.js').then(({ app: backendApp }) => {
   // Start the unified server
   nextApp.prepare().then(() => {
     const server = createServer(async (req, res) => {
