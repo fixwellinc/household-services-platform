@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useSearchParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRegister } from '@/hooks/use-api';
@@ -25,6 +26,7 @@ export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const registerMutation = useRegister();
+  const searchParams = useSearchParams();
 
   const {
     register,
@@ -39,9 +41,19 @@ export default function RegisterForm() {
       // Always register as CUSTOMER since we removed provider option
       const registrationData = { ...data, role: 'CUSTOMER' as const };
       await registerMutation.mutateAsync(registrationData);
-              toast.success('Registration successful! Welcome to Fixwell Services!');
-      // Redirect to dashboard or home page
-      window.location.href = '/';
+      toast.success('Registration successful! Welcome to Fixwell Services!');
+      
+      // Handle redirect after successful registration
+      const redirectUrl = searchParams.get('redirect');
+      if (redirectUrl) {
+        // Decode the URL and redirect
+        const decodedUrl = decodeURIComponent(redirectUrl);
+        console.log('Redirecting to:', decodedUrl);
+        window.location.href = decodedUrl;
+      } else {
+        // Default redirect to dashboard
+        window.location.href = '/dashboard';
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Registration failed');
     }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/shared';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
@@ -11,6 +12,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading } = useAuth();
+  const searchParams = useSearchParams();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +25,18 @@ export default function LoginForm() {
     
     try {
       await login(email, password);
-      // The AuthContext will handle the success toast and state update
+      
+      // Handle redirect after successful login
+      const redirectUrl = searchParams.get('redirect');
+      if (redirectUrl) {
+        // Decode the URL and redirect
+        const decodedUrl = decodeURIComponent(redirectUrl);
+        console.log('Redirecting to:', decodedUrl);
+        window.location.href = decodedUrl;
+      } else {
+        // Default redirect to dashboard
+        window.location.href = '/dashboard';
+      }
     } catch (error) {
       console.error('Login error:', error);
       // The AuthContext will handle the error toast
