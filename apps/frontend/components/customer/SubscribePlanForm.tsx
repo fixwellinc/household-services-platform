@@ -272,7 +272,7 @@ export default function SubscribePlanForm({ planId }: SubscribePlanFormProps) {
               <span className="text-white/80">/{billingPeriod === 'yearly' ? 'year' : 'month'}</span>
             </div>
             
-            {getOriginalPrice() && (
+            {getSavings() && (
               <div className="flex items-center justify-center gap-3 mb-2">
                 <span className="text-lg text-white/60 line-through">
                   ${getOriginalPrice()?.toFixed(2)}
