@@ -115,7 +115,7 @@ const stats = [
 export default function PlansSection() {
   const [billingPeriod, setBillingPeriod] = useState<'month' | 'year'>('month');
   const { data: plansData, isLoading: plansLoading } = usePlans();
-  const { data: userPlanData } = useUserPlan();
+  const { data: userPlanData, error: userPlanError } = useUserPlan();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const router = useRouter();
 
@@ -190,10 +190,15 @@ export default function PlansSection() {
   const plans = (plansData as any)?.plans || fallbackPlans;
   const userPlan = (userPlanData as any)?.subscription;
 
-  // Debug logging
-  console.log('Plans data:', plans);
-  console.log('Plans loading:', plansLoading);
-  console.log('User plan:', userPlan);
+  // Debug logging - only log if there's an error or if user plan data exists
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Plans data:', plans);
+    console.log('Plans loading:', plansLoading);
+    console.log('User plan:', userPlan);
+    if (userPlanError) {
+      console.log('User plan error:', userPlanError);
+    }
+  }
 
   const getDiscountedPrice = (plan: any) => {
     if (billingPeriod === 'year') {

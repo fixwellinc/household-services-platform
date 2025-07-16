@@ -84,6 +84,7 @@ export const useUserPlan = () => {
     }> => {
       return api.getUserPlan();
     },
+    enabled: typeof window !== 'undefined' && !!localStorage.getItem('auth_token'),
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // React Query v5
   });

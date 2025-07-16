@@ -74,11 +74,12 @@ export class ApiClient {
     options: RequestInit = {}
   ): Promise<T> => {
     const url = `${this.baseURL}${endpoint}`;
-      // API request logging (development only)
-  if (process.env.NODE_ENV === 'development') {
-    console.log('API request to:', url);
-    console.log('Request method:', options.method || 'GET');
-  }
+    
+    // API request logging (development only)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('API request to:', url);
+      console.log('Request method:', options.method || 'GET');
+    }
     
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -113,24 +114,43 @@ export class ApiClient {
 
       const response = await fetch(url, fetchOptions);
 
-          if (process.env.NODE_ENV === 'development') {
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-    }
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('API error response:', errorData);
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        
+        // Only log errors in development or if they're not authentication-related
+        if (process.env.NODE_ENV === 'development' || response.status !== 401) {
+          console.error('API error response:', errorData);
+        }
+        
+        // Provide more specific error messages
+        if (response.status === 401) {
+          throw new Error('Authentication required. Please log in to continue.');
+        } else if (response.status === 403) {
+          throw new Error('Access denied. You do not have permission to perform this action.');
+        } else if (response.status === 404) {
+          throw new Error('Resource not found.');
+        } else if (response.status >= 500) {
+          throw new Error('Server error. Please try again later.');
+        } else {
+          throw new Error(errorData.error || `Request failed with status ${response.status}`);
+        }
       }
 
       const data = await response.json();
       if (process.env.NODE_ENV === 'development') {
-      console.log('API response data:', data);
-    }
+        console.log('API response data:', data);
+      }
       return data;
     } catch (error) {
-      console.error('API request failed:', error);
+      // Only log API request failures in development or if they're not authentication-related
+      if (process.env.NODE_ENV === 'development' || !(error instanceof Error && error.message?.includes('Authentication required'))) {
+        console.error('API request failed:', error);
+      }
       throw error;
     }
   }
