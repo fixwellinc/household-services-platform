@@ -64,7 +64,6 @@
   
   html {
     scroll-behavior: smooth;
-    -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
   
@@ -73,8 +72,6 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     line-height: 1.6;
     -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
     user-select: text;
   }
 
