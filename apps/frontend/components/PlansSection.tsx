@@ -456,7 +456,7 @@ export default function PlansSection() {
                           }
                           
                           // All prerequisites met, proceed to subscription
-                          router.push(`/dashboard/customer/book-service?plan=${plan.id}`);
+                          router.push(`/pricing/subscribe?plan=${plan.id}`);
                         }}
                       >
                         {loadingPlan === plan.id ? (
@@ -605,7 +605,7 @@ export default function PlansSection() {
                           }
                           
                           // All prerequisites met, proceed to subscription
-                          router.push(`/dashboard/customer/book-service?plan=${plan.id}`);
+                          router.push(`/pricing/subscribe?plan=${plan.id}`);
                         }}
                       >
                         {loadingPlan === plan.id ? (

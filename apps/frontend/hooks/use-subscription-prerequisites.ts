@@ -31,7 +31,7 @@ export function useSubscriptionPrerequisites(): UseSubscriptionPrerequisitesResu
 
   const redirectToLogin = (planId: string) => {
     const currentUrl = window.location.pathname + window.location.search;
-    const redirectUrl = `/dashboard/customer/book-service?plan=${planId}`;
+    const redirectUrl = `/pricing/subscribe?plan=${planId}`;
     router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
   };
 

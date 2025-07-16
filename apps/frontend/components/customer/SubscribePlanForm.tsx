@@ -202,8 +202,8 @@ export default function SubscribePlanForm({ planId }: SubscribePlanFormProps) {
         body: JSON.stringify({
           priceId,
           tier: planId.toUpperCase(),
-          successUrl: `${window.location.origin}/dashboard/customer/book-service?success=true&plan=${planId}`,
-          cancelUrl: `${window.location.origin}/dashboard/customer/book-service?canceled=true&plan=${planId}`,
+          successUrl: `${window.location.origin}/pricing/subscribe?success=true&plan=${planId}`,
+          cancelUrl: `${window.location.origin}/pricing/subscribe?canceled=true&plan=${planId}`,
         }),
       });
 
