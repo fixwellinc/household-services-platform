@@ -16,8 +16,10 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata = {
-      title: 'Fixwell Services | Professional Home Services',
+  title: 'Fixwell Services | Professional Home Services',
   description: 'Book cleaning, repairs, and more with trusted, verified professionals. Choose from Basic, Plus, or Premier plans.',
+  metadataBase: new URL('https://roasted-key-production.up.railway.app'),
+  charset: 'utf-8',
   icons: {
     icon: [
       { url: '/favicon.ico' },
@@ -64,9 +66,6 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />

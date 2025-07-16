@@ -338,6 +338,8 @@ export default function ChatWidget({ customerName, customerEmail }: ChatWidgetPr
           onClick={handleOpenChat}
           className="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg relative"
           size="lg"
+          aria-label={unreadAdminCount > 0 ? `Open chat (${unreadAdminCount} unread messages)` : "Open chat"}
+          title={unreadAdminCount > 0 ? `Open chat (${unreadAdminCount} unread messages)` : "Open chat"}
         >
           <MessageSquare className="h-6 w-6" />
           {unreadAdminCount > 0 && (
@@ -363,12 +365,16 @@ export default function ChatWidget({ customerName, customerEmail }: ChatWidgetPr
             <button
               onClick={() => setIsMinimized(!isMinimized)}
               className="text-white hover:text-gray-200"
+              aria-label={isMinimized ? "Maximize chat" : "Minimize chat"}
+              title={isMinimized ? "Maximize chat" : "Minimize chat"}
             >
               {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
             </button>
             <button
               onClick={() => setIsOpen(false)}
               className="text-white hover:text-gray-200"
+              aria-label="Close chat"
+              title="Close chat"
             >
               <X className="h-4 w-4" />
             </button>

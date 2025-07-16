@@ -119,6 +119,8 @@ export default function BCLocationBanner() {
                   setPostalCodeInput(userLocation || '');
                 }}
                 className="text-gray-400 hover:text-gray-600 p-2 rounded-md hover:bg-gray-100 transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                aria-label="Close location input"
+                title="Close location input"
               >
                 <X className="h-5 w-5" />
               </button>

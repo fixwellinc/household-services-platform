@@ -90,7 +90,25 @@ io.on('connection', (socket) => {
 app.set('io', io);
 
 // PATTERN: Security middleware first
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://js.stripe.com", "https://m.stripe.network"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https://api.stripe.com"],
+      frameSrc: ["https://js.stripe.com", "https://hooks.stripe.com"],
+      frameAncestors: ["'none'"]
+    }
+  },
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// Remove X-Powered-By header
+app.disable('x-powered-by');
 
 // CORS configuration - Properly configured for production
 const corsOptions = {
@@ -166,6 +184,15 @@ app.use(cookieParser());
 
 // Input sanitization
 app.use(sanitize);
+
+// Add cache control headers for API responses
+app.use('/api', (req, res, next) => {
+  // Most API responses should not be cached
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
 
 // Health check endpoint
 app.get('/api/health', async (req, res) => {
@@ -600,8 +627,11 @@ app.get('/settings', async (req, res) => {
   res.json({ settings: { notifications: true, darkMode: false } });
 });
 
-// Serve uploads directory for chat file access
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+// Serve uploads directory for chat file access with cache control
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 hours
+  next();
+}, express.static(path.join(process.cwd(), 'uploads')));
 
 // PATTERN: Error handling middleware last
 app.use(errorLogger);
