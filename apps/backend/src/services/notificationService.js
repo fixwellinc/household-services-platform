@@ -205,16 +205,37 @@ class NotificationService {
   }
 
   /**
-   * Get notification settings
+   * Get notification settings (persistent)
    */
-  getNotificationSettings() {
-    return {
-      smsEnabled: this.enableSMS,
-      emailEnabled: this.enableEmail,
-      ownerPhone: this.ownerPhone,
-      managerPhones: this.managerPhones,
-      notificationTypes: process.env.SMS_NOTIFICATION_TYPES?.split(',') || []
-    };
+  async getNotificationSettings() {
+    try {
+      // Import prisma dynamically to avoid circular dependencies
+      const { PrismaClient } = await import('@prisma/client');
+      const prisma = new PrismaClient();
+      const keys = [
+        'smsEnabled',
+        'ownerPhone',
+        'managerPhones',
+        'notificationTypes'
+      ];
+      const settings = await prisma.setting.findMany({ where: { key: { in: keys } } });
+      const map = Object.fromEntries(settings.map(s => [s.key, s.value]));
+      await prisma.$disconnect();
+      return {
+        smsEnabled: map.smsEnabled === undefined ? (process.env.ENABLE_SMS_NOTIFICATIONS === 'true') : map.smsEnabled === 'true',
+        ownerPhone: map.ownerPhone || process.env.OWNER_PHONE_NUMBER || '',
+        managerPhones: map.managerPhones || process.env.MANAGER_PHONE_NUMBERS || '',
+        notificationTypes: map.notificationTypes ? map.notificationTypes.split(',') : (process.env.SMS_NOTIFICATION_TYPES ? process.env.SMS_NOTIFICATION_TYPES.split(',') : ['new_chat', 'urgent_chat'])
+      };
+    } catch (error) {
+      console.error('Failed to load notification settings:', error);
+      return {
+        smsEnabled: process.env.ENABLE_SMS_NOTIFICATIONS === 'true',
+        ownerPhone: process.env.OWNER_PHONE_NUMBER || '',
+        managerPhones: process.env.MANAGER_PHONE_NUMBERS || '',
+        notificationTypes: process.env.SMS_NOTIFICATION_TYPES ? process.env.SMS_NOTIFICATION_TYPES.split(',') : ['new_chat', 'urgent_chat']
+      };
+    }
   }
 }
 

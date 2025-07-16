@@ -322,39 +322,70 @@ class EmailService {
   async sendSubscriptionMarketingEmail(user, planType = 'all') {
     const fs = await import('fs/promises');
     const path = await import('path');
-    const subject = "Your Home's Personal Fix-It Team for Just $39/Month";
+    const subject = "Stop Stressing About Home Repairs - Professional Maintenance for Just $39/Month";
     const text = `
       Hi ${user.name},
 
-      Tired of endless home repair stress? Let Fixwell handle your to-do list with professional, reliable, and affordable home maintenance.
+      Are you tired of that growing list of home repairs that never seems to get done? That dripping faucet, squeaky door, or flickering light has been on your "to-do" list for months, and finding a reliable handyman feels like a part-time job.
 
-      Why Fixwell Members Love Us:
-      ✓ No More Contractor Hunting
-      ✓ Proactive Maintenance
-      ✓ Predictable Costs
-      ✓ Quality Guaranteed
-      ✓ Fully Insured & Bonded
-      ✓ Same-Day Response
+      What if you had a professional fix-it team on speed dial? Introducing Fixwell Subscription Services - your home's personal maintenance team that keeps everything running smoothly, so you can focus on what matters most.
 
-      Limited Time: First Month Only $19!
+      CHOOSE YOUR PERFECT PLAN:
+
+      🔧 STARTER PLAN - $39/month
+      • Quarterly visits (30 min each)
+      • Minor repairs & maintenance
+      • Lightbulb changes & safety checks
+      • FREE annual home inspection
+      • Priority scheduling
+      • 24/7 emergency support
+
+      🏠 HOMECARE PLAN - $59/month ⭐ MOST POPULAR
+      • Monthly visits (1 hour each)
+      • Everything in Starter PLUS
+      • Gutter cleaning & seasonal maintenance
+      • Small drywall repairs & caulking
+      • 10% off larger projects
+      • FREE annual deep cleaning
+
+      ⭐ PRIORITY PLAN - $150/month
+      • 2 visits monthly (2 hours total)
+      • Everything above PLUS
+      • Same-week emergency callouts
+      • Smart home setup & TV mounting
+      • FREE consumables included
+      • Dedicated account manager
+
+      💎 WHY FIXWELL MEMBERS LOVE US:
+      ✅ No More Contractor Hunting
+      ✅ Proactive Maintenance
+      ✅ Predictable Costs
+      ✅ Quality Guaranteed
+      ✅ Fully Insured & Bonded
+      ✅ Same-Day Response
+
+      🔥 LIMITED TIME OFFER: FIRST MONTH ONLY $19! 🔥
 
       Ready to never stress about home repairs again?
 
-      Questions? Call us: (555) 123-4567
-      Learn more: www.fixwell.com
-      Email us: hello@fixwell.com
+      📞 Questions? Call us: (555) 123-4567
+      🌐 Learn more: https://fixwell-services-platform-production.up.railway.app
+      📧 Email us: jm@fixwell.ca
 
-      P.S. Current subscribers get 10% off when they refer friends. Know someone who needs Fixwell? Send them our way!
+      💡 P.S. Current subscribers get 10% off when they refer friends! Know someone who needs Fixwell? Send them our way!
 
       Already have a handyman? No problem! Our subscription works alongside major projects - we handle the small stuff so your contractor can focus on the big jobs.
 
       Best regards,
       The Fixwell Team
+      "Making homes better, one fix at a time"
     `;
-    // Load the HTML template and replace {{name}}
-    const templatePath = path.join(process.cwd(), 'apps', 'backend', 'src', 'templates', 'marketing_email.html');
+    
+    // Load the new HTML template and replace {{name}}
+    const templatePath = path.join(process.cwd(), 'apps', 'backend', 'src', 'templates', 'fixwell_email_blast.html');
     let html = await fs.readFile(templatePath, 'utf8');
     html = html.replace(/\{\{name\}\}/g, user.name || 'there');
+    
     return this.sendEmail({
       to: user.email,
       subject,

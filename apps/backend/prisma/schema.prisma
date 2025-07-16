@@ -137,3 +137,31 @@ model EmailTemplate {
   updatedAt DateTime @updatedAt
   createdBy String?
 } 
+
+model ChatSession {
+  id            String   @id @default(cuid())
+  customerName  String
+  customerEmail String?
+  status        String   @default("ACTIVE")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastAdminReadAt DateTime?
+  lastCustomerReadAt DateTime?
+  messages      ChatMessage[]
+}
+
+model ChatMessage {
+  id            String   @id @default(cuid())
+  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id])
+  chatSessionId String
+  sender        String   // 'customer', 'admin', 'manager', or phone/email
+  senderType    String   // 'customer', 'admin', 'sms'
+  message       String
+  sentAt        DateTime @default(now())
+  viaSMS        Boolean  @default(false)
+  readBy        String[] // 'customer', 'admin'
+  // File attachment fields
+  fileName      String?
+  fileType      String?
+  fileUrl       String?
+} 

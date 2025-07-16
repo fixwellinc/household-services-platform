@@ -14,6 +14,9 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
+import http from 'http';
+import { Server as SocketIOServer } from 'socket.io';
+import path from 'path';
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -40,6 +43,51 @@ import prisma from './config/database.js';
 import { getCorsOptions } from './config/environment.js';
 
 const app = express();
+const server = http.createServer(app);
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
+});
+
+// Socket.IO real-time chat events
+io.on('connection', (socket) => {
+  console.log('🔌 New client connected:', socket.id);
+
+  // Join a chat room
+  socket.on('join-session', (chatId) => {
+    socket.join(chatId);
+    console.log(`Socket ${socket.id} joined chat ${chatId}`);
+  });
+
+  // Relay new messages to the room
+  socket.on('new-message', (data) => {
+    if (data && data.chatId) {
+      io.to(data.chatId).emit('new-message', data);
+    }
+  });
+
+  // Typing indicators
+  socket.on('typing', (data) => {
+    if (data && data.chatId) {
+      socket.to(data.chatId).emit('typing', { chatId: data.chatId, sender: data.sender });
+    }
+  });
+  socket.on('stop-typing', (data) => {
+    if (data && data.chatId) {
+      socket.to(data.chatId).emit('stop-typing', { chatId: data.chatId, sender: data.sender });
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('🔌 Client disconnected:', socket.id);
+  });
+});
+
+// Make io available to routes
+app.set('io', io);
 
 // PATTERN: Security middleware first
 app.use(helmet());
@@ -552,6 +600,9 @@ app.get('/settings', async (req, res) => {
   res.json({ settings: { notifications: true, darkMode: false } });
 });
 
+// Serve uploads directory for chat file access
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
 // PATTERN: Error handling middleware last
 app.use(errorLogger);
 app.use(errorHandler);
@@ -575,4 +626,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   });
 }
 
-export default app; 
+export { app, server, io }; 

@@ -2,16 +2,33 @@ import express from 'express';
 import { requireAdmin } from '../middleware/auth.js';
 import notificationService from '../services/notificationService.js';
 import smsService from '../services/sms.js';
+import prisma from '../config/database.js';
 
 const router = express.Router();
 
 /**
- * Get notification settings
+ * Get notification settings (persistent)
  */
 router.get('/settings', requireAdmin, async (req, res) => {
   try {
-    const settings = notificationService.getNotificationSettings();
-    res.json({ success: true, settings });
+    // Try to load from DB first
+    const keys = [
+      'smsEnabled',
+      'ownerPhone',
+      'managerPhones',
+      'notificationTypes'
+    ];
+    const settings = await prisma.setting.findMany({ where: { key: { in: keys } } });
+    const map = Object.fromEntries(settings.map(s => [s.key, s.value]));
+
+    // Fallbacks (env/defaults)
+    const result = {
+      smsEnabled: map.smsEnabled === undefined ? (process.env.ENABLE_SMS_NOTIFICATIONS === 'true') : map.smsEnabled === 'true',
+      ownerPhone: map.ownerPhone || process.env.OWNER_PHONE_NUMBER || '',
+      managerPhones: map.managerPhones || process.env.MANAGER_PHONE_NUMBERS || '',
+      notificationTypes: map.notificationTypes ? map.notificationTypes.split(',') : (process.env.SMS_NOTIFICATION_TYPES ? process.env.SMS_NOTIFICATION_TYPES.split(',') : ['new_chat', 'urgent_chat'])
+    };
+    res.json({ success: true, settings: result });
   } catch (error) {
     console.error('Error getting notification settings:', error);
     res.status(500).json({ success: false, error: 'Failed to get settings' });
@@ -19,12 +36,11 @@ router.get('/settings', requireAdmin, async (req, res) => {
 });
 
 /**
- * Update notification settings
+ * Update notification settings (persistent)
  */
 router.post('/settings', requireAdmin, async (req, res) => {
   try {
     const { smsEnabled, ownerPhone, managerPhones, notificationTypes } = req.body;
-    
     // Validate phone numbers
     if (smsEnabled) {
       if (ownerPhone && !smsService.validatePhoneNumber(ownerPhone)) {
@@ -33,7 +49,6 @@ router.post('/settings', requireAdmin, async (req, res) => {
           error: 'Invalid owner phone number format. Use E.164 format (e.g., +1234567890)' 
         });
       }
-      
       if (managerPhones) {
         const phones = managerPhones.split(',').map(p => p.trim());
         for (const phone of phones) {
@@ -46,11 +61,20 @@ router.post('/settings', requireAdmin, async (req, res) => {
         }
       }
     }
-
-    // Save settings to environment or database
-    // For now, we'll just return success
-    // In production, you'd want to save these to a database
-    
+    // Save settings to DB
+    const upserts = [
+      { key: 'smsEnabled', value: String(!!smsEnabled) },
+      { key: 'ownerPhone', value: ownerPhone || '' },
+      { key: 'managerPhones', value: managerPhones || '' },
+      { key: 'notificationTypes', value: Array.isArray(notificationTypes) ? notificationTypes.join(',') : (notificationTypes || '') }
+    ];
+    for (const setting of upserts) {
+      await prisma.setting.upsert({
+        where: { key: setting.key },
+        update: { value: setting.value },
+        create: { key: setting.key, value: setting.value }
+      });
+    }
     res.json({ success: true, message: 'Settings updated successfully' });
   } catch (error) {
     console.error('Error updating notification settings:', error);
