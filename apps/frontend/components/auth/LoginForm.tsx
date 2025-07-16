@@ -28,13 +28,20 @@ export default function LoginForm() {
       
       // Handle redirect after successful login
       const redirectUrl = searchParams.get('redirect');
+      console.log('🔄 LoginForm redirect handling:', {
+        redirectUrl,
+        decodedUrl: redirectUrl ? decodeURIComponent(redirectUrl) : null,
+        searchParams: Object.fromEntries(searchParams.entries())
+      });
+      
       if (redirectUrl) {
         // Decode the URL and redirect
         const decodedUrl = decodeURIComponent(redirectUrl);
-        console.log('Redirecting to:', decodedUrl);
+        console.log('✅ Redirecting to:', decodedUrl);
         window.location.href = decodedUrl;
       } else {
         // Default redirect to dashboard
+        console.log('📋 No redirect URL, going to dashboard');
         window.location.href = '/dashboard';
       }
     } catch (error) {

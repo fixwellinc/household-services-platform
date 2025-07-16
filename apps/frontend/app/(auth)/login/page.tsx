@@ -15,10 +15,20 @@ function LoginContent() {
   useEffect(() => {
     if (user && !isLoading && isHydrated) {
       const redirectUrl = searchParams.get('redirect');
+      console.log('🏠 LoginPage useEffect redirect handling:', {
+        user: !!user,
+        isLoading,
+        isHydrated,
+        redirectUrl,
+        decodedUrl: redirectUrl ? decodeURIComponent(redirectUrl) : null
+      });
+      
       if (redirectUrl) {
         const decodedUrl = decodeURIComponent(redirectUrl);
+        console.log('🚀 LoginPage redirecting to:', decodedUrl);
         router.push(decodedUrl);
       } else {
+        console.log('🏠 LoginPage redirecting to dashboard');
         router.push('/dashboard');
       }
     }
