@@ -193,7 +193,7 @@ export default function AdminPage() {
               <h1 className="text-2xl font-bold text-gray-900">
                 {navigation.find(item => item.id === activeTab)?.name || 'Dashboard'}
               </h1>
-              <p className="text-gray-600">Manage your application from here</p>
+              <p className="text-gray-600">Manage your application from here.</p>
             </div>
 
             {/* Tab content */}
