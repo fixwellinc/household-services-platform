@@ -51,9 +51,8 @@ export function useSubscriptionPrerequisites(): UseSubscriptionPrerequisitesResu
       return false;
     }
 
-    // If authenticated but no valid location, prompt for location
+    // If authenticated but no valid location, don't redirect - let component handle
     if (!hasValidLocation) {
-      promptForLocation();
       return false;
     }
 
