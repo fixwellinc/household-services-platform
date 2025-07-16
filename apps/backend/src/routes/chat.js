@@ -1,10 +1,12 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import notificationService from '../services/notificationService.js';
-import prisma from '../config/database.js';
+import { PrismaClient } from '@prisma/client';
 import smsService from '../services/sms.js';
 import multer from 'multer';
 import path from 'path';
+
+const prisma = new PrismaClient();
 
 const router = express.Router();
 
@@ -43,7 +45,25 @@ const upload = multer({
  */
 router.post('/start', async (req, res) => {
   try {
+    console.log('Chat start request received:', req.body);
+    
+    // Check if Prisma client and models are available
+    if (!prisma) {
+      throw new Error('Database connection not available');
+    }
+    
+    if (!prisma.chatSession) {
+      throw new Error('ChatSession model not available in Prisma client');
+    }
+    
     const { customerName, customerEmail, initialMessage } = req.body;
+    
+    console.log('Creating chat session with data:', {
+      customerName: customerName || 'Anonymous',
+      customerEmail: customerEmail || '',
+      status: 'ACTIVE'
+    });
+    
     const session = await prisma.chatSession.create({
       data: {
         customerName: customerName || 'Anonymous',
@@ -59,15 +79,24 @@ router.post('/start', async (req, res) => {
         } : undefined
       },
     });
+    
+    console.log('Chat session created successfully:', session.id);
+    
     // Send notification to owner/managers
     if (process.env.ENABLE_SMS_NOTIFICATIONS === 'true') {
-      await notificationService.notifyNewChat({
-        customerName: session.customerName,
-        message: initialMessage || 'Customer started a chat',
-        chatId: session.id,
-        priority: 'NORMAL'
-      });
+      try {
+        await notificationService.notifyNewChat({
+          customerName: session.customerName,
+          message: initialMessage || 'Customer started a chat',
+          chatId: session.id,
+          priority: 'NORMAL'
+        });
+      } catch (notificationError) {
+        console.warn('Failed to send notification:', notificationError);
+        // Don't fail the chat creation if notification fails
+      }
     }
+    
     res.json({
       success: true,
       chatId: session.id,
@@ -75,9 +104,17 @@ router.post('/start', async (req, res) => {
     });
   } catch (error) {
     console.error('Error starting chat:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      prismaAvailable: !!prisma,
+      chatSessionAvailable: !!(prisma && prisma.chatSession)
+    });
+    
     res.status(500).json({
       success: false,
-      error: 'Failed to start chat session'
+      error: 'Failed to start chat session',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
