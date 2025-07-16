@@ -17,7 +17,8 @@ import {
   LogIn,
   UserPlus,
   ArrowRight,
-  Loader2
+  Loader2,
+  Bug
 } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-api';
 import { usePlans } from '@/hooks/use-plans';
@@ -39,14 +40,110 @@ const PLAN_COLORS = {
   premier: 'from-amber-500 to-amber-600'
 };
 
+// Fallback plan data for debugging
+const FALLBACK_PLANS: Record<string, any> = {
+  basic: {
+    id: 'basic',
+    name: 'Basic',
+    description: 'Perfect for those who own a car and drive shorter distances',
+    monthlyPrice: 7.92,
+    yearlyPrice: 95,
+    originalPrice: 9.99,
+    savings: '$1,500+ saved per year',
+    color: 'blue',
+    icon: 'star',
+    features: [
+      'All GO Plan features',
+      '24/7 Roadside Assistance with distance up to 5km free',
+      'Add a family member at any time',
+      'Save up to 20% on BCAA Insurance',
+      'Access to on-demand services',
+      'Email support'
+    ],
+    stripePriceIds: {
+      monthly: 'price_monthly_basic',
+      yearly: 'price_yearly_basic'
+    }
+  },
+  plus: {
+    id: 'plus',
+    name: 'Plus',
+    description: 'Ideally suited to those who live in the suburbs',
+    monthlyPrice: 11.25,
+    yearlyPrice: 135,
+    originalPrice: 14.99,
+    savings: '$1,500+ saved per year',
+    color: 'purple',
+    icon: 'crown',
+    popular: true,
+    features: [
+      'All Basic Plan features',
+      'With distance up to 160km free',
+      'Motorcycle & E-Bike coverage',
+      'Kids Go Free (15 years old and under)',
+      'FREE fuel delivery (up to 10L)',
+      'Road trip interruption coverage',
+      'Locksmith coverage (up to $100)',
+      'Phone & Email support'
+    ],
+    stripePriceIds: {
+      monthly: 'price_monthly_plus',
+      yearly: 'price_yearly_plus'
+    }
+  },
+  premier: {
+    id: 'premier',
+    name: 'Premier',
+    description: 'Great for anyone who travels long distances',
+    monthlyPrice: 14.58,
+    yearlyPrice: 175,
+    originalPrice: 19.99,
+    savings: '$1,500+ saved per year',
+    color: 'amber',
+    icon: 'sparkles',
+    features: [
+      'All Plus Plan features',
+      'With distance up to 320km free',
+      'Motorcycle & E-Bike coverage',
+      'FREE passport photos',
+      'Two Day Car Replacement',
+      'Dedicated account manager',
+      'Concierge service',
+      '24/7 Priority support'
+    ],
+    stripePriceIds: {
+      monthly: 'price_monthly_premier',
+      yearly: 'price_yearly_premier'
+    }
+  }
+};
+
 export default function SubscribePlanForm({ planId }: SubscribePlanFormProps) {
   const [subscribing, setSubscribing] = useState(false);
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
+  const [debugMode, setDebugMode] = useState(false);
   const { data: userData, isLoading: userLoading } = useCurrentUser();
   const { data: plansData, isLoading: plansLoading } = usePlans();
 
-  // Find the selected plan from API data
-  const selectedPlan = plansData?.plans?.find((plan: any) => plan.id === planId);
+  // Debug logging
+  useEffect(() => {
+    console.log('🔍 SubscribePlanForm Debug Info:');
+    console.log('- planId:', planId);
+    console.log('- userData:', userData);
+    console.log('- plansData:', plansData);
+    console.log('- userLoading:', userLoading);
+    console.log('- plansLoading:', plansLoading);
+  }, [planId, userData, plansData, userLoading, plansLoading]);
+
+  // Try to find the selected plan from API data, fallback to fallback plans
+  let selectedPlan: any = plansData?.plans?.find((plan: any) => plan.id === planId);
+  
+  // If not found in API data, try fallback plans
+  if (!selectedPlan) {
+    selectedPlan = FALLBACK_PLANS[planId];
+    console.log('🔧 Using fallback plan data for:', planId);
+  }
+
   const PlanIcon = PLAN_ICONS[planId as keyof typeof PLAN_ICONS] || Star;
   const planColor = PLAN_COLORS[planId as keyof typeof PLAN_COLORS] || 'from-blue-500 to-blue-600';
 
@@ -78,8 +175,10 @@ export default function SubscribePlanForm({ planId }: SubscribePlanFormProps) {
     setSubscribing(true);
     try {
       const priceId = billingPeriod === 'yearly' 
-        ? selectedPlan.stripePriceIds.yearly 
-        : selectedPlan.stripePriceIds.monthly;
+        ? selectedPlan.stripePriceIds?.yearly || `price_yearly_${planId}`
+        : selectedPlan.stripePriceIds?.monthly || `price_monthly_${planId}`;
+
+      console.log('💳 Creating subscription with:', { priceId, tier: planId.toUpperCase() });
 
       const response = await fetch('/api/payments/create-subscription-checkout', {
         method: 'POST',
@@ -124,13 +223,54 @@ export default function SubscribePlanForm({ planId }: SubscribePlanFormProps) {
     );
   }
 
+  // Debug panel
+  if (debugMode) {
+    return (
+      <Card className="p-6">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Bug className="h-5 w-5 text-red-500" />
+            <h3 className="text-lg font-semibold">Debug Information</h3>
+            <Button size="sm" variant="outline" onClick={() => setDebugMode(false)}>
+              Hide Debug
+            </Button>
+          </div>
+          
+          <div className="bg-gray-50 p-4 rounded-lg text-sm">
+            <div className="space-y-2">
+              <div><strong>Plan ID:</strong> {planId}</div>
+              <div><strong>User Loading:</strong> {userLoading ? 'Yes' : 'No'}</div>
+              <div><strong>Plans Loading:</strong> {plansLoading ? 'Yes' : 'No'}</div>
+              <div><strong>User Data:</strong> {JSON.stringify(userData, null, 2)}</div>
+              <div><strong>Plans Data:</strong> {JSON.stringify(plansData, null, 2)}</div>
+              <div><strong>Selected Plan:</strong> {JSON.stringify(selectedPlan, null, 2)}</div>
+              <div><strong>User Authenticated:</strong> {userData?.user ? 'Yes' : 'No'}</div>
+            </div>
+          </div>
+          
+          <Button onClick={() => setDebugMode(false)} className="w-full">
+            Continue with Plan Selection
+          </Button>
+        </div>
+      </Card>
+    );
+  }
+
   // Plan not found
   if (!selectedPlan) {
     return (
       <Card className="p-6">
-        <div className="text-center">
+        <div className="text-center space-y-4">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Plan Not Found</h3>
-          <p className="text-gray-600 mb-4">The selected plan could not be found.</p>
+          <p className="text-gray-600 mb-4">
+            The selected plan "{planId}" could not be found.
+          </p>
+          
+          <Button size="sm" variant="outline" onClick={() => setDebugMode(true)} className="mb-4">
+            <Bug className="h-4 w-4 mr-2" />
+            Show Debug Info
+          </Button>
+          
           <Link href="/pricing">
             <Button>View All Plans</Button>
           </Link>
@@ -143,6 +283,13 @@ export default function SubscribePlanForm({ planId }: SubscribePlanFormProps) {
   if (!userData?.user) {
     return (
       <div className="space-y-6">
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline" onClick={() => setDebugMode(true)}>
+            <Bug className="h-4 w-4 mr-2" />
+            Debug
+          </Button>
+        </div>
+        
         {/* Plan Preview Card */}
         <Card className="overflow-hidden">
           <div className={`bg-gradient-to-r ${planColor} p-6 text-white`}>
@@ -231,6 +378,13 @@ export default function SubscribePlanForm({ planId }: SubscribePlanFormProps) {
   // User authenticated - show subscription form
   return (
     <div className="space-y-6">
+      <div className="flex justify-end">
+        <Button size="sm" variant="outline" onClick={() => setDebugMode(true)}>
+          <Bug className="h-4 w-4 mr-2" />
+          Debug
+        </Button>
+      </div>
+      
       {/* Plan Details Card */}
       <Card className="overflow-hidden">
         <div className={`bg-gradient-to-r ${planColor} p-6 text-white`}>
