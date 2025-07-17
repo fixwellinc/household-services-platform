@@ -125,6 +125,21 @@ export default function PlansSection() {
   const router = useRouter();
   const prerequisites = useSubscriptionPrerequisites();
 
+  // Helper function to get button text based on authentication status
+  const getButtonText = (plan: any) => {
+    if (!prerequisites.isAuthenticated) {
+      return 'Get Started';
+    }
+    
+    // For authenticated users, show the plan-specific text
+    return plan.cta || (
+      plan.name === 'Basic' ? 'Choose Basic' : 
+      plan.name === 'Plus' ? 'Choose Plus' : 
+      plan.name === 'Premier' ? 'Choose Premier' : 
+      'Choose Plan'
+    );
+  };
+
   // Fallback plans in case API fails
   const fallbackPlans = [
     {
@@ -465,7 +480,7 @@ export default function PlansSection() {
                             Loading...
                           </span>
                         ) : (
-                          plan.cta || (plan.name === 'Basic' ? 'Choose Basic' : plan.name === 'Plus' ? 'Choose Plus' : plan.name === 'Premier' ? 'Choose Premier' : 'Choose Plan')
+                          getButtonText(plan)
                         )}
                       </Button>
 
@@ -614,7 +629,7 @@ export default function PlansSection() {
                             Loading...
                           </span>
                         ) : (
-                          plan.cta || (plan.name === 'Premier' ? 'Contact us for custom enterprise solutions' : 'No setup fees • Cancel anytime')
+                          getButtonText(plan)
                         )}
                       </Button>
 

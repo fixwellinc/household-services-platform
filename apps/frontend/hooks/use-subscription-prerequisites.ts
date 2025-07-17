@@ -30,9 +30,9 @@ export function useSubscriptionPrerequisites(): UseSubscriptionPrerequisitesResu
   const canProceedToSubscription = isAuthenticated && hasValidLocation;
 
   const redirectToLogin = (planId: string) => {
-    const currentUrl = window.location.pathname + window.location.search;
-    const redirectUrl = `/pricing/subscribe?plan=${planId}`;
-    router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
+    // For new users clicking "Get Started", redirect to welcome page after auth
+    const welcomeUrl = `/welcome?plan=${planId}`;
+    router.push(`/login?redirect=${encodeURIComponent(welcomeUrl)}`);
   };
 
   const promptForLocation = () => {

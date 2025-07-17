@@ -23,6 +23,7 @@ const publicRoutes = [
   '/contact',
   '/pricing',
   '/pricing/subscribe',
+  '/welcome',
   '/blog',
   '/test-api',
 ];
