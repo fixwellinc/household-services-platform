@@ -20,6 +20,7 @@ model User {
   phone         String?
   address       String?
   isActive      Boolean  @default(true)
+  notifications Json?    @default("{\"email\": true, \"sms\": false}")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   // Reference fields (manual lookup in code)
