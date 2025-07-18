@@ -14,7 +14,7 @@ export const PLANS = {
       yearly: process.env.STRIPE_STARTER_YEARLY_PRICE_ID || 'price_starter_yearly'
     },
     features: [
-      '1 visit per quarter (up to 0.5 hour)',
+      '1 visit per month (up to 0.5 hour)',
       'Minor repairs (squeaky doors, loose handles)',
       'Lightbulb replacements',
       'Smoke detector battery checks',
@@ -30,9 +30,9 @@ export const PLANS = {
     savings: 'Peace of mind maintenance',
     color: 'blue',
     icon: 'star',
-    visitFrequency: 'Quarterly',
+    visitFrequency: 'Monthly',
     timePerVisit: '0.5 hours',
-    visitsPerMonth: 0.33
+    visitsPerMonth: 1
   },
   
   HOMECARE: {
@@ -150,7 +150,7 @@ export const PLAN_COMPARISON = {
   features: [
     {
       name: 'Visit Frequency',
-      starter: 'Quarterly',
+      starter: 'Monthly',
       homecare: 'Monthly',
       priority: 'Bi-weekly'
     },
@@ -208,7 +208,7 @@ export const SERVICE_DISCOUNTS = {
 
 // Visit frequencies by plan (visits per month)
 export const VISIT_FREQUENCIES = {
-  STARTER: 0.33, // quarterly
+  STARTER: 1, // monthly
   HOMECARE: 1, // monthly
   PRIORITY: 2 // bi-weekly
 };
