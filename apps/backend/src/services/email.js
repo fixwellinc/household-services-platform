@@ -333,7 +333,7 @@ class EmailService {
       CHOOSE YOUR PERFECT PLAN:
 
       🔧 STARTER PLAN - $39/month
-      • Quarterly visits (30 min each)
+      • Monthly visits (30 min each)
       • Minor repairs & maintenance
       • Lightbulb changes & safety checks
       • FREE annual home inspection

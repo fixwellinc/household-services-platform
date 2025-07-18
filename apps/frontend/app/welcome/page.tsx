@@ -35,7 +35,7 @@ const PLAN_INFO = {
     color: 'blue',
     gradient: 'from-blue-500 to-blue-600',
     benefits: [
-      '1 visit per quarter (up to 0.5 hour)',
+      '1 visit per month (up to 0.5 hour)',
       'Minor repairs and basic maintenance',
       'Lightbulb replacements and safety checks',
       'Faucet tightening & leak checks',

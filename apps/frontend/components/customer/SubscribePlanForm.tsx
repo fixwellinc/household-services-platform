@@ -55,7 +55,7 @@ const FALLBACK_PLANS: Record<string, any> = {
     color: 'blue',
     icon: 'star',
     features: [
-      '1 visit per quarter (up to 0.5 hour)',
+      '1 visit per month (up to 0.5 hour)',
       'Minor repairs (squeaky doors, loose handles)',
       'Lightbulb replacements',
       'Smoke detector battery checks',

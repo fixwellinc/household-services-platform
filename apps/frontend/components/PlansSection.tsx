@@ -145,12 +145,12 @@ export default function PlansSection() {
     {
       id: 'starter',
       name: 'Starter Plan',
-      description: 'Perfect for light upkeep & peace of mind. Quarterly maintenance visits to keep your home in top condition.',
+      description: 'Perfect for light upkeep & peace of mind. Monthly maintenance visits to keep your home in top condition.',
       monthlyPrice: 39.00,
       yearlyPrice: 429.00,
       originalPrice: 49.00,
       features: [
-        '1 visit per quarter (up to 0.5 hour)',
+        '1 visit per month (up to 0.5 hour)',
         'Minor repairs (squeaky doors, loose handles)',
         'Lightbulb replacements',
         'Smoke detector battery checks',
