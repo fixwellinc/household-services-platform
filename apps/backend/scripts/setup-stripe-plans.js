@@ -24,33 +24,33 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 const plans = [
   {
-    name: 'Basic Plan',
-    description: 'Essential household services for everyday needs',
-    monthlyPrice: 999, // $9.99 in cents
-    yearlyPrice: 9999, // $99.99 in cents
+    name: 'Starter Plan',
+    description: 'Perfect for light upkeep & peace of mind',
+    monthlyPrice: 3900, // $39.00 in cents
+    yearlyPrice: 42900, // $429.00 in cents
     metadata: {
-      tier: 'BASIC',
-      planId: 'basic'
+      tier: 'STARTER',
+      planId: 'starter'
     }
   },
   {
-    name: 'Plus Plan',
-    description: 'Enhanced features for busy families',
-    monthlyPrice: 1999, // $19.99 in cents
-    yearlyPrice: 19999, // $199.99 in cents
+    name: 'HomeCare Plan',
+    description: 'Monthly help for ongoing maintenance and upkeep',
+    monthlyPrice: 5900, // $59.00 in cents
+    yearlyPrice: 64900, // $649.00 in cents
     metadata: {
-      tier: 'PLUS',
-      planId: 'plus'
+      tier: 'HOMECARE',
+      planId: 'homecare'
     }
   },
   {
-    name: 'Premier Plan',
-    description: 'Ultimate convenience for luxury households',
-    monthlyPrice: 2999, // $29.99 in cents
-    yearlyPrice: 29999, // $299.99 in cents
+    name: 'Priority Plan',
+    description: 'For homeowners who want their home proactively managed',
+    monthlyPrice: 15000, // $150.00 in cents
+    yearlyPrice: 165000, // $1650.00 in cents
     metadata: {
-      tier: 'PREMIER',
-      planId: 'premier'
+      tier: 'PRIORITY',
+      planId: 'priority'
     }
   }
 ];

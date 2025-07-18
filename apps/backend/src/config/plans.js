@@ -1,103 +1,147 @@
-// BCAA-Style Plans Configuration
+// Fixwell Subscription Services by Tier Configuration
 // This file contains the plan structure and Stripe price IDs
 
 export const PLANS = {
-  BASIC: {
-    id: 'basic',
-    name: 'Basic',
-    description: 'Essential household services for everyday needs',
-    monthlyPrice: 9.99,
-    yearlyPrice: 99.99, // 17% discount
-    originalPrice: 15.99,
+  STARTER: {
+    id: 'starter',
+    name: 'Starter Plan',
+    description: 'Perfect for light upkeep & peace of mind',
+    monthlyPrice: 39.00,
+    yearlyPrice: 429.00, // 8% discount ($39 x 11 months)
+    originalPrice: 49.00,
     stripePriceIds: {
-      monthly: process.env.STRIPE_BASIC_MONTHLY_PRICE_ID || 'price_basic_monthly',
-      yearly: process.env.STRIPE_BASIC_YEARLY_PRICE_ID || 'price_basic_yearly'
+      monthly: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || 'price_starter_monthly',
+      yearly: process.env.STRIPE_STARTER_YEARLY_PRICE_ID || 'price_starter_yearly'
     },
     features: [
-      'Access to basic household services',
-      'Standard booking system (7 days advance)',
-      'Email support',
-      'Basic service categories (cleaning, maintenance)',
-      'Standard response time (24 hours)',
-      'No booking fees',
-      'Service history tracking',
-      'Professional service team',
-      'Basic service guarantees',
-      'Lower Mainland service area'
+      '1 visit per quarter (up to 0.5 hour)',
+      'Minor repairs (squeaky doors, loose handles)',
+      'Lightbulb replacements',
+      'Smoke detector battery checks',
+      'Faucet tightening & leak checks',
+      'Cabinet hinge adjustment',
+      'Basic caulking (kitchen/bathroom)',
+      'Door alignment & lubrication',
+      'Home safety check (visual)',
+      'Priority scheduling',
+      'Free annual home inspection',
+      'Access to discounted upgrade services'
     ],
-    savings: '$500+ per year',
+    savings: 'Peace of mind maintenance',
     color: 'blue',
-    icon: 'star'
+    icon: 'star',
+    visitFrequency: 'Quarterly',
+    timePerVisit: '0.5 hours',
+    visitsPerMonth: 0.33
   },
   
-  PLUS: {
-    id: 'plus',
-    name: 'Plus',
-    description: 'Enhanced features for busy families',
-    monthlyPrice: 19.99,
-    yearlyPrice: 199.99, // 17% discount
-    originalPrice: 29.99,
+  HOMECARE: {
+    id: 'homecare',
+    name: 'HomeCare Plan',
+    description: 'Monthly help for ongoing maintenance and upkeep',
+    monthlyPrice: 59.00,
+    yearlyPrice: 649.00, // 8% discount ($59 x 11 months)
+    originalPrice: 79.00,
     stripePriceIds: {
-      monthly: process.env.STRIPE_PLUS_MONTHLY_PRICE_ID || 'price_plus_monthly',
-      yearly: process.env.STRIPE_PLUS_YEARLY_PRICE_ID || 'price_plus_yearly'
+      monthly: process.env.STRIPE_HOMECARE_MONTHLY_PRICE_ID || 'price_homecare_monthly',
+      yearly: process.env.STRIPE_HOMECARE_YEARLY_PRICE_ID || 'price_homecare_yearly'
     },
     features: [
-      'Everything in Basic',
-      'Priority booking system (3 days advance)',
-      'SMS notifications',
-      'Extended service categories (repair, organization)',
-      'Faster response time (12 hours)',
-      'Phone & email support',
-      'Advanced scheduling options',
-      'Service ratings & reviews',
-      'Service customization',
-      'Recurring service setup',
-      'Priority customer support',
-      'Service guarantees',
-      'Advanced filtering options',
-      '10% discount on all services',
-      'Free service consultation'
+      '1 visit per month (up to 1 hour)',
+      'Everything from Starter Plan',
+      'Gutter inspection/clearing (ground floor)',
+      'Seasonal maintenance (weatherstripping, window sealing)',
+      'Small drywall repairs or touch-ups',
+      'Power outlet/switch inspection',
+      'Hanging shelves, photos, curtains',
+      'Appliance checks (wobbling, leaks, noise)',
+      'Toilet tank/flush adjustments',
+      'Exterior door & lock tune-ups',
+      '10% off hourly add-ons or larger projects',
+      'Seasonal home maintenance reminders',
+      'Emergency visits at standard rate (priority booking)'
     ],
-    savings: '$1,000+ per year',
+    savings: 'Professional monthly maintenance',
     color: 'purple',
     icon: 'crown',
-    popular: true
+    popular: true,
+    visitFrequency: 'Monthly',
+    timePerVisit: '1 hour',
+    visitsPerMonth: 1
   },
   
-  PREMIER: {
-    id: 'premier',
-    name: 'Premier',
-    description: 'Ultimate convenience for luxury households',
-    monthlyPrice: 29.99,
-    yearlyPrice: 299.99, // 17% discount
-    originalPrice: 49.99,
+  PRIORITY: {
+    id: 'priority',
+    name: 'Priority Plan',
+    description: 'For homeowners who want their home proactively managed',
+    monthlyPrice: 150.00,
+    yearlyPrice: 1650.00, // 8% discount ($150 x 11 months)
+    originalPrice: 199.00,
     stripePriceIds: {
-      monthly: process.env.STRIPE_PREMIER_MONTHLY_PRICE_ID || 'price_premier_monthly',
-      yearly: process.env.STRIPE_PREMIER_YEARLY_PRICE_ID || 'price_premier_yearly'
+      monthly: process.env.STRIPE_PRIORITY_MONTHLY_PRICE_ID || 'price_priority_monthly',
+      yearly: process.env.STRIPE_PRIORITY_YEARLY_PRICE_ID || 'price_priority_yearly'
     },
     features: [
-      'Everything in Plus',
-      'Concierge service',
-      'Same-day booking availability',
-      'Dedicated account manager',
-      '24/7 priority support',
-      'Custom service packages',
-      'Premium service team',
-      'White-glove service',
-      'Service quality guarantees',
-      'Flexible scheduling',
-      'All service categories',
-      'Advanced analytics dashboard',
-      'Family member management',
-      'Integration with smart home',
-      'Exclusive events & offers',
-      '20% discount on all services',
-      'Free emergency call-out',
-      'Priority scheduling for all services'
+      '2 visits per month (up to 2 hours total)',
+      'All services from Starter + HomeCare Plans',
+      'Same-week emergency callout (1 per quarter)',
+      'Full-home "fix-it list" checkup every visit',
+      'Smart home device setup (doorbells, cameras, thermostats)',
+      'TV mounting, shelf and curtain installations',
+      'Basic furniture assembly',
+      'Window screen replacement/repair',
+      'Interior door planing or sticking fixes',
+      'Paint touch-ups (up to 1 wall/surface per visit)',
+      'Light fixture replacement/upgrade',
+      'Tile regrouting (small areas)',
+      '10% off larger renovations or handyman jobs',
+      'Free consumables: caulk, screws, anchors, silicone',
+      'Early access to Fixwell promos and partner perks'
     ],
-    savings: '$1,500+ per year',
+    savings: 'Complete home management',
     color: 'amber',
-    icon: 'sparkles'
+    icon: 'sparkles',
+    visitFrequency: 'Bi-weekly',
+    timePerVisit: '2 hours total',
+    visitsPerMonth: 2
+  }
+};
+
+// Optional Add-Ons (Available to All Tiers)
+export const ADD_ONS = {
+  STANDARD_CHARGE: {
+    name: 'Standard Charge (no subscription)',
+    price: 200.00,
+    description: 'One-time service visit without subscription'
+  },
+  EXTRA_HOURS: {
+    name: 'Extra Hours',
+    price: 50.00,
+    unit: 'per hour',
+    description: 'Additional time beyond plan allowance'
+  },
+  WEEKEND_EVENING: {
+    name: 'Weekend or Evening Service',
+    price: 30.00,
+    description: 'Flat fee for off-hours scheduling'
+  },
+  APPLIANCE_INSTALLATION: {
+    name: 'Appliance Installation',
+    price: 75.00,
+    description: 'Starting price for appliance installation',
+    priceRange: 'from $75'
+  },
+  RENOVATION_CONSULT: {
+    name: 'Renovation Consultation',
+    price: 99.00,
+    description: 'Credited if project proceeds',
+    note: 'Credited if project proceeds'
+  },
+  DEEP_MAINTENANCE: {
+    name: 'Deep Maintenance Visit',
+    price: 129.00,
+    duration: '3 hours',
+    description: 'Comprehensive 3-hour maintenance session'
   }
 };
 
@@ -105,75 +149,82 @@ export const PLANS = {
 export const PLAN_COMPARISON = {
   features: [
     {
-      name: 'Response Time',
-      basic: '24 hours',
-      plus: '12 hours',
-      premier: 'Same day'
+      name: 'Visit Frequency',
+      starter: 'Quarterly',
+      homecare: 'Monthly',
+      priority: 'Bi-weekly'
     },
     {
-      name: 'Customer Support',
-      basic: 'Email only',
-      plus: 'Phone & Email',
-      premier: '24/7 Priority'
+      name: 'Time Per Visit',
+      starter: '0.5 hours',
+      homecare: '1 hour',
+      priority: '2 hours total'
     },
     {
-      name: 'Service Categories',
-      basic: 'Basic',
-      plus: 'Extended',
-      premier: 'All + Custom'
+      name: 'Emergency Callouts',
+      starter: 'Standard rate',
+      homecare: 'Standard rate (priority booking)',
+      priority: 'Same-week (1 per quarter)'
     },
     {
-      name: 'Service Discount',
-      basic: 'None',
-      plus: '10% off',
-      premier: '20% off'
+      name: 'Service Scope',
+      starter: 'Basic maintenance',
+      homecare: 'Extended maintenance',
+      priority: 'Full home management'
     },
     {
-      name: 'Account Manager',
-      basic: false,
-      plus: false,
-      premier: true
+      name: 'Project Discounts',
+      starter: 'Upgrade discounts',
+      homecare: '10% off add-ons',
+      priority: '10% off renovations'
     },
     {
-      name: 'Concierge Service',
-      basic: false,
-      plus: false,
-      premier: true
+      name: 'Free Consumables',
+      starter: false,
+      homecare: false,
+      priority: true
     },
     {
-      name: 'Emergency Call-out',
-      basic: 'Standard rate',
-      plus: 'Standard rate',
-      premier: 'Free'
+      name: 'Annual Inspection',
+      starter: true,
+      homecare: true,
+      priority: true
     },
     {
-      name: 'Money-back Guarantee',
-      basic: true,
-      plus: true,
-      premier: true
+      name: 'Smart Home Setup',
+      starter: false,
+      homecare: false,
+      priority: true
     }
   ]
 };
 
 // Service discounts by plan
 export const SERVICE_DISCOUNTS = {
-  BASIC: 0,
-  PLUS: 0.10, // 10%
-  PREMIER: 0.20 // 20%
+  STARTER: 0,
+  HOMECARE: 0.10, // 10%
+  PRIORITY: 0.10 // 10%
 };
 
-// Booking advance times by plan
-export const BOOKING_ADVANCE_TIMES = {
-  BASIC: 7, // days
-  PLUS: 3, // days
-  PREMIER: 0 // same day
+// Visit frequencies by plan (visits per month)
+export const VISIT_FREQUENCIES = {
+  STARTER: 0.33, // quarterly
+  HOMECARE: 1, // monthly
+  PRIORITY: 2 // bi-weekly
 };
 
-// Response times by plan (in hours)
-export const RESPONSE_TIMES = {
-  BASIC: 24,
-  PLUS: 12,
-  PREMIER: 2
+// Time allowances by plan (hours per visit)
+export const TIME_ALLOWANCES = {
+  STARTER: 0.5,
+  HOMECARE: 1,
+  PRIORITY: 2
+};
+
+// Emergency response by plan
+export const EMERGENCY_RESPONSE = {
+  STARTER: 'standard_rate',
+  HOMECARE: 'priority_booking',
+  PRIORITY: 'same_week_quarterly'
 };
 
 // Helper functions
@@ -199,10 +250,14 @@ export const calculateServiceDiscount = (planTier, servicePrice) => {
   return servicePrice * discountRate;
 };
 
-export const getBookingAdvanceTime = (planTier) => {
-  return BOOKING_ADVANCE_TIMES[planTier.toUpperCase()] || 7;
+export const getVisitFrequency = (planTier) => {
+  return VISIT_FREQUENCIES[planTier.toUpperCase()] || 0.33;
 };
 
-export const getResponseTime = (planTier) => {
-  return RESPONSE_TIMES[planTier.toUpperCase()] || 24;
+export const getTimeAllowance = (planTier) => {
+  return TIME_ALLOWANCES[planTier.toUpperCase()] || 0.5;
+};
+
+export const getEmergencyResponse = (planTier) => {
+  return EMERGENCY_RESPONSE[planTier.toUpperCase()] || 'standard_rate';
 }; 

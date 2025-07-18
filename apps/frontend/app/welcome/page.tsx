@@ -29,49 +29,52 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 
 const PLAN_INFO = {
-  basic: {
-    name: 'Basic',
+  starter: {
+    name: 'Starter Plan',
     icon: Star,
     color: 'blue',
     gradient: 'from-blue-500 to-blue-600',
     benefits: [
-      'All GO Plan features',
-      '24/7 Roadside Assistance with 5km free towing',
-      'Add family members at any time',
-      'Save up to 20% on BCAA Insurance',
-      'Access to on-demand services',
-      'Email support'
+      '1 visit per quarter (up to 0.5 hour)',
+      'Minor repairs and basic maintenance',
+      'Lightbulb replacements and safety checks',
+      'Faucet tightening & leak checks',
+      'Cabinet hinge adjustment',
+      'Basic caulking and door alignment',
+      'Priority scheduling',
+      'Free annual home inspection'
     ]
   },
-  plus: {
-    name: 'Plus',
+  homecare: {
+    name: 'HomeCare Plan',
     icon: Crown,
     color: 'purple',
     gradient: 'from-purple-500 to-purple-600',
     benefits: [
-      'All Basic Plan features',
-      'Extended towing distance up to 160km free',
-      'Motorcycle & E-Bike coverage',
-      'Kids Go Free (15 years old and under)',
-      'FREE fuel delivery (up to 10L)',
-      'Road trip interruption coverage',
-      'Locksmith coverage (up to $100)',
-      'Phone & Email support'
+      '1 visit per month (up to 1 hour)',
+      'Everything from Starter Plan',
+      'Gutter inspection and seasonal maintenance',
+      'Small drywall repairs and touch-ups',
+      'Hanging shelves, photos, and curtains',
+      'Appliance checks and toilet adjustments',
+      '10% off hourly add-ons',
+      'Emergency visits with priority booking'
     ]
   },
-  premier: {
-    name: 'Premier',
+  priority: {
+    name: 'Priority Plan',
     icon: Sparkles,
     color: 'amber',
     gradient: 'from-amber-500 to-amber-600',
     benefits: [
-      'All Plus Plan features',
-      'Extended towing distance up to 320km free',
-      'FREE passport photos',
-      'Two Day Car Replacement',
-      'Dedicated account manager',
-      'Concierge service',
-      '24/7 Priority support'
+      '2 visits per month (up to 2 hours total)',
+      'All services from previous plans',
+      'Same-week emergency callout',
+      'Smart home device setup',
+      'TV mounting and furniture assembly',
+      'Paint touch-ups and light fixture upgrades',
+      'Free consumables included',
+      '10% off larger renovation projects'
     ]
   }
 };
@@ -103,10 +106,10 @@ function WelcomeContent() {
   const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const planId = searchParams.get('plan') || 'basic';
+  const planId = searchParams.get('plan') || 'starter';
   const [showPlanDetails, setShowPlanDetails] = useState(true);
   
-  const selectedPlan = PLAN_INFO[planId as keyof typeof PLAN_INFO] || PLAN_INFO.basic;
+  const selectedPlan = PLAN_INFO[planId as keyof typeof PLAN_INFO] || PLAN_INFO.starter;
   const PlanIcon = selectedPlan.icon;
 
   useEffect(() => {

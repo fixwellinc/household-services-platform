@@ -31,91 +31,109 @@ interface SubscribePlanFormProps {
 }
 
 const PLAN_ICONS = {
-  basic: Star,
-  plus: Crown,
-  premier: Sparkles
+  starter: Star,
+  homecare: Crown,
+  priority: Sparkles
 };
 
 const PLAN_COLORS = {
-  basic: 'from-blue-500 to-blue-600',
-  plus: 'from-purple-500 to-purple-600', 
-  premier: 'from-amber-500 to-amber-600'
+  starter: 'from-blue-500 to-blue-600',
+  homecare: 'from-purple-500 to-purple-600', 
+  priority: 'from-amber-500 to-amber-600'
 };
 
 // Fallback plan data for debugging
 const FALLBACK_PLANS: Record<string, any> = {
-  basic: {
-    id: 'basic',
-    name: 'Basic',
-    description: 'Perfect for those who own a car and drive shorter distances',
-    monthlyPrice: 7.92,
-    yearlyPrice: 95,
-    originalPrice: 9.99,
-    savings: '$1,500+ saved per year',
+  starter: {
+    id: 'starter',
+    name: 'Starter Plan',
+    description: 'Perfect for light upkeep & peace of mind',
+    monthlyPrice: 39.00,
+    yearlyPrice: 429.00,
+    originalPrice: 49.00,
+    savings: 'Peace of mind maintenance',
     color: 'blue',
     icon: 'star',
     features: [
-      'All GO Plan features',
-      '24/7 Roadside Assistance with distance up to 5km free',
-      'Add a family member at any time',
-      'Save up to 20% on BCAA Insurance',
-      'Access to on-demand services',
-      'Email support'
+      '1 visit per quarter (up to 0.5 hour)',
+      'Minor repairs (squeaky doors, loose handles)',
+      'Lightbulb replacements',
+      'Smoke detector battery checks',
+      'Faucet tightening & leak checks',
+      'Cabinet hinge adjustment',
+      'Basic caulking (kitchen/bathroom)',
+      'Door alignment & lubrication',
+      'Home safety check (visual)',
+      'Priority scheduling',
+      'Free annual home inspection',
+      'Access to discounted upgrade services'
     ],
     stripePriceIds: {
-      monthly: 'price_monthly_basic',
-      yearly: 'price_yearly_basic'
+      monthly: 'price_monthly_starter',
+      yearly: 'price_yearly_starter'
     }
   },
-  plus: {
-    id: 'plus',
-    name: 'Plus',
-    description: 'Ideally suited to those who live in the suburbs',
-    monthlyPrice: 11.25,
-    yearlyPrice: 135,
-    originalPrice: 14.99,
-    savings: '$1,500+ saved per year',
+  homecare: {
+    id: 'homecare',
+    name: 'HomeCare Plan',
+    description: 'Monthly help for ongoing maintenance and upkeep',
+    monthlyPrice: 59.00,
+    yearlyPrice: 649.00,
+    originalPrice: 79.00,
+    savings: 'Professional monthly maintenance',
     color: 'purple',
     icon: 'crown',
     popular: true,
     features: [
-      'All Basic Plan features',
-      'With distance up to 160km free',
-      'Motorcycle & E-Bike coverage',
-      'Kids Go Free (15 years old and under)',
-      'FREE fuel delivery (up to 10L)',
-      'Road trip interruption coverage',
-      'Locksmith coverage (up to $100)',
-      'Phone & Email support'
+      '1 visit per month (up to 1 hour)',
+      'Everything from Starter Plan',
+      'Gutter inspection/clearing (ground floor)',
+      'Seasonal maintenance (weatherstripping, window sealing)',
+      'Small drywall repairs or touch-ups',
+      'Power outlet/switch inspection',
+      'Hanging shelves, photos, curtains',
+      'Appliance checks (wobbling, leaks, noise)',
+      'Toilet tank/flush adjustments',
+      'Exterior door & lock tune-ups',
+      '10% off hourly add-ons or larger projects',
+      'Seasonal home maintenance reminders',
+      'Emergency visits at standard rate (priority booking)'
     ],
     stripePriceIds: {
-      monthly: 'price_monthly_plus',
-      yearly: 'price_yearly_plus'
+      monthly: 'price_monthly_homecare',
+      yearly: 'price_yearly_homecare'
     }
   },
-  premier: {
-    id: 'premier',
-    name: 'Premier',
-    description: 'Great for anyone who travels long distances',
-    monthlyPrice: 14.58,
-    yearlyPrice: 175,
-    originalPrice: 19.99,
-    savings: '$1,500+ saved per year',
+  priority: {
+    id: 'priority',
+    name: 'Priority Plan',
+    description: 'For homeowners who want their home proactively managed',
+    monthlyPrice: 150.00,
+    yearlyPrice: 1650.00,
+    originalPrice: 199.00,
+    savings: 'Complete home management',
     color: 'amber',
     icon: 'sparkles',
     features: [
-      'All Plus Plan features',
-      'With distance up to 320km free',
-      'Motorcycle & E-Bike coverage',
-      'FREE passport photos',
-      'Two Day Car Replacement',
-      'Dedicated account manager',
-      'Concierge service',
-      '24/7 Priority support'
+      '2 visits per month (up to 2 hours total)',
+      'All services from Starter + HomeCare Plans',
+      'Same-week emergency callout (1 per quarter)',
+      'Full-home "fix-it list" checkup every visit',
+      'Smart home device setup (doorbells, cameras, thermostats)',
+      'TV mounting, shelf and curtain installations',
+      'Basic furniture assembly',
+      'Window screen replacement/repair',
+      'Interior door planing or sticking fixes',
+      'Paint touch-ups (up to 1 wall/surface per visit)',
+      'Light fixture replacement/upgrade',
+      'Tile regrouting (small areas)',
+      '10% off larger renovations or handyman jobs',
+      'Free consumables: caulk, screws, anchors, silicone',
+      'Early access to Fixwell promos and partner perks'
     ],
     stripePriceIds: {
-      monthly: 'price_monthly_premier',
-      yearly: 'price_yearly_premier'
+      monthly: 'price_monthly_priority',
+      yearly: 'price_yearly_priority'
     }
   }
 };
