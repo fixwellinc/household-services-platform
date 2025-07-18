@@ -55,8 +55,6 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Force all pages to be server-side rendered
-  output: 'standalone',
 }
 
 module.exports = nextConfig 
