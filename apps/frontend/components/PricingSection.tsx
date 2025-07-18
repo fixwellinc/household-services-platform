@@ -172,7 +172,7 @@ export default function PricingSection() {
             </span>
             {billingPeriod === 'year' && (
               <Badge className="bg-green-100 text-green-700 border-green-200">
-                Save 17%
+                Save 10%
               </Badge>
             )}
           </div>
