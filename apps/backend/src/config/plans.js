@@ -1,5 +1,6 @@
 // Fixwell Subscription Services by Tier Configuration
 // This file contains the plan structure and Stripe price IDs
+// Updated with 10% yearly discount - July 2025
 
 export const PLANS = {
   STARTER: {
