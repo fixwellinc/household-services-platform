@@ -8,7 +8,7 @@ The implementation includes a 3-tier subscription model (Basic, Plus, Premier) i
 
 ## Plan Structure
 
-### Basic Plan - $9.99/month ($99.99/year)
+### Basic Plan - $19.99/month ($215.89/year)
 - **Target**: Essential household services for everyday needs
 - **Savings**: $500+ per year
 - **Features**:
@@ -23,7 +23,7 @@ The implementation includes a 3-tier subscription model (Basic, Plus, Premier) i
   - Basic service guarantees
   - Lower Mainland service area
 
-### Plus Plan - $19.99/month ($199.99/year) ⭐ MOST POPULAR
+### Plus Plan - $49.99/month ($539.89/year) ⭐ MOST POPULAR
 - **Target**: Enhanced features for busy families
 - **Savings**: $1,000+ per year
 - **Features**:
@@ -43,7 +43,7 @@ The implementation includes a 3-tier subscription model (Basic, Plus, Premier) i
   - **10% discount on all services**
   - Free service consultation
 
-### Premier Plan - $29.99/month ($299.99/year)
+### Premier Plan - $109.99/month ($1187.89/year)
 - **Target**: Ultimate convenience for luxury households
 - **Savings**: $1,500+ per year
 - **Features**:

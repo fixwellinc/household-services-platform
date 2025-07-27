@@ -146,8 +146,8 @@ export default function PlansSection() {
       id: 'starter',
       name: 'Starter Plan',
       description: 'Perfect for light upkeep & peace of mind. Monthly maintenance visits to keep your home in top condition.',
-      monthlyPrice: 39.00,
-      yearlyPrice: 429.00,
+      monthlyPrice: 19.99,
+      yearlyPrice: 215.89,
       originalPrice: 49.00,
       features: [
         '1 visit per month (up to 0.5 hour)',
@@ -171,9 +171,9 @@ export default function PlansSection() {
     {
       id: 'homecare',
       name: 'HomeCare Plan',
-      description: 'Monthly help for ongoing maintenance and upkeep. Everything you need to keep your home running smoothly.',
-      monthlyPrice: 59.00,
-      yearlyPrice: 649.00,
+      description: 'Monthly help for ongoing maintenance and upkeep. Enhanced services for comprehensive home care.',
+      monthlyPrice: 49.99,
+      yearlyPrice: 539.89,
       originalPrice: 79.00,
       features: [
         '1 visit per month (up to 1 hour)',
@@ -199,8 +199,8 @@ export default function PlansSection() {
       id: 'priority',
       name: 'Priority Plan',
       description: 'For homeowners who want their home proactively managed. Complete home management with premium benefits.',
-      monthlyPrice: 150.00,
-      yearlyPrice: 1650.00,
+      monthlyPrice: 109.99,
+      yearlyPrice: 1187.89,
       originalPrice: 199.00,
       features: [
         '2 visits per month (up to 2 hours total)',

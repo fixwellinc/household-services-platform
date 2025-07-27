@@ -21,7 +21,7 @@ import {
 const plans = [
   {
     name: 'Basic',
-    price: 9.99,
+    price: 19.99,
     period: 'month',
             description: 'Perfect for individual fixwells',
     icon: Star,
@@ -44,7 +44,7 @@ const plans = [
   },
   {
     name: 'Premium',
-    price: 19.99,
+    price: 49.99,
     period: 'month',
     description: 'Enhanced features for busy families',
     icon: Crown,
@@ -71,7 +71,7 @@ const plans = [
   },
   {
     name: 'VIP',
-    price: 39.99,
+    price: 109.99,
     period: 'month',
             description: 'Ultimate convenience for luxury fixwells',
     icon: Sparkles,
