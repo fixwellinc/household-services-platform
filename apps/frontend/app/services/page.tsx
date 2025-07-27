@@ -430,7 +430,11 @@ export default function ServicesPage() {
                 <Users className="h-5 w-5 mr-2" />
                 Let's Get You Started
               </Button>
-              <Button variant="outline" size="lg" className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 text-lg">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="bg-white text-blue-600 hover:bg-gray-100 border-2 border-white px-8 py-4 text-lg font-medium"
+              >
                 <MessageCircle className="h-5 w-5 mr-2" />
                 Contact Support
               </Button>

@@ -3,6 +3,7 @@
 import { useServices, useCurrentUser } from '@/hooks/use-api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocation } from '@/contexts/LocationContext';
+import { useRouter } from 'next/navigation';
 import { formatPrice } from '@/lib/utils';
 import { Button } from '@/components/ui/shared';
 import { Badge } from '@/components/ui/shared';
@@ -23,15 +24,38 @@ import {
   Loader2,
   MapPin
 } from 'lucide-react';
+import LocationPromptModal from '@/components/location/LocationPromptModal';
+import { useState } from 'react';
 
 export default function HomePageClient() {
   const { isHydrated } = useAuth();
   const { data: userData, isLoading: userLoading } = useCurrentUser(isHydrated);
   const { data: servicesData, isLoading: servicesLoading } = useServices();
   const { userLocation, userCity, isInBC } = useLocation();
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
+  const [showLocationModal, setShowLocationModal] = useState(false);
 
   const user = userData?.user;
   const services = servicesData?.services || [];
+
+  const handleGetStarted = () => {
+    // If user is not authenticated, check location first
+    if (!isAuthenticated) {
+      // If no location is set, show location modal
+      if (!userLocation || !isInBC) {
+        setShowLocationModal(true);
+        return;
+      }
+      
+      // If location is valid, redirect to sign up
+      router.push(`/register?redirect=${encodeURIComponent('/')}`);
+      return;
+    }
+    
+    // If user is authenticated, redirect to dashboard
+    router.push('/dashboard');
+  };
 
   if (userLoading || !isHydrated) {
     return (
@@ -110,14 +134,12 @@ export default function HomePageClient() {
                     </span>
                   </Button>
                 </Link>
-                <Link href="/register">
-                  <Button variant="outline" size="lg" className="border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all duration-300">
-                    <span className="flex items-center gap-2">
-                      Let's Get You Started
-                      <User className="h-4 w-4" />
-                    </span>
-                  </Button>
-                </Link>
+                <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105" onClick={handleGetStarted}>
+                  <span className="flex items-center gap-2">
+                    Let's Get You Started
+                    <User className="h-4 w-4" />
+                  </span>
+                </Button>
               </div>
             )}
 
@@ -322,7 +344,7 @@ export default function HomePageClient() {
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Link href="/register">
-              <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-8 py-4 font-medium">
+              <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-8 py-4 font-medium" onClick={handleGetStarted}>
                 <span className="flex items-center gap-2">
                   Let's Get You Started
                   <ArrowRight className="h-5 w-5" />
@@ -340,6 +362,18 @@ export default function HomePageClient() {
           </div>
         </div>
       </section>
+
+      {/* Location Prompt Modal */}
+      <LocationPromptModal
+        isOpen={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        onLocationSet={() => {
+          // After location is set, redirect to sign up
+          router.push(`/register?redirect=${encodeURIComponent('/')}`);
+          setShowLocationModal(false);
+        }}
+        planName="service"
+      />
     </div>
   );
 } 

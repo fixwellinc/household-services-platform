@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/shared';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/shared';
 import { Badge } from '@/components/ui/shared';
 import { usePlans, useUserPlan, formatPrice, calculateYearlySavings, getDiscountPercentage } from '@/hooks/use-plans';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLocation } from '@/contexts/LocationContext';
+import { useRouter } from 'next/navigation';
 import { 
   Check, 
   Star, 
@@ -29,7 +32,6 @@ import {
   MapPin,
   Truck
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useSubscriptionPrerequisites } from '@/hooks/use-subscription-prerequisites';
 import { toast } from 'sonner';
 import LocationPromptModal from '@/components/location/LocationPromptModal';
@@ -124,6 +126,8 @@ export default function PlansSection() {
   const [selectedPlanForLocation, setSelectedPlanForLocation] = useState<any>(null);
   const router = useRouter();
   const prerequisites = useSubscriptionPrerequisites();
+  const { isAuthenticated } = useAuth();
+  const { userLocation, isInBC } = useLocation();
 
   // Helper function to get button text based on authentication status
   const getButtonText = (plan: any) => {
@@ -470,17 +474,29 @@ export default function PlansSection() {
                         onClick={async () => {
                           setLoadingPlan(plan.id);
                           
-                          // Check prerequisites before proceeding
+                          // If user is not authenticated, check location first
+                          if (!isAuthenticated) {
+                            // If no location is set, show location modal
+                            if (!userLocation || !isInBC) {
+                              setSelectedPlanForLocation(plan);
+                              setShowLocationModal(true);
+                              setLoadingPlan(null);
+                              return;
+                            }
+                            
+                            // If location is valid, redirect to sign up
+                            router.push(`/register?redirect=${encodeURIComponent('/pricing')}`);
+                            setLoadingPlan(null);
+                            return;
+                          }
+                          
+                          // Check prerequisites before proceeding for authenticated users
                           const canProceed = await prerequisites.checkAndRedirect(plan.id);
                           
                           if (!canProceed) {
                             setLoadingPlan(null);
                             // Show appropriate message based on what's missing
-                            if (!prerequisites.isAuthenticated) {
-                              toast.info('Please log in to subscribe to a plan', {
-                                description: 'You\'ll be redirected to the login page.',
-                              });
-                            } else if (!prerequisites.hasValidLocation) {
+                            if (!prerequisites.hasValidLocation) {
                               // Show location modal instead of just a toast
                               setSelectedPlanForLocation(plan);
                               setShowLocationModal(true);
@@ -619,17 +635,29 @@ export default function PlansSection() {
                         onClick={async () => {
                           setLoadingPlan(plan.id);
                           
-                          // Check prerequisites before proceeding
+                          // If user is not authenticated, check location first
+                          if (!isAuthenticated) {
+                            // If no location is set, show location modal
+                            if (!userLocation || !isInBC) {
+                              setSelectedPlanForLocation(plan);
+                              setShowLocationModal(true);
+                              setLoadingPlan(null);
+                              return;
+                            }
+                            
+                            // If location is valid, redirect to sign up
+                            router.push(`/register?redirect=${encodeURIComponent('/pricing')}`);
+                            setLoadingPlan(null);
+                            return;
+                          }
+                          
+                          // Check prerequisites before proceeding for authenticated users
                           const canProceed = await prerequisites.checkAndRedirect(plan.id);
                           
                           if (!canProceed) {
                             setLoadingPlan(null);
                             // Show appropriate message based on what's missing
-                            if (!prerequisites.isAuthenticated) {
-                              toast.info('Please log in to subscribe to a plan', {
-                                description: 'You\'ll be redirected to the login page.',
-                              });
-                            } else if (!prerequisites.hasValidLocation) {
+                            if (!prerequisites.hasValidLocation) {
                               // Show location modal instead of just a toast
                               setSelectedPlanForLocation(plan);
                               setShowLocationModal(true);
@@ -895,12 +923,12 @@ export default function PlansSection() {
           setSelectedPlanForLocation(null);
         }}
         onLocationSet={() => {
-          // After location is set, proceed with the subscription
-          if (selectedPlanForLocation) {
-            router.push(`/dashboard/customer/book-service?plan=${selectedPlanForLocation.id}`);
-          }
+          // After location is set, redirect to sign up
+          router.push(`/register?redirect=${encodeURIComponent('/pricing')}`);
+          setShowLocationModal(false);
+          setSelectedPlanForLocation(null);
         }}
-        planName={selectedPlanForLocation?.name}
+        planName={selectedPlanForLocation?.name?.toLowerCase() || "plan"}
       />
     </section>
   );

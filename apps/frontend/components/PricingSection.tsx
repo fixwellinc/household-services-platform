@@ -4,6 +4,9 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/shared';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/shared';
 import { Badge } from '@/components/ui/shared';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLocation } from '@/contexts/LocationContext';
+import { useRouter } from 'next/navigation';
 import { 
   Check, 
   Star, 
@@ -17,6 +20,7 @@ import {
   MessageSquare,
   Quote
 } from 'lucide-react';
+import LocationPromptModal from '@/components/location/LocationPromptModal';
 
 const plans = [
   {
@@ -127,6 +131,10 @@ const testimonials = [
 
 export default function PricingSection() {
   const [billingPeriod, setBillingPeriod] = useState<'month' | 'year'>('month');
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const { userLocation, isInBC } = useLocation();
+  const router = useRouter();
 
   const getDiscountedPrice = (price: number) => {
     return billingPeriod === 'year' ? price * 10 : price; // Yearly discount
@@ -242,6 +250,23 @@ export default function PricingSection() {
                 {/* CTA Button */}
                 <Button 
                   className={`w-full ${plan.ctaColor} text-white font-semibold py-2 md:py-3 text-base md:text-lg transition-all duration-300 transform hover:scale-105`}
+                  onClick={() => {
+                    // If user is not authenticated, check location first
+                    if (!isAuthenticated) {
+                      // If no location is set, show location modal
+                      if (!userLocation || !isInBC) {
+                        setShowLocationModal(true);
+                        return;
+                      }
+                      
+                      // If location is valid, redirect to sign up
+                      router.push(`/register?redirect=${encodeURIComponent('/pricing')}`);
+                      return;
+                    }
+                    
+                    // If user is authenticated, redirect to pricing page
+                    router.push('/pricing');
+                  }}
                 >
                   <span className="flex items-center gap-2">
                     {plan.cta}
@@ -393,6 +418,18 @@ export default function PricingSection() {
           </div>
         </div>
       </div>
+
+      {/* Location Prompt Modal */}
+      <LocationPromptModal
+        isOpen={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        onLocationSet={() => {
+          // After location is set, redirect to sign up
+          router.push(`/register?redirect=${encodeURIComponent('/pricing')}`);
+          setShowLocationModal(false);
+        }}
+        planName="plan"
+      />
     </section>
   );
 } 
