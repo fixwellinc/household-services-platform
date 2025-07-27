@@ -41,11 +41,12 @@ const Header: React.FC = () => {
   };
 
   const handleGetStarted = () => {
-    console.log('Header handleGetStarted called');
+    console.log('=== Header handleGetStarted called ===');
     console.log('user:', user);
     console.log('userLocation:', userLocation);
     console.log('isInBC:', isInBC);
     console.log('locationLoading:', locationLoading);
+    console.log('showLocationModal:', showLocationModal);
     
     // If location is still loading, wait
     if (locationLoading) {
@@ -60,6 +61,7 @@ const Header: React.FC = () => {
       if (!userLocation || !isInBC) {
         console.log('No valid location, showing location modal');
         setShowLocationModal(true);
+        console.log('Modal should now be open');
         return;
       }
       

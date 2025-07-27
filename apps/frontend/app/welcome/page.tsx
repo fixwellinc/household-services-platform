@@ -106,7 +106,7 @@ const WELCOME_FEATURES = [
 
 function WelcomeContent() {
   const { user, isLoading, isAuthenticated } = useAuth();
-  const { userLocation, isInBC } = useLocation();
+  const { userLocation, isInBC, isLoading: locationLoading } = useLocation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const planId = searchParams.get('plan') || 'starter';
@@ -135,19 +135,37 @@ function WelcomeContent() {
   }
 
   const handleContinueToPlan = () => {
+    console.log('=== Welcome handleContinueToPlan called ===');
+    console.log('isAuthenticated:', isAuthenticated);
+    console.log('userLocation:', userLocation);
+    console.log('isInBC:', isInBC);
+    console.log('locationLoading:', locationLoading);
+    console.log('showLocationModal:', showLocationModal);
+    
+    // If location is still loading, wait
+    if (locationLoading) {
+      console.log('Location still loading, waiting...');
+      return;
+    }
+    
     // If user is not authenticated, check location first
     if (!isAuthenticated) {
+      console.log('User not authenticated, checking location...');
       // If no location is set, show location modal
       if (!userLocation || !isInBC) {
+        console.log('No valid location, showing location modal');
         setShowLocationModal(true);
+        console.log('Modal should now be open');
         return;
       }
       
+      console.log('Location is valid, redirecting to sign up');
       // If location is valid, redirect to sign up
       router.push(`/register?redirect=${encodeURIComponent(`/welcome?plan=${planId}`)}`);
       return;
     }
     
+    console.log('User is authenticated, proceeding to subscription');
     // If user is authenticated, proceed to subscription
     router.push(`/pricing/subscribe?plan=${planId}`);
   };
