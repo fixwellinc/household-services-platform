@@ -8,6 +8,7 @@ import BCLocationBanner from '@/components/location/BCLocationBanner'
 import { Toaster } from 'sonner'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import React from 'react'
+import { Metadata } from 'next'
 
 const jetbrainsMono = JetBrains_Mono({ 
   subsets: ['latin'],
@@ -15,40 +16,59 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 })
 
-export const metadata = {
-  title: 'Fixwell Services | Professional Home Services',
-  description: 'Book cleaning, repairs, and more with trusted, verified professionals. Choose from Basic, Plus, or Premier plans.',
-  metadataBase: new URL('https://roasted-key-production.up.railway.app'),
-  charset: 'utf-8',
-  icons: {
-    icon: [
-      { url: '/favicon.ico' },
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-    ],
+export const metadata: Metadata = {
+  title: {
+    default: 'Fixwell Services - Professional Household Services',
+    template: '%s | Fixwell Services'
+  },
+  description: 'Book cleaning, repairs, and more with trusted, verified professionals. Choose from Starter Plan, HomeCare Plan, or Priority Plan.',
+  keywords: ['household services', 'cleaning', 'maintenance', 'repair', 'professional services', 'home care'],
+  authors: [{ name: 'Fixwell Services' }],
+  creator: 'Fixwell Services',
+  publisher: 'Fixwell Services',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL('https://fixwell-services-platform-production.up.railway.app'),
+  alternates: {
+    canonical: '/',
   },
   openGraph: {
-    title: 'Household Services',
-    description: 'Book cleaning, repairs, and more with trusted, verified professionals.',
-    url: 'https://yourdomain.com',
-    siteName: 'Household Services',
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://fixwell-services-platform-production.up.railway.app',
+    title: 'Fixwell Services - Professional Household Services',
+    description: 'Book cleaning, repairs, and more with trusted, verified professionals. Choose from Starter Plan, HomeCare Plan, or Priority Plan.',
+    siteName: 'Fixwell Services',
     images: [
       {
-        url: 'https://yourdomain.com/og-image.jpg',
+        url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Household Services',
+        alt: 'Fixwell Services - Professional Household Services',
       },
     ],
-    locale: 'en_US',
-    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Household Services',
-    description: 'Book cleaning, repairs, and more with trusted, verified professionals.',
-    images: ['https://yourdomain.com/og-image.jpg'],
+    title: 'Fixwell Services - Professional Household Services',
+    description: 'Book cleaning, repairs, and more with trusted, verified professionals. Choose from Starter Plan, HomeCare Plan, or Priority Plan.',
+    images: ['/og-image.jpg'],
   },
-}
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+};
 
 export const viewport = {
   width: 'device-width',

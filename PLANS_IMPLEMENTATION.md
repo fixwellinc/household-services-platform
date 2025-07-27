@@ -4,11 +4,11 @@ This document outlines the complete implementation of BCAA-style subscription pl
 
 ## Overview
 
-The implementation includes a 3-tier subscription model (Basic, Plus, Premier) inspired by BCAA's membership structure, with comprehensive features, pricing, and management tools.
+The implementation includes a 3-tier subscription model (Starter Plan, HomeCare Plan, Priority Plan) inspired by BCAA's membership structure, with comprehensive features, pricing, and management tools.
 
 ## Plan Structure
 
-### Basic Plan - $19.99/month ($215.89/year)
+### Starter Plan - $19.99/month ($215.89/year)
 - **Target**: Essential household services for everyday needs
 - **Savings**: $500+ per year
 - **Features**:
@@ -23,11 +23,11 @@ The implementation includes a 3-tier subscription model (Basic, Plus, Premier) i
   - Basic service guarantees
   - Lower Mainland service area
 
-### Plus Plan - $49.99/month ($539.89/year) ⭐ MOST POPULAR
+### HomeCare Plan - $49.99/month ($539.89/year) ⭐ MOST POPULAR
 - **Target**: Enhanced features for busy families
 - **Savings**: $1,000+ per year
 - **Features**:
-  - Everything in Basic
+  - Everything in Starter
   - Priority booking system (3 days advance)
   - SMS notifications
   - Extended service categories (repair, organization)
@@ -43,11 +43,11 @@ The implementation includes a 3-tier subscription model (Basic, Plus, Premier) i
   - **10% discount on all services**
   - Free service consultation
 
-### Premier Plan - $109.99/month ($1187.89/year)
+### Priority Plan - $109.99/month ($1187.89/year)
 - **Target**: Ultimate convenience for luxury households
 - **Savings**: $1,500+ per year
 - **Features**:
-  - Everything in Plus
+  - Everything in HomeCare
   - Concierge service
   - Same-day booking availability
   - Dedicated account manager
@@ -124,12 +124,12 @@ Add the following to your `.env` file:
 
 ```bash
 # Stripe Plan Price IDs
-STRIPE_BASIC_MONTHLY_PRICE_ID="price_basic_monthly"
-STRIPE_BASIC_YEARLY_PRICE_ID="price_basic_yearly"
-STRIPE_PLUS_MONTHLY_PRICE_ID="price_plus_monthly"
-STRIPE_PLUS_YEARLY_PRICE_ID="price_plus_yearly"
-STRIPE_PREMIER_MONTHLY_PRICE_ID="price_premier_monthly"
-STRIPE_PREMIER_YEARLY_PRICE_ID="price_premier_yearly"
+STRIPE_STARTER_MONTHLY_PRICE_ID="price_starter_monthly"
+STRIPE_STARTER_YEARLY_PRICE_ID="price_starter_yearly"
+STRIPE_HOMECARE_MONTHLY_PRICE_ID="price_homecare_monthly"
+STRIPE_HOMECARE_YEARLY_PRICE_ID="price_homecare_yearly"
+STRIPE_PRIORITY_MONTHLY_PRICE_ID="price_priority_monthly"
+STRIPE_PRIORITY_YEARLY_PRICE_ID="price_priority_yearly"
 ```
 
 ### 2. Stripe Setup

@@ -259,7 +259,7 @@ export default function PricingSection() {
         </div>
 
         {/* Feature Comparison Table */}
-        <div className="max-w-6xl mx-auto mb-16 md:mb-20">
+        <div className="mt-16 md:mt-20">
           <div className="text-center mb-8 md:mb-12">
             <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
               Compare Plans
@@ -275,9 +275,9 @@ export default function PricingSection() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Features</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Basic</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Premium</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">VIP</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Starter Plan</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">HomeCare Plan</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Priority Plan</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">

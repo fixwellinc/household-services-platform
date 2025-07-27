@@ -121,7 +121,7 @@ model Setting {
 
 // Enums are not supported in MongoDB, using strings instead
 // UserRole: "CUSTOMER", "ADMIN"
-// SubscriptionTier: "BASIC", "PLUS", "PREMIER"
+// SubscriptionTier: "STARTER", "HOMECARE", "PRIORITY"
 // SubscriptionStatus: "ACTIVE", "CANCELLED", "PAST_DUE", "UNPAID"
 // ServiceCategory: "CLEANING", "MAINTENANCE", "REPAIR", "ORGANIZATION", "SHOPPING", "OTHER"
 // ServiceComplexity: "SIMPLE", "MODERATE", "COMPLEX"
@@ -165,4 +165,10 @@ model ChatMessage {
   fileName      String?
   fileType      String?
   fileUrl       String?
+} 
+
+enum SubscriptionTier {
+  STARTER
+  HOMECARE
+  PRIORITY
 } 

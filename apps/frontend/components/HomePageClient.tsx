@@ -84,9 +84,8 @@ export default function HomePageClient() {
               <span className="text-blue-600">Our Expertise</span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Connect with verified professionals for all your household needs. Choose from Basic, Plus, or Premier plans.
-              {isInBC && userCity ? ` Serving ${userCity} and surrounding areas.` : ' Currently serving Lower Mainland residents (within 50km of Surrey).'}
+            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
+              Connect with verified professionals for all your household needs. Choose from Starter Plan, HomeCare Plan, or Priority Plan.
             </p>
             
             {user ? (

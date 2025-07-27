@@ -1,8 +1,14 @@
 import PlansSection from '@/components/PlansSection';
 
 export const metadata = {
-  title: 'Plans | Fixwell Services',
-  description: 'Choose your perfect plan: Basic, Plus, or Premier. Get professional household services with transparent pricing and flexible options.',
+  title: 'Pricing Plans - Fixwell Services',
+  description: 'Choose your perfect plan: Starter Plan, HomeCare Plan, or Priority Plan. Get professional household services with transparent pricing and flexible options.',
+  keywords: 'pricing, plans, subscription, household services, maintenance, cleaning, repair',
+  openGraph: {
+    title: 'Pricing Plans - Fixwell Services',
+    description: 'Choose your perfect plan: Starter Plan, HomeCare Plan, or Priority Plan. Get professional household services with transparent pricing and flexible options.',
+    type: 'website',
+  },
 };
 
 export default function PlansPage() {
@@ -38,13 +44,24 @@ export default function PlansPage() {
       {/* FAQ Section */}
       <section className="py-12 md:py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-4">
-              Everything you need to know about our plans and services
+          <div className="max-w-4xl mx-auto text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Simple, Transparent Pricing
+            </h1>
+            <p className="text-xl text-gray-600 leading-relaxed">
+              All plans include access to our core household services. Starter Plan includes cleaning and maintenance, HomeCare Plan adds repair and organization, and Priority Plan includes all services plus custom packages and concierge service.
             </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto text-center mb-12">
+            <div className="bg-blue-50 rounded-2xl p-6 md:p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                Response Times by Plan
+              </h2>
+              <p className="text-lg text-gray-600">
+                Response times vary by plan: Starter Plan (24 hours), HomeCare Plan (12 hours), Priority Plan (same day). Emergency services are available for urgent situations with Priority Plan members getting priority scheduling.
+              </p>
+            </div>
           </div>
 
           <div className="max-w-4xl mx-auto grid gap-6 md:gap-8">

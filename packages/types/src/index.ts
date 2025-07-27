@@ -14,14 +14,13 @@ export interface User {
 export interface Subscription {
   id: string;
   userId: string;
-  tier: 'BASIC' | 'PLUS' | 'PREMIER';
-  status: 'ACTIVE' | 'CANCELLED' | 'PAST_DUE' | 'UNPAID';
-  stripeCustomerId?: string;
+  tier: 'STARTER' | 'HOMECARE' | 'PRIORITY';
+  status: 'ACTIVE' | 'CANCELLED' | 'PENDING';
+  startDate: Date;
+  endDate?: Date;
   stripeSubscriptionId?: string;
-  currentPeriodStart?: string;
-  currentPeriodEnd?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface Service {

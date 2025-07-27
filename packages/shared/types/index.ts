@@ -31,9 +31,9 @@ export interface Subscription {
 }
 
 export enum SubscriptionTier {
-  BASIC = 'BASIC',
-  PREMIUM = 'PREMIUM',
-  VIP = 'VIP'
+  STARTER = 'STARTER',
+  HOMECARE = 'HOMECARE',
+  PRIORITY = 'PRIORITY'
 }
 
 export enum SubscriptionStatus {
