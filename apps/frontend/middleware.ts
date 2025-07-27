@@ -11,7 +11,6 @@ const roleRoutes = [
   { path: '/bookings', role: ['CUSTOMER', 'ADMIN'] },
   { path: '/payments', role: ['CUSTOMER'] },
   { path: '/support', role: ['CUSTOMER'] },
-  { path: '/services', role: ['CUSTOMER', 'ADMIN'] },
 ];
 
 // Public routes that don't require authentication
@@ -26,6 +25,7 @@ const publicRoutes = [
   '/welcome',
   '/blog',
   '/test-api',
+  '/services',
 ];
 
 function getRequiredRole(pathname: string): string | string[] | null {

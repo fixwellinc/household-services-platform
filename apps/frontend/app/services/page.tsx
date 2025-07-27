@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Button } from '@/components/ui/shared';
 import { Badge } from '@/components/ui/shared';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLocation } from '@/contexts/LocationContext';
+import { useRouter } from 'next/navigation';
 import { 
   Search, 
   Filter, 
@@ -26,6 +29,7 @@ import {
   TrendingUp,
   MessageCircle
 } from 'lucide-react';
+import LocationPromptModal from '@/components/location/LocationPromptModal';
 
 // Shopping Bag Icon Component
 const ShoppingBag = ({ className }: { className?: string }) => (
@@ -118,6 +122,10 @@ const sampleServices = [
 export default function ServicesPage() {
   const [selectedCategory, setSelectedCategory] = useState('ALL')
   const [searchQuery, setSearchQuery] = useState('')
+  const [showLocationModal, setShowLocationModal] = useState(false)
+  const { user, isAuthenticated } = useAuth();
+  const { userLocation, userCity, isInBC, setUserLocation } = useLocation();
+  const router = useRouter();
 
   const filteredServices = sampleServices
     .filter(service => {
@@ -129,7 +137,23 @@ export default function ServicesPage() {
 
   const handleBook = (serviceId: string) => {
     console.log('Booking service:', serviceId)
-    // TODO: Implement booking logic
+    
+    // If user is not authenticated, check location first
+    if (!isAuthenticated) {
+      // If no location is set, show location modal
+      if (!userLocation || !isInBC) {
+        setShowLocationModal(true);
+        return;
+      }
+      
+      // If location is valid, redirect to sign up
+      router.push(`/register?redirect=${encodeURIComponent('/services')}`);
+      return;
+    }
+    
+    // If user is authenticated, proceed with booking
+    // TODO: Implement booking logic for authenticated users
+    console.log('Proceeding with booking for authenticated user');
   }
 
   const handleViewDetails = (serviceId: string) => {
@@ -355,7 +379,7 @@ export default function ServicesPage() {
                             onClick={() => handleBook(service.id)}
                           >
                             <BookOpen className="h-4 w-4 mr-2" />
-                            Book Now
+                            {isAuthenticated ? 'Book Now' : 'Let\'s Get You Started'}
                           </Button>
                           <Button 
                             variant="outline" 
@@ -387,9 +411,24 @@ export default function ServicesPage() {
               We're always expanding our services. Let us know what you need and we'll make it happen!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg">
+              <Button 
+                size="lg" 
+                className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg"
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    if (!userLocation || !isInBC) {
+                      setShowLocationModal(true);
+                    } else {
+                      router.push(`/register?redirect=${encodeURIComponent('/services')}`);
+                    }
+                  } else {
+                    // For authenticated users, maybe redirect to booking or dashboard
+                    router.push('/dashboard');
+                  }
+                }}
+              >
                 <Users className="h-5 w-5 mr-2" />
-                Request a Service
+                Let's Get You Started
               </Button>
               <Button variant="outline" size="lg" className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 text-lg">
                 <MessageCircle className="h-5 w-5 mr-2" />
@@ -399,6 +438,16 @@ export default function ServicesPage() {
           </div>
         </div>
       </section>
+      <LocationPromptModal
+        isOpen={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        onLocationSet={() => {
+          // After location is set, redirect to sign up
+          router.push(`/register?redirect=${encodeURIComponent('/services')}`);
+          setShowLocationModal(false);
+        }}
+        planName="service"
+      />
     </div>
   )
 } 
