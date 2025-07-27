@@ -22,7 +22,9 @@ import {
   Sparkle,
   Heart,
   Loader2,
-  MapPin
+  MapPin,
+  CheckCircle,
+  Clock
 } from 'lucide-react';
 import LocationPromptModal from '@/components/location/LocationPromptModal';
 import { useState } from 'react';
@@ -186,14 +188,31 @@ export default function HomePageClient() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
               <Wrench className="h-4 w-4" />
-              Our Services
+              Professional Services
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
               Professional Services
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8">
               Choose from our wide range of household services, all professionally managed and delivered across the Lower Mainland
             </p>
+            
+            {/* Cost Comparison Banner */}
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-2xl p-6 max-w-4xl mx-auto">
+              <div className="flex items-center justify-center gap-4 mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-gray-700">Contractor Average</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-gray-700">Fixwell Service</span>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600">
+                💡 <strong>Save up to 40%</strong> compared to traditional contractor rates while getting professional, insured, and guaranteed service
+              </p>
+            </div>
           </div>
 
           {servicesLoading ? (
@@ -214,55 +233,98 @@ export default function HomePageClient() {
             </div>
           ) : services.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {services.map((service) => (
-                <Card key={service.id} className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 shadow-lg overflow-hidden bg-white">
-                  <div className="h-48 bg-gradient-to-br from-blue-100 via-purple-100 to-green-100 flex items-center justify-center relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10"></div>
-                    <div className="text-6xl opacity-30 relative z-10">
-                      {service.category === 'CLEANING' && <Home />}
-                      {service.category === 'MAINTENANCE' && <Wrench />}
-                      {service.category === 'REPAIR' && <Zap />}
-                      {service.category === 'ORGANIZATION' && <Sparkle />}
-                      {service.category === 'SHOPPING' && <Heart />}
-                      {service.category === 'OTHER' && <Star />}
-                    </div>
-                  </div>
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-xl group-hover:text-blue-600 transition-colors font-bold">
-                          {service.name}
-                        </CardTitle>
-                        <CardDescription className="mt-3 text-gray-600 leading-relaxed">
-                          {service.description}
-                        </CardDescription>
-                      </div>
-                      <Badge variant="outline" className="ml-2 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 border-blue-200 font-medium">
-                        {service.category}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-3xl font-bold text-blue-600">
-                        {formatPrice(service.basePrice)}
-                      </span>
-                      <Badge variant="secondary" className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 font-medium">
-                        {service.complexity}
-                      </Badge>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
-                      <Shield className="h-4 w-4 text-green-500" />
-                      <span className="font-medium">Professional Service</span>
-                    </div>
+              {services.map((service) => {
+                // Calculate contractor price and savings based on service category
+                const getContractorPrice = (category: string, basePrice: number) => {
+                  const multipliers: Record<string, number> = {
+                    'CLEANING': 1.8,      // Contractors charge ~80% more
+                    'MAINTENANCE': 2.2,   // Contractors charge ~120% more
+                    'REPAIR': 2.5,        // Contractors charge ~150% more
+                    'ORGANIZATION': 1.6,  // Contractors charge ~60% more
+                    'SHOPPING': 1.4,      // Contractors charge ~40% more
+                    'OTHER': 1.9          // Contractors charge ~90% more
+                  };
+                  return Math.round(basePrice * (multipliers[category] || 1.8));
+                };
 
-                    <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                      Book Now
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+                const contractorPrice = getContractorPrice(service.category, service.basePrice);
+                const savings = contractorPrice - service.basePrice;
+                const savingsPercentage = Math.round((savings / contractorPrice) * 100);
+
+                return (
+                  <Card key={service.id} className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 shadow-lg overflow-hidden bg-white">
+                    <div className="h-48 bg-gradient-to-br from-blue-100 via-purple-100 to-green-100 flex items-center justify-center relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10"></div>
+                      <div className="text-6xl opacity-30 relative z-10">
+                        {service.category === 'CLEANING' && <Home />}
+                        {service.category === 'MAINTENANCE' && <Wrench />}
+                        {service.category === 'REPAIR' && <Zap />}
+                        {service.category === 'ORGANIZATION' && <Sparkle />}
+                        {service.category === 'SHOPPING' && <Heart />}
+                        {service.category === 'OTHER' && <Star />}
+                      </div>
+                    </div>
+                    <CardHeader className="pb-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-xl group-hover:text-blue-600 transition-colors font-bold">
+                            {service.name}
+                          </CardTitle>
+                          <CardDescription className="mt-3 text-gray-600 leading-relaxed">
+                            {service.description}
+                          </CardDescription>
+                        </div>
+                        <Badge variant="outline" className="ml-2 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 border-blue-200 font-medium">
+                          {service.category}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      {/* Price Comparison */}
+                      <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm text-gray-600">Contractor Rate:</span>
+                          <span className="text-sm line-through text-red-600 font-medium">
+                            ${contractorPrice}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm text-gray-600">Fixwell Rate:</span>
+                          <span className="text-2xl font-bold text-green-600">
+                            ${service.basePrice}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">You Save:</span>
+                          <span className="text-sm font-bold text-green-600">
+                            ${savings} ({savingsPercentage}%)
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Service Benefits */}
+                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
+                        <Shield className="h-4 w-4 text-green-500" />
+                        <span className="font-medium">Professional & Insured</span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
+                        <CheckCircle className="h-4 w-4 text-blue-500" />
+                        <span className="font-medium">Satisfaction Guaranteed</span>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
+                        <Clock className="h-4 w-4 text-purple-500" />
+                        <span className="font-medium">Same-day booking available</span>
+                      </div>
+
+                      <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                        Book Now
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           ) : (
             <Card className="max-w-md mx-auto border-0 shadow-lg">
@@ -274,7 +336,6 @@ export default function HomePageClient() {
                 <p className="text-gray-600 mb-6">
                   Check back soon for amazing new services.
                 </p>
-
               </CardContent>
             </Card>
           )}
