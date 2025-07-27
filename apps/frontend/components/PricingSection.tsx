@@ -39,7 +39,7 @@ const plans = [
       'Professional service team'
     ],
     popular: false,
-    cta: 'Get Started',
+    cta: 'Let\'s Get You Started',
     ctaColor: 'bg-blue-600 hover:bg-blue-700'
   },
   {
@@ -66,7 +66,7 @@ const plans = [
       'Advanced filtering options'
     ],
     popular: true,
-    cta: 'Get Started',
+    cta: 'Let\'s Get You Started',
     ctaColor: 'bg-purple-600 hover:bg-purple-700'
   },
   {
@@ -96,7 +96,7 @@ const plans = [
       'Exclusive events & offers'
     ],
     popular: false,
-    cta: 'Get Started',
+    cta: 'Let\'s Get You Started',
     ctaColor: 'bg-amber-600 hover:bg-amber-700'
   }
 ];

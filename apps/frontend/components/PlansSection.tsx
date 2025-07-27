@@ -128,7 +128,7 @@ export default function PlansSection() {
   // Helper function to get button text based on authentication status
   const getButtonText = (plan: any) => {
     if (!prerequisites.isAuthenticated) {
-      return 'Get Started';
+      return 'Let\'s Get You Started';
     }
     
     // For authenticated users, show the plan-specific text

@@ -260,7 +260,7 @@ function WelcomeContent() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
-              Ready to Get Started? 🚀
+              Ready to Get You Started? 🚀
             </h2>
             <p className="text-lg text-gray-600 mb-8">
               Complete your subscription to unlock all the benefits and start booking services today!

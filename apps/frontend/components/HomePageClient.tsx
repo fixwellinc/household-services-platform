@@ -113,7 +113,7 @@ export default function HomePageClient() {
                 <Link href="/register">
                   <Button variant="outline" size="lg" className="border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all duration-300">
                     <span className="flex items-center gap-2">
-                      Get Started
+                      Let's Get You Started
                       <User className="h-4 w-4" />
                     </span>
                   </Button>
@@ -324,7 +324,7 @@ export default function HomePageClient() {
             <Link href="/register">
               <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-8 py-4 font-medium">
                 <span className="flex items-center gap-2">
-                  Get Started
+                  Let's Get You Started
                   <ArrowRight className="h-5 w-5" />
                 </span>
               </Button>
