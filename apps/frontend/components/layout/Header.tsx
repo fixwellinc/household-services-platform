@@ -5,6 +5,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/shared'
 import { useAuth } from '@/contexts/AuthContext'
+import { useLocation } from '@/contexts/LocationContext'
+import { useRouter } from 'next/navigation'
 import { 
   User, 
   LogOut, 
@@ -19,11 +21,15 @@ import {
   LayoutDashboard,
   DollarSign
 } from 'lucide-react'
+import LocationPromptModal from '@/components/location/LocationPromptModal'
 
 const Header: React.FC = () => {
   const { user, isLoading, logout, isHydrated } = useAuth();
+  const { userLocation, isInBC } = useLocation();
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -32,6 +38,24 @@ const Header: React.FC = () => {
     } catch (error) {
       console.error('Logout failed:', error);
     }
+  };
+
+  const handleGetStarted = () => {
+    // If user is not authenticated, check location first
+    if (!user) {
+      // If no location is set, show location modal
+      if (!userLocation || !isInBC) {
+        setShowLocationModal(true);
+        return;
+      }
+      
+      // If location is valid, redirect to sign up
+      router.push(`/register?redirect=${encodeURIComponent('/')}`);
+      return;
+    }
+    
+    // If user is authenticated, redirect to dashboard
+    router.push('/dashboard');
   };
 
   const toggleMobileMenu = () => {
@@ -234,11 +258,12 @@ const Header: React.FC = () => {
                     Sign In
                   </Button>
                 </Link>
-                <Link href="/register">
-                  <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2 font-medium transform hover:scale-105">
-                    Get Started
-                  </Button>
-                </Link>
+                <Button 
+                  onClick={handleGetStarted}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2 font-medium transform hover:scale-105"
+                >
+                  Get Started
+                </Button>
               </div>
             )}
 
@@ -305,11 +330,15 @@ const Header: React.FC = () => {
                       Sign In
                     </Button>
                   </Link>
-                  <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button className="w-full justify-start bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3">
-                      Get Started
-                    </Button>
-                  </Link>
+                  <Button 
+                    onClick={() => {
+                      handleGetStarted();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full justify-start bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3"
+                  >
+                    Get Started
+                  </Button>
                 </div>
               )}
             </nav>
@@ -324,6 +353,18 @@ const Header: React.FC = () => {
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
+
+      {/* Location Prompt Modal */}
+      <LocationPromptModal
+        isOpen={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        onLocationSet={() => {
+          // After location is set, redirect to sign up
+          router.push(`/register?redirect=${encodeURIComponent('/')}`);
+          setShowLocationModal(false);
+        }}
+        planName="service"
+      />
     </header>
   )
 }

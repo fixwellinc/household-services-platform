@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLocation } from '@/contexts/LocationContext';
 import { Button } from '@/components/ui/shared';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/shared';
 import { Badge } from '@/components/ui/shared';
@@ -27,6 +28,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import LocationPromptModal from '@/components/location/LocationPromptModal';
 
 const PLAN_INFO = {
   starter: {
@@ -104,10 +106,12 @@ const WELCOME_FEATURES = [
 
 function WelcomeContent() {
   const { user, isLoading, isAuthenticated } = useAuth();
+  const { userLocation, isInBC } = useLocation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const planId = searchParams.get('plan') || 'starter';
   const [showPlanDetails, setShowPlanDetails] = useState(true);
+  const [showLocationModal, setShowLocationModal] = useState(false);
   
   const selectedPlan = PLAN_INFO[planId as keyof typeof PLAN_INFO] || PLAN_INFO.starter;
   const PlanIcon = selectedPlan.icon;
@@ -131,6 +135,20 @@ function WelcomeContent() {
   }
 
   const handleContinueToPlan = () => {
+    // If user is not authenticated, check location first
+    if (!isAuthenticated) {
+      // If no location is set, show location modal
+      if (!userLocation || !isInBC) {
+        setShowLocationModal(true);
+        return;
+      }
+      
+      // If location is valid, redirect to sign up
+      router.push(`/register?redirect=${encodeURIComponent(`/welcome?plan=${planId}`)}`);
+      return;
+    }
+    
+    // If user is authenticated, proceed to subscription
     router.push(`/pricing/subscribe?plan=${planId}`);
   };
 
@@ -310,6 +328,18 @@ function WelcomeContent() {
           </div>
         </div>
       </div>
+
+      {/* Location Prompt Modal */}
+      <LocationPromptModal
+        isOpen={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        onLocationSet={() => {
+          // After location is set, redirect to sign up
+          router.push(`/register?redirect=${encodeURIComponent(`/welcome?plan=${planId}`)}`);
+          setShowLocationModal(false);
+        }}
+        planName={selectedPlan.name.toLowerCase()}
+      />
     </div>
   );
 }
