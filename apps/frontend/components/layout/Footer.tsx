@@ -22,20 +22,22 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-6">
-            <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 flex items-center justify-center">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 flex items-center justify-center bg-white rounded-lg shadow-md">
                 <Image 
-                  src="/fw.webp" 
+                  src="/fixwelltop.png" 
                   alt="Fixwell Logo" 
-                  width={40} 
-                  height={40}
+                  width={48} 
+                  height={48}
                   className="rounded-lg"
                 />
               </div>
-              <span className="text-xl font-bold">Fixwell</span>
+              <span className="text-xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+                Fixwell
+              </span>
             </div>
             <p className="text-gray-300 leading-relaxed">
-                              Connect with verified professionals for all your fixwell needs. 
+              Connect with verified professionals for all your household needs. 
               From cleaning to repairs, we&apos;ve got you covered with quality service.
             </p>
             <div className="flex space-x-4">
