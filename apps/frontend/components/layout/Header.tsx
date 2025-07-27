@@ -25,7 +25,7 @@ import LocationPromptModal from '@/components/location/LocationPromptModal'
 
 const Header: React.FC = () => {
   const { user, isLoading, logout, isHydrated } = useAuth();
-  const { userLocation, isInBC } = useLocation();
+  const { userLocation, isInBC, isLoading: locationLoading } = useLocation();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -41,19 +41,35 @@ const Header: React.FC = () => {
   };
 
   const handleGetStarted = () => {
+    console.log('Header handleGetStarted called');
+    console.log('user:', user);
+    console.log('userLocation:', userLocation);
+    console.log('isInBC:', isInBC);
+    console.log('locationLoading:', locationLoading);
+    
+    // If location is still loading, wait
+    if (locationLoading) {
+      console.log('Location still loading, waiting...');
+      return;
+    }
+    
     // If user is not authenticated, check location first
     if (!user) {
+      console.log('User not authenticated, checking location...');
       // If no location is set, show location modal
       if (!userLocation || !isInBC) {
+        console.log('No valid location, showing location modal');
         setShowLocationModal(true);
         return;
       }
       
+      console.log('Location is valid, redirecting to sign up');
       // If location is valid, redirect to sign up
       router.push(`/register?redirect=${encodeURIComponent('/')}`);
       return;
     }
     
+    console.log('User is authenticated, redirecting to dashboard');
     // If user is authenticated, redirect to dashboard
     router.push('/dashboard');
   };

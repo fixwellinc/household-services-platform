@@ -31,7 +31,7 @@ export default function HomePageClient() {
   const { isHydrated } = useAuth();
   const { data: userData, isLoading: userLoading } = useCurrentUser(isHydrated);
   const { data: servicesData, isLoading: servicesLoading } = useServices();
-  const { userLocation, userCity, isInBC } = useLocation();
+  const { userLocation, userCity, isInBC, isLoading: locationLoading } = useLocation();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -40,19 +40,35 @@ export default function HomePageClient() {
   const services = servicesData?.services || [];
 
   const handleGetStarted = () => {
+    console.log('handleGetStarted called');
+    console.log('isAuthenticated:', isAuthenticated);
+    console.log('userLocation:', userLocation);
+    console.log('isInBC:', isInBC);
+    console.log('locationLoading:', locationLoading);
+    
+    // If location is still loading, wait
+    if (locationLoading) {
+      console.log('Location still loading, waiting...');
+      return;
+    }
+    
     // If user is not authenticated, check location first
     if (!isAuthenticated) {
+      console.log('User not authenticated, checking location...');
       // If no location is set, show location modal
       if (!userLocation || !isInBC) {
+        console.log('No valid location, showing location modal');
         setShowLocationModal(true);
         return;
       }
       
+      console.log('Location is valid, redirecting to sign up');
       // If location is valid, redirect to sign up
       router.push(`/register?redirect=${encodeURIComponent('/')}`);
       return;
     }
     
+    console.log('User is authenticated, redirecting to dashboard');
     // If user is authenticated, redirect to dashboard
     router.push('/dashboard');
   };
@@ -343,14 +359,17 @@ export default function HomePageClient() {
             Join thousands of satisfied Lower Mainland customers who trust us with their household needs
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <Link href="/register">
-              <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-8 py-4 font-medium" onClick={handleGetStarted}>
-                <span className="flex items-center gap-2">
-                  Let's Get You Started
-                  <ArrowRight className="h-5 w-5" />
-                </span>
-              </Button>
-            </Link>
+            <Button 
+              size="lg" 
+              variant="secondary" 
+              className="bg-white text-blue-600 hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-8 py-4 font-medium" 
+              onClick={handleGetStarted}
+            >
+              <span className="flex items-center gap-2">
+                Let's Get You Started
+                <ArrowRight className="h-5 w-5" />
+              </span>
+            </Button>
             <Link href="/services">
               <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 font-medium transition-all duration-300 transform hover:scale-105">
                 <span className="flex items-center gap-2">
