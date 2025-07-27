@@ -25,8 +25,12 @@ export default function LocationPromptModal({
   const [isValidating, setIsValidating] = useState(false);
   const [validationError, setValidationError] = useState('');
 
+  // Debug logging
+  console.log('LocationPromptModal render - isOpen:', isOpen, 'planName:', planName);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('LocationPromptModal handleSubmit called');
     
     if (!postalCodeInput.trim()) {
       setValidationError('Please enter your postal code');
@@ -51,6 +55,7 @@ export default function LocationPromptModal({
         return;
       }
 
+      console.log('Location is valid, saving and calling onLocationSet');
       // Location is valid, save it
       setUserLocation(formattedPostalCode);
       toast.success('Location saved successfully!', {

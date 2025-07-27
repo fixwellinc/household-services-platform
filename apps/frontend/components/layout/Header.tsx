@@ -373,8 +373,12 @@ const Header: React.FC = () => {
       {/* Location Prompt Modal */}
       <LocationPromptModal
         isOpen={showLocationModal}
-        onClose={() => setShowLocationModal(false)}
+        onClose={() => {
+          console.log('Header LocationPromptModal onClose called');
+          setShowLocationModal(false);
+        }}
         onLocationSet={() => {
+          console.log('Header LocationPromptModal onLocationSet called');
           // After location is set, redirect to sign up
           router.push(`/register?redirect=${encodeURIComponent('/')}`);
           setShowLocationModal(false);

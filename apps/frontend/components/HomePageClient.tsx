@@ -40,11 +40,12 @@ export default function HomePageClient() {
   const services = servicesData?.services || [];
 
   const handleGetStarted = () => {
-    console.log('handleGetStarted called');
+    console.log('=== HomePageClient handleGetStarted called ===');
     console.log('isAuthenticated:', isAuthenticated);
     console.log('userLocation:', userLocation);
     console.log('isInBC:', isInBC);
     console.log('locationLoading:', locationLoading);
+    console.log('showLocationModal:', showLocationModal);
     
     // If location is still loading, wait
     if (locationLoading) {
@@ -59,6 +60,7 @@ export default function HomePageClient() {
       if (!userLocation || !isInBC) {
         console.log('No valid location, showing location modal');
         setShowLocationModal(true);
+        console.log('Modal should now be open');
         return;
       }
       
@@ -385,8 +387,12 @@ export default function HomePageClient() {
       {/* Location Prompt Modal */}
       <LocationPromptModal
         isOpen={showLocationModal}
-        onClose={() => setShowLocationModal(false)}
+        onClose={() => {
+          console.log('LocationPromptModal onClose called');
+          setShowLocationModal(false);
+        }}
         onLocationSet={() => {
+          console.log('LocationPromptModal onLocationSet called');
           // After location is set, redirect to sign up
           router.push(`/register?redirect=${encodeURIComponent('/')}`);
           setShowLocationModal(false);
