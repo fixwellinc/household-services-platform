@@ -142,7 +142,7 @@ export default function HomePageClient() {
               <div className="flex flex-col items-center mb-12">
                 <Button 
                   size="lg" 
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 animate-bounce-slow hover:animate-none px-8 py-4 text-lg font-semibold" 
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 animate-glow-slow hover:animate-none px-8 py-4 text-lg font-semibold" 
                   onClick={handleGetStarted}
                 >
                   <span className="flex items-center gap-3">

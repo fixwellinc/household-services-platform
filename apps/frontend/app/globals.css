@@ -283,7 +283,11 @@
   }
 
   .animate-bounce-slow {
-    animation: bounceSlow 3s ease-in-out infinite;
+    animation: bounceSlow 6s ease-in-out infinite;
+  }
+
+  .animate-glow-slow {
+    animation: glowSlow 4s ease-in-out infinite;
   }
 
   .animate-slide-up {
@@ -419,7 +423,16 @@
       transform: translateY(0);
     }
     50% {
-      transform: translateY(-8px);
+      transform: translateY(-4px);
+    }
+  }
+
+  @keyframes glowSlow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
     }
   }
 
