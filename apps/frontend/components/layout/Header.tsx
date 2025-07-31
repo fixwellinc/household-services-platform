@@ -167,6 +167,13 @@ const Header: React.FC = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             <Link 
+              href="/" 
+              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50"
+            >
+              <Home className="h-4 w-4" />
+              Home
+            </Link>
+            <Link 
               href="/services" 
               className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50"
             >
@@ -307,6 +314,14 @@ const Header: React.FC = () => {
               <span className="text-sm text-gray-500 font-medium">Navigation Menu</span>
             </div>
             <nav className="flex flex-col space-y-4">
+              <Link 
+                href="/" 
+                className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Home className="h-5 w-5" />
+                Home
+              </Link>
               <Link 
                 href="/services" 
                 className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50"

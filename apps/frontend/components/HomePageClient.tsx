@@ -123,8 +123,6 @@ export default function HomePageClient() {
             </div>
             
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
-              Your Home,
-              <br />
               <span className="text-blue-600">Home Solutions</span>
             </h1>
             
