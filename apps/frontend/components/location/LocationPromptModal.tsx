@@ -83,8 +83,8 @@ export default function LocationPromptModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto" style={{ top: '80px' }}>
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full relative max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4 overflow-y-auto" style={{ top: '80px' }}>
+      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full relative transform transition-all duration-300 hover:scale-105">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -95,24 +95,24 @@ export default function LocationPromptModal({
         </button>
 
         {/* Modal Content */}
-        <div className="p-6">
+        <div className="p-8">
           {/* Header */}
-          <div className="text-center mb-6">
-            <div className="bg-blue-100 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-              <MapPin className="h-8 w-8 text-blue-600" />
+          <div className="text-center mb-8">
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center shadow-lg">
+              <MapPin className="h-10 w-10 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">
               Verify Your Location
             </h2>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-lg">
               To subscribe to the {planName} plan, we need to confirm you're in our BC service area.
             </p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="postalCode" className="block text-lg font-semibold text-gray-700 mb-3">
                 BC Postal Code
               </label>
               <input
@@ -122,8 +122,8 @@ export default function LocationPromptModal({
                 onChange={(e) => setPostalCodeInput(e.target.value.toUpperCase())}
                 onKeyPress={handleKeyPress}
                 placeholder="V6B 1A1"
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                  validationError ? 'border-red-500' : 'border-gray-300'
+                className={`w-full px-6 py-4 text-lg border-2 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 ${
+                  validationError ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-blue-400'
                 }`}
                 maxLength={7}
                 disabled={isValidating}
@@ -153,24 +153,24 @@ export default function LocationPromptModal({
             </div>
 
             {/* Buttons */}
-            <div className="flex space-x-3 pt-4">
+            <div className="flex space-x-4 pt-6">
               <Button
                 type="button"
                 variant="outline"
                 onClick={onClose}
-                className="flex-1"
+                className="flex-1 py-4 text-lg font-semibold border-2 hover:border-gray-400 transition-all duration-300"
                 disabled={isValidating}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                className="flex-1 py-4 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                 disabled={isValidating || !postalCodeInput.trim()}
               >
                 {isValidating ? (
                   <span className="flex items-center justify-center">
-                    <svg className="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
+                    <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                     </svg>
