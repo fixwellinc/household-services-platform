@@ -41,17 +41,15 @@ export default function HomePageClient() {
 
   // Check if we should show location modal from URL parameter
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const shouldShowModal = urlParams.get('showLocationModal');
-    
-    if (shouldShowModal === 'true' && !isAuthenticated && (!userLocation || !isInBC)) {
-      console.log('Auto-showing location modal from URL parameter');
-      setShowLocationModal(true);
-      // Clean up the URL parameter
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
-    }
+    checkAndShowLocationModal();
   }, [isAuthenticated, userLocation, isInBC]);
+
+  // Check URL parameter on component mount
+  useEffect(() => {
+    if (isHydrated) {
+      checkAndShowLocationModal();
+    }
+  }, [isHydrated]);
 
   const user = userData?.user;
   const services = servicesData?.services || [];
@@ -91,6 +89,20 @@ export default function HomePageClient() {
     console.log('User is authenticated, redirecting to dashboard');
     // If user is authenticated, redirect to dashboard
     router.push('/dashboard');
+  };
+
+  // Function to check URL parameter and show modal
+  const checkAndShowLocationModal = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const shouldShowModal = urlParams.get('showLocationModal');
+    
+    if (shouldShowModal === 'true' && !isAuthenticated && (!userLocation || !isInBC)) {
+      console.log('Auto-showing location modal from URL parameter');
+      setShowLocationModal(true);
+      // Clean up the URL parameter
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
   };
 
   if (!isHydrated) {
