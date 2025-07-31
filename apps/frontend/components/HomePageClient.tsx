@@ -77,7 +77,7 @@ export default function HomePageClient() {
     router.push('/dashboard');
   };
 
-  if (userLoading || !isHydrated) {
+  if (!isHydrated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <div className="flex items-center justify-center min-h-screen">
