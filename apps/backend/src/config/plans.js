@@ -7,8 +7,8 @@ export const PLANS = {
     id: 'starter',
     name: 'Starter Plan',
     description: 'Perfect for light upkeep & peace of mind',
-    monthlyPrice: 19.99,
-    yearlyPrice: 215.89, // 10% discount ($19.99 x 12 months x 0.9)
+    monthlyPrice: 21.99,
+    yearlyPrice: 237.49, // 10% discount ($21.99 x 12 months x 0.9)
     originalPrice: 49.00,
     stripePriceIds: {
       monthly: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || 'price_starter_monthly',
@@ -40,8 +40,8 @@ export const PLANS = {
     id: 'homecare',
     name: 'HomeCare Plan',
     description: 'Monthly help for ongoing maintenance and upkeep',
-    monthlyPrice: 49.99,
-    yearlyPrice: 539.89, // 10% discount ($49.99 x 12 months x 0.9)
+    monthlyPrice: 54.99,
+    yearlyPrice: 593.89, // 10% discount ($54.99 x 12 months x 0.9)
     originalPrice: 79.00,
     stripePriceIds: {
       monthly: process.env.STRIPE_HOMECARE_MONTHLY_PRICE_ID || 'price_homecare_monthly',
@@ -75,8 +75,8 @@ export const PLANS = {
     id: 'priority',
     name: 'Priority Plan',
     description: 'For homeowners who want their home proactively managed',
-    monthlyPrice: 109.99,
-    yearlyPrice: 1187.89, // 10% discount ($109.99 x 12 months x 0.9)
+    monthlyPrice: 120.99,
+    yearlyPrice: 1306.69, // 10% discount ($120.99 x 12 months x 0.9)
     originalPrice: 199.00,
     stripePriceIds: {
       monthly: process.env.STRIPE_PRIORITY_MONTHLY_PRICE_ID || 'price_priority_monthly',

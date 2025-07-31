@@ -87,12 +87,7 @@ const Footer: React.FC = () => {
                   Organization
                 </Link>
               </li>
-              <li>
-                <Link href="/services/shopping" className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center gap-2">
-                  <div className="w-1 h-1 bg-blue-400 rounded-full"></div>
-                  Shopping Assistance
-                </Link>
-              </li>
+
             </ul>
           </div>
           
@@ -139,15 +134,11 @@ const Footer: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center gap-3 text-gray-300">
                 <Mail className="h-4 w-4 text-blue-400" />
-                <span>hello@fixwell.com</span>
+                <span>support@fixwell.ca</span>
               </div>
               <div className="flex items-center gap-3 text-gray-300">
                 <Phone className="h-4 w-4 text-blue-400" />
-                <span>+1 (555) 123-4567</span>
-              </div>
-              <div className="flex items-center gap-3 text-gray-300">
-                <MapPin className="h-4 w-4 text-blue-400" />
-                <span>123 Service St, City, State 12345</span>
+                <span>+1 (778) 888-2347</span>
               </div>
             </div>
             <div className="pt-4">

@@ -83,27 +83,27 @@ const getPlanColors = (colorName: string) => {
 const testimonials = [
   {
     name: 'Sarah Johnson',
-    role: 'Plus Member',
+    role: 'Home Care Member',
     location: 'Vancouver',
-    content: 'The Plus plan has transformed how I manage my household. The priority booking and faster response times make all the difference for my busy schedule.',
+    content: 'The Home Care plan has transformed how I manage my household. The priority booking and faster response times make all the difference for my busy schedule.',
     rating: 5,
     avatar: 'SJ',
     savings: '$1,200 saved this year'
   },
   {
     name: 'Michael Chen',
-    role: 'Premier Member',
+    role: 'Priority Member',
     location: 'Burnaby',
-    content: 'As a Premier member, I get the white-glove treatment I expect. My dedicated account manager knows exactly what I need before I even ask.',
+    content: 'As a Priority member, I get the white-glove treatment I expect. My dedicated account manager knows exactly what I need before I even ask.',
     rating: 5,
     avatar: 'MC',
     savings: '$1,800 saved this year'
   },
   {
     name: 'Emily Rodriguez',
-    role: 'Basic Member',
+    role: 'Starter Member',
     location: 'Richmond',
-    content: 'Perfect for my needs! The Basic plan gives me access to reliable services without breaking the bank. Great value for money.',
+    content: 'Perfect for my needs! The Starter plan gives me access to reliable services without breaking the bank. Great value for money.',
     rating: 5,
     avatar: 'ER',
     savings: '$600 saved this year'
@@ -150,8 +150,8 @@ export default function PlansSection() {
       id: 'starter',
       name: 'Starter Plan',
       description: 'Perfect for light upkeep & peace of mind. Monthly maintenance visits to keep your home in top condition.',
-      monthlyPrice: 19.99,
-      yearlyPrice: 215.89,
+      monthlyPrice: 21.99,
+      yearlyPrice: 237.49,
       originalPrice: 49.00,
       features: [
         '1 visit per month (up to 0.5 hour)',
@@ -176,8 +176,8 @@ export default function PlansSection() {
       id: 'homecare',
       name: 'HomeCare Plan',
       description: 'Monthly help for ongoing maintenance and upkeep. Enhanced services for comprehensive home care.',
-      monthlyPrice: 49.99,
-      yearlyPrice: 539.89,
+      monthlyPrice: 54.99,
+      yearlyPrice: 593.89,
       originalPrice: 79.00,
       features: [
         '1 visit per month (up to 1 hour)',
@@ -203,8 +203,8 @@ export default function PlansSection() {
       id: 'priority',
       name: 'Priority Plan',
       description: 'For homeowners who want their home proactively managed. Complete home management with premium benefits.',
-      monthlyPrice: 109.99,
-      yearlyPrice: 1187.89,
+      monthlyPrice: 120.99,
+      yearlyPrice: 1306.69,
       originalPrice: 199.00,
       features: [
         '2 visits per month (up to 2 hours total)',
@@ -709,17 +709,17 @@ export default function PlansSection() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Features</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Starter Plan</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">HomeCare Plan</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Priority Plan</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Starter</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Home Care</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Priority</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   <tr>
                     <td className="px-6 py-4 text-sm text-gray-900 font-medium">Response Time</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">24 hours</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">12 hours</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">Same day</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600">Up to 48 hrs</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600">Up to 24 hrs</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600">Up to 12 hrs</td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 text-sm text-gray-900 font-medium">Customer Support</td>
@@ -736,8 +736,8 @@ export default function PlansSection() {
                   <tr>
                     <td className="px-6 py-4 text-sm text-gray-900 font-medium">Service Discount</td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600">None</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">10% off</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">20% off</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600">Up to 10%</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600">Up to 20%</td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 text-sm text-gray-900 font-medium">Account Manager</td>
@@ -789,9 +789,9 @@ export default function PlansSection() {
           {/* Mobile Comparison Cards */}
           <div className="md:hidden space-y-6">
             {[
-              { name: 'Basic', color: 'blue', icon: Star },
-              { name: 'Plus', color: 'purple', icon: Crown },
-              { name: 'Premier', color: 'amber', icon: Sparkles }
+              { name: 'Starter', color: 'blue', icon: Star },
+              { name: 'Home Care', color: 'purple', icon: Crown },
+              { name: 'Priority', color: 'amber', icon: Sparkles }
             ].map((plan, index) => (
               <Card key={index} className="bg-white shadow-lg">
                 <CardHeader className="pb-4">
@@ -809,7 +809,7 @@ export default function PlansSection() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="font-medium text-gray-900">Response Time</p>
-                      <p className="text-gray-600">{index === 0 ? '24 hours' : index === 1 ? '12 hours' : 'Same day'}</p>
+                      <p className="text-gray-600">{index === 0 ? 'Up to 48 hrs' : index === 1 ? 'Up to 24 hrs' : 'Up to 12 hrs'}</p>
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">Support</p>
@@ -817,7 +817,7 @@ export default function PlansSection() {
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">Service Discount</p>
-                      <p className="text-gray-600">{index === 0 ? 'None' : index === 1 ? '10% off' : '20% off'}</p>
+                      <p className="text-gray-600">{index === 0 ? 'None' : index === 1 ? 'Up to 10%' : 'Up to 20%'}</p>
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">Account Manager</p>

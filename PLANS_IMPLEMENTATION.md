@@ -8,7 +8,7 @@ The implementation includes a 3-tier subscription model (Starter Plan, HomeCare 
 
 ## Plan Structure
 
-### Starter Plan - $19.99/month ($215.89/year)
+### Starter Plan - $21.99/month ($237.49/year)
 - **Target**: Essential household services for everyday needs
 - **Savings**: $500+ per year
 - **Features**:
@@ -16,14 +16,14 @@ The implementation includes a 3-tier subscription model (Starter Plan, HomeCare 
   - Standard booking system (7 days advance)
   - Email support
   - Basic service categories (cleaning, maintenance)
-  - Standard response time (24 hours)
+  - Standard response time (up to 48 hours)
   - No booking fees
   - Service history tracking
   - Professional service team
   - Basic service guarantees
   - Lower Mainland service area
 
-### HomeCare Plan - $49.99/month ($539.89/year) ⭐ MOST POPULAR
+### HomeCare Plan - $54.99/month ($593.89/year) ⭐ MOST POPULAR
 - **Target**: Enhanced features for busy families
 - **Savings**: $1,000+ per year
 - **Features**:
@@ -31,7 +31,7 @@ The implementation includes a 3-tier subscription model (Starter Plan, HomeCare 
   - Priority booking system (3 days advance)
   - SMS notifications
   - Extended service categories (repair, organization)
-  - Faster response time (12 hours)
+  - Faster response time (up to 24 hours)
   - Phone & email support
   - Advanced scheduling options
   - Service ratings & reviews
@@ -40,10 +40,10 @@ The implementation includes a 3-tier subscription model (Starter Plan, HomeCare 
   - Priority customer support
   - Service guarantees
   - Advanced filtering options
-  - **10% discount on all services**
+  - **Up to 10% discount on all services**
   - Free service consultation
 
-### Priority Plan - $109.99/month ($1187.89/year)
+### Priority Plan - $120.99/month ($1306.69/year)
 - **Target**: Ultimate convenience for luxury households
 - **Savings**: $1,500+ per year
 - **Features**:
@@ -62,7 +62,7 @@ The implementation includes a 3-tier subscription model (Starter Plan, HomeCare 
   - Family member management
   - Integration with smart home
   - Exclusive events & offers
-  - **20% discount on all services**
+  - **Up to 20% discount on all services**
   - Free emergency call-out
   - Priority scheduling for all services
 
@@ -186,7 +186,7 @@ npm run dev
 - Feature comparison table
 - Savings calculations
 - Service guarantees
-- Response time commitments
+- Response time commitments (up to 48 hrs for Starter, up to 24 hrs for Home Care, up to 12 hrs for Priority)
 
 ## API Endpoints
 

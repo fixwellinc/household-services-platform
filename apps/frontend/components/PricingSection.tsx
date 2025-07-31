@@ -24,20 +24,20 @@ import LocationPromptModal from '@/components/location/LocationPromptModal';
 
 const plans = [
   {
-    name: 'Basic',
-    price: 19.99,
+    name: 'Starter',
+    price: 21.99,
     period: 'month',
-            description: 'Perfect for individual fixwells',
+            description: 'Perfect for individual households',
     icon: Star,
     color: 'from-blue-500 to-blue-600',
     bgColor: 'bg-blue-50',
     borderColor: 'border-blue-200',
     features: [
-              'Access to basic fixwell services',
+              'Access to basic household services',
       'Standard booking system',
       'Email support',
       'Basic service categories',
-      'Standard response time (24h)',
+      'Up to 48 hrs response time',
       'No booking fees',
       'Service history tracking',
       'Professional service team'
@@ -47,8 +47,8 @@ const plans = [
     ctaColor: 'bg-blue-600 hover:bg-blue-700'
   },
   {
-    name: 'Premium',
-    price: 49.99,
+    name: 'Home Care',
+    price: 54.99,
     period: 'month',
     description: 'Enhanced features for busy families',
     icon: Crown,
@@ -56,10 +56,10 @@ const plans = [
     bgColor: 'bg-purple-50',
     borderColor: 'border-purple-200',
     features: [
-      'Everything in Basic',
+      'Everything in Starter',
       'Priority booking system',
-      'Premium service categories',
-      'Faster response time (12h)',
+      'Extended service categories',
+      'Up to 24 hrs response time',
       'Phone & email support',
       'Advanced scheduling options',
       'Service ratings & reviews',
@@ -67,25 +67,26 @@ const plans = [
       'Recurring service setup',
       'Priority customer support',
       'Service guarantees',
-      'Advanced filtering options'
+      'Advanced filtering options',
+      'Up to 10% service discount'
     ],
     popular: true,
     cta: 'Let\'s Get You Started',
     ctaColor: 'bg-purple-600 hover:bg-purple-700'
   },
   {
-    name: 'VIP',
-    price: 109.99,
+    name: 'Priority',
+    price: 120.99,
     period: 'month',
-            description: 'Ultimate convenience for luxury fixwells',
+            description: 'Ultimate convenience for luxury households',
     icon: Sparkles,
     color: 'from-amber-500 to-amber-600',
     bgColor: 'bg-amber-50',
     borderColor: 'border-amber-200',
     features: [
-      'Everything in Premium',
+      'Everything in Home Care',
       'Concierge service',
-      'Instant booking (2h response)',
+      'Up to 12 hrs response time',
       'Dedicated account manager',
       '24/7 priority support',
       'Custom service packages',
@@ -93,11 +94,12 @@ const plans = [
       'White-glove service',
       'Service quality guarantees',
       'Flexible scheduling',
-      'Premium service categories',
+      'All service categories',
       'Advanced analytics dashboard',
       'Family member management',
       'Integration with smart home',
-      'Exclusive events & offers'
+      'Exclusive events & offers',
+      'Up to 20% service discount'
     ],
     popular: false,
     cta: 'Let\'s Get You Started',
@@ -108,22 +110,22 @@ const plans = [
 const testimonials = [
   {
     name: 'Sarah Johnson',
-    role: 'Premium Member',
-            content: 'The Premium plan has transformed how I manage my fixwell. The priority booking and faster response times make all the difference for my busy schedule.',
+    role: 'Home Care Member',
+            content: 'The Home Care plan has transformed how I manage my household. The priority booking and faster response times make all the difference for my busy schedule.',
     rating: 5,
     avatar: 'SJ'
   },
   {
     name: 'Michael Chen',
-    role: 'VIP Member',
-    content: 'As a VIP member, I get the white-glove treatment I expect. My dedicated account manager knows exactly what I need before I even ask.',
+    role: 'Priority Member',
+    content: 'As a Priority member, I get the white-glove treatment I expect. My dedicated account manager knows exactly what I need before I even ask.',
     rating: 5,
     avatar: 'MC'
   },
   {
     name: 'Emily Rodriguez',
-    role: 'Basic Member',
-    content: 'Perfect for my needs! The Basic plan gives me access to reliable services without breaking the bank. Great value for money.',
+    role: 'Starter Member',
+    content: 'Perfect for my needs! The Starter plan gives me access to reliable services without breaking the bank. Great value for money.',
     rating: 5,
     avatar: 'ER'
   }

@@ -335,7 +335,7 @@ function WelcomeContent() {
                 </div>
                 <div className="flex items-center gap-2 text-gray-700">
                   <Mail className="h-4 w-4" />
-                  <span>support@household.services</span>
+                  <span>support@fixwell.ca</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-700">
                   <Clock className="h-4 w-4" />

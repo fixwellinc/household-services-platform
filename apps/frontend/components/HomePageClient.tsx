@@ -125,7 +125,7 @@ export default function HomePageClient() {
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
               Your Home,
               <br />
-              <span className="text-blue-600">Our Expertise</span>
+              <span className="text-blue-600">Home Solutions</span>
             </h1>
             
             <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
@@ -174,8 +174,8 @@ export default function HomePageClient() {
                 <div className="text-gray-600 font-medium">Happy Members</div>
               </div>
               <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                <div className="text-4xl font-bold text-green-600 mb-2">$1k+</div>
-                <div className="text-gray-600 font-medium">Annual Savings</div>
+                              <div className="text-4xl font-bold text-green-600 mb-2">$1k+</div>
+              <div className="text-gray-600 font-medium">Possible Annual Savings</div>
               </div>
             </div>
           </div>
@@ -210,7 +210,7 @@ export default function HomePageClient() {
                 </div>
               </div>
               <p className="text-sm text-gray-600">
-                💡 <strong>Save up to 40%</strong> compared to traditional contractor rates while getting professional, insured, and guaranteed service
+                💡 <strong>Save up to 40%</strong> compared to traditional contractor rates while getting professional, insured, and guaranteed services
               </p>
             </div>
           </div>

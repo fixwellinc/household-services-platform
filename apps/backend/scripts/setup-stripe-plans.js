@@ -26,8 +26,8 @@ const plans = [
   {
     name: 'Starter Plan',
     description: 'Perfect for light upkeep & peace of mind',
-    monthlyPrice: 1999, // $19.99 in cents
-    yearlyPrice: 21589, // $215.89 in cents
+    monthlyPrice: 2199, // $21.99 in cents
+          yearlyPrice: 23749, // $237.49 in cents
     metadata: {
       tier: 'STARTER',
       planId: 'starter'
@@ -36,8 +36,8 @@ const plans = [
   {
     name: 'HomeCare Plan',
     description: 'Monthly help for ongoing maintenance and upkeep',
-    monthlyPrice: 4999, // $49.99 in cents
-    yearlyPrice: 53989, // $539.89 in cents
+    monthlyPrice: 5499, // $54.99 in cents
+          yearlyPrice: 59389, // $593.89 in cents
     metadata: {
       tier: 'HOMECARE',
       planId: 'homecare'
@@ -46,8 +46,8 @@ const plans = [
   {
     name: 'Priority Plan',
     description: 'For homeowners who want their home proactively managed',
-    monthlyPrice: 10999, // $109.99 in cents
-    yearlyPrice: 118789, // $1187.89 in cents
+    monthlyPrice: 12099, // $120.99 in cents
+          yearlyPrice: 130669, // $1306.69 in cents
     metadata: {
       tier: 'PRIORITY',
       planId: 'priority'

@@ -59,7 +59,7 @@ export default function PlansPage() {
                 Response Times by Plan
               </h2>
               <p className="text-lg text-gray-600">
-                Response times vary by plan: Starter Plan (24 hours), HomeCare Plan (12 hours), Priority Plan (same day). Emergency services are available for urgent situations with Priority Plan members getting priority scheduling.
+                Response times vary by plan: Starter Plan (up to 48 hrs), HomeCare Plan (up to 24 hrs), Priority Plan (up to 12 hrs). Emergency services are available for urgent situations with Priority Plan members getting priority scheduling.
               </p>
             </div>
           </div>
@@ -106,7 +106,7 @@ export default function PlansPage() {
                 What services are included in each plan?
               </h3>
               <p className="text-gray-600">
-                All plans include access to our core household services. Basic includes cleaning and maintenance, Plus adds repair and organization, and Premier includes all services plus custom packages and concierge service.
+                All plans include access to our core household services. Starter includes cleaning and maintenance, Home Care adds repair and organization, and Priority includes all services plus custom packages and concierge service.
               </p>
             </div>
 
@@ -115,7 +115,7 @@ export default function PlansPage() {
                 How quickly can I get service?
               </h3>
               <p className="text-gray-600">
-                Response times vary by plan: Basic (24 hours), Plus (12 hours), Premier (same day). Emergency services are available for urgent situations with Premier members getting priority scheduling.
+                Response times vary by plan: Starter (up to 48 hrs), Home Care (up to 24 hrs), Priority (up to 12 hrs). Emergency services are available for urgent situations with Priority members getting priority scheduling.
               </p>
             </div>
 
@@ -124,7 +124,7 @@ export default function PlansPage() {
                 What payment methods do you accept?
               </h3>
               <p className="text-gray-600">
-                We accept all major credit cards, debit cards, and PayPal. All payments are processed securely through Stripe. You can pay monthly or yearly with a 17% discount for annual plans.
+                We accept all major credit cards, debit cards, and PayPal. All payments are processed securely through Stripe. You can pay monthly or yearly with a 10% discount for annual plans.
               </p>
             </div>
 
