@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import LocationPromptModal from '@/components/location/LocationPromptModal';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function HomePageClient() {
   const { isHydrated } = useAuth();
@@ -52,6 +53,7 @@ export default function HomePageClient() {
     // If location is still loading, wait
     if (locationLoading) {
       console.log('Location still loading, waiting...');
+      toast.info('Please wait while we check your location...');
       return;
     }
     

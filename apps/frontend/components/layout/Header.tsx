@@ -22,6 +22,7 @@ import {
   DollarSign
 } from 'lucide-react'
 import LocationPromptModal from '@/components/location/LocationPromptModal'
+import { toast } from 'sonner';
 
 const Header: React.FC = () => {
   const { user, isLoading, logout, isHydrated } = useAuth();
@@ -51,6 +52,7 @@ const Header: React.FC = () => {
     // If location is still loading, wait
     if (locationLoading) {
       console.log('Location still loading, waiting...');
+      toast.info('Please wait while we check your location...');
       return;
     }
     
