@@ -109,10 +109,10 @@ export default function HomePageClient() {
               {isInBC && userCity ? `Trusted by ${userCity} homeowners` : 'Trusted by Lower Mainland homeowners'}
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent animate-fade-in">
               Your Home,
               <br />
-              <span className="text-blue-600">Our Expertise</span>
+              <span className="text-blue-600 animate-fade-in-delay">Our Expertise</span>
             </h1>
             
             <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
@@ -121,9 +121,9 @@ export default function HomePageClient() {
             
             {/* Decorative elements */}
             <div className="flex justify-center items-center gap-8 mb-8 opacity-60">
-              <div className="w-16 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
-              <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-              <div className="w-16 h-1 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full"></div>
+              <div className="w-16 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse"></div>
+              <div className="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
+              <div className="w-16 h-1 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full animate-pulse"></div>
             </div>
             
             {user ? (
@@ -139,21 +139,32 @@ export default function HomePageClient() {
                 </Badge>
               </div>
             ) : (
-              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                <Link href="/pricing">
-                  <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                    <span className="flex items-center gap-2">
-                      View Plans
-                      <ArrowRight className="h-4 w-4" />
-                    </span>
-                  </Button>
-                </Link>
-                <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105" onClick={handleGetStarted}>
-                  <span className="flex items-center gap-2">
+              <div className="flex flex-col items-center mb-12">
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 animate-pulse hover:animate-none relative overflow-hidden group px-8 py-4 text-lg font-semibold" 
+                  onClick={handleGetStarted}
+                >
+                  <span className="flex items-center gap-3 relative z-10">
                     Let's Get You Started
-                    <User className="h-4 w-4" />
+                    <User className="h-5 w-5 animate-bounce" />
                   </span>
+                  {/* Animated background effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  {/* Shimmer effect */}
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
                 </Button>
+                
+                <div className="mt-6">
+                  <Link href="/pricing">
+                    <Button variant="outline" size="lg" className="border-2 border-gray-300 hover:border-blue-500 text-gray-700 hover:text-blue-600 transition-all duration-300 transform hover:scale-105">
+                      <span className="flex items-center gap-2">
+                        View Plans
+                        <ArrowRight className="h-4 w-4" />
+                      </span>
+                    </Button>
+                  </Link>
+                </div>
               </div>
             )}
 
