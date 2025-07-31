@@ -21,8 +21,7 @@ import {
   LayoutDashboard,
   DollarSign
 } from 'lucide-react'
-import LocationPromptModal from '@/components/location/LocationPromptModal'
-import { toast } from 'sonner';
+
 
 const Header: React.FC = () => {
   const { user, isLoading, logout, isHydrated } = useAuth();
@@ -30,12 +29,6 @@ const Header: React.FC = () => {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [showLocationModal, setShowLocationModal] = useState(false);
-
-  // Debug modal state changes
-  useEffect(() => {
-    console.log('Header showLocationModal changed to:', showLocationModal);
-  }, [showLocationModal]);
 
   const handleLogout = async () => {
     try {
@@ -52,35 +45,17 @@ const Header: React.FC = () => {
     console.log('userLocation:', userLocation);
     console.log('isInBC:', isInBC);
     console.log('locationLoading:', locationLoading);
-    console.log('showLocationModal:', showLocationModal);
     
-    // If location is still loading, wait
-    if (locationLoading) {
-      console.log('Location still loading, waiting...');
-      toast.info('Please wait while we check your location...');
-      return;
-    }
-    
-    // If user is not authenticated, check location first
-    if (!user) {
-      console.log('User not authenticated, checking location...');
-      // If no location is set, show location modal
-      if (!userLocation || !isInBC) {
-        console.log('No valid location, showing location modal');
-        setShowLocationModal(true);
-        console.log('Modal should now be open, showLocationModal set to true');
-        return;
-      }
-      
-      console.log('Location is valid, redirecting to sign up');
-      // If location is valid, redirect to sign up
-      router.push(`/register?redirect=${encodeURIComponent('/')}`);
-      return;
-    }
-    
-    console.log('User is authenticated, redirecting to dashboard');
     // If user is authenticated, redirect to dashboard
-    router.push('/dashboard');
+    if (user) {
+      console.log('User is authenticated, redirecting to dashboard');
+      router.push('/dashboard');
+      return;
+    }
+    
+    // If user is not authenticated, redirect to homepage to show location modal
+    console.log('User not authenticated, redirecting to homepage');
+    router.push('/');
   };
 
   const toggleMobileMenu = () => {
@@ -394,21 +369,7 @@ const Header: React.FC = () => {
         />
       )}
 
-      {/* Location Prompt Modal */}
-      <LocationPromptModal
-        isOpen={showLocationModal}
-        onClose={() => {
-          console.log('Header LocationPromptModal onClose called');
-          setShowLocationModal(false);
-        }}
-        onLocationSet={() => {
-          console.log('Header LocationPromptModal onLocationSet called');
-          // After location is set, redirect to sign up
-          router.push(`/register?redirect=${encodeURIComponent('/')}`);
-          setShowLocationModal(false);
-        }}
-        planName="service"
-      />
+      
     </header>
   )
 }
