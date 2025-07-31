@@ -175,7 +175,7 @@ export default function HomePageClient() {
                 <div className="text-gray-600 font-medium">Happy Members</div>
               </div>
               <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                              <div className="text-4xl font-bold text-green-600 mb-2">$1k+</div>
+                              <div className="text-4xl font-bold text-green-600 mb-2">Up to $1k+</div>
               <div className="text-gray-600 font-medium">Possible Annual Savings</div>
               </div>
             </div>
@@ -235,17 +235,17 @@ export default function HomePageClient() {
           ) : services.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {services.map((service) => {
-                // Calculate contractor price and savings based on service category
+                // Calculate contractor price and savings based on service category (max 40% savings)
                 const getContractorPrice = (category: string, basePrice: number) => {
                   const multipliers: Record<string, number> = {
-                    'CLEANING': 1.8,      // Contractors charge ~80% more
-                    'MAINTENANCE': 2.2,   // Contractors charge ~120% more
-                    'REPAIR': 2.5,        // Contractors charge ~150% more
-                    'ORGANIZATION': 1.6,  // Contractors charge ~60% more
-                    'SHOPPING': 1.4,      // Contractors charge ~40% more
-                    'OTHER': 1.9          // Contractors charge ~90% more
+                    'CLEANING': 1.67,     // ~40% savings
+                    'MAINTENANCE': 1.67,  // ~40% savings
+                    'REPAIR': 1.67,       // ~40% savings
+                    'ORGANIZATION': 1.67, // ~40% savings
+                    'SHOPPING': 1.67,     // ~40% savings
+                    'OTHER': 1.67         // ~40% savings
                   };
-                  return Math.round(basePrice * (multipliers[category] || 1.8));
+                  return Math.round(basePrice * (multipliers[category] || 1.67));
                 };
 
                 const contractorPrice = getContractorPrice(service.category, service.basePrice);
