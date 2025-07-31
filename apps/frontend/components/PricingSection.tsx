@@ -232,7 +232,7 @@ export default function PricingSection() {
                   </div>
                   {billingPeriod === 'year' && (
                     <p className="text-xs md:text-sm text-gray-500 mt-1">
-                      Billed annually (${plan.price}/month)
+                      Billed annually (${(plan.price * 0.9).toFixed(2)}/month)
                     </p>
                   )}
                 </div>

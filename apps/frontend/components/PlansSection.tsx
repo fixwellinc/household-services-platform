@@ -435,7 +435,7 @@ export default function PlansSection() {
                         )}
                         {billingPeriod === 'year' && (
                           <p className="text-sm text-white/70 font-medium">
-                            Billed annually (${plan.monthlyPrice}/month)
+                            Billed annually (${(plan.monthlyPrice * 0.9).toFixed(2)}/month)
                           </p>
                         )}
                         {/* Savings Badge */}
@@ -596,7 +596,7 @@ export default function PlansSection() {
                         )}
                         {billingPeriod === 'year' && (
                           <p className="text-sm text-white/70 font-medium">
-                            Billed annually (${plan.monthlyPrice}/month)
+                            Billed annually (${(plan.monthlyPrice * 0.9).toFixed(2)}/month)
                           </p>
                         )}
                         {/* Savings Badge */}

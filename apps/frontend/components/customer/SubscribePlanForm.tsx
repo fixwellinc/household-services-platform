@@ -483,7 +483,7 @@ export default function SubscribePlanForm({ planId }: SubscribePlanFormProps) {
             
             {billingPeriod === 'yearly' && (
               <p className="text-sm text-white/80">
-                Billed annually (${selectedPlan.monthlyPrice}/month)
+                Billed annually (${(selectedPlan.monthlyPrice * 0.9).toFixed(2)}/month)
               </p>
             )}
           </div>

@@ -1,0 +1,40 @@
+[1mdiff --git a/apps/frontend/components/HomePageClient.tsx b/apps/frontend/components/HomePageClient.tsx[m
+[1mindex ea88609..d190b10 100644[m
+[1m--- a/apps/frontend/components/HomePageClient.tsx[m
+[1m+++ b/apps/frontend/components/HomePageClient.tsx[m
+[36m@@ -28,6 +28,7 @@[m [mimport {[m
+ } from 'lucide-react';[m
+ import LocationPromptModal from '@/components/location/LocationPromptModal';[m
+ import { useState } from 'react';[m
+[32m+[m[32mimport { toast } from 'sonner';[m
+ [m
+ export default function HomePageClient() {[m
+   const { isHydrated } = useAuth();[m
+[36m@@ -52,6 +53,7 @@[m [mexport default function HomePageClient() {[m
+     // If location is still loading, wait[m
+     if (locationLoading) {[m
+       console.log('Location still loading, waiting...');[m
+[32m+[m[32m      toast.info('Please wait while we check your location...');[m
+       return;[m
+     }[m
+     [m
+[1mdiff --git a/apps/frontend/components/layout/Header.tsx b/apps/frontend/components/layout/Header.tsx[m
+[1mindex 5dafbb0..cf3c578 100644[m
+[1m--- a/apps/frontend/components/layout/Header.tsx[m
+[1m+++ b/apps/frontend/components/layout/Header.tsx[m
+[36m@@ -22,6 +22,7 @@[m [mimport {[m
+   DollarSign[m
+ } from 'lucide-react'[m
+ import LocationPromptModal from '@/components/location/LocationPromptModal'[m
+[32m+[m[32mimport { toast } from 'sonner';[m
+ [m
+ const Header: React.FC = () => {[m
+   const { user, isLoading, logout, isHydrated } = useAuth();[m
+[36m@@ -51,6 +52,7 @@[m [mconst Header: React.FC = () => {[m
+     // If location is still loading, wait[m
+     if (locationLoading) {[m
+       console.log('Location still loading, waiting...');[m
+[32m+[m[32m      toast.info('Please wait while we check your location...');[m
+       return;[m
+     }[m
+     [m
