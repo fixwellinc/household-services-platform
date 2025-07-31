@@ -142,17 +142,13 @@ export default function HomePageClient() {
               <div className="flex flex-col items-center mb-12">
                 <Button 
                   size="lg" 
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 animate-pulse hover:animate-none relative overflow-hidden group px-8 py-4 text-lg font-semibold" 
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 animate-bounce hover:animate-none px-8 py-4 text-lg font-semibold" 
                   onClick={handleGetStarted}
                 >
-                  <span className="flex items-center gap-3 relative z-10">
+                  <span className="flex items-center gap-3">
                     Let's Get You Started
-                    <User className="h-5 w-5 animate-bounce" />
+                    <User className="h-5 w-5" />
                   </span>
-                  {/* Animated background effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  {/* Shimmer effect */}
-                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
                 </Button>
                 
                 <div className="mt-6">
@@ -323,8 +319,11 @@ export default function HomePageClient() {
                         <span className="font-medium">Same-day booking available</span>
                       </div>
 
-                      <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                        Book Now
+                      <Button 
+                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                        onClick={handleGetStarted}
+                      >
+                        Let's Get You Started
                       </Button>
                     </CardContent>
                   </Card>
