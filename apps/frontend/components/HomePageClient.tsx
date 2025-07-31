@@ -27,7 +27,7 @@ import {
   Clock
 } from 'lucide-react';
 import LocationPromptModal from '@/components/location/LocationPromptModal';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
 export default function HomePageClient() {
@@ -38,6 +38,20 @@ export default function HomePageClient() {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [showLocationModal, setShowLocationModal] = useState(false);
+
+  // Check if we should show location modal from URL parameter
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const shouldShowModal = urlParams.get('showLocationModal');
+    
+    if (shouldShowModal === 'true' && !isAuthenticated && (!userLocation || !isInBC)) {
+      console.log('Auto-showing location modal from URL parameter');
+      setShowLocationModal(true);
+      // Clean up the URL parameter
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [isAuthenticated, userLocation, isInBC]);
 
   const user = userData?.user;
   const services = servicesData?.services || [];

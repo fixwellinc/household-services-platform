@@ -55,7 +55,7 @@ const Header: React.FC = () => {
     
     // If user is not authenticated, redirect to homepage to show location modal
     console.log('User not authenticated, redirecting to homepage');
-    router.push('/');
+    router.push('/?showLocationModal=true');
   };
 
   const toggleMobileMenu = () => {
