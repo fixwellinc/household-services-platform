@@ -51,6 +51,22 @@ export default function HomePageClient() {
     }
   }, [isHydrated]);
 
+  // Check URL parameter immediately when component mounts
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const shouldShowModal = urlParams.get('showLocationModal');
+    
+    console.log('Component mount useEffect - shouldShowModal:', shouldShowModal);
+    
+    if (shouldShowModal === 'true' && !isAuthenticated) {
+      console.log('Setting modal to true from component mount');
+      setShowLocationModal(true);
+      // Clean up the URL parameter
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, []);
+
   const user = userData?.user;
   const services = servicesData?.services || [];
 
@@ -96,7 +112,13 @@ export default function HomePageClient() {
     const urlParams = new URLSearchParams(window.location.search);
     const shouldShowModal = urlParams.get('showLocationModal');
     
-    if (shouldShowModal === 'true' && !isAuthenticated && (!userLocation || !isInBC)) {
+    console.log('checkAndShowLocationModal called');
+    console.log('shouldShowModal:', shouldShowModal);
+    console.log('isAuthenticated:', isAuthenticated);
+    console.log('userLocation:', userLocation);
+    console.log('isInBC:', isInBC);
+    
+    if (shouldShowModal === 'true' && !isAuthenticated) {
       console.log('Auto-showing location modal from URL parameter');
       setShowLocationModal(true);
       // Clean up the URL parameter
