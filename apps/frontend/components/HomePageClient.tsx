@@ -109,26 +109,22 @@ export default function HomePageClient() {
               {isInBC && userCity ? `Trusted by ${userCity} homeowners` : 'Trusted by Lower Mainland homeowners'}
             </div>
             
-            <div className="flex justify-center mb-8">
-              <div className="w-56 h-56 bg-white rounded-2xl shadow-lg flex items-center justify-center p-4">
-                <Image 
-                  src="/fixwell.png" 
-                  alt="Fixwell Logo" 
-                  width={224} 
-                  height={224}
-                  className="rounded-lg"
-                  priority
-                />
-              </div>
-            </div>
-            
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
-              <span className="text-blue-600">Home Solutions</span>
+              Your Home,
+              <br />
+              <span className="text-blue-600">Our Expertise</span>
             </h1>
             
             <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
               Connect with verified professionals for all your household needs. Choose from Starter Plan, HomeCare Plan, or Priority Plan.
             </p>
+            
+            {/* Decorative elements */}
+            <div className="flex justify-center items-center gap-8 mb-8 opacity-60">
+              <div className="w-16 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+              <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+              <div className="w-16 h-1 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full"></div>
+            </div>
             
             {user ? (
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
