@@ -119,7 +119,18 @@ export default function LocationPromptModal({
                 id="postalCode"
                 type="text"
                 value={postalCodeInput}
-                onChange={(e) => setPostalCodeInput(e.target.value.toUpperCase())}
+                onChange={(e) => {
+                  const value = e.target.value.toUpperCase();
+                  // Only allow letters and numbers, auto-format with space
+                  const cleaned = value.replace(/[^A-Z0-9]/g, '');
+                  if (cleaned.length <= 6) {
+                    let formatted = cleaned;
+                    if (cleaned.length >= 3) {
+                      formatted = cleaned.substring(0, 3) + ' ' + cleaned.substring(3);
+                    }
+                    setPostalCodeInput(formatted);
+                  }
+                }}
                 onKeyPress={handleKeyPress}
                 placeholder="V6B 1A1"
                 className={`w-full px-6 py-4 text-lg border-2 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 ${
@@ -133,6 +144,12 @@ export default function LocationPromptModal({
                 <div className="flex items-center mt-2 text-red-600 text-sm">
                   <AlertCircle className="h-4 w-4 mr-1 flex-shrink-0" />
                   {validationError}
+                </div>
+              )}
+              {!validationError && postalCodeInput && (
+                <div className="flex items-center mt-2 text-blue-600 text-sm">
+                  <CheckCircle className="h-4 w-4 mr-1 flex-shrink-0" />
+                  Format: A1A 1A1 (e.g., V6B 1A1)
                 </div>
               )}
             </div>

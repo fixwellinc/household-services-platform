@@ -110,9 +110,11 @@ export function formatPostalCode(postalCode: string): string {
 export function validateAndFormatPostalCode(input: string): string {
   const cleanInput = input.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
   
-  if (cleanInput.length > 6) {
-    return formatPostalCode(cleanInput.substring(0, 6));
+  // Check if it's a valid Canadian postal code format
+  const postalCodeRegex = /^[A-Z]\d[A-Z]\d[A-Z]\d$/;
+  if (cleanInput.length === 6 && postalCodeRegex.test(cleanInput)) {
+    return formatPostalCode(cleanInput);
   }
   
-  return cleanInput;
+  return '';
 } 
