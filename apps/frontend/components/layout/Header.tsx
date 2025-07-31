@@ -32,6 +32,11 @@ const Header: React.FC = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
 
+  // Debug modal state changes
+  useEffect(() => {
+    console.log('Header showLocationModal changed to:', showLocationModal);
+  }, [showLocationModal]);
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -63,7 +68,7 @@ const Header: React.FC = () => {
       if (!userLocation || !isInBC) {
         console.log('No valid location, showing location modal');
         setShowLocationModal(true);
-        console.log('Modal should now be open');
+        console.log('Modal should now be open, showLocationModal set to true');
         return;
       }
       

@@ -83,7 +83,7 @@ export default function LocationPromptModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4 overflow-y-auto" style={{ top: '80px' }}>
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4 overflow-y-auto">
       <div className="bg-white rounded-xl shadow-2xl max-w-md w-full relative transform transition-all duration-300 hover:scale-105">
         {/* Close Button */}
         <button
