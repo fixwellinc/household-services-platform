@@ -1,14 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSearchParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRegister } from '@/hooks/use-api';
+import { useLocation } from '@/contexts/LocationContext';
 import { Button } from '@/components/ui/shared';
 import { toast } from 'sonner';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2, MapPin, AlertCircle } from 'lucide-react';
+import LocationPromptModal from '@/components/location/LocationPromptModal';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -25,8 +27,11 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [locationVerified, setLocationVerified] = useState(false);
   const registerMutation = useRegister();
   const searchParams = useSearchParams();
+  const { userLocation, isInBC, isLoading: locationLoading } = useLocation();
 
   const {
     register,
@@ -35,6 +40,17 @@ export default function RegisterForm() {
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
+
+  // Check location on component mount
+  useEffect(() => {
+    if (!locationLoading) {
+      if (!userLocation || !isInBC) {
+        setShowLocationModal(true);
+      } else {
+        setLocationVerified(true);
+      }
+    }
+  }, [userLocation, isInBC, locationLoading]);
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
@@ -58,6 +74,64 @@ export default function RegisterForm() {
       toast.error(error instanceof Error ? error.message : 'Registration failed');
     }
   };
+
+  // Show location verification step if not verified
+  if (!locationVerified) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
+            <MapPin className="h-6 w-6 text-blue-600" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Verify Your Location
+          </h3>
+          <p className="text-sm text-gray-600 mb-6">
+            We need to confirm you're in our BC service area before creating your account.
+          </p>
+          
+          {locationLoading ? (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="animate-spin h-5 w-5 text-blue-600 mr-2" />
+              <span className="text-sm text-gray-600">Checking your location...</span>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                <div className="flex">
+                  <AlertCircle className="h-5 w-5 text-yellow-400 mt-0.5 mr-2 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-yellow-800">
+                      <strong>Service Area Required:</strong> We currently serve BC residents in the Lower Mainland area.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <Button
+                type="button"
+                onClick={() => setShowLocationModal(true)}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Verify My Location
+              </Button>
+            </div>
+          )}
+        </div>
+        
+        {/* Location Prompt Modal */}
+        <LocationPromptModal
+          isOpen={showLocationModal}
+          onClose={() => setShowLocationModal(false)}
+          onLocationSet={() => {
+            setShowLocationModal(false);
+            setLocationVerified(true);
+          }}
+          planName="account"
+        />
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

@@ -23,13 +23,14 @@ function RegisterContent() {
               sign in to your existing account
             </Link>
           </p>
-          {redirectUrl && (
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-              <p className="text-sm text-blue-800 text-center">
-                Create an account to continue with your plan subscription
-              </p>
-            </div>
-          )}
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <p className="text-sm text-blue-800 text-center">
+              {redirectUrl 
+                ? 'Create an account to continue with your plan subscription'
+                : 'We\'ll verify your location to ensure we can serve your area'
+              }
+            </p>
+          </div>
         </div>
         <RegisterForm />
       </div>

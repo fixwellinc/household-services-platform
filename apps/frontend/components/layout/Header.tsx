@@ -39,24 +39,7 @@ const Header: React.FC = () => {
     }
   };
 
-  const handleGetStarted = () => {
-    console.log('=== Header handleGetStarted called ===');
-    console.log('user:', user);
-    console.log('userLocation:', userLocation);
-    console.log('isInBC:', isInBC);
-    console.log('locationLoading:', locationLoading);
-    
-    // If user is authenticated, redirect to dashboard
-    if (user) {
-      console.log('User is authenticated, redirecting to dashboard');
-      router.push('/dashboard');
-      return;
-    }
-    
-    // If user is not authenticated, redirect to homepage to show location modal
-    console.log('User not authenticated, redirecting to homepage');
-    router.push('/?showLocationModal=true');
-  };
+
 
   const toggleMobileMenu = () => {
     console.log('Mobile menu toggle clicked, current state:', isMobileMenuOpen);
@@ -265,12 +248,13 @@ const Header: React.FC = () => {
                     Sign In
                   </Button>
                 </Link>
-                <Button 
-                  onClick={handleGetStarted}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2 font-medium transform hover:scale-105"
-                >
-                  Get Started
-                </Button>
+                <Link href="/register">
+                  <Button 
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2 font-medium transform hover:scale-105"
+                  >
+                    Create Account
+                  </Button>
+                </Link>
               </div>
             )}
 
@@ -345,15 +329,13 @@ const Header: React.FC = () => {
                       Sign In
                     </Button>
                   </Link>
-                  <Button 
-                    onClick={() => {
-                      handleGetStarted();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full justify-start bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3"
-                  >
-                    Get Started
-                  </Button>
+                  <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button 
+                      className="w-full justify-start bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3"
+                    >
+                      Create Account
+                    </Button>
+                  </Link>
                 </div>
               )}
             </nav>
