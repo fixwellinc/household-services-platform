@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from '@/contexts/LocationContext';
 import { Button } from '@/components/ui/shared';
 import { MapPin, X, AlertCircle, CheckCircle } from 'lucide-react';
@@ -24,9 +24,30 @@ export default function LocationPromptModal({
   const [postalCodeInput, setPostalCodeInput] = useState('');
   const [isValidating, setIsValidating] = useState(false);
   const [validationError, setValidationError] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Debug logging
   console.log('LocationPromptModal render - isOpen:', isOpen, 'planName:', planName);
+
+  // Focus the input when modal opens
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      // Small delay to ensure the modal is fully rendered
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
+  // Reset form when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setPostalCodeInput('');
+      setValidationError('');
+      setIsValidating(false);
+    }
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,8 +104,14 @@ export default function LocationPromptModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full relative transform transition-all duration-300 hover:scale-105">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4 overflow-y-auto modal-backdrop"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-xl shadow-2xl max-w-md w-full relative transform transition-all duration-300 modal-content"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -116,6 +143,7 @@ export default function LocationPromptModal({
                 BC Postal Code
               </label>
               <input
+                ref={inputRef}
                 id="postalCode"
                 type="text"
                 value={postalCodeInput}
@@ -138,7 +166,6 @@ export default function LocationPromptModal({
                 }`}
                 maxLength={7}
                 disabled={isValidating}
-                autoFocus
               />
               {validationError && (
                 <div className="flex items-center mt-2 text-red-600 text-sm">
@@ -182,7 +209,7 @@ export default function LocationPromptModal({
               </Button>
               <Button
                 type="submit"
-                className="flex-1 py-4 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                className="flex-1 py-4 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                 disabled={isValidating || !postalCodeInput.trim()}
               >
                 {isValidating ? (

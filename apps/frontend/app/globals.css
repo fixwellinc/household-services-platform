@@ -303,7 +303,16 @@
   }
 
   .animate-bounce-in {
-    animation: bounceIn 0.8s ease-out;
+    animation: bounceIn 0.6s ease-out;
+  }
+
+  /* Modal-specific animations */
+  .modal-backdrop {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  .modal-content {
+    animation: scaleIn 0.2s ease-out;
   }
 
   /* Gradient text */

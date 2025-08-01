@@ -39,33 +39,32 @@ export default function HomePageClient() {
   const router = useRouter();
   const [showLocationModal, setShowLocationModal] = useState(false);
 
-  // Check if we should show location modal from URL parameter
+  // Check URL parameter and show location modal
   useEffect(() => {
-    checkAndShowLocationModal();
-  }, [isAuthenticated, userLocation, isInBC]);
-
-  // Check URL parameter on component mount
-  useEffect(() => {
-    if (isHydrated) {
-      checkAndShowLocationModal();
-    }
-  }, [isHydrated]);
-
-  // Check URL parameter immediately when component mounts
-  useEffect(() => {
+    if (!isHydrated) return;
+    
     const urlParams = new URLSearchParams(window.location.search);
     const shouldShowModal = urlParams.get('showLocationModal');
     
-    console.log('Component mount useEffect - shouldShowModal:', shouldShowModal);
+    console.log('URL parameter check - shouldShowModal:', shouldShowModal);
+    console.log('isAuthenticated:', isAuthenticated);
+    console.log('userLocation:', userLocation);
+    console.log('isInBC:', isInBC);
+    console.log('showLocationModal state:', showLocationModal);
     
     if (shouldShowModal === 'true' && !isAuthenticated) {
-      console.log('Setting modal to true from component mount');
+      console.log('Auto-showing location modal from URL parameter');
       setShowLocationModal(true);
       // Clean up the URL parameter
       const newUrl = window.location.pathname;
       window.history.replaceState({}, '', newUrl);
     }
-  }, []);
+  }, [isHydrated, isAuthenticated, userLocation, isInBC]);
+
+  // Debug modal state changes
+  useEffect(() => {
+    console.log('showLocationModal state changed to:', showLocationModal);
+  }, [showLocationModal]);
 
   const user = userData?.user;
   const services = servicesData?.services || [];
@@ -76,7 +75,7 @@ export default function HomePageClient() {
     console.log('userLocation:', userLocation);
     console.log('isInBC:', isInBC);
     console.log('locationLoading:', locationLoading);
-    console.log('showLocationModal:', showLocationModal);
+    console.log('showLocationModal before:', showLocationModal);
     
     // If location is still loading, wait
     if (locationLoading) {
@@ -91,6 +90,7 @@ export default function HomePageClient() {
       // If no location is set, show location modal
       if (!userLocation || !isInBC) {
         console.log('No valid location, showing location modal');
+        console.log('Setting showLocationModal to true');
         setShowLocationModal(true);
         console.log('Modal should now be open');
         return;
@@ -107,25 +107,7 @@ export default function HomePageClient() {
     router.push('/dashboard');
   };
 
-  // Function to check URL parameter and show modal
-  const checkAndShowLocationModal = () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const shouldShowModal = urlParams.get('showLocationModal');
-    
-    console.log('checkAndShowLocationModal called');
-    console.log('shouldShowModal:', shouldShowModal);
-    console.log('isAuthenticated:', isAuthenticated);
-    console.log('userLocation:', userLocation);
-    console.log('isInBC:', isInBC);
-    
-    if (shouldShowModal === 'true' && !isAuthenticated) {
-      console.log('Auto-showing location modal from URL parameter');
-      setShowLocationModal(true);
-      // Clean up the URL parameter
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
-    }
-  };
+
 
   if (!isHydrated) {
     return (
@@ -486,6 +468,18 @@ export default function HomePageClient() {
                 Let's Get You Started
                 <ArrowRight className="h-5 w-5" />
               </span>
+            </Button>
+            {/* Temporary debug button */}
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="mt-2 bg-red-100 text-red-600 hover:bg-red-200" 
+              onClick={() => {
+                console.log('Debug: Manually setting modal to true');
+                setShowLocationModal(true);
+              }}
+            >
+              Debug: Show Modal
             </Button>
             <Link href="/services">
               <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 font-medium transition-all duration-300 transform hover:scale-105">
