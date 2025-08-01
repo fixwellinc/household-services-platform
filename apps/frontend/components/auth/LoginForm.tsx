@@ -112,7 +112,7 @@ export default function LoginForm() {
       <Button
         type="submit"
         disabled={isLoading}
-        className="w-full flex justify-center py-2 px-4"
+        className="w-full flex justify-center py-3 px-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-2 border-green-400 hover:border-green-500 font-medium"
       >
         {isLoading ? (
           <>
@@ -120,7 +120,12 @@ export default function LoginForm() {
             Signing in...
           </>
         ) : (
-          'Sign in'
+          <span className="flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+            </svg>
+            Sign In
+          </span>
         )}
       </Button>
     </form>
