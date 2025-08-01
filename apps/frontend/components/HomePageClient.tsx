@@ -109,16 +109,17 @@ export default function HomePageClient() {
               </div>
             ) : (
               <div className="flex flex-col items-center mb-12">
-                <Button 
-                  size="lg" 
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 animate-glow-slow hover:animate-none px-8 py-4 text-lg font-semibold" 
-                  onClick={handleGetStarted}
-                >
-                  <span className="flex items-center gap-3">
-                    Let's Get You Started
-                    <User className="h-5 w-5" />
-                  </span>
-                </Button>
+                <Link href="/register">
+                  <Button 
+                    size="lg" 
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 animate-glow-slow hover:animate-none px-8 py-4 text-lg font-semibold" 
+                  >
+                    <span className="flex items-center gap-3">
+                      Create Your Account
+                      <User className="h-5 w-5" />
+                    </span>
+                  </Button>
+                </Link>
                 
                 <div className="mt-6">
                   <Link href="/pricing">
@@ -288,12 +289,13 @@ export default function HomePageClient() {
                         <span className="font-medium">Same-day booking available</span>
                       </div>
 
-                      <Button 
-                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                        onClick={handleGetStarted}
-                      >
-                        Let's Get You Started
-                      </Button>
+                      <Link href="/register">
+                        <Button 
+                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                        >
+                          Create Account
+                        </Button>
+                      </Link>
                     </CardContent>
                   </Card>
                 );
