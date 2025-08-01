@@ -245,7 +245,7 @@ const Header: React.FC = () => {
                <div className="hidden sm:flex items-center space-x-3">
                  <Link href="/login">
                    <Button 
-                     className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2 font-medium transform hover:scale-105 border-2 border-green-400 hover:border-green-500 animate-pulse shadow-green-500/50"
+                     className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2 font-medium transform hover:scale-105 border-2 border-green-400 hover:border-green-500 shadow-green-500/50 ring-2 ring-green-300 ring-opacity-50"
                    >
                      <span className="flex items-center gap-2">
                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -333,7 +333,7 @@ const Header: React.FC = () => {
                  <div className="pt-4 border-t border-gray-200 space-y-3">
                    <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
                      <Button 
-                       className="w-full justify-start bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-3 border-2 border-green-400 hover:border-green-500"
+                                               className="w-full justify-start bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-3 border-2 border-green-400 hover:border-green-500 ring-2 ring-green-300 ring-opacity-50"
                      >
                        <span className="flex items-center gap-2">
                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
