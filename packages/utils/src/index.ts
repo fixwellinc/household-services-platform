@@ -114,7 +114,6 @@ export const getServiceCategoryLabel = (category: ServiceCategory): string => {
     MAINTENANCE: 'Maintenance',
     REPAIR: 'Repair',
     ORGANIZATION: 'Organization',
-    SHOPPING: 'Shopping',
     OTHER: 'Other'
   };
   return labels[category] || category;

@@ -123,7 +123,7 @@ model Setting {
 // UserRole: "CUSTOMER", "ADMIN"
 // SubscriptionTier: "STARTER", "HOMECARE", "PRIORITY"
 // SubscriptionStatus: "ACTIVE", "CANCELLED", "PAST_DUE", "UNPAID"
-// ServiceCategory: "CLEANING", "MAINTENANCE", "REPAIR", "ORGANIZATION", "SHOPPING", "OTHER"
+// ServiceCategory: "CLEANING", "MAINTENANCE", "REPAIR", "ORGANIZATION", "OTHER"
 // ServiceComplexity: "SIMPLE", "MODERATE", "COMPLEX"
 // BookingStatus: "PENDING", "CONFIRMED", "IN_PROGRESS", "COMPLETED", "CANCELLED" 
 

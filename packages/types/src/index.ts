@@ -130,7 +130,6 @@ export const SERVICE_CATEGORIES = [
   'MAINTENANCE', 
   'REPAIR',
   'ORGANIZATION',
-  'SHOPPING',
   'OTHER'
 ] as const;
 

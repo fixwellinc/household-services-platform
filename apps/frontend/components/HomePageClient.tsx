@@ -292,7 +292,7 @@ export default function HomePageClient() {
                     'MAINTENANCE': 1.67,  // ~40% savings
                     'REPAIR': 1.67,       // ~40% savings
                     'ORGANIZATION': 1.67, // ~40% savings
-                    'SHOPPING': 1.67,     // ~40% savings
+
                     'OTHER': 1.67         // ~40% savings
                   };
                   return Math.round(basePrice * (multipliers[category] || 1.67));
@@ -311,7 +311,7 @@ export default function HomePageClient() {
                         {service.category === 'MAINTENANCE' && <Wrench />}
                         {service.category === 'REPAIR' && <Zap />}
                         {service.category === 'ORGANIZATION' && <Sparkle />}
-                        {service.category === 'SHOPPING' && <Heart />}
+
                         {service.category === 'OTHER' && <Star />}
                       </div>
                     </div>

@@ -57,7 +57,7 @@ router.post('/', authMiddleware, requireAdmin, async (req, res, next) => {
       throw new ValidationError('All fields are required');
     }
     
-    if (!['CLEANING', 'MAINTENANCE', 'REPAIR', 'ORGANIZATION', 'SHOPPING', 'OTHER'].includes(category)) {
+    if (!['CLEANING', 'MAINTENANCE', 'REPAIR', 'ORGANIZATION', 'OTHER'].includes(category)) {
       throw new ValidationError('Invalid category');
     }
     

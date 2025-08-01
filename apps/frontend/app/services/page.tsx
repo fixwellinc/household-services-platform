@@ -31,12 +31,7 @@ import {
 } from 'lucide-react';
 import LocationPromptModal from '@/components/location/LocationPromptModal';
 
-// Shopping Bag Icon Component
-const ShoppingBag = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-  </svg>
-);
+
 
 const categories = [
   { id: 'ALL', name: 'All Services', icon: Star, color: 'from-blue-500 to-purple-500' },
@@ -44,7 +39,7 @@ const categories = [
   { id: 'MAINTENANCE', name: 'Maintenance', icon: Wrench, color: 'from-blue-500 to-cyan-500' },
   { id: 'REPAIR', name: 'Repair', icon: Zap, color: 'from-orange-500 to-red-500' },
   { id: 'ORGANIZATION', name: 'Organization', icon: Sparkle, color: 'from-purple-500 to-pink-500' },
-  { id: 'SHOPPING', name: 'Shopping', icon: ShoppingBag, color: 'from-indigo-500 to-blue-500' },
+
   { id: 'OTHER', name: 'Other', icon: Star, color: 'from-gray-500 to-slate-500' }
 ];
 
@@ -84,19 +79,9 @@ const sampleServices = [
     benefits: ['Reduced stress', 'Increased productivity', 'Better home flow'],
     icon: Sparkle
   },
+
   {
     id: '4',
-    name: 'Grocery Shopping',
-    description: 'Save time and energy with our personal grocery shopping service. Fresh, quality items delivered to your doorstep.',
-    category: 'SHOPPING',
-    complexity: 'SIMPLE' as const,
-    estimatedDuration: '1-2 hours',
-    features: ['Fresh produce selection', 'Dietary preferences', 'Contactless delivery'],
-    benefits: ['Time savings', 'Convenience', 'Quality assurance'],
-    icon: ShoppingBag
-  },
-  {
-    id: '5',
     name: 'HVAC Maintenance',
     description: 'Keep your heating and cooling systems running efficiently with our comprehensive maintenance service.',
     category: 'MAINTENANCE',
@@ -107,7 +92,7 @@ const sampleServices = [
     icon: Wrench
   },
   {
-    id: '6',
+    id: '5',
     name: 'Electrical Repair',
     description: 'Safe and reliable electrical services for your home. From troubleshooting to installations, we ensure your safety.',
     category: 'REPAIR',

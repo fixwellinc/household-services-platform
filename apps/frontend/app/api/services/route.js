@@ -100,7 +100,7 @@ export async function POST(request) {
       );
     }
     
-    if (!['CLEANING', 'MAINTENANCE', 'REPAIR', 'ORGANIZATION', 'SHOPPING', 'OTHER'].includes(category)) {
+    if (!['CLEANING', 'MAINTENANCE', 'REPAIR', 'ORGANIZATION', 'OTHER'].includes(category)) {
       return NextResponse.json(
         { error: 'Invalid category' },
         { status: 400 }

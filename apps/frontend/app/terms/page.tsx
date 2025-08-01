@@ -44,7 +44,7 @@ export default function TermsPage() {
                 <li>Cleaning services</li>
                 <li>Maintenance and repair services</li>
                 <li>Organization services</li>
-                <li>Shopping and errand services</li>
+
                 <li>Subscription maintenance plans</li>
               </ul>
               <p className="mt-3 text-sm text-gray-600">

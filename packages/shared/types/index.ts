@@ -61,7 +61,6 @@ export enum ServiceCategory {
   MAINTENANCE = 'MAINTENANCE',
   REPAIR = 'REPAIR',
   ORGANIZATION = 'ORGANIZATION',
-  SHOPPING = 'SHOPPING',
   OTHER = 'OTHER'
 }
 

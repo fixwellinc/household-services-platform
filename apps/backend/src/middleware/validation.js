@@ -57,7 +57,7 @@ const validationSchemas = {
       return value.trim();
     },
     category: (value) => {
-      const validCategories = ['CLEANING', 'MAINTENANCE', 'REPAIR', 'ORGANIZATION', 'SHOPPING', 'OTHER'];
+      const validCategories = ['CLEANING', 'MAINTENANCE', 'REPAIR', 'ORGANIZATION', 'OTHER'];
       if (!value) throw new ValidationError('Service category is required');
       if (!validCategories.includes(value)) throw new ValidationError('Invalid service category');
       return value;
