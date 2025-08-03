@@ -88,6 +88,13 @@ export default function ContactPage() {
               <div className="text-gray-700 font-medium">• Surrey</div>
               <div className="text-gray-700 font-medium">• Delta</div>
               <div className="text-gray-700 font-medium">• Langley</div>
+              <div className="text-gray-700 font-medium">• Maple Ridge</div>
+              <div className="text-gray-700 font-medium">• Pitt Meadows</div>
+              <div className="text-gray-700 font-medium">• Port Coquitlam</div>
+              <div className="text-gray-700 font-medium">• Port Moody</div>
+              <div className="text-gray-700 font-medium">• White Rock</div>
+              <div className="text-gray-700 font-medium">• North Vancouver</div>
+              <div className="text-gray-700 font-medium">• West Vancouver</div>
             </div>
           </div>
 
