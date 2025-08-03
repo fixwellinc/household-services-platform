@@ -24,7 +24,8 @@ import {
   Loader2,
   MapPin,
   CheckCircle,
-  Clock
+  Clock,
+  TrendingUp
 } from 'lucide-react';
 
 import { useState, useEffect } from 'react';
