@@ -21,7 +21,7 @@ export default function PlansPage() {
             Choose Your Perfect Plan
           </h1>
           <p className="text-lg md:text-xl text-blue-100 max-w-3xl mx-auto px-4">
-            Get professional household services with transparent pricing. Choose the plan that fits your lifestyle and save $1,000+ per year.
+            Get professional household services with transparent pricing. Choose the plan that fits your lifestyle and save up to $1,000+ per year.
           </p>
         </div>
       </section>

@@ -299,10 +299,10 @@ export default function PlansSection() {
             <div className="text-center">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <TrendingUp className="h-6 w-6 text-blue-600" />
-                <h3 className="text-xl font-bold text-gray-900">Save $1,000+ Per Year</h3>
+                <h3 className="text-xl font-bold text-gray-900">Save Up to $1,000+ Per Year</h3>
               </div>
               <p className="text-gray-600 mb-6 text-base leading-relaxed">
-                Our members save an average of $1,000+ annually compared to hiring individual contractors for each service.
+                Our members save up to $1,000+ annually compared to hiring individual contractors for each service. With our subscription model, you get predictable pricing, priority scheduling, and comprehensive coverage across all household needs.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center justify-center gap-2">
