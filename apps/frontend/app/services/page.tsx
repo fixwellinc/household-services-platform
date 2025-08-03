@@ -143,7 +143,22 @@ export default function ServicesPage() {
 
   const handleViewDetails = (serviceId: string) => {
     console.log('Viewing details for service:', serviceId)
-    // TODO: Navigate to service details page
+    
+    // Map service IDs to their detail page routes
+    const serviceRoutes: Record<string, string> = {
+      '1': '/services/deep-house-cleaning',
+      '2': '/services/plumbing-repair',
+      '3': '/services/home-organization',
+      '4': '/services/hvac-maintenance',
+      '5': '/services/electrical-repair'
+    };
+    
+    const route = serviceRoutes[serviceId];
+    if (route) {
+      router.push(route);
+    } else {
+      console.log('No detail page found for service:', serviceId);
+    }
   }
 
   return (
