@@ -105,16 +105,17 @@ export function formatPostalCode(postalCode: string): string {
 /**
  * Validates and formats a postal code input
  * @param input - The user input
- * @returns string - Formatted postal code or empty string if invalid
+ * @returns string - Formatted postal code or partial input for typing
  */
 export function validateAndFormatPostalCode(input: string): string {
   const cleanInput = input.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
   
-  // Check if it's a valid Canadian postal code format
+  // If we have exactly 6 characters and it matches the format, format it
   const postalCodeRegex = /^[A-Z]\d[A-Z]\d[A-Z]\d$/;
   if (cleanInput.length === 6 && postalCodeRegex.test(cleanInput)) {
     return formatPostalCode(cleanInput);
   }
   
-  return '';
+  // For partial input, just return the cleaned input (up to 6 characters)
+  return cleanInput.substring(0, 6);
 } 
