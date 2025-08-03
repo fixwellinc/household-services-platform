@@ -49,7 +49,7 @@ async function main() {
       description: 'Expert plumbing services for leaks, clogs, and fixture installations',
       category: 'REPAIR',
       complexity: 'COMPLEX',
-      basePrice: 150,
+      basePrice: 180,
       isActive: true,
     },
   });
@@ -60,7 +60,7 @@ async function main() {
       description: 'Professional decluttering and organization of closets, garages, and living spaces',
       category: 'ORGANIZATION',
       complexity: 'MODERATE',
-      basePrice: 95,
+      basePrice: 100,
       isActive: true,
     },
   });

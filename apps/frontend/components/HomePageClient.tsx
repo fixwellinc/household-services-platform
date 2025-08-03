@@ -205,20 +205,30 @@ export default function HomePageClient() {
           ) : services.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {services.map((service) => {
-                // Calculate contractor price and savings based on service category (max 40% savings)
-                const getContractorPrice = (category: string, basePrice: number) => {
+                // Calculate contractor price and savings based on service category
+                const getContractorPrice = (serviceName: string, category: string, basePrice: number) => {
+                  // Special case for Plumbing Repair - fixed contractor rate
+                  if (serviceName === 'Plumbing Repair') {
+                    return 250;
+                  }
+                  
+                  // Special case for Home Organization - fixed contractor rate
+                  if (serviceName === 'Home Organization') {
+                    return 150;
+                  }
+                  
+                  // For other services, use the multiplier system
                   const multipliers: Record<string, number> = {
                     'CLEANING': 1.67,     // ~40% savings
                     'MAINTENANCE': 1.67,  // ~40% savings
                     'REPAIR': 1.67,       // ~40% savings
                     'ORGANIZATION': 1.67, // ~40% savings
-
                     'OTHER': 1.67         // ~40% savings
                   };
                   return Math.round(basePrice * (multipliers[category] || 1.67));
                 };
 
-                const contractorPrice = getContractorPrice(service.category, service.basePrice);
+                const contractorPrice = getContractorPrice(service.name, service.category, service.basePrice);
                 const savings = contractorPrice - service.basePrice;
                 const savingsPercentage = Math.round((savings / contractorPrice) * 100);
 
@@ -293,7 +303,7 @@ export default function HomePageClient() {
                         <Button 
                           className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                         >
-                          Create Account
+                          Let's Get You Started
                         </Button>
                       </Link>
                     </CardContent>
@@ -333,7 +343,7 @@ export default function HomePageClient() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white">
               <CardHeader>
                 <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
@@ -372,6 +382,20 @@ export default function HomePageClient() {
               <CardContent>
                 <p className="text-gray-600 leading-relaxed">
                   Book services in minutes with our streamlined platform. No phone calls, no waiting - just instant confirmation.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white">
+              <CardHeader>
+                <div className="w-20 h-20 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <TrendingUp className="h-10 w-10 text-white" />
+                </div>
+                <CardTitle className="text-xl font-bold">Save Up to 40%</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 leading-relaxed">
+                  Get professional quality at contractor rates. Save up to 40% compared to traditional contractor prices while getting better service and guarantees.
                 </p>
               </CardContent>
             </Card>
