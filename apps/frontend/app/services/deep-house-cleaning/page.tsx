@@ -177,24 +177,40 @@ export default function DeepHouseCleaningPage() {
                 </div>
               </div>
 
-              {/* Right Column - Pricing & Booking */}
+              {/* Right Column - Quote Request & Booking */}
               <div>
                 <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 shadow-lg">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">Pricing & Booking</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6">Get Your Custom Quote</h3>
                   
-                  {/* Price Comparison */}
+                  {/* Quote Information */}
                   <div className="bg-white rounded-lg p-6 mb-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-gray-600">Contractor Rate:</span>
-                      <span className="text-lg line-through text-red-600 font-medium">$200</span>
+                    <div className="text-center mb-4">
+                      <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <BookOpen className="h-8 w-8 text-blue-600" />
+                      </div>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-2">Personalized Pricing</h4>
+                      <p className="text-gray-600 text-sm">Every home is unique. Get a custom quote based on your specific needs and home size.</p>
                     </div>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-gray-600">Fixwell Rate:</span>
-                      <span className="text-3xl font-bold text-green-600">$120</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">You Save:</span>
-                      <span className="text-lg font-bold text-green-600">$80 (40%)</span>
+                    
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                        </div>
+                        <span className="text-sm text-gray-700">Free consultation and assessment</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                          <Clock className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <span className="text-sm text-gray-700">Transparent pricing breakdown</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
+                          <Shield className="h-4 w-4 text-purple-600" />
+                        </div>
+                        <span className="text-sm text-gray-700">No hidden fees or surprises</span>
+                      </div>
                     </div>
                   </div>
 
@@ -220,14 +236,14 @@ export default function DeepHouseCleaningPage() {
                     </div>
                   </div>
 
-                  {/* Booking Button */}
+                  {/* Quote Request Button */}
                   <div className="space-y-4">
                     <Button 
                       size="lg"
                       className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 text-lg font-semibold"
                     >
                       <BookOpen className="h-5 w-5 mr-2" />
-                      Book Deep House Cleaning
+                      Request Custom Quote
                     </Button>
                     
                     <div className="text-center">
