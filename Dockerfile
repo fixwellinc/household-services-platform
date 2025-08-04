@@ -49,7 +49,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Make startup script executable
+# Ensure startup script has correct line endings and is executable
+RUN sed -i 's/\r$//' /app/start.sh
 RUN chmod +x /app/start.sh
 
 # Expose port
