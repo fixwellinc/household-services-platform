@@ -49,12 +49,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Ensure startup script has correct line endings and is executable
-RUN sed -i 's/\r$//' /app/start.sh
-RUN chmod +x /app/start.sh
-
 # Expose port
 EXPOSE 3000
 
-# Start the unified server using the startup script
-CMD ["/app/start.sh"] 
+# Start the unified server with migrations
+CMD ["sh", "-c", "cd /app/apps/backend && npx prisma migrate deploy && npx prisma generate && cd /app && node unified-server.js"] 
