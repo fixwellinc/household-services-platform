@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Butto
 import { Badge } from '@/components/ui/shared';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocation } from '@/contexts/LocationContext';
+import { useUserPlan } from '@/hooks/use-plans';
 import { useRouter } from 'next/navigation';
 import { 
   Search, 
@@ -110,7 +111,11 @@ export default function ServicesPage() {
   const [showLocationModal, setShowLocationModal] = useState(false)
   const { user, isAuthenticated } = useAuth();
   const { userLocation, userCity, isInBC, setUserLocation } = useLocation();
+  const { data: userPlanData } = useUserPlan();
   const router = useRouter();
+
+  // Check if user is subscribed
+  const isSubscribed = userPlanData?.success && userPlanData?.hasPlan && userPlanData?.subscription?.status === 'ACTIVE';
 
   const filteredServices = sampleServices
     .filter(service => {
@@ -384,10 +389,27 @@ export default function ServicesPage() {
                           <Button 
                             variant="outline" 
                             className="border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all duration-300"
-                            onClick={() => handleViewDetails(service.id)}
+                            onClick={() => {
+                              if (!isAuthenticated || !isSubscribed) {
+                                // If not authenticated or not subscribed, redirect to pricing
+                                if (!isAuthenticated) {
+                                  if (!userLocation || !isInBC) {
+                                    setShowLocationModal(true);
+                                  } else {
+                                    router.push(`/register?redirect=${encodeURIComponent('/services')}`);
+                                  }
+                                } else {
+                                  // User is authenticated but not subscribed
+                                  router.push('/pricing');
+                                }
+                              } else {
+                                // User is subscribed, show details
+                                handleViewDetails(service.id);
+                              }
+                            }}
                           >
                             <Eye className="h-4 w-4 mr-2" />
-                            Details
+                            {!isAuthenticated || !isSubscribed ? 'Let\'s Get You Started' : 'Request Custom Quote'}
                           </Button>
                         </div>
                       </CardContent>
