@@ -49,8 +49,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Copy startup script
-COPY start.sh /app/start.sh
+# Make startup script executable
 RUN chmod +x /app/start.sh
 
 # Expose port
