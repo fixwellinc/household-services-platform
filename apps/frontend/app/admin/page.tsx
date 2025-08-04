@@ -80,6 +80,14 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   
+  // Subscription Management State
+  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+  const [subscribedCustomers, setSubscribedCustomers] = useState<any[]>([]);
+  const [customersWithPerksUsed, setCustomersWithPerksUsed] = useState<any[]>([]);
+  const [subscriptionAnalytics, setSubscriptionAnalytics] = useState<any>({});
+  const [selectedSubscription, setSelectedSubscription] = useState<any>(null);
+  const [blockCancellationReason, setBlockCancellationReason] = useState('');
+  
   // Email Blast State
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
@@ -129,6 +137,34 @@ export default function AdminPage() {
       if (usersResponse.ok) {
         const usersData = await usersResponse.json();
         setUsers(usersData.users || []);
+      }
+
+      // Fetch subscriptions
+      const subscriptionsResponse = await fetch('/api/admin/subscriptions');
+      if (subscriptionsResponse.ok) {
+        const subscriptionsData = await subscriptionsResponse.json();
+        setSubscriptions(subscriptionsData.subscriptions || []);
+      }
+
+      // Fetch subscribed customers
+      const subscribedCustomersResponse = await fetch('/api/admin/customers/subscribed');
+      if (subscribedCustomersResponse.ok) {
+        const subscribedCustomersData = await subscribedCustomersResponse.json();
+        setSubscribedCustomers(subscribedCustomersData.customers || []);
+      }
+
+      // Fetch customers who have used perks
+      const perksUsedResponse = await fetch('/api/admin/customers/perks-used');
+      if (perksUsedResponse.ok) {
+        const perksUsedData = await perksUsedResponse.json();
+        setCustomersWithPerksUsed(perksUsedData.customers || []);
+      }
+
+      // Fetch subscription analytics
+      const analyticsResponse = await fetch('/api/admin/subscriptions/analytics');
+      if (analyticsResponse.ok) {
+        const analyticsData = await analyticsResponse.json();
+        setSubscriptionAnalytics(analyticsData);
       }
 
       // Mock chat messages (would come from real API)
@@ -222,6 +258,44 @@ export default function AdminPage() {
     }
   };
 
+  const blockSubscriptionCancellation = async (subscriptionId: string) => {
+    try {
+      const response = await fetch(`/api/admin/subscriptions/${subscriptionId}/block-cancellation`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: blockCancellationReason || 'Perks have been used' })
+      });
+      
+      if (response.ok) {
+        alert('Subscription cancellation blocked successfully!');
+        setBlockCancellationReason('');
+        fetchData(); // Refresh data
+      }
+    } catch (error) {
+      console.error('Error blocking subscription cancellation:', error);
+    }
+  };
+
+  const allowSubscriptionCancellation = async (subscriptionId: string) => {
+    try {
+      const response = await fetch(`/api/admin/subscriptions/${subscriptionId}/allow-cancellation`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        alert('Subscription cancellation allowed successfully!');
+        fetchData(); // Refresh data
+      }
+    } catch (error) {
+      console.error('Error allowing subscription cancellation:', error);
+    }
+  };
+
+  const viewSubscriptionDetails = (subscription: any) => {
+    setSelectedSubscription(subscription);
+  };
+
   if (userLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -247,6 +321,7 @@ export default function AdminPage() {
   const navigation: NavigationItem[] = [
     { name: 'Dashboard', icon: Home, id: 'dashboard' },
     { name: 'Analytics', icon: BarChart3, id: 'analytics' },
+    { name: 'Subscriptions', icon: DollarSign, id: 'subscriptions' },
     { name: 'Email Blast', icon: Mail, id: 'email-blast' },
     { name: 'Live Chat', icon: MessageSquare, id: 'live-chat' },
     { name: 'User Management', icon: Users, id: 'users' },
@@ -590,6 +665,223 @@ export default function AdminPage() {
                       Refresh Data
                     </Button>
                   </div>
+                </div>
+              )}
+
+              {/* SUBSCRIPTIONS TAB */}
+              {activeTab === 'subscriptions' && (
+                <div className="p-6">
+                  {/* Subscription Analytics Overview */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div className="bg-blue-50 p-6 rounded-lg">
+                      <div className="flex items-center">
+                        <DollarSign className="h-8 w-8 text-blue-600" />
+                        <div className="ml-4">
+                          <p className="text-sm font-medium text-blue-600">Total Subscriptions</p>
+                          <p className="text-2xl font-bold text-blue-900">{subscriptionAnalytics.totalSubscriptions || 0}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-red-50 p-6 rounded-lg">
+                      <div className="flex items-center">
+                        <XCircle className="h-8 w-8 text-red-600" />
+                        <div className="ml-4">
+                          <p className="text-sm font-medium text-red-600">Blocked Cancellations</p>
+                          <p className="text-2xl font-bold text-red-900">{subscriptionAnalytics.blockedCancellations || 0}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-green-50 p-6 rounded-lg">
+                      <div className="flex items-center">
+                        <CheckCircle className="h-8 w-8 text-green-600" />
+                        <div className="ml-4">
+                          <p className="text-sm font-medium text-green-600">Perks Used</p>
+                          <p className="text-2xl font-bold text-green-900">{subscriptionAnalytics.perksUsedCount || 0}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-purple-50 p-6 rounded-lg">
+                      <div className="flex items-center">
+                        <Users className="h-8 w-8 text-purple-600" />
+                        <div className="ml-4">
+                          <p className="text-sm font-medium text-purple-600">Subscribed Customers</p>
+                          <p className="text-2xl font-bold text-purple-900">{subscribedCustomers.length}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Subscription Management Tabs */}
+                  <div className="mb-6">
+                    <div className="border-b border-gray-200">
+                      <nav className="-mb-px flex space-x-8">
+                        <button className="border-b-2 border-blue-500 py-2 px-1 text-sm font-medium text-blue-600">
+                          All Subscriptions
+                        </button>
+                        <button className="border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                          Perks Used
+                        </button>
+                        <button className="border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                          Blocked Cancellations
+                        </button>
+                      </nav>
+                    </div>
+                  </div>
+
+                  {/* Subscriptions Table */}
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tier</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Perks Used</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Can Cancel</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {subscriptions.map((subscription) => (
+                          <tr key={subscription.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">{subscription.user?.name || 'N/A'}</div>
+                                <div className="text-sm text-gray-500">{subscription.user?.email}</div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 py-1 text-xs rounded-full ${
+                                subscription.tier === 'PRIORITY' ? 'bg-purple-100 text-purple-800' :
+                                subscription.tier === 'HOMECARE' ? 'bg-blue-100 text-blue-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {subscription.tier}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 py-1 text-xs rounded-full ${
+                                subscription.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
+                                subscription.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
+                                'bg-yellow-100 text-yellow-800'
+                              }`}>
+                                {subscription.status}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">
+                                {subscription.user?.subscriptionUsage ? (
+                                  <div className="space-y-1">
+                                    {subscription.user.subscriptionUsage.priorityBookingUsed && (
+                                      <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Priority Booking</div>
+                                    )}
+                                    {subscription.user.subscriptionUsage.discountUsed && (
+                                      <div className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Discount Used</div>
+                                    )}
+                                    {subscription.user.subscriptionUsage.freeServiceUsed && (
+                                      <div className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">Free Service</div>
+                                    )}
+                                    {subscription.user.subscriptionUsage.emergencyServiceUsed && (
+                                      <div className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">Emergency Service</div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-gray-400">No perks used</span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                {subscription.canCancel ? (
+                                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                                ) : (
+                                  <XCircle className="h-4 w-4 text-red-500 mr-2" />
+                                )}
+                                <span className={`text-sm ${
+                                  subscription.canCancel ? 'text-green-800' : 'text-red-800'
+                                }`}>
+                                  {subscription.canCancel ? 'Yes' : 'No'}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <div className="flex space-x-2">
+                                <button 
+                                  onClick={() => viewSubscriptionDetails(subscription)}
+                                  className="text-blue-600 hover:text-blue-900"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </button>
+                                {subscription.canCancel ? (
+                                  <button 
+                                    onClick={() => blockSubscriptionCancellation(subscription.id)}
+                                    className="text-red-600 hover:text-red-900"
+                                    title="Block Cancellation"
+                                  >
+                                    <XCircle className="h-4 w-4" />
+                                  </button>
+                                ) : (
+                                  <button 
+                                    onClick={() => allowSubscriptionCancellation(subscription.id)}
+                                    className="text-green-600 hover:text-green-900"
+                                    title="Allow Cancellation"
+                                  >
+                                    <CheckCircle className="h-4 w-4" />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Block Cancellation Modal */}
+                  {selectedSubscription && (
+                    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                        <div className="mt-3">
+                          <h3 className="text-lg font-medium text-gray-900 mb-4">Block Subscription Cancellation</h3>
+                          <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Reason</label>
+                            <textarea
+                              value={blockCancellationReason}
+                              onChange={(e) => setBlockCancellationReason(e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Enter reason for blocking cancellation..."
+                              rows={3}
+                            />
+                          </div>
+                          <div className="flex justify-end space-x-3">
+                            <button
+                              onClick={() => setSelectedSubscription(null)}
+                              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => {
+                                blockSubscriptionCancellation(selectedSubscription.id);
+                                setSelectedSubscription(null);
+                              }}
+                              className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                            >
+                              Block Cancellation
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {subscriptions.length === 0 && (
+                    <div className="text-center py-8">
+                      <DollarSign className="mx-auto h-12 w-12 text-gray-400" />
+                      <h3 className="mt-2 text-sm font-medium text-gray-900">No subscriptions found</h3>
+                      <p className="mt-1 text-sm text-gray-500">No active subscriptions in the system.</p>
+                    </div>
+                  )}
                 </div>
               )}
 

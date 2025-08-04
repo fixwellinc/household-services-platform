@@ -32,6 +32,8 @@ model User {
   // Employee assignments
   assignedCustomers CustomerEmployeeAssignment[] @relation("EmployeeAssignments")
   assignedEmployee   CustomerEmployeeAssignment? @relation("CustomerAssignment")
+  // Subscription usage tracking
+  subscriptionUsage SubscriptionUsage?
 }
 
 model CustomerEmployeeAssignment {
@@ -56,6 +58,38 @@ model Subscription {
   currentPeriodEnd   DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  // Prevent cancellation after perks used
+  canCancel     Boolean  @default(true)
+  cancellationBlockedAt DateTime?
+  cancellationBlockedReason String?
+}
+
+model SubscriptionUsage {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  subscriptionId String
+  tier          String
+  // Perk usage tracking
+  priorityBookingUsed     Boolean  @default(false)
+  priorityBookingUsedAt   DateTime?
+  priorityBookingCount    Int      @default(0)
+  discountUsed            Boolean  @default(false)
+  discountUsedAt          DateTime?
+  discountAmount          Float    @default(0)
+  freeServiceUsed         Boolean  @default(false)
+  freeServiceUsedAt       DateTime?
+  freeServiceType         String?
+  emergencyServiceUsed    Boolean  @default(false)
+  emergencyServiceUsedAt  DateTime?
+  // Usage limits
+  maxPriorityBookings     Int      @default(0)
+  maxDiscountAmount       Float    @default(0)
+  maxFreeServices         Int      @default(0)
+  maxEmergencyServices    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  user         User     @relation(fields: [userId], references: [id])
 }
 
 model Service {
@@ -83,6 +117,9 @@ model Booking {
   finalAmount   Float
   notes         String?
   stripePaymentIntentId String?
+  // Subscription perk tracking
+  usedSubscriptionPerk Boolean @default(false)
+  perkType             String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   messageIds    String[]

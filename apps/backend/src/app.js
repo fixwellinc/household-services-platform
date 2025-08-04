@@ -29,6 +29,7 @@ import docsRoutes from './routes/docs.js';
 import notificationRoutes from './routes/notifications.js';
 import chatRoutes from './routes/chat.js';
 import plansRoutes from './routes/plans.js';
+import subscriptionRoutes from './routes/subscriptions.js';
 // import webhookRoutes from './routes/webhooks.js';
 
 // Import middleware
@@ -229,6 +230,7 @@ app.use('/api/quotes', quotesRoutes);
 app.use('/api/docs', docsRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/plans', plansRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
 // app.use('/api/webhooks', webhookRoutes);
 
 function requireAdminLocal(req, res, next) {
@@ -271,8 +273,177 @@ app.get('/api/admin/users', requireAdmin, async (req, res) => {
   if (!prisma) {
     return res.status(503).json({ error: 'Database not available' });
   }
-  const users = await prisma.user.findMany();
+  const users = await prisma.user.findMany({
+    include: {
+      subscriptionUsage: true
+    }
+  });
   res.json({ users });
+});
+
+// Admin: Get all subscriptions with usage tracking
+app.get('/api/admin/subscriptions', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+  const subscriptions = await prisma.subscription.findMany({
+    include: {
+      user: {
+        include: {
+          subscriptionUsage: true
+        }
+      }
+    }
+  });
+  res.json({ subscriptions });
+});
+
+// Admin: Get subscription usage details
+app.get('/api/admin/subscriptions/:id/usage', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+  const { id } = req.params;
+  const subscription = await prisma.subscription.findUnique({
+    where: { id },
+    include: {
+      user: {
+        include: {
+          subscriptionUsage: true
+        }
+      }
+    }
+  });
+  if (!subscription) {
+    return res.status(404).json({ error: 'Subscription not found' });
+  }
+  res.json({ subscription });
+});
+
+// Admin: Block subscription cancellation
+app.patch('/api/admin/subscriptions/:id/block-cancellation', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+  const { id } = req.params;
+  const { reason } = req.body;
+  
+  try {
+    const subscription = await prisma.subscription.update({
+      where: { id },
+      data: {
+        canCancel: false,
+        cancellationBlockedAt: new Date(),
+        cancellationBlockedReason: reason || 'Perks have been used'
+      }
+    });
+    res.json({ subscription });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Admin: Allow subscription cancellation
+app.patch('/api/admin/subscriptions/:id/allow-cancellation', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+  const { id } = req.params;
+  
+  try {
+    const subscription = await prisma.subscription.update({
+      where: { id },
+      data: {
+        canCancel: true,
+        cancellationBlockedAt: null,
+        cancellationBlockedReason: null
+      }
+    });
+    res.json({ subscription });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Admin: Get customers with active subscriptions
+app.get('/api/admin/customers/subscribed', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+  const subscribedCustomers = await prisma.user.findMany({
+    where: {
+      subscriptionId: { not: null },
+      isActive: true
+    },
+    include: {
+      subscriptionUsage: true,
+      subscription: true
+    }
+  });
+  res.json({ customers: subscribedCustomers });
+});
+
+// Admin: Get customers who have used perks
+app.get('/api/admin/customers/perks-used', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+  const customersWithPerksUsed = await prisma.user.findMany({
+    where: {
+      subscriptionUsage: {
+        OR: [
+          { priorityBookingUsed: true },
+          { discountUsed: true },
+          { freeServiceUsed: true },
+          { emergencyServiceUsed: true }
+        ]
+      }
+    },
+    include: {
+      subscriptionUsage: true,
+      subscription: true
+    }
+  });
+  res.json({ customers: customersWithPerksUsed });
+});
+
+// Admin: Get subscription analytics
+app.get('/api/admin/subscriptions/analytics', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+  
+  const totalSubscriptions = await prisma.subscription.count({
+    where: { status: 'ACTIVE' }
+  });
+  
+  const blockedCancellations = await prisma.subscription.count({
+    where: { canCancel: false }
+  });
+  
+  const perksUsedCount = await prisma.subscriptionUsage.count({
+    where: {
+      OR: [
+        { priorityBookingUsed: true },
+        { discountUsed: true },
+        { freeServiceUsed: true },
+        { emergencyServiceUsed: true }
+      ]
+    }
+  });
+  
+  const tierBreakdown = await prisma.subscription.groupBy({
+    by: ['tier'],
+    where: { status: 'ACTIVE' },
+    _count: { tier: true }
+  });
+  
+  res.json({
+    totalSubscriptions,
+    blockedCancellations,
+    perksUsedCount,
+    tierBreakdown
+  });
 });
 
 // Admin: Get all bookings
