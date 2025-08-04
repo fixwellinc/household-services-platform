@@ -49,8 +49,12 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
+# Copy startup script
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
 # Expose port
 EXPOSE 3000
 
-# Start the unified server
-CMD ["node", "unified-server.js"] 
+# Start the unified server using the startup script
+CMD ["/app/start.sh"] 
