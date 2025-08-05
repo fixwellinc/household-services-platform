@@ -46,7 +46,7 @@ Replace `price_xxxxxxxxxxxxx` with the actual price IDs from your Stripe dashboa
 ### 3. Configure Webhooks (Optional but Recommended)
 
 1. In Stripe Dashboard, go to **Developers** → **Webhooks**
-2. Add endpoint: `https://fixwell.ca/api/payments/webhook`
+2. Add endpoint: `https://roasted-key-production.up.railway.app/api/payments/webhook`
 3. Select these events:
    - `customer.subscription.created`
    - `customer.subscription.updated`
@@ -54,6 +54,8 @@ Replace `price_xxxxxxxxxxxxx` with the actual price IDs from your Stripe dashboa
    - `invoice.payment_succeeded`
    - `invoice.payment_failed`
 4. Copy the webhook signing secret and add as `STRIPE_WEBHOOK_SECRET`
+
+**Note**: When you deploy to your production domain (fixwell.ca), you'll need to update this webhook URL to `https://fixwell.ca/api/payments/webhook`
 
 ## Current Workaround
 
@@ -67,10 +69,12 @@ The mock system will redirect directly to the success page instead of going thro
 
 ## Testing
 
-1. Try subscribing to a plan
+1. Try subscribing to a plan at: https://roasted-key-production.up.railway.app
 2. You should be redirected to the success page
 3. Check the subscription management page
 4. Test cancellation features
+
+**Current Test URL**: https://roasted-key-production.up.railway.app
 
 ## Next Steps
 
