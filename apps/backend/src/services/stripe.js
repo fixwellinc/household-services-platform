@@ -236,12 +236,21 @@ export const verifyWebhookSignature = (payload, signature) => {
     // Check if webhook secret is configured
     if (!process.env.STRIPE_WEBHOOK_SECRET) {
       console.log('⚠️ STRIPE_WEBHOOK_SECRET not configured, skipping signature verification for testing');
-      // For testing, try to parse the payload as JSON
+      // For testing, handle the payload appropriately
       try {
-        // Convert Buffer to string if needed
-        const payloadString = Buffer.isBuffer(payload) ? payload.toString('utf8') : payload;
-        const event = JSON.parse(payloadString);
-        console.log('✅ Successfully parsed webhook payload for testing');
+        let event;
+        
+        // If payload is already an object (parsed by Express), use it directly
+        if (typeof payload === 'object' && payload !== null) {
+          event = payload;
+          console.log('✅ Using payload as object for testing');
+        } else {
+          // If payload is a string or buffer, parse it
+          const payloadString = Buffer.isBuffer(payload) ? payload.toString('utf8') : payload;
+          event = JSON.parse(payloadString);
+          console.log('✅ Successfully parsed webhook payload for testing');
+        }
+        
         return event;
       } catch (parseError) {
         console.error('Failed to parse webhook payload:', parseError);
