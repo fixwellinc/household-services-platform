@@ -11,6 +11,7 @@ export interface User {
   avatar?: string;
   phone?: string;
   address?: string;
+  postalCode?: string;
   createdAt: string;
 }
 
@@ -353,7 +354,7 @@ export class ApiClient {
   }
 
   // User self-service endpoints
-  updateProfile = async (data: { name?: string; email?: string; phone?: string; avatar?: string }): Promise<{ user: User }> => {
+  updateProfile = async (data: { name?: string; email?: string; phone?: string; avatar?: string; address?: string; postalCode?: string }): Promise<{ user: User }> => {
     return this.request<{ user: User }>('/users/me', {
       method: 'PATCH',
       body: JSON.stringify(data),

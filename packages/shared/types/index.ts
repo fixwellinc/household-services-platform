@@ -7,6 +7,7 @@ export interface User {
   avatar?: string;
   phone?: string;
   address?: string;
+  postalCode?: string;
   createdAt: Date;
   updatedAt: Date;
 }

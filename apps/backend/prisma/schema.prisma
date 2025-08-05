@@ -19,6 +19,7 @@ model User {
   avatar        String?
   phone         String?
   address       String?
+  postalCode    String?
   isActive      Boolean  @default(true)
   notifications Json?    @default("{\"email\": true, \"sms\": false}")
   createdAt     DateTime @default(now())

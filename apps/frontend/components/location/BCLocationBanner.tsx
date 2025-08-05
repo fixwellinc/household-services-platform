@@ -14,11 +14,22 @@ export default function BCLocationBanner() {
   const [postalCodeInput, setPostalCodeInput] = useState('');
   const [isValidating, setIsValidating] = useState(false);
 
-  // When opening the modal, pre-fill with current location
+  // Check if user is logged in and has postal code
+  const hasUserPostalCode = user?.postalCode && user.postalCode.trim() !== '';
+  const userIsInServiceArea = hasUserPostalCode && isBCPostalCode(user.postalCode);
+
+  // When opening the modal, pre-fill with current location or user's postal code
   const handleOpenLocationModal = () => {
-    setPostalCodeInput(userLocation || '');
+    setPostalCodeInput(userLocation || user?.postalCode || '');
     setShowLocationInput(true);
   };
+
+  // Auto-set user's postal code if they're logged in and have one
+  React.useEffect(() => {
+    if (hasUserPostalCode && !userLocation && userIsInServiceArea) {
+      setUserLocation(user.postalCode);
+    }
+  }, [hasUserPostalCode, userLocation, userIsInServiceArea, user?.postalCode, setUserLocation]);
 
   // Don't show banner while loading
   if (isLoading) return null;
@@ -90,16 +101,21 @@ export default function BCLocationBanner() {
                     Currently serving Lower Mainland residents
                   </span>
                   <span className="text-xs text-blue-600 block sm:inline sm:ml-2">
-                    Enter your postal code to check availability (within 50km of Surrey)
+                    {hasUserPostalCode 
+                      ? `Using your profile postal code: ${user.postalCode}`
+                      : 'Enter your postal code to check availability (within 50km of Surrey)'
+                    }
                   </span>
                 </div>
               </div>
-              <Button
-                onClick={handleOpenLocationModal}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-medium w-full sm:w-auto min-h-[44px] shadow-md hover:shadow-lg transition-all duration-200"
-              >
-                Check Availability
-              </Button>
+              {!hasUserPostalCode && (
+                <Button
+                  onClick={handleOpenLocationModal}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-medium w-full sm:w-auto min-h-[44px] shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  Check Availability
+                </Button>
+              )}
             </div>
           </div>
         </div>

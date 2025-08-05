@@ -10,10 +10,10 @@ const prisma = new PrismaClient();
 router.patch('/me', auth, async (req, res) => {
   try {
     const userId = req.user.id;
-    const { name, email, phone, avatar } = req.body;
+    const { name, email, phone, avatar, address, postalCode } = req.body;
     const updated = await prisma.user.update({
       where: { id: userId },
-      data: { name, email, phone, avatar },
+      data: { name, email, phone, avatar, address, postalCode },
     });
     res.json({ user: updated });
   } catch (err) {
