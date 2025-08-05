@@ -141,9 +141,8 @@ export default function ServicesPage() {
       return;
     }
     
-    // If user is authenticated, proceed with booking
-    // TODO: Implement booking logic for authenticated users
-    console.log('Proceeding with booking for authenticated user');
+    // If user is authenticated, redirect to booking page
+    router.push(`/dashboard/customer/book-service?service=${serviceId}`);
   }
 
   const handleViewDetails = (serviceId: string) => {
@@ -444,13 +443,13 @@ export default function ServicesPage() {
                       router.push(`/register?redirect=${encodeURIComponent('/services')}`);
                     }
                   } else {
-                    // For authenticated users, maybe redirect to booking or dashboard
-                    router.push('/dashboard');
+                    // For authenticated users, redirect to booking page
+                    router.push('/dashboard/customer/book-service');
                   }
                 }}
               >
                 <Users className="h-5 w-5 mr-2" />
-                Let's Get You Started
+                {isAuthenticated ? 'Book Now' : 'Let\'s Get You Started'}
               </Button>
               <Button 
                 variant="outline" 
