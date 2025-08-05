@@ -5,12 +5,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { priceId, tier, successUrl, cancelUrl } = body;
 
-    // Get the auth token from cookies
-    const authToken = request.cookies.get('auth_token')?.value;
-    
-    if (!authToken) {
+    // Get the auth token from Authorization header
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
+
+    const authToken = authHeader.replace('Bearer ', '');
 
     // Call your backend API
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
