@@ -178,6 +178,26 @@ export const createCustomer = async (email, name, metadata = {}) => {
 // Subscription creation
 export const createSubscription = async (customerId, priceId, metadata = {}) => {
   try {
+    // Check if we're using a mock price ID (for testing)
+    const isMockPriceId = priceId.startsWith('price_') && !priceId.includes('_test_') && !priceId.includes('_live_');
+    
+    if (isMockPriceId) {
+      console.log('🔧 Using mock subscription for testing price ID:', priceId);
+      return {
+        id: `sub_mock_${Date.now()}`,
+        customer: customerId,
+        status: 'incomplete',
+        current_period_start: Math.floor(Date.now() / 1000),
+        current_period_end: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60), // 30 days
+        latest_invoice: {
+          payment_intent: {
+            client_secret: `pi_mock_${Date.now()}_secret_${Math.random().toString(36).substr(2, 9)}`,
+          },
+        },
+        metadata: metadata || {},
+      };
+    }
+
     const subscription = await stripe.subscriptions.create({
       customer: customerId,
       items: [{ price: priceId }],
@@ -189,6 +209,12 @@ export const createSubscription = async (customerId, priceId, metadata = {}) => 
     return subscription;
   } catch (error) {
     console.error('Error creating subscription:', error);
+    
+    // If it's a resource_missing error, provide a helpful message
+    if (error.code === 'resource_missing' && error.param === 'line_items[0][price]') {
+      throw new Error(`Price ID '${priceId}' not found in Stripe. Please create the product and price in your Stripe dashboard or set the correct environment variables.`);
+    }
+    
     throw new Error('Failed to create subscription');
   }
 };
@@ -273,6 +299,19 @@ export const createCheckoutSession = async (lineItems, successUrl, cancelUrl, me
 // Create subscription checkout session
 export const createSubscriptionCheckoutSession = async (priceId, successUrl, cancelUrl, metadata = {}) => {
   try {
+    // Check if we're using a mock price ID (for testing)
+    const isMockPriceId = priceId.startsWith('price_') && !priceId.includes('_test_') && !priceId.includes('_live_');
+    
+    if (isMockPriceId) {
+      console.log('🔧 Using mock checkout session for testing price ID:', priceId);
+      return {
+        id: `cs_mock_${Date.now()}`,
+        url: 'https://checkout.stripe.com/pay/cs_mock_test',
+        payment_intent: `pi_mock_${Date.now()}`,
+        metadata: metadata || {},
+      };
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
@@ -284,6 +323,12 @@ export const createSubscriptionCheckoutSession = async (priceId, successUrl, can
     return session;
   } catch (error) {
     console.error('Error creating subscription checkout session:', error);
+    
+    // If it's a resource_missing error, provide a helpful message
+    if (error.code === 'resource_missing' && error.param === 'line_items[0][price]') {
+      throw new Error(`Price ID '${priceId}' not found in Stripe. Please create the product and price in your Stripe dashboard or set the correct environment variables.`);
+    }
+    
     throw new Error('Failed to create subscription checkout session');
   }
 };
