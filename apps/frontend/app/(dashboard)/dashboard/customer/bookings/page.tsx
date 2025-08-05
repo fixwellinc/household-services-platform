@@ -33,8 +33,7 @@ export default function CustomerBookingsPage() {
   const { data: bookingsData, isLoading: bookingsLoading } = useQuery({
     queryKey: ['customer-bookings'],
     queryFn: async () => {
-      const response = await api.get('/bookings');
-      return response.data;
+      return await api.getBookings();
     },
     enabled: !!user,
   });

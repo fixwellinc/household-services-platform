@@ -509,6 +509,54 @@ export class ApiClient {
   }> => {
     return this.request('/plans/admin/stats');
   }
+
+  // Dashboard endpoints
+  getDashboardData = async (): Promise<{
+    subscription: {
+      id: string;
+      status: string;
+      tier: string;
+      currentPeriodStart: string;
+      currentPeriodEnd: string;
+      plan: {
+        id: string;
+        name: string;
+        monthlyPrice: number;
+        yearlyPrice: number;
+        features: string[];
+        maxServicesPerMonth: number;
+      };
+    } | null;
+    statistics: {
+      totalBookings: number;
+      upcomingBookings: number;
+      completedBookings: number;
+      totalSpent: number;
+    };
+    usageStats: {
+      perksUsed: number;
+      totalPerks: number;
+      remainingPerks: number;
+      savings: number;
+    } | null;
+    recentActivity: Array<{
+      id: string;
+      service: string;
+      date: string;
+      status: string;
+      amount: number;
+      provider: string;
+    }>;
+    availableServices: Array<{
+      id: string;
+      name: string;
+      description: string;
+      basePrice: number;
+      category: string;
+    }>;
+  }> => {
+    return this.request('/dashboard/customer');
+  }
 }
 
 // Create and export API client instance
