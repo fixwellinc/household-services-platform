@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 // Define role-based route access
 const roleRoutes = [
   { path: '/admin', role: 'ADMIN' },
-  { path: '/dashboard', role: 'ADMIN' }, // Only admin can access /dashboard
+  { path: '/dashboard', role: ['ADMIN', 'CUSTOMER'] }, // Both admin and customer can access /dashboard
   { path: '/customer', role: 'CUSTOMER' },
   { path: '/settings', role: ['ADMIN', 'CUSTOMER'] },
   { path: '/profile', role: ['CUSTOMER'] },
@@ -100,7 +100,7 @@ function getDashboardForRole(role: string | undefined): string {
     case 'ADMIN':
       return '/admin';
     case 'CUSTOMER':
-      return '/services';
+      return '/dashboard/customer';
     default:
       return '/login';
   }
