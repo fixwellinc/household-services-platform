@@ -3,7 +3,7 @@
 import { useCurrentUser } from '@/hooks/use-api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import api from '@/lib/api';
 import { Button } from '@/components/ui/shared';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/shared';
 import { Badge } from '@/components/ui/shared';
