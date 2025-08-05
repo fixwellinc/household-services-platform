@@ -28,6 +28,7 @@ router.post('/create', auth, async (req, res) => {
 
     // Validate tier
     const plan = getPlanByTier(tier);
+    
     if (!plan) {
       return res.status(400).json({ error: 'Invalid tier' });
     }
@@ -289,7 +290,28 @@ router.post('/checkout-session', auth, async (req, res) => {
 // GET /api/subscriptions/plans - Get available subscription plans
 router.get('/plans', async (req, res) => {
   try {
-    res.json({ plans: PLANS });
+    const plans = Object.values(PLANS).map(plan => ({
+      id: plan.id,
+      name: plan.name,
+      description: plan.description,
+      monthlyPrice: plan.monthlyPrice,
+      yearlyPrice: plan.yearlyPrice,
+      originalPrice: plan.originalPrice,
+      features: plan.features,
+      savings: plan.savings,
+      color: plan.color,
+      icon: plan.icon,
+      popular: plan.popular,
+      visitFrequency: plan.visitFrequency,
+      timePerVisit: plan.timePerVisit,
+      visitsPerMonth: plan.visitsPerMonth
+    }));
+
+    res.json({
+      success: true,
+      plans,
+      message: 'Plans retrieved successfully'
+    });
   } catch (error) {
     console.error('Error fetching plans:', error);
     res.status(500).json({ error: error.message });
@@ -299,41 +321,57 @@ router.get('/plans', async (req, res) => {
 // POST /api/subscriptions/track-perk - Track perk usage
 router.post('/track-perk', auth, async (req, res) => {
   try {
-    const { perkType, details } = req.body;
+    const { perkType, details = {} } = req.body;
     const userId = req.user.id;
 
     if (!perkType) {
       return res.status(400).json({ error: 'Perk type is required' });
     }
 
-    const result = await subscriptionService.trackPerkUsage(userId, perkType, details);
-    res.json(result);
+    await subscriptionService.trackPerkUsage(userId, perkType, details);
+
+    res.json({ 
+      success: true, 
+      message: 'Perk usage tracked successfully' 
+    });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Error tracking perk usage:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
-// GET /api/subscriptions/usage - Get user's subscription usage
+// GET /api/subscriptions/usage - Get usage summary
 router.get('/usage', auth, async (req, res) => {
   try {
     const userId = req.user.id;
-    const usage = await subscriptionService.getUsageSummary(userId);
-    res.json({ usage });
+    const usageSummary = await subscriptionService.getUsageSummary(userId);
+
+    res.json({
+      success: true,
+      usage: usageSummary
+    });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Error fetching usage summary:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
-// GET /api/subscriptions/can-use-perk - Check if user can use a specific perk
+// GET /api/subscriptions/can-use-perk/:perkType - Check if user can use a specific perk
 router.get('/can-use-perk/:perkType', auth, async (req, res) => {
   try {
     const { perkType } = req.params;
     const userId = req.user.id;
 
-    const result = await subscriptionService.canUsePerk(userId, perkType);
-    res.json(result);
+    const canUse = await subscriptionService.canUsePerk(userId, perkType);
+
+    res.json({
+      success: true,
+      canUse,
+      perkType
+    });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Error checking perk usage:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
