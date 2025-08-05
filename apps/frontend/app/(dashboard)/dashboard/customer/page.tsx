@@ -122,6 +122,113 @@ export default function CustomerDashboardPage() {
           </div>
         </div>
 
+        {/* Account Information */}
+        <div className="mb-8">
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5 text-blue-600" />
+                Account Information
+              </CardTitle>
+              <CardDescription>
+                Your account details and subscription information
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-medium text-gray-900 mb-2">Account Details</h3>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Account Type:</span>
+                        <span className="font-medium capitalize">{user.role?.toLowerCase() || 'customer'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Member Since:</span>
+                        <span className="font-medium">
+                          {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Account Status:</span>
+                        <Badge className="bg-green-100 text-green-800">Active</Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Email:</span>
+                        <span className="font-medium">{user.email}</span>
+                      </div>
+                      {user.phone && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Phone:</span>
+                          <span className="font-medium">{user.phone}</span>
+                        </div>
+                      )}
+                      {user.postalCode && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Postal Code:</span>
+                          <span className="font-medium">{user.postalCode}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-medium text-gray-900 mb-2">Subscription Status</h3>
+                    {isSubscribed ? (
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Plan:</span>
+                          <span className="font-medium">{plan?.name || subscription?.tier || 'Premium'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Status:</span>
+                          <Badge className="bg-green-100 text-green-800">Active</Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Next Billing:</span>
+                          <span className="font-medium">
+                            {subscription?.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString() : 'N/A'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Monthly Cost:</span>
+                          <span className="font-medium">${plan?.monthlyPrice || 0}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Plan:</span>
+                          <span className="font-medium text-gray-500">No Active Plan</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Status:</span>
+                          <Badge className="bg-gray-100 text-gray-600">Inactive</Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Benefits:</span>
+                          <span className="font-medium text-gray-500">Standard Services</span>
+                        </div>
+                        <div className="pt-2">
+                          <Link href="/pricing">
+                            <Button size="sm" className="w-full">
+                              <StarIcon className="h-4 w-4 mr-2" />
+                              Subscribe Now
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Subscription Status */}
         {isSubscribed && (
           <div className="mb-8">
