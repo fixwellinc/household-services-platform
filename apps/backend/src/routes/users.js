@@ -11,12 +11,33 @@ router.patch('/me', auth, async (req, res) => {
   try {
     const userId = req.user.id;
     const { name, email, phone, avatar, address, postalCode } = req.body;
+    
+    // Debug logging
+    console.log('Profile update request:', {
+      userId,
+      receivedData: { name, email, phone, avatar, address, postalCode }
+    });
+    
     const updated = await prisma.user.update({
       where: { id: userId },
       data: { name, email, phone, avatar, address, postalCode },
     });
+    
+    // Debug logging
+    console.log('Profile updated successfully:', {
+      userId,
+      savedData: {
+        name: updated.name,
+        email: updated.email,
+        phone: updated.phone,
+        address: updated.address,
+        postalCode: updated.postalCode
+      }
+    });
+    
     res.json({ user: updated });
   } catch (err) {
+    console.error('Profile update error:', err);
     res.status(400).json({ error: err.message });
   }
 });
