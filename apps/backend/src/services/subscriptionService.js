@@ -1,8 +1,368 @@
 import { PrismaClient } from '@prisma/client';
+import { 
+  createCustomer, 
+  createSubscription, 
+  cancelSubscription, 
+  getSubscription,
+  getCustomer,
+  updateCustomer
+} from './stripe.js';
+import { getPlanByTier } from '../config/plans.js';
 
 const prisma = new PrismaClient();
 
 class SubscriptionService {
+  // Create a new subscription with Stripe integration
+  async createSubscription(userId, tier, billingPeriod = 'monthly') {
+    try {
+      // Get user
+      const user = await prisma.user.findUnique({ 
+        where: { id: userId },
+        include: { subscription: true }
+      });
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // Check if user already has an active subscription
+      if (user.subscription && user.subscription.status === 'ACTIVE') {
+        throw new Error('User already has an active subscription');
+      }
+
+      // Validate tier
+      const plan = getPlanByTier(tier);
+      if (!plan) {
+        throw new Error('Invalid tier');
+      }
+
+      // Get or create Stripe customer
+      let stripeCustomerId = user.subscription?.stripeCustomerId;
+
+      if (!stripeCustomerId) {
+        const customer = await createCustomer(user.email, user.name, {
+          userId: user.id,
+        });
+        stripeCustomerId = customer.id;
+      }
+
+      // Get Stripe price ID
+      const priceId = plan.stripePriceIds[billingPeriod];
+      if (!priceId) {
+        throw new Error('Invalid billing period');
+      }
+
+      // Create subscription in Stripe
+      const stripeSubscription = await createSubscription(stripeCustomerId, priceId, {
+        userId: user.id,
+        tier,
+        billingPeriod,
+      });
+
+      // Create or update subscription in database
+      const subscription = await prisma.subscription.upsert({
+        where: { userId },
+        update: {
+          tier,
+          status: stripeSubscription.status.toUpperCase(),
+          stripeCustomerId,
+          stripeSubscriptionId: stripeSubscription.id,
+          currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
+          currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
+        },
+        create: {
+          userId,
+          tier,
+          status: stripeSubscription.status.toUpperCase(),
+          stripeCustomerId,
+          stripeSubscriptionId: stripeSubscription.id,
+          currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
+          currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
+        },
+      });
+
+      return {
+        subscription,
+        clientSecret: stripeSubscription.latest_invoice?.payment_intent?.client_secret,
+        requiresAction: stripeSubscription.status === 'incomplete',
+      };
+    } catch (error) {
+      console.error('Error creating subscription:', error);
+      throw error;
+    }
+  }
+
+  // Cancel subscription
+  async cancelSubscription(userId) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { subscription: true }
+      });
+
+      if (!user?.subscription) {
+        throw new Error('No subscription found');
+      }
+
+      // Check if subscription can be cancelled
+      if (!user.subscription.canCancel) {
+        throw new Error(`Subscription cannot be cancelled: ${user.subscription.cancellationBlockedReason}`);
+      }
+
+      // Cancel in Stripe if subscription exists there
+      if (user.subscription.stripeSubscriptionId) {
+        await cancelSubscription(user.subscription.stripeSubscriptionId);
+      }
+
+      // Update subscription status in database
+      await prisma.subscription.update({
+        where: { id: user.subscription.id },
+        data: {
+          status: 'CANCELLED',
+          updatedAt: new Date(),
+        },
+      });
+
+      return { message: 'Subscription cancelled successfully' };
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
+      throw error;
+    }
+  }
+
+  // Get current subscription details
+  async getCurrentSubscription(userId) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { 
+          subscription: true,
+          subscriptionUsage: true
+        }
+      });
+
+      if (!user?.subscription) {
+        return { subscription: null };
+      }
+
+      // Get plan details
+      const plan = getPlanByTier(user.subscription.tier);
+
+      // Get Stripe subscription details if available
+      let stripeSubscription = null;
+      if (user.subscription.stripeSubscriptionId) {
+        try {
+          stripeSubscription = await getSubscription(user.subscription.stripeSubscriptionId);
+        } catch (error) {
+          console.error('Error fetching Stripe subscription:', error);
+        }
+      }
+
+      return {
+        subscription: {
+          ...user.subscription,
+          plan,
+          stripeSubscription,
+          usage: user.subscriptionUsage,
+        },
+      };
+    } catch (error) {
+      console.error('Error fetching subscription:', error);
+      throw error;
+    }
+  }
+
+  // Update subscription (change plan)
+  async updateSubscription(userId, tier, billingPeriod = 'monthly') {
+    try {
+      const plan = getPlanByTier(tier);
+      if (!plan) {
+        throw new Error('Invalid tier');
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { subscription: true }
+      });
+
+      if (!user?.subscription) {
+        throw new Error('No subscription found');
+      }
+
+      // Get new price ID
+      const newPriceId = plan.stripePriceIds[billingPeriod];
+      if (!newPriceId) {
+        throw new Error('Invalid billing period');
+      }
+
+      // Update subscription in database
+      await prisma.subscription.update({
+        where: { id: user.subscription.id },
+        data: {
+          tier,
+          updatedAt: new Date(),
+        },
+      });
+
+      return { message: 'Subscription updated successfully' };
+    } catch (error) {
+      console.error('Error updating subscription:', error);
+      throw error;
+    }
+  }
+
+  // Process webhook events
+  async processWebhookEvent(event) {
+    try {
+      switch (event.type) {
+        case 'customer.subscription.created':
+          await this.handleSubscriptionCreated(event.data.object);
+          break;
+        
+        case 'customer.subscription.updated':
+          await this.handleSubscriptionUpdated(event.data.object);
+          break;
+        
+        case 'customer.subscription.deleted':
+          await this.handleSubscriptionDeleted(event.data.object);
+          break;
+        
+        case 'invoice.payment_succeeded':
+          await this.handleInvoicePaymentSucceeded(event.data.object);
+          break;
+        
+        case 'invoice.payment_failed':
+          await this.handleInvoicePaymentFailed(event.data.object);
+          break;
+        
+        default:
+          console.log(`Unhandled webhook event type: ${event.type}`);
+      }
+    } catch (error) {
+      console.error('Error processing webhook event:', error);
+      throw error;
+    }
+  }
+
+  // Handle subscription created webhook
+  async handleSubscriptionCreated(subscription) {
+    try {
+      const { userId, tier } = subscription.metadata;
+      
+      if (userId) {
+        await prisma.subscription.upsert({
+          where: { userId },
+          update: {
+            tier,
+            status: subscription.status.toUpperCase(),
+            stripeCustomerId: subscription.customer,
+            stripeSubscriptionId: subscription.id,
+            currentPeriodStart: new Date(subscription.current_period_start * 1000),
+            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+          },
+          create: {
+            userId,
+            tier,
+            status: subscription.status.toUpperCase(),
+            stripeCustomerId: subscription.customer,
+            stripeSubscriptionId: subscription.id,
+            currentPeriodStart: new Date(subscription.current_period_start * 1000),
+            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Error handling subscription created:', error);
+      throw error;
+    }
+  }
+
+  // Handle subscription updated webhook
+  async handleSubscriptionUpdated(subscription) {
+    try {
+      const { userId } = subscription.metadata;
+      
+      if (userId) {
+        await prisma.subscription.update({
+          where: { userId },
+          data: {
+            status: subscription.status.toUpperCase(),
+            currentPeriodStart: new Date(subscription.current_period_start * 1000),
+            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Error handling subscription updated:', error);
+      throw error;
+    }
+  }
+
+  // Handle subscription deleted webhook
+  async handleSubscriptionDeleted(subscription) {
+    try {
+      const { userId } = subscription.metadata;
+      
+      if (userId) {
+        await prisma.subscription.update({
+          where: { userId },
+          data: {
+            status: 'CANCELLED',
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Error handling subscription deleted:', error);
+      throw error;
+    }
+  }
+
+  // Handle invoice payment succeeded webhook
+  async handleInvoicePaymentSucceeded(invoice) {
+    try {
+      if (invoice.subscription) {
+        const subscription = await prisma.subscription.findFirst({
+          where: { stripeSubscriptionId: invoice.subscription },
+        });
+        
+        if (subscription) {
+          await prisma.subscription.update({
+            where: { id: subscription.id },
+            data: {
+              status: 'ACTIVE',
+            },
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error handling invoice payment succeeded:', error);
+      throw error;
+    }
+  }
+
+  // Handle invoice payment failed webhook
+  async handleInvoicePaymentFailed(invoice) {
+    try {
+      if (invoice.subscription) {
+        const subscription = await prisma.subscription.findFirst({
+          where: { stripeSubscriptionId: invoice.subscription },
+        });
+        
+        if (subscription) {
+          await prisma.subscription.update({
+            where: { id: subscription.id },
+            data: {
+              status: 'PAST_DUE',
+            },
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error handling invoice payment failed:', error);
+      throw error;
+    }
+  }
+
   // Track when a customer uses a subscription perk
   async trackPerkUsage(userId, perkType, details = {}) {
     try {
@@ -14,7 +374,7 @@ class SubscriptionService {
       if (!usage) {
         // Create new usage record
         const user = await prisma.user.findUnique({
-          where: { userId },
+          where: { id: userId },
           include: { subscription: true }
         });
 
@@ -96,7 +456,7 @@ class SubscriptionService {
       if (hasUsedPerks) {
         // Get user's subscription
         const user = await prisma.user.findUnique({
-          where: { userId },
+          where: { id: userId },
           include: { subscription: true }
         });
 

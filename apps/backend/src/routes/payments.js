@@ -10,6 +10,7 @@ import {
   createSubscriptionCheckoutSession,
   refundPayment
 } from '../services/stripe.js';
+import subscriptionService from '../services/subscriptionService.js';
 import { PrismaClient } from '@prisma/client';
 
 const router = express.Router();
@@ -242,38 +243,8 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
   try {
     const event = verifyWebhookSignature(req.body, sig);
 
-    switch (event.type) {
-      case 'payment_intent.succeeded':
-        await handlePaymentSuccess(event.data.object);
-        break;
-      
-      case 'payment_intent.payment_failed':
-        await handlePaymentFailure(event.data.object);
-        break;
-      
-      case 'customer.subscription.created':
-        await handleSubscriptionCreated(event.data.object);
-        break;
-      
-      case 'customer.subscription.updated':
-        await handleSubscriptionUpdated(event.data.object);
-        break;
-      
-      case 'customer.subscription.deleted':
-        await handleSubscriptionDeleted(event.data.object);
-        break;
-      
-      case 'invoice.payment_succeeded':
-        await handleInvoicePaymentSucceeded(event.data.object);
-        break;
-      
-      case 'invoice.payment_failed':
-        await handleInvoicePaymentFailed(event.data.object);
-        break;
-      
-      default:
-        console.log(`Unhandled event type: ${event.type}`);
-    }
+    // Use the subscription service to process webhook events
+    await subscriptionService.processWebhookEvent(event);
 
     res.json({ received: true });
   } catch (error) {
