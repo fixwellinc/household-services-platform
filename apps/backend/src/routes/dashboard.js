@@ -12,10 +12,7 @@ router.get('/customer', authMiddleware, requireCustomer, async (req, res, next) 
     
     // Get user's subscription
     const subscription = await prisma.subscription.findUnique({
-      where: { userId },
-      include: {
-        plan: true
-      }
+      where: { userId }
     });
     
     // Get user's bookings with statistics
@@ -59,9 +56,16 @@ router.get('/customer', authMiddleware, requireCustomer, async (req, res, next) 
     // Calculate usage statistics if user has subscription
     let usageStats = null;
     if (subscription && subscription.status === 'ACTIVE') {
-      const plan = subscription.plan;
+      // Define perks based on subscription tier
+      const tierPerks = {
+        'STARTER': { maxServicesPerMonth: 4 },
+        'HOMECARE': { maxServicesPerMonth: 8 },
+        'PRIORITY': { maxServicesPerMonth: 12 }
+      };
+      
+      const plan = tierPerks[subscription.tier] || { maxServicesPerMonth: 4 };
       const usedPerks = bookings.filter(b => b.status === 'COMPLETED').length;
-      const totalPerks = plan.maxServicesPerMonth || 12;
+      const totalPerks = plan.maxServicesPerMonth;
       const perksUsed = Math.min(usedPerks, totalPerks);
       
       usageStats = {
@@ -94,7 +98,14 @@ router.get('/customer', authMiddleware, requireCustomer, async (req, res, next) 
         tier: subscription.tier,
         currentPeriodStart: subscription.currentPeriodStart,
         currentPeriodEnd: subscription.currentPeriodEnd,
-        plan: subscription.plan
+        plan: {
+          id: subscription.tier,
+          name: subscription.tier,
+          monthlyPrice: 0, // These would come from a plans table in a real app
+          yearlyPrice: 0,
+          features: [],
+          maxServicesPerMonth: tierPerks[subscription.tier]?.maxServicesPerMonth || 4
+        }
       } : null,
       statistics: {
         totalBookings,
