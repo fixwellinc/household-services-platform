@@ -306,7 +306,7 @@ export const createSubscriptionCheckoutSession = async (priceId, successUrl, can
       console.log('🔧 Using mock checkout session for testing price ID:', priceId);
       return {
         id: `cs_mock_${Date.now()}`,
-        url: 'https://checkout.stripe.com/pay/cs_mock_test',
+        url: successUrl, // Redirect directly to success URL for testing
         payment_intent: `pi_mock_${Date.now()}`,
         metadata: metadata || {},
       };
