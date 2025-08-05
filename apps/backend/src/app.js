@@ -30,6 +30,7 @@ import notificationRoutes from './routes/notifications.js';
 import chatRoutes from './routes/chat.js';
 import plansRoutes from './routes/plans.js';
 import subscriptionRoutes from './routes/subscriptions.js';
+import dashboardRoutes from './routes/dashboard.js';
 // import webhookRoutes from './routes/webhooks.js';
 
 // Import middleware
@@ -231,6 +232,7 @@ app.use('/api/docs', docsRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/plans', plansRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 // app.use('/api/webhooks', webhookRoutes);
 
 function requireAdminLocal(req, res, next) {

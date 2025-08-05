@@ -2,6 +2,8 @@
 
 import { useCurrentUser } from '@/hooks/use-api';
 import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/api';
 import { Button } from '@/components/ui/shared';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/shared';
 import { Badge } from '@/components/ui/shared';
@@ -27,7 +29,17 @@ export default function CustomerBookingsPage() {
   const router = useRouter();
   const user = userData?.user;
 
-  if (isLoading) {
+  // Fetch real booking data
+  const { data: bookingsData, isLoading: bookingsLoading } = useQuery({
+    queryKey: ['customer-bookings'],
+    queryFn: async () => {
+      const response = await api.get('/bookings');
+      return response.data;
+    },
+    enabled: !!user,
+  });
+
+  if (isLoading || bookingsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -57,42 +69,13 @@ export default function CustomerBookingsPage() {
     );
   }
 
-  // Mock booking data - in real app, this would come from API
-  const bookings = [
-    {
-      id: '1',
-      service: 'Deep House Cleaning',
-      date: '2024-01-20',
-      time: '10:00 AM',
-      status: 'scheduled',
-      provider: 'Sarah Johnson',
-      amount: '$120',
-      address: '123 Main St, Vancouver, BC'
-    },
-    {
-      id: '2',
-      service: 'Plumbing Repair',
-      date: '2024-01-15',
-      time: '2:00 PM',
-      status: 'completed',
-      provider: 'Mike Chen',
-      amount: '$85',
-      address: '123 Main St, Vancouver, BC'
-    },
-    {
-      id: '3',
-      service: 'Home Organization',
-      date: '2024-01-25',
-      time: '9:00 AM',
-      status: 'scheduled',
-      provider: 'Emma Davis',
-      amount: '$150',
-      address: '123 Main St, Vancouver, BC'
-    }
-  ];
-
-  const upcomingBookings = bookings.filter(booking => booking.status === 'scheduled');
-  const completedBookings = bookings.filter(booking => booking.status === 'completed');
+  // Use real booking data
+  const bookings = bookingsData?.bookings || [];
+  const upcomingBookings = bookings.filter(booking => 
+    ['PENDING', 'CONFIRMED', 'IN_PROGRESS'].includes(booking.status) && 
+    new Date(booking.scheduledDate) > new Date()
+  );
+  const completedBookings = bookings.filter(booking => booking.status === 'COMPLETED');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -197,30 +180,30 @@ export default function CustomerBookingsPage() {
                         <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                           <Calendar className="h-6 w-6 text-blue-600" />
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{booking.service}</h3>
-                          <p className="text-sm text-gray-600">
-                            {new Date(booking.date).toLocaleDateString()} at {booking.time}
-                          </p>
-                          <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
-                            <User className="h-3 w-3" />
-                            {booking.provider}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-gray-900">{booking.amount}</p>
-                        <Badge className="bg-blue-100 text-blue-800 mt-1">
-                          {booking.status}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="mt-4 pt-4 border-t">
-                      <p className="text-sm text-gray-600 flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {booking.address}
-                      </p>
-                    </div>
+                                                 <div>
+                           <h3 className="font-semibold text-gray-900">{booking.service?.name || 'Service'}</h3>
+                           <p className="text-sm text-gray-600">
+                             {new Date(booking.scheduledDate).toLocaleDateString()} at {new Date(booking.scheduledDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                           </p>
+                           <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                             <User className="h-3 w-3" />
+                             Fixwell Team
+                           </p>
+                         </div>
+                       </div>
+                       <div className="text-right">
+                         <p className="font-semibold text-gray-900">${booking.finalAmount || booking.totalAmount}</p>
+                         <Badge className="bg-blue-100 text-blue-800 mt-1">
+                           {booking.status.toLowerCase()}
+                         </Badge>
+                       </div>
+                     </div>
+                     <div className="mt-4 pt-4 border-t">
+                       <p className="text-sm text-gray-600 flex items-center gap-1">
+                         <MapPin className="h-3 w-3" />
+                         Service Address
+                       </p>
+                     </div>
                     <div className="mt-4 flex gap-2">
                       <Button variant="outline" size="sm">
                         Reschedule
@@ -259,30 +242,30 @@ export default function CustomerBookingsPage() {
                         <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                           <CheckCircle className="h-6 w-6 text-green-600" />
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{booking.service}</h3>
-                          <p className="text-sm text-gray-600">
-                            {new Date(booking.date).toLocaleDateString()} at {booking.time}
-                          </p>
-                          <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
-                            <User className="h-3 w-3" />
-                            {booking.provider}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-gray-900">{booking.amount}</p>
-                        <Badge className="bg-green-100 text-green-800 mt-1">
-                          {booking.status}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="mt-4 pt-4 border-t">
-                      <p className="text-sm text-gray-600 flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {booking.address}
-                      </p>
-                    </div>
+                                                 <div>
+                           <h3 className="font-semibold text-gray-900">{booking.service?.name || 'Service'}</h3>
+                           <p className="text-sm text-gray-600">
+                             {new Date(booking.scheduledDate).toLocaleDateString()} at {new Date(booking.scheduledDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                           </p>
+                           <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                             <User className="h-3 w-3" />
+                             Fixwell Team
+                           </p>
+                         </div>
+                       </div>
+                       <div className="text-right">
+                         <p className="font-semibold text-gray-900">${booking.finalAmount || booking.totalAmount}</p>
+                         <Badge className="bg-green-100 text-green-800 mt-1">
+                           {booking.status.toLowerCase()}
+                         </Badge>
+                       </div>
+                     </div>
+                     <div className="mt-4 pt-4 border-t">
+                       <p className="text-sm text-gray-600 flex items-center gap-1">
+                         <MapPin className="h-3 w-3" />
+                         Service Address
+                       </p>
+                     </div>
                     <div className="mt-4 flex gap-2">
                       <Button variant="outline" size="sm">
                         Book Again

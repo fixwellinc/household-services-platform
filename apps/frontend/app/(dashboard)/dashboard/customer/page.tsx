@@ -3,6 +3,7 @@
 import { useCurrentUser } from '@/hooks/use-api';
 import { useUserPlan } from '@/hooks/use-plans';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDashboardData } from '@/hooks/use-dashboard';
 import { Button } from '@/components/ui/shared';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/shared';
 import { Badge } from '@/components/ui/shared';
@@ -44,11 +45,12 @@ import { useRouter } from 'next/navigation';
 export default function CustomerDashboardPage() {
   const { data: userData, isLoading } = useCurrentUser();
   const { data: userPlanData, isLoading: planLoading } = useUserPlan();
+  const { data: dashboardData, isLoading: dashboardLoading } = useDashboardData();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const user = userData?.user;
 
-  if (isLoading || planLoading) {
+  if (isLoading || planLoading || dashboardLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -82,6 +84,12 @@ export default function CustomerDashboardPage() {
   const isSubscribed = userPlanData?.success && userPlanData?.hasPlan && userPlanData?.subscription?.status === 'ACTIVE';
   const subscription = userPlanData?.subscription;
   const plan = userPlanData?.plan;
+  
+  // Use real dashboard data
+  const stats = dashboardData?.statistics || { totalBookings: 0, upcomingBookings: 0, completedBookings: 0, totalSpent: 0 };
+  const usageStats = dashboardData?.usageStats;
+  const recentActivity = dashboardData?.recentActivity || [];
+  const availableServices = dashboardData?.availableServices || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -148,8 +156,8 @@ export default function CustomerDashboardPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Services Used</p>
-                  <p className="text-2xl font-bold text-gray-900">12</p>
+                  <p className="text-sm font-medium text-gray-600">Total Bookings</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalBookings}</p>
                 </div>
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                   <BookOpen className="h-6 w-6 text-blue-600" />
@@ -163,7 +171,7 @@ export default function CustomerDashboardPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Upcoming Bookings</p>
-                  <p className="text-2xl font-bold text-gray-900">3</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.upcomingBookings}</p>
                 </div>
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                   <Calendar className="h-6 w-6 text-green-600" />
@@ -176,8 +184,12 @@ export default function CustomerDashboardPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Perks Used</p>
-                  <p className="text-2xl font-bold text-gray-900">8/12</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    {usageStats ? 'Perks Used' : 'Completed Bookings'}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {usageStats ? `${usageStats.perksUsed}/${usageStats.totalPerks}` : stats.completedBookings}
+                  </p>
                 </div>
                 <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                   <Gift className="h-6 w-6 text-purple-600" />
@@ -190,8 +202,12 @@ export default function CustomerDashboardPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Savings</p>
-                  <p className="text-2xl font-bold text-gray-900">$450</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    {usageStats ? 'Total Savings' : 'Total Spent'}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    ${usageStats ? usageStats.savings.toFixed(2) : stats.totalSpent.toFixed(2)}
+                  </p>
                 </div>
                 <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
                   <TrendingUp className="h-6 w-6 text-yellow-600" />
@@ -218,27 +234,26 @@ export default function CustomerDashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[
-                    { name: 'Deep House Cleaning', icon: Home, color: 'bg-green-100', textColor: 'text-green-600' },
-                    { name: 'Plumbing Repair', icon: Wrench, color: 'bg-blue-100', textColor: 'text-blue-600' },
-                    { name: 'Electrical Repair', icon: Zap, color: 'bg-orange-100', textColor: 'text-orange-600' },
-                    { name: 'Home Organization', icon: Sparkle, color: 'bg-purple-100', textColor: 'text-purple-600' },
-                    { name: 'HVAC Maintenance', icon: Settings, color: 'bg-cyan-100', textColor: 'text-cyan-600' },
-                    { name: 'Custom Service', icon: Plus, color: 'bg-gray-100', textColor: 'text-gray-600' }
-                  ].map((service, index) => (
-                    <div key={index} className="flex items-center gap-3 p-4 rounded-lg border hover:shadow-md transition-all duration-200 cursor-pointer">
-                      <div className={`w-10 h-10 ${service.color} rounded-full flex items-center justify-center`}>
-                        <service.icon className={`h-5 w-5 ${service.textColor}`} />
+                  {availableServices.length > 0 ? (
+                    availableServices.map((service, index) => (
+                      <div key={service.id} className="flex items-center gap-3 p-4 rounded-lg border hover:shadow-md transition-all duration-200 cursor-pointer">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <Home className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-900">{service.name}</h3>
+                          <p className="text-sm text-gray-600">${service.basePrice}</p>
+                        </div>
+                        <Button size="sm" onClick={() => router.push(`/dashboard/customer/book-service?service=${service.id}`)}>
+                          Book Now
+                        </Button>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">{service.name}</h3>
-                        <p className="text-sm text-gray-600">Professional service</p>
-                      </div>
-                      <Button size="sm" onClick={() => router.push('/dashboard/customer/book-service')}>
-                        Book Now
-                      </Button>
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center py-8">
+                      <p className="text-gray-500">No services available at the moment.</p>
                     </div>
-                  ))}
+                  )}
                 </div>
                 <div className="mt-6 text-center">
                   <Link href="/services">
@@ -264,53 +279,37 @@ export default function CustomerDashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {[
-                    { 
-                      service: 'Deep House Cleaning', 
-                      date: '2024-01-15', 
-                      status: 'completed', 
-                      amount: '$120',
-                      provider: 'Sarah Johnson'
-                    },
-                    { 
-                      service: 'Plumbing Repair', 
-                      date: '2024-01-10', 
-                      status: 'completed', 
-                      amount: '$85',
-                      provider: 'Mike Chen'
-                    },
-                    { 
-                      service: 'Home Organization', 
-                      date: '2024-01-20', 
-                      status: 'scheduled', 
-                      amount: '$150',
-                      provider: 'Emma Davis'
-                    }
-                  ].map((activity, index) => (
-                    <div key={index} className="flex items-center gap-4 p-4 rounded-lg border">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        activity.status === 'completed' ? 'bg-green-100' : 'bg-blue-100'
-                      }`}>
-                        {activity.status === 'completed' ? (
-                          <CheckCircle className="h-5 w-5 text-green-600" />
-                        ) : (
-                          <Clock className="h-5 w-5 text-blue-600" />
-                        )}
+                  {recentActivity.length > 0 ? (
+                    recentActivity.map((activity) => (
+                      <div key={activity.id} className="flex items-center gap-4 p-4 rounded-lg border">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                          activity.status === 'COMPLETED' ? 'bg-green-100' : 'bg-blue-100'
+                        }`}>
+                          {activity.status === 'COMPLETED' ? (
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                          ) : (
+                            <Clock className="h-5 w-5 text-blue-600" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-900">{activity.service}</h3>
+                          <p className="text-sm text-gray-600">
+                            {new Date(activity.date).toLocaleDateString()} • {activity.provider}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-gray-900">${activity.amount}</p>
+                          <Badge variant={activity.status === 'COMPLETED' ? 'default' : 'secondary'}>
+                            {activity.status.toLowerCase()}
+                          </Badge>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">{activity.service}</h3>
-                        <p className="text-sm text-gray-600">
-                          {new Date(activity.date).toLocaleDateString()} • {activity.provider}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium text-gray-900">{activity.amount}</p>
-                        <Badge variant={activity.status === 'completed' ? 'default' : 'secondary'}>
-                          {activity.status}
-                        </Badge>
-                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">No recent activity to show.</p>
                     </div>
-                  ))}
+                  )}
                 </div>
                 <div className="mt-6 text-center">
                   <Link href="/dashboard/customer/bookings">
