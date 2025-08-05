@@ -69,7 +69,7 @@ export default function SubscriptionManagement({ className = '' }: SubscriptionM
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const { userData, userLoading } = useCurrentUser();
+  const { data: userData, isLoading: userLoading } = useCurrentUser();
 
   useEffect(() => {
     if (!userLoading) {
