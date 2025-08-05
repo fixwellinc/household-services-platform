@@ -238,10 +238,15 @@ export const verifyWebhookSignature = (payload, signature) => {
       console.log('⚠️ STRIPE_WEBHOOK_SECRET not configured, skipping signature verification for testing');
       // For testing, try to parse the payload as JSON
       try {
-        const event = JSON.parse(payload);
+        // Convert Buffer to string if needed
+        const payloadString = Buffer.isBuffer(payload) ? payload.toString('utf8') : payload;
+        const event = JSON.parse(payloadString);
+        console.log('✅ Successfully parsed webhook payload for testing');
         return event;
       } catch (parseError) {
         console.error('Failed to parse webhook payload:', parseError);
+        console.error('Payload type:', typeof payload);
+        console.error('Payload length:', payload.length);
         throw new Error('Invalid webhook payload');
       }
     }
