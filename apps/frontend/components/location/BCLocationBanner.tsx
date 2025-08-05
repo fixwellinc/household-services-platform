@@ -16,7 +16,7 @@ export default function BCLocationBanner() {
 
   // Check if user is logged in and has postal code
   const hasUserPostalCode = user?.postalCode && user.postalCode.trim() !== '';
-  const userIsInServiceArea = hasUserPostalCode && isBCPostalCode(user.postalCode);
+  const userIsInServiceArea = hasUserPostalCode && isBCPostalCode(user.postalCode!);
 
   // When opening the modal, pre-fill with current location or user's postal code
   const handleOpenLocationModal = () => {
@@ -26,7 +26,7 @@ export default function BCLocationBanner() {
 
   // Auto-set user's postal code if they're logged in and have one
   React.useEffect(() => {
-    if (hasUserPostalCode && !userLocation && userIsInServiceArea) {
+    if (hasUserPostalCode && !userLocation && userIsInServiceArea && user?.postalCode) {
       setUserLocation(user.postalCode);
     }
   }, [hasUserPostalCode, userLocation, userIsInServiceArea, user?.postalCode, setUserLocation]);
