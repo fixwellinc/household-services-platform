@@ -11,10 +11,9 @@ import {
   createSubscriptionCheckoutSession
 } from '../services/stripe.js';
 import { PLANS, getPlanByTier } from '../config/plans.js';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/database.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // POST /api/subscriptions/create - Create a new subscription
 router.post('/create', auth, async (req, res) => {

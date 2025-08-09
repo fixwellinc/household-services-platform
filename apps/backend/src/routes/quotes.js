@@ -1,5 +1,5 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/database.js';
 import { authMiddleware, requireAdmin } from '../middleware/auth.js';
 import nodemailer from 'nodemailer';
 import multer from 'multer';
@@ -8,7 +8,6 @@ import { v4 as uuidv4 } from 'uuid';
 import EmailService from '../services/email.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Email transport (simple SMTP, configure via .env)
 const transporter = nodemailer.createTransport({

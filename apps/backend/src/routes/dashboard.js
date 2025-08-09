@@ -1,9 +1,8 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/database.js';
 import { authMiddleware, requireCustomer } from '../middleware/auth.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Get customer dashboard data
 router.get('/customer', authMiddleware, requireCustomer, async (req, res, next) => {
@@ -14,6 +13,13 @@ router.get('/customer', authMiddleware, requireCustomer, async (req, res, next) 
     const subscription = await prisma.subscription.findUnique({
       where: { userId }
     });
+    
+    // Define perks based on subscription tier
+    const tierPerks = {
+      'STARTER': { maxServicesPerMonth: 4, monthlyPrice: 21.99, yearlyPrice: 237.49, features: ["4 services/month", "Standard support"] },
+      'HOMECARE': { maxServicesPerMonth: 8, monthlyPrice: 41.99, yearlyPrice: 453.49, features: ["8 services/month", "Priority support", "Discounted rates"] },
+      'PRIORITY': { maxServicesPerMonth: 12, monthlyPrice: 61.99, yearlyPrice: 669.49, features: ["12 services/month", "24/7 dedicated support", "Exclusive discounts", "Emergency service"] }
+    };
     
     // Get user's bookings with statistics
     const bookings = await prisma.booking.findMany({
@@ -56,13 +62,6 @@ router.get('/customer', authMiddleware, requireCustomer, async (req, res, next) 
     // Calculate usage statistics if user has subscription
     let usageStats = null;
     if (subscription && subscription.status === 'ACTIVE') {
-      // Define perks based on subscription tier
-      const tierPerks = {
-        'STARTER': { maxServicesPerMonth: 4 },
-        'HOMECARE': { maxServicesPerMonth: 8 },
-        'PRIORITY': { maxServicesPerMonth: 12 }
-      };
-      
       const plan = tierPerks[subscription.tier] || { maxServicesPerMonth: 4 };
       const usedPerks = bookings.filter(b => b.status === 'COMPLETED').length;
       const totalPerks = plan.maxServicesPerMonth;
@@ -101,9 +100,9 @@ router.get('/customer', authMiddleware, requireCustomer, async (req, res, next) 
         plan: {
           id: subscription.tier,
           name: subscription.tier,
-          monthlyPrice: 0, // These would come from a plans table in a real app
-          yearlyPrice: 0,
-          features: [],
+          monthlyPrice: tierPerks[subscription.tier]?.monthlyPrice || 0,
+          yearlyPrice: tierPerks[subscription.tier]?.yearlyPrice || 0,
+          features: tierPerks[subscription.tier]?.features || [],
           maxServicesPerMonth: tierPerks[subscription.tier]?.maxServicesPerMonth || 4
         }
       } : null,

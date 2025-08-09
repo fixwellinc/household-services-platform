@@ -10,7 +10,7 @@ This project is now configured for **single deployment** on Railway, eliminating
 
 - **Frontend**: Next.js 14 with TypeScript and Tailwind CSS
 - **Backend**: Express.js API with Prisma ORM
-- **Database**: MongoDB (via Prisma)
+- **Database**: PostgreSQL (via Prisma)
 - **Deployment**: Railway (unified)
 - **Font**: JetBrains Mono (monospace throughout)
 
@@ -20,7 +20,7 @@ This project is now configured for **single deployment** on Railway, eliminating
 
 - Node.js 18+
 - npm 9+
-- MongoDB database
+- PostgreSQL database
 
 ### Setup
 
@@ -34,7 +34,7 @@ This project is now configured for **single deployment** on Railway, eliminating
 2. **Environment variables:**
    Create `.env` files in both `apps/backend` and `apps/frontend` with:
    ```env
-   DATABASE_URL="your-mongodb-connection-string"
+   DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DBNAME?schema=public"
    JWT_SECRET="your-jwt-secret"
    STRIPE_SECRET_KEY="your-stripe-secret"
    STRIPE_PUBLISHABLE_KEY="your-stripe-publishable-key"
@@ -94,7 +94,7 @@ Set these in your Railway project:
 
 ```env
 NODE_ENV=production
-DATABASE_URL=your-mongodb-connection-string
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DBNAME?schema=public
 JWT_SECRET=your-jwt-secret
 STRIPE_SECRET_KEY=your-stripe-secret
 STRIPE_PUBLISHABLE_KEY=your-stripe-publishable-key
@@ -114,7 +114,7 @@ Fixwell/
 │       │   ├── routes/   # API routes
 │       │   ├── middleware/
 │       │   └── ...
-│       └── prisma/       # Database schema
+│       └── prisma/       # Prisma schema (PostgreSQL)
 ├── packages/             # Shared packages
 ├── unified-server.js     # Unified server script
 ├── Dockerfile           # Docker configuration
@@ -126,7 +126,7 @@ Fixwell/
 - **Unified Deployment**: Single Railway deployment for both frontend and backend
 - **Monospace Typography**: JetBrains Mono font throughout the application
 - **API Routes**: Backend API accessible at `/api/*`
-- **Database**: MongoDB with Prisma ORM
+- **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: JWT-based authentication
 - **Payments**: Stripe integration
 - **Real-time**: WebSocket support for real-time features

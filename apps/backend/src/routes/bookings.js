@@ -1,10 +1,9 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/database.js';
 import { authMiddleware, requireCustomer, requireCustomerOrAdmin } from '../middleware/auth.js';
 import { ValidationError } from '../middleware/error.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Get user's bookings (customers see their bookings, admins see all)
 router.get('/', authMiddleware, async (req, res, next) => {

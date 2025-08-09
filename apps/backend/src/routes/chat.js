@@ -1,17 +1,21 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import notificationService from '../services/notificationService.js';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/database.js';
 import smsService from '../services/sms.js';
 import multer from 'multer';
 import path from 'path';
 
-const prisma = new PrismaClient();
+import fs from 'fs';
 
 const router = express.Router();
 
 // File upload config
 const uploadDir = path.join(process.cwd(), 'uploads', 'chat');
+// Ensure upload directory exists
+try {
+  fs.mkdirSync(uploadDir, { recursive: true });
+} catch {}
 const maxFileSize = parseInt(process.env.MAX_FILE_SIZE || '5242880', 10); // 5MB default
 const allowedTypes = (process.env.ALLOWED_FILE_TYPES || 'image/jpeg,image/png,image/gif,application/pdf').split(',');
 
@@ -211,7 +215,9 @@ router.post('/message', async (req, res) => {
 /**
  * Upload a file for chat (local storage)
  */
-router.post('/upload', upload.single('file'), (req, res) => {
+import { uploadLimiter } from '../middleware/rateLimit.js';
+
+router.post('/upload', uploadLimiter, upload.single('file'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ success: false, error: 'No file uploaded' });
   }

@@ -210,8 +210,7 @@ class NotificationService {
   async getNotificationSettings() {
     try {
       // Import prisma dynamically to avoid circular dependencies
-      const { PrismaClient } = await import('@prisma/client');
-      const prisma = new PrismaClient();
+      const { default: prisma } = await import('../config/database.js');
       const keys = [
         'smsEnabled',
         'ownerPhone',

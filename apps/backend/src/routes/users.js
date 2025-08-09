@@ -1,10 +1,9 @@
 import express from 'express';
 import auth from '../middleware/auth.js';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/database.js';
 import bcrypt from 'bcryptjs';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // PATCH /api/users/me - Update profile
 router.patch('/me', auth, async (req, res) => {

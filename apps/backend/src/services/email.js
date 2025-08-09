@@ -17,8 +17,7 @@ class EmailService {
   async loadSettings() {
     try {
       // Import prisma dynamically to avoid circular dependencies
-      const { PrismaClient } = await import('@prisma/client');
-      const prisma = new PrismaClient();
+      const { default: prisma } = await import('../config/database.js');
       
       const settings = await prisma.setting.findMany({
         where: {

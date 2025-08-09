@@ -331,7 +331,7 @@ export class ApiClient {
 
   // Health check
   healthCheck = async (): Promise<{ status: string; timestamp: string }> => {
-    return this.request<{ status: string; timestamp: string }>('/api/health');
+    return this.request<{ status: string; timestamp: string }>('/health');
   }
 
   // Quotes endpoints

@@ -1,10 +1,9 @@
 import express from 'express';
 import { authMiddleware } from '../middleware/auth.js';
 import { getAllPlans, getPlanById, getPlanByTier, calculateServiceDiscount } from '../config/plans.js';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/database.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Get all plans (public endpoint)
 router.get('/', async (req, res) => {

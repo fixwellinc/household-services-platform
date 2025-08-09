@@ -11,10 +11,9 @@ import {
   refundPayment
 } from '../services/stripe.js';
 import subscriptionService from '../services/subscriptionService.js';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/database.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Create payment intent for booking
 router.post('/create-payment-intent', authMiddleware, async (req, res) => {
@@ -237,11 +236,11 @@ router.post('/refund', authMiddleware, async (req, res) => {
 });
 
 // Stripe webhook handler
-router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+router.post('/webhook', async (req, res) => {
   const sig = req.headers['stripe-signature'];
 
   try {
-    const event = verifyWebhookSignature(req.body, sig);
+    const event = verifyWebhookSignature(req.rawBody || req.body, sig);
 
     // Use the subscription service to process webhook events
     await subscriptionService.processWebhookEvent(event);

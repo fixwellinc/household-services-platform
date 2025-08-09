@@ -1,7 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../config/database.js';
 
 export const authMiddleware = async (req, res, next) => {
   try {
@@ -9,21 +7,19 @@ export const authMiddleware = async (req, res, next) => {
     let token = null;
     const authHeader = req.headers.authorization;
     
-    console.log('Auth middleware debug:', {
-      url: req.url,
-      authHeader: authHeader,
-      cookies: req.cookies,
-      hasAuthHeader: !!authHeader,
-      authHeaderStartsWithBearer: authHeader?.startsWith('Bearer ')
-    });
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Auth middleware debug:', {
+        url: req.url,
+        hasAuthHeader: !!authHeader,
+        hasCookie: !!req.cookies?.auth_token,
+      });
+    }
     
     if (authHeader && authHeader.startsWith('Bearer ')) {
       token = authHeader.substring(7); // Remove 'Bearer ' prefix
-      console.log('Token from Authorization header:', token ? `${token.substring(0, 20)}...` : 'null');
     } else {
       // Check for token in cookies
       token = req.cookies?.auth_token;
-      console.log('Token from cookies:', token ? `${token.substring(0, 20)}...` : 'null');
     }
     
     if (!token) {
@@ -32,9 +28,7 @@ export const authMiddleware = async (req, res, next) => {
     }
     
     // CRITICAL: Verify JWT token
-    console.log('Verifying token with JWT_SECRET length:', process.env.JWT_SECRET?.length);
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('Token decoded successfully:', { userId: decoded.userId, email: decoded.email });
     
     // Get user from database
     const user = await prisma.user.findUnique({
@@ -50,7 +44,6 @@ export const authMiddleware = async (req, res, next) => {
       }
     });
     
-    console.log('User found in database:', user ? { id: user.id, email: user.email, role: user.role } : 'null');
     
     if (!user) {
       return res.status(401).json({ error: 'User not found' });
@@ -58,7 +51,6 @@ export const authMiddleware = async (req, res, next) => {
     
     // Add user to request object
     req.user = user;
-    console.log('User added to request:', { id: req.user.id, email: req.user.email, role: req.user.role });
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {

@@ -21,9 +21,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(data, { status: response.status })
     }
     
-    // Create response and clear the token cookie
+    // Create response and clear the auth cookie
     const nextResponse = NextResponse.json(data)
-    nextResponse.cookies.set('token', '', {
+    nextResponse.cookies.set('auth_token', '', {
       httpOnly: false,
       path: '/',
       sameSite: 'lax',

@@ -1,12 +1,11 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/database.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { ValidationError } from '../middleware/error.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Register new user
 router.post('/register', async (req, res, next) => {
@@ -62,12 +61,12 @@ router.post('/register', async (req, res, next) => {
       { expiresIn: '7d' }
     );
     
-    // Set cookie for Next.js middleware
+    // Set secure auth cookie for middleware and SSR
     res.cookie('auth_token', token, {
-      httpOnly: false,
+      httpOnly: true,
       path: '/',
       sameSite: 'lax',
-      // secure: true, // enable in production with HTTPS
+      secure: process.env.NODE_ENV === 'production',
     });
     
     res.status(201).json({
@@ -119,12 +118,12 @@ router.post('/login', async (req, res, next) => {
       { expiresIn: '7d' }
     );
     
-    // Set cookie for Next.js middleware
+    // Set secure auth cookie for middleware and SSR
     res.cookie('auth_token', token, {
-      httpOnly: false,
+      httpOnly: true,
       path: '/',
       sameSite: 'lax',
-      // secure: true, // enable in production with HTTPS
+      secure: process.env.NODE_ENV === 'production',
     });
     
     // Remove password from response
@@ -153,7 +152,8 @@ router.post('/logout', authMiddleware, async (req, res) => {
   res.clearCookie('auth_token', {
     path: '/',
     sameSite: 'lax',
-    // secure: true, // enable in production with HTTPS
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
   });
   
   res.json({

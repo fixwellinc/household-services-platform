@@ -48,7 +48,7 @@ export function verifyToken(token: string): { userId: string; email: string; rol
 
 export async function authenticateUser(request: NextRequest): Promise<AuthenticatedRequest> {
   const authHeader = request.headers.get('authorization')
-  const token = authHeader?.replace('Bearer ', '') || request.cookies.get('token')?.value
+  const token = authHeader?.replace('Bearer ', '') || request.cookies.get('auth_token')?.value
 
   if (!token) {
     return request as AuthenticatedRequest

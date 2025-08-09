@@ -63,9 +63,9 @@ export async function POST(request) {
       token
     });
     
-    // Set cookie
+    // Set secure auth cookie for middleware and SSR
     response.cookies.set('auth_token', token, {
-      httpOnly: false,
+      httpOnly: true,
       path: '/',
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',

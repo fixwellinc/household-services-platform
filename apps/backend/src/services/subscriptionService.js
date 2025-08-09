@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/database.js';
 import { 
   createCustomer, 
   createSubscription, 
@@ -9,7 +9,6 @@ import {
 } from './stripe.js';
 import { getPlanByTier } from '../config/plans.js';
 
-const prisma = new PrismaClient();
 
 class SubscriptionService {
   // Create a new subscription with Stripe integration
