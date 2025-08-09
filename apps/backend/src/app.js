@@ -529,7 +529,11 @@ app.post('/api/admin/email-blast', requireAdmin, bulkAdminLimiter, async (req, r
     if (!targetEmails || targetEmails.length === 0) {
       return res.status(400).json({ error: 'No recipients found for this blast' });
     }
-  
+  } catch (error) {
+    console.error('Email blast preprocessing error:', error);
+    return res.status(500).json({ error: 'Failed to prepare recipients' });
+  }
+
   try {
     // Import email service
     const { default: emailService } = await import('./services/email.js');

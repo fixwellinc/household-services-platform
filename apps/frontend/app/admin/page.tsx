@@ -94,6 +94,20 @@ export default function AdminPage() {
     const [messages, setMessages] = useState<any[]>([]);
     const [text, setText] = useState('');
     useEffect(() => {
+      let socket: any;
+      (async () => {
+        const { io } = await import('socket.io-client');
+        socket = io('/', { path: '/socket.io' });
+        socket.emit('join-session', chatId);
+        socket.on('new-message', (data: any) => {
+          if (data.chatSessionId === chatId) {
+            setMessages((prev) => [...prev, data]);
+          }
+        });
+      })();
+      return () => { if (socket) socket.disconnect(); };
+    }, [chatId]);
+    useEffect(() => {
       let mounted = true;
       (async () => {
         try {
@@ -986,10 +1000,8 @@ export default function AdminPage() {
                           onChange={(e) => setRecipientFilter(e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                          <option value="all">All Users</option>
-                          <option value="customers">Customers Only</option>
-                          <option value="providers">Providers Only</option>
-                          <option value="inactive">Inactive Users</option>
+                          <option value="all">All Active Users</option>
+                          <option value="subscribers">Active Subscribers</option>
                         </select>
                       </div>
                     </div>

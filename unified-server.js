@@ -1,5 +1,6 @@
 import express from 'express';
 import { createServer } from 'http';
+import { Server as SocketIOServer } from 'socket.io';
 import next from 'next';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -40,6 +41,17 @@ import('./apps/backend/src/app.js').then(({ app: backendApp }) => {
         res.end('Internal Server Error');
       }
     });
+
+    // Attach Socket.IO to the unified HTTP server and inject into backend app
+    const io = new SocketIOServer(server, {
+      cors: {
+        origin: '*',
+        methods: ['GET', 'POST'],
+        credentials: true,
+      }
+    });
+    // Make io available to backend routes that use req.app.get('io')
+    backendApp.set('io', io);
 
     server.listen(port, (err) => {
       if (err) throw err;
