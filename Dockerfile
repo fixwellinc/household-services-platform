@@ -4,7 +4,8 @@ FROM node:20-alpine
 # Install system dependencies
 RUN apk add --no-cache \
     openssl \
-    ca-certificates
+    ca-certificates \
+    netcat-openbsd
 
 # Set working directory
 WORKDIR /app
@@ -53,4 +54,4 @@ ENV PORT=3000
 EXPOSE 3000
 
 # Start the unified server with migrations
-CMD ["sh", "-c", "cd /app/apps/backend && npx prisma migrate deploy && npx prisma generate && cd /app && node unified-server.js"] 
+CMD ["sh", "-c", "echo 'Waiting for database...' && until nc -z postgres.railway.internal 5432; do echo 'DB not ready, retrying in 2s'; sleep 2; done; echo 'Database is reachable'; cd /app/apps/backend && for i in 1 2 3 4 5; do npx prisma migrate deploy && break || { echo 'migrate failed, retrying in 3s'; sleep 3; }; done && npx prisma generate && cd /app && node unified-server.js"]
