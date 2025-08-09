@@ -8,13 +8,13 @@ export async function GET(
   const path = params.path.join('/');
   
   try {
-    // For now, we'll redirect to the actual backend
-    // Later we can move the backend logic here
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
-    const response = await fetch(`${backendUrl}/api/${path}`, {
+    const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const backendBase = base.replace(/\/$/, '');
+    const response = await fetch(`${backendBase}/${path}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'Cookie': request.headers.get('cookie') || '',
       },
     });
     
@@ -37,11 +37,13 @@ export async function POST(
   const body = await request.json();
   
   try {
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
-    const response = await fetch(`${backendUrl}/api/${path}`, {
+    const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const backendBase = base.replace(/\/$/, '');
+    const response = await fetch(`${backendBase}/${path}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Cookie': request.headers.get('cookie') || '',
       },
       body: JSON.stringify(body),
     });
@@ -65,11 +67,13 @@ export async function PUT(
   const body = await request.json();
   
   try {
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
-    const response = await fetch(`${backendUrl}/api/${path}`, {
+    const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const backendBase = base.replace(/\/$/, '');
+    const response = await fetch(`${backendBase}/${path}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        'Cookie': request.headers.get('cookie') || '',
       },
       body: JSON.stringify(body),
     });
@@ -92,11 +96,13 @@ export async function DELETE(
   const path = params.path.join('/');
   
   try {
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
-    const response = await fetch(`${backendUrl}/api/${path}`, {
+    const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const backendBase = base.replace(/\/$/, '');
+    const response = await fetch(`${backendBase}/${path}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
+        'Cookie': request.headers.get('cookie') || '',
       },
     });
     
