@@ -28,6 +28,7 @@ import quotesRoutes from './routes/quotes.js';
 import docsRoutes from './routes/docs.js';
 import notificationRoutes from './routes/notifications.js';
 import chatRoutes from './routes/chat.js';
+import smsService from './services/sms.js';
 import plansRoutes from './routes/plans.js';
 import subscriptionRoutes from './routes/subscriptions.js';
 import dashboardRoutes from './routes/dashboard.js';
@@ -37,7 +38,7 @@ import dashboardRoutes from './routes/dashboard.js';
 import { authMiddleware, requireAdmin } from './middleware/auth.js';
 import { errorHandler } from './middleware/error.js';
 import { requestLogger, errorLogger, performanceMonitor } from './middleware/logging.js';
-import { generalLimiter, authLimiter, apiLimiter } from './middleware/rateLimit.js';
+import { generalLimiter, authLimiter, apiLimiter, bulkAdminLimiter } from './middleware/rateLimit.js';
 import { sanitize } from './middleware/validation.js';
 
 // Import database and config
@@ -200,6 +201,8 @@ app.use('/api', (req, res, next) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
+  // Attach Socket.IO to request for downstream handlers if needed
+  req.io = io;
   next();
 });
 
@@ -222,6 +225,9 @@ app.get('/api/health', async (req, res) => {
     });
   }
 });
+
+// Ensure admin routes have authenticated user context
+app.use('/api/admin', authMiddleware);
 
 // CRITICAL: Authentication middleware for protected routes
 // app.use('/api/users', authMiddleware);
@@ -492,20 +498,37 @@ app.get('/api/admin/analytics', requireAdmin, async (req, res) => {
 });
 
 // Admin: Email blast
-app.post('/api/admin/email-blast', requireAdmin, async (req, res) => {
+app.post('/api/admin/email-blast', requireAdmin, bulkAdminLimiter, async (req, res) => {
   if (!prisma) {
     return res.status(503).json({ error: 'Database not available' });
   }
   
-  const { subject, body, html, isHtmlMode, emails } = req.body;
+  const { subject, body, html, isHtmlMode, emails, recipientFilter, template } = req.body;
   
-  if (!subject || (!body && !html)) {
+  if (!subject || (!body && !html && !template)) {
     return res.status(400).json({ error: 'Subject and message are required' });
   }
   
-  if (!emails || !Array.isArray(emails) || emails.length === 0) {
-    return res.status(400).json({ error: 'At least one email address is required' });
-  }
+  let targetEmails = Array.isArray(emails) ? emails.filter(Boolean) : [];
+  
+  try {
+    // Derive recipients if not directly provided
+    if (targetEmails.length === 0 && recipientFilter) {
+      if (recipientFilter === 'all') {
+        const users = await prisma.user.findMany({ select: { email: true }, where: { isActive: true } });
+        targetEmails = users.map(u => u.email).filter(Boolean);
+      } else if (recipientFilter === 'subscribers') {
+        const users = await prisma.user.findMany({
+          where: { subscriptionId: { not: null }, isActive: true },
+          select: { email: true }
+        });
+        targetEmails = users.map(u => u.email).filter(Boolean);
+      }
+    }
+
+    if (!targetEmails || targetEmails.length === 0) {
+      return res.status(400).json({ error: 'No recipients found for this blast' });
+    }
   
   try {
     // Import email service
@@ -514,14 +537,20 @@ app.post('/api/admin/email-blast', requireAdmin, async (req, res) => {
     let sentCount = 0;
     const failedEmails = [];
     
-    for (const email of emails) {
+    for (const email of targetEmails) {
       try {
-        const result = await emailService.sendEmail({
-          to: email,
-          subject,
-          text: body,
-          html: isHtmlMode ? html : undefined
-        });
+        let result;
+        if (template) {
+          // Use subscription marketing template pathway
+          result = await emailService.sendSubscriptionMarketingEmail({ email, name: 'there' }, template);
+        } else {
+          result = await emailService.sendEmail({
+            to: email,
+            subject,
+            text: body,
+            html: isHtmlMode ? html : undefined
+          });
+        }
         
         if (result.success) {
           sentCount++;
@@ -542,6 +571,100 @@ app.post('/api/admin/email-blast', requireAdmin, async (req, res) => {
   } catch (error) {
     console.error('Email blast error:', error);
     res.status(500).json({ error: 'Failed to send email blast' });
+  }
+});
+
+// Admin: Email Templates CRUD
+app.get('/api/admin/email-templates', requireAdmin, async (req, res) => {
+  try {
+    if (!prisma) return res.status(503).json({ error: 'Database not available' });
+    const templates = await prisma.emailTemplate.findMany({ orderBy: { updatedAt: 'desc' } });
+    res.json({ templates });
+  } catch (error) {
+    console.error('Get email templates error:', error);
+    res.status(500).json({ error: 'Failed to get email templates' });
+  }
+});
+
+app.get('/api/admin/email-templates/:id', requireAdmin, async (req, res) => {
+  try {
+    if (!prisma) return res.status(503).json({ error: 'Database not available' });
+    const template = await prisma.emailTemplate.findUnique({ where: { id: req.params.id } });
+    if (!template) return res.status(404).json({ error: 'Not found' });
+    res.json({ template });
+  } catch (error) {
+    console.error('Get email template error:', error);
+    res.status(500).json({ error: 'Failed to get email template' });
+  }
+});
+
+app.post('/api/admin/email-templates', requireAdmin, async (req, res) => {
+  try {
+    if (!prisma) return res.status(503).json({ error: 'Database not available' });
+    const { id, name, subject, body, html, isHtmlMode = false } = req.body || {};
+    if (!name || !subject) return res.status(400).json({ error: 'Name and subject are required' });
+    let template;
+    if (id) {
+      template = await prisma.emailTemplate.update({
+        where: { id },
+        data: { name, subject, body: body || null, html: html || null, isHtmlMode: !!isHtmlMode }
+      });
+    } else {
+      template = await prisma.emailTemplate.upsert({
+        where: { name },
+        update: { subject, body: body || null, html: html || null, isHtmlMode: !!isHtmlMode },
+        create: { name, subject, body: body || null, html: html || null, isHtmlMode: !!isHtmlMode, createdBy: req.user?.id || null }
+      });
+    }
+    res.json({ template });
+  } catch (error) {
+    console.error('Save email template error:', error);
+    res.status(500).json({ error: 'Failed to save email template' });
+  }
+});
+
+app.delete('/api/admin/email-templates/:id', requireAdmin, async (req, res) => {
+  try {
+    if (!prisma) return res.status(503).json({ error: 'Database not available' });
+    await prisma.emailTemplate.delete({ where: { id: req.params.id } });
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete email template error:', error);
+    res.status(500).json({ error: 'Failed to delete email template' });
+  }
+});
+
+// Admin: Send mobile notification (basic SMS helper)
+app.post('/api/admin/notifications', requireAdmin, bulkAdminLimiter, async (req, res) => {
+  try {
+    const { phoneNumber, message = 'Notification', type = 'new_chat', customerName = 'Customer', chatId = 'admin-broadcast' } = req.body || {};
+
+    if (phoneNumber) {
+      const result = await smsService.sendChatNotification(phoneNumber, customerName, message, chatId);
+      if (!result.success) return res.status(500).json({ success: false, error: result.error || 'Failed to send' });
+      return res.json({ success: true, sid: result.sid });
+    }
+
+    // No direct phone provided: try owner/manager phones from settings/env
+    const settings = await prisma.setting.findMany({ where: { key: { in: ['ownerPhone', 'managerPhones'] } } });
+    const map = Object.fromEntries(settings.map(s => [s.key, s.value]));
+    const owner = map.ownerPhone || process.env.OWNER_PHONE_NUMBER;
+    const managers = (map.managerPhones || process.env.MANAGER_PHONE_NUMBERS || '').split(',').map(s => s.trim()).filter(Boolean);
+    const targets = [owner, ...managers].filter(Boolean);
+
+    if (targets.length === 0) return res.status(400).json({ success: false, error: 'No target phone numbers configured' });
+
+    const results = [];
+    for (const phone of targets) {
+      const r = await smsService.sendChatNotification(phone, customerName, message, chatId);
+      results.push({ phone, ...r });
+    }
+
+    const failed = results.filter(r => !r.success);
+    res.json({ success: failed.length === 0, results });
+  } catch (error) {
+    console.error('Admin notifications error:', error);
+    res.status(500).json({ success: false, error: 'Failed to send notifications' });
   }
 });
 

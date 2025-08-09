@@ -77,6 +77,8 @@ export default function AdminPage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatSessions, setChatSessions] = useState<any[]>([]);
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -88,11 +90,65 @@ export default function AdminPage() {
   const [selectedSubscription, setSelectedSubscription] = useState<any>(null);
   const [blockCancellationReason, setBlockCancellationReason] = useState('');
   
+  function ChatMessages({ chatId }: { chatId: string }) {
+    const [messages, setMessages] = useState<any[]>([]);
+    const [text, setText] = useState('');
+    useEffect(() => {
+      let mounted = true;
+      (async () => {
+        try {
+          const r = await fetch(`/api/backend/chat/${chatId}/messages`);
+          if (r.ok) {
+            const d = await r.json();
+            if (mounted) setMessages(d.messages || []);
+          }
+        } catch {}
+      })();
+      return () => { mounted = false };
+    }, [chatId]);
+    const send = async () => {
+      if (!text.trim()) return;
+      await fetch('/api/backend/chat/message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chatId, message: text, sender: 'admin', senderType: 'admin' })
+      });
+      setText('');
+      // naive refresh
+      const r = await fetch(`/api/backend/chat/${chatId}/messages`);
+      if (r.ok) {
+        const d = await r.json();
+        setMessages(d.messages || []);
+      }
+    };
+    return (
+      <>
+        {messages.map((m) => (
+          <div key={m.id} className={`flex ${m.senderType === 'admin' ? 'justify-end' : ''}`}>
+            <div className={`${m.senderType === 'admin' ? 'bg-blue-600 text-white' : 'bg-gray-100'} p-3 rounded-lg max-w-xs`}>
+              <p className="text-sm break-words">{m.message || (m.fileUrl ? `[File] ${m.fileName}` : '')}</p>
+              <p className="text-xs opacity-70 mt-1">{new Date(m.sentAt).toLocaleTimeString()}</p>
+            </div>
+          </div>
+        ))}
+        <div className="p-4 border-t mt-4">
+          <div className="flex space-x-2">
+            <input value={text} onChange={(e) => setText(e.target.value)} type="text" placeholder="Type your message..." className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <Button onClick={send}>
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </>
+    )
+  }
+  
   // Email Blast State
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [recipientFilter, setRecipientFilter] = useState('all');
+  const [templates, setTemplates] = useState<any[]>([]);
   
   // Analytics State
   const [analyticsData, setAnalyticsData] = useState({
@@ -167,12 +223,23 @@ export default function AdminPage() {
         setSubscriptionAnalytics(analyticsData);
       }
 
-      // Mock chat messages (would come from real API)
-      setChatMessages([
-        { id: '1', userId: 'u1', userName: 'John Doe', message: 'Need help with booking', timestamp: '2024-01-15T10:30:00Z', status: 'unread' },
-        { id: '2', userId: 'u2', userName: 'Jane Smith', message: 'Payment issue', timestamp: '2024-01-15T10:25:00Z', status: 'read' },
-        { id: '3', userId: 'u3', userName: 'Bob Wilson', message: 'Service inquiry', timestamp: '2024-01-15T10:20:00Z', status: 'unread' }
-      ]);
+      // Load email templates
+      try {
+        const t = await fetch('/api/admin/email-templates');
+        if (t.ok) {
+          const td = await t.json();
+          setTemplates(td.templates || []);
+        }
+      } catch {}
+
+      // Load chat sessions
+      try {
+        const s = await fetch('/api/backend/chat/sessions');
+        if (s.ok) {
+          const sd = await s.json();
+          setChatSessions(sd.sessions || []);
+        }
+      } catch {}
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -930,42 +997,40 @@ export default function AdminPage() {
                     <div className="space-y-6">
                       <div className="border rounded-lg p-4">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">Email Templates</h3>
-                        <div className="space-y-2">
-                          <button
-                            onClick={() => {
-                              setEmailSubject('Welcome to Our Platform!');
-                              setEmailBody('Dear valued customer,\n\nWelcome to our household services platform! We are excited to have you join our community...');
-                              setSelectedTemplate('welcome');
-                            }}
-                            className="w-full text-left p-3 border border-gray-200 rounded hover:bg-gray-50"
-                          >
-                            <div className="font-medium">Welcome Email</div>
-                            <div className="text-sm text-gray-600">New user onboarding</div>
-                          </button>
-                          
-                          <button
-                            onClick={() => {
-                              setEmailSubject('Special Promotion - 20% Off!');
-                              setEmailBody('Dear customer,\n\nDont miss out on our special promotion! Get 20% off all services this month...');
-                              setSelectedTemplate('promotion');
-                            }}
-                            className="w-full text-left p-3 border border-gray-200 rounded hover:bg-gray-50"
-                          >
-                            <div className="font-medium">Promotion Email</div>
-                            <div className="text-sm text-gray-600">Marketing campaigns</div>
-                          </button>
-                          
-                          <button
-                            onClick={() => {
-                              setEmailSubject('Service Reminder');
-                              setEmailBody('Dear customer,\n\nThis is a friendly reminder about your upcoming service appointment...');
-                              setSelectedTemplate('reminder');
-                            }}
-                            className="w-full text-left p-3 border border-gray-200 rounded hover:bg-gray-50"
-                          >
-                            <div className="font-medium">Reminder Email</div>
-                            <div className="text-sm text-gray-600">Appointment reminders</div>
-                          </button>
+                        <div className="space-y-3">
+                          <select className="w-full px-3 py-2 border border-gray-300 rounded-md" value={selectedTemplate} onChange={(e) => setSelectedTemplate(e.target.value)}>
+                            <option value="">Select template...</option>
+                            {templates.map((t: any) => (
+                              <option key={t.id} value={t.name}>{t.name}</option>
+                            ))}
+                          </select>
+                          <div className="flex gap-2">
+                            <Button variant="outline" onClick={async () => {
+                              const name = prompt('Template name?');
+                              if (!name) return;
+                              await fetch('/api/admin/email-templates', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, subject: emailSubject, body: emailBody, isHtmlMode: emailBody.includes('<') }) });
+                              const r = await fetch('/api/admin/email-templates');
+                              if (r.ok) { const d = await r.json(); setTemplates(d.templates || []); setSelectedTemplate(name); }
+                            }}>Save as Template</Button>
+                            <Button variant="outline" onClick={async () => {
+                              if (!selectedTemplate) return;
+                              const r = await fetch('/api/admin/email-templates');
+                              const d = await r.json();
+                              const t = (d.templates || []).find((x: any) => x.name === selectedTemplate);
+                              if (t) { setEmailSubject(t.subject || ''); setEmailBody((t.html || t.body) || ''); }
+                            }}>Load</Button>
+                            <Button variant="destructive" onClick={async () => {
+                              if (!selectedTemplate) return;
+                              const r = await fetch('/api/admin/email-templates');
+                              const d = await r.json();
+                              const t = (d.templates || []).find((x: any) => x.name === selectedTemplate);
+                              if (t) {
+                                await fetch(`/api/admin/email-templates/${t.id}`, { method: 'DELETE' });
+                                const rr = await fetch('/api/admin/email-templates');
+                                if (rr.ok) { const dd = await rr.json(); setTemplates(dd.templates || []); setSelectedTemplate(''); }
+                              }
+                            }}>Delete</Button>
+                          </div>
                         </div>
                       </div>
 
@@ -1001,18 +1066,15 @@ export default function AdminPage() {
                     <div className="lg:col-span-1">
                       <h3 className="text-lg font-semibold text-gray-900 mb-4">Active Conversations</h3>
                       <div className="space-y-2 max-h-96 overflow-y-auto">
-                        {chatMessages.map((message) => (
-                          <div key={message.id} className="p-3 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer">
+                        {chatSessions.map((session: any) => (
+                          <div key={session.id} className={`p-3 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer ${activeChatId === session.id ? 'ring-2 ring-blue-500' : ''}`} onClick={() => setActiveChatId(session.id)}>
                             <div className="flex items-center justify-between">
-                              <div className="font-medium text-sm">{message.userName}</div>
+                              <div className="font-medium text-sm">{session.customerName}</div>
                               <div className="flex items-center space-x-2">
-                                <span className="text-xs text-gray-500">{new Date(message.timestamp).toLocaleTimeString()}</span>
-                                {message.status === 'unread' && (
-                                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                                )}
+                                <span className="text-xs text-gray-500">Unread: {session.unreadCount ?? 0}</span>
                               </div>
                             </div>
-                            <div className="text-sm text-gray-600 truncate">{message.message}</div>
+                            <div className="text-sm text-gray-600 truncate">{session.messages?.[0]?.message || 'No messages yet'}</div>
                           </div>
                         ))}
                       </div>
@@ -1021,32 +1083,17 @@ export default function AdminPage() {
                     <div className="lg:col-span-2">
                       <div className="border rounded-lg h-96 flex flex-col">
                         <div className="p-4 border-b bg-gray-50">
-                          <h3 className="font-semibold">Chat with John Doe</h3>
-                          <p className="text-sm text-gray-600">Last seen: 2 minutes ago</p>
+                          <h3 className="font-semibold">{activeChatId ? `Chat ${activeChatId}` : 'No chat selected'}</h3>
+                          <p className="text-sm text-gray-600">{activeChatId ? 'Live' : 'Select a conversation'}</p>
                         </div>
                         
                         <div className="flex-1 p-4 overflow-y-auto">
                           <div className="space-y-4">
-                            <div className="flex">
-                              <div className="bg-gray-100 p-3 rounded-lg max-w-xs">
-                                <p className="text-sm">Hi, I need help with my booking. The service provider hasn&apos;t shown up yet.</p>
-                                <p className="text-xs text-gray-500 mt-1">10:30 AM</p>
-                              </div>
-                            </div>
-                            
-                            <div className="flex justify-end">
-                              <div className="bg-blue-600 text-white p-3 rounded-lg max-w-xs">
-                                <p className="text-sm">I&apos;m sorry to hear that. Let me check the status of your booking right away.</p>
-                                <p className="text-xs text-blue-200 mt-1">10:32 AM</p>
-                              </div>
-                            </div>
-                            
-                            <div className="flex">
-                              <div className="bg-gray-100 p-3 rounded-lg max-w-xs">
-                                <p className="text-sm">Thank you! The booking reference is #BK123456</p>
-                                <p className="text-xs text-gray-500 mt-1">10:33 AM</p>
-                              </div>
-                            </div>
+                            {activeChatId ? (
+                              <ChatMessages chatId={activeChatId} />
+                            ) : (
+                              <div className="text-sm text-gray-500">Select a conversation to view messages.</div>
+                            )}
                           </div>
                         </div>
                         

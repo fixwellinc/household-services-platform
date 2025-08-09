@@ -6,8 +6,8 @@ export const dynamic = 'force-dynamic'
 // Get subscription analytics (admin)
 export async function GET(request: NextRequest) {
   try {
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
-    const response = await fetch(`${backendUrl}/api/admin/subscriptions/analytics`, {
+    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const response = await fetch(`${backendUrl.replace(/\/$/, '')}/admin/subscriptions/analytics`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     }
     
     const data = await response.json();
-    return NextResponse.json(data);
+    return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error('Admin subscription analytics GET error:', error);
     return NextResponse.json(

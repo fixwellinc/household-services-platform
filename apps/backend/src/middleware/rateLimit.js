@@ -98,3 +98,22 @@ export const adminLimiter = rateLimit({
     });
   }
 }); 
+
+// Stricter limiter for bulk admin actions (email blasts, notifications)
+export const bulkAdminLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // very limited bulk actions
+  message: {
+    error: 'Bulk admin action limit reached. Try again later.',
+    retryAfter: '15 minutes'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.user?.id || req.ip,
+  handler: (req, res) => {
+    res.status(429).json({
+      error: 'Bulk admin action limit reached. Try again later.',
+      retryAfter: Math.ceil(req.rateLimit.resetTime / 1000)
+    });
+  }
+});

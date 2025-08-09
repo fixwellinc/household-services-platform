@@ -6,8 +6,8 @@ export const dynamic = 'force-dynamic'
 // Get customers who have used perks (admin)
 export async function GET(request: NextRequest) {
   try {
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
-    const response = await fetch(`${backendUrl}/api/admin/customers/perks-used`, {
+    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const response = await fetch(`${backendUrl.replace(/\/$/, '')}/admin/customers/perks-used`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
