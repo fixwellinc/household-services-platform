@@ -373,8 +373,8 @@ export default function ServicesPage() {
 
                         {/* Action Buttons */}
                         <div className="flex flex-col sm:flex-row gap-3">
-                          {!isAuthenticated || !isSubscribed ? (
-                            // Single button for non-authenticated or non-subscribed users
+                          {!isAuthenticated ? (
+                            // Single button for non-authenticated users
                             <Button 
                               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transition-all duration-300 transform hover:scale-105"
                               onClick={() => {
@@ -389,7 +389,7 @@ export default function ServicesPage() {
                               Let's Get You Started
                             </Button>
                           ) : (
-                            // Two buttons for authenticated and subscribed users
+                            // Two buttons for authenticated users (considered subscribers)
                             <>
                               <Button 
                                 className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transition-all duration-300 transform hover:scale-105"
