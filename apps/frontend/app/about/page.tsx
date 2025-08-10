@@ -210,9 +210,9 @@ export default function AboutPage() {
                   <CheckCircle className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Verified Professionals</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">One-Stop Solution</h3>
                   <p className="text-gray-600">
-                    Fixwell is your go-to platform for every trade on all home repairs and renovations. Once call, Zero hassles.
+                    Fixwell is your go-to platform for every trade on all home repairs and renovations. One call, zero hassles.
                   </p>
                 </div>
               </div>
@@ -222,9 +222,9 @@ export default function AboutPage() {
                   <Shield className="w-6 h-6 text-green-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Professional Quality Assurance</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Verified Professionals</h3>
                   <p className="text-gray-600">
-                    Our team of verified experts ensures exceptional results every time.
+                    All our service providers are thoroughly vetted, licensed, and insured professionals with proven track records.
                   </p>
                 </div>
               </div>
