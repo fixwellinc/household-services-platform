@@ -164,20 +164,29 @@ export default function ServicesPage() {
   const handleViewServiceDetails = (serviceId: string) => {
     console.log('Viewing details for service:', serviceId)
     
-    // Find the service details
+    // Find the service details and navigate to the appropriate page
     const service = sampleServices.find(s => s.id === serviceId);
     if (service) {
-      // For now, we'll show an alert with service details
-      // In the future, this could open a modal or navigate to a detail page
-      const details = `
-Service: ${service.name}
-Category: ${service.category}
-Duration: ${service.estimatedDuration}
-Complexity: ${service.complexity}
-Description: ${service.description}
-      `.trim();
+      // Map service IDs to their detail page routes
+      const serviceRoutes: { [key: string]: string } = {
+        'deep-house-cleaning': '/services/deep-house-cleaning',
+        'electrical-repair': '/services/electrical-repair',
+        'plumbing-repair': '/services/plumbing-repair',
+        'hvac-maintenance': '/services/hvac-maintenance',
+        'home-organization': '/services/home-organization',
+        'cleaning': '/services/cleaning',
+        'maintenance': '/services/maintenance',
+        'repair': '/services/repair',
+        'organization': '/services/organization'
+      };
       
-      alert(details);
+      const route = serviceRoutes[serviceId];
+      if (route) {
+        router.push(route);
+      } else {
+        // Fallback to services page if no specific route found
+        router.push('/services');
+      }
     } else {
       console.log('Service not found:', serviceId);
     }

@@ -1,4 +1,6 @@
-import { Metadata } from 'next';
+'use client';
+
+import { useState } from 'react';
 import { Button } from '@/components/ui/shared';
 import { Badge } from '@/components/ui/shared';
 import { 
@@ -13,16 +15,28 @@ import {
   ArrowLeft,
   Sparkles,
   Zap,
-  Wrench
+  Wrench,
+  MessageCircle
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import QuoteRequestModal from '@/components/QuoteRequestModal';
 
-export const metadata: Metadata = {
-  title: 'Deep House Cleaning - Fixwell',
-  description: 'Professional deep house cleaning service with eco-friendly products and professional quality assurance',
-};
+
 
 export default function DeepHouseCleaningPage() {
+  const router = useRouter();
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
+
+  const handleBookNow = () => {
+    // Navigate to book service page
+    router.push('/dashboard/customer/book-service');
+  };
+
+  const handleRequestQuote = () => {
+    setShowQuoteModal(true);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Hero Section */}
@@ -236,15 +250,28 @@ export default function DeepHouseCleaningPage() {
                     </div>
                   </div>
 
-                  {/* Quote Request Button */}
+                  {/* Action Buttons */}
                   <div className="space-y-4">
-                    <Button 
-                      size="lg"
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 text-lg font-semibold"
-                    >
-                      <BookOpen className="h-5 w-5 mr-2" />
-                      Request Custom Quote
-                    </Button>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Button 
+                        size="lg"
+                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 text-lg font-semibold"
+                        onClick={handleBookNow}
+                      >
+                        <BookOpen className="h-5 w-5 mr-2" />
+                        Book Now
+                      </Button>
+                      
+                      <Button 
+                        size="lg"
+                        variant="outline"
+                        className="w-full border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 text-gray-700 py-4 text-lg font-semibold"
+                        onClick={handleRequestQuote}
+                      >
+                        <MessageCircle className="h-5 w-5 mr-2" />
+                        Request Quote
+                      </Button>
+                    </div>
                     
                     <div className="text-center">
                       <p className="text-sm text-gray-600">
@@ -289,6 +316,14 @@ export default function DeepHouseCleaningPage() {
           </div>
         </div>
       </section>
+      
+      {/* Quote Request Modal */}
+      <QuoteRequestModal
+        isOpen={showQuoteModal}
+        onClose={() => setShowQuoteModal(false)}
+        serviceName="Deep House Cleaning"
+        serviceId="deep-house-cleaning"
+      />
     </div>
   );
 } 
