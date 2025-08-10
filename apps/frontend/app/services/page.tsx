@@ -167,23 +167,21 @@ export default function ServicesPage() {
     // Find the service details and navigate to the appropriate page
     const service = sampleServices.find(s => s.id === serviceId);
     if (service) {
-      // Map service IDs to their detail page routes
+      // Map service IDs to their detail page routes based on service names
       const serviceRoutes: { [key: string]: string } = {
-        'deep-house-cleaning': '/services/deep-house-cleaning',
-        'electrical-repair': '/services/electrical-repair',
-        'plumbing-repair': '/services/plumbing-repair',
-        'hvac-maintenance': '/services/hvac-maintenance',
-        'home-organization': '/services/home-organization',
-        'cleaning': '/services/cleaning',
-        'maintenance': '/services/maintenance',
-        'repair': '/services/repair',
-        'organization': '/services/organization'
+        '1': '/services/deep-house-cleaning',      // Deep House Cleaning
+        '2': '/services/plumbing-repair',         // Plumbing Repair
+        '3': '/services/home-organization',       // Home Organization
+        '4': '/services/hvac-maintenance',        // HVAC Maintenance
+        '5': '/services/electrical-repair'        // Electrical Repair
       };
       
       const route = serviceRoutes[serviceId];
       if (route) {
+        console.log('Navigating to:', route);
         router.push(route);
       } else {
+        console.log('No route found for service ID:', serviceId);
         // Fallback to services page if no specific route found
         router.push('/services');
       }
