@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/shared';
 import { Badge } from '@/components/ui/shared';
-import { 
-  Zap, 
-  Clock, 
-  Shield, 
-  CheckCircle, 
-  Star, 
-  Users, 
+import {
+  Zap,
+  Clock,
+  Shield,
+  CheckCircle,
+  Star,
+  Users,
   MapPin,
   BookOpen,
   ArrowLeft,
@@ -21,6 +21,8 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import QuoteRequestModal from '@/components/QuoteRequestModal';
+
+export const dynamic = 'force-dynamic';
 
 export default function PlumbingRepairPage() {
   const router = useRouter();
@@ -41,7 +43,7 @@ export default function PlumbingRepairPage() {
       <section className="relative py-20 md:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10" />
         <div className="absolute inset-0 opacity-50 bg-[radial-gradient(circle_at_1px_1px,rgba(156,146,172,0.1)_1px,transparent_0)] bg-[length:20px_20px]" />
-        
+
         <div className="relative container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             {/* Back Button */}
@@ -57,11 +59,11 @@ export default function PlumbingRepairPage() {
                 <Zap className="h-4 w-4" />
                 Repair Services
               </div>
-              
+
               <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
                 Plumbing Repair
               </h1>
-              
+
               <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
                 Expert plumbing solutions for all your home needs. From minor leaks to major installations, we handle it all with licensed professionals.
               </p>
@@ -123,7 +125,7 @@ export default function PlumbingRepairPage() {
               {/* Left Column - Service Information */}
               <div>
                 <h2 className="text-3xl font-bold text-gray-900 mb-8">Service Details</h2>
-                
+
                 <div className="space-y-8">
                   {/* What's Included */}
                   <div>
@@ -193,7 +195,7 @@ export default function PlumbingRepairPage() {
               <div>
                 <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 shadow-lg">
                   <h3 className="text-2xl font-bold text-gray-900 mb-6">Get Your Custom Quote</h3>
-                  
+
                   {/* Quote Information */}
                   <div className="bg-white rounded-lg p-6 mb-6">
                     <div className="text-center mb-4">
@@ -203,7 +205,7 @@ export default function PlumbingRepairPage() {
                       <h4 className="text-lg font-semibold text-gray-900 mb-2">Personalized Pricing</h4>
                       <p className="text-gray-600 text-sm">Every plumbing issue is unique. Get a custom quote based on your specific problem and requirements.</p>
                     </div>
-                    
+
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
                         <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
@@ -251,7 +253,7 @@ export default function PlumbingRepairPage() {
                   {/* Action Buttons */}
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Button 
+                      <Button
                         size="lg"
                         className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 text-lg font-semibold"
                         onClick={handleBookNow}
@@ -259,8 +261,8 @@ export default function PlumbingRepairPage() {
                         <BookOpen className="h-5 w-5 mr-2" />
                         Book Now
                       </Button>
-                      
-                      <Button 
+
+                      <Button
                         size="lg"
                         variant="outline"
                         className="w-full border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 text-gray-700 py-4 text-lg font-semibold"
@@ -270,7 +272,7 @@ export default function PlumbingRepairPage() {
                         Request Quote
                       </Button>
                     </div>
-                    
+
                     <div className="text-center">
                       <p className="text-sm text-gray-600">
                         Emergency? <Link href="/contact" className="text-red-600 hover:text-red-700 font-semibold">Call us immediately</Link>
@@ -289,23 +291,23 @@ export default function PlumbingRepairPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Frequently Asked Questions</h2>
-            
+
             <div className="space-y-6">
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Are your plumbers licensed and insured?</h3>
                 <p className="text-gray-600">Yes, all our plumbers are fully licensed, bonded, and insured. We maintain the highest standards of professionalism and safety.</p>
               </div>
-              
+
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Do you offer emergency plumbing services?</h3>
                 <p className="text-gray-600">Yes, we offer 24/7 emergency plumbing services for urgent issues like burst pipes, major leaks, and sewer backups.</p>
               </div>
-              
+
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">What warranty do you provide?</h3>
                 <p className="text-gray-600">We provide a comprehensive warranty on all our work. Parts and labor are covered, and we stand behind our professional quality assurance.</p>
               </div>
-              
+
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">How quickly can you respond to emergency calls?</h3>
                 <p className="text-gray-600">For emergency situations, we typically respond within 2-4 hours. We prioritize safety and water damage prevention.</p>
@@ -314,7 +316,7 @@ export default function PlumbingRepairPage() {
           </div>
         </div>
       </section>
-      
+
       {/* Quote Request Modal */}
       <QuoteRequestModal
         isOpen={showQuoteModal}

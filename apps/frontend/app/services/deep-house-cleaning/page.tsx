@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/shared';
 import { Badge } from '@/components/ui/shared';
-import { 
-  Home, 
-  Clock, 
-  Shield, 
-  CheckCircle, 
-  Star, 
-  Users, 
+import {
+  Home,
+  Clock,
+  Shield,
+  CheckCircle,
+  Star,
+  Users,
   MapPin,
   BookOpen,
   ArrowLeft,
@@ -22,6 +22,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import QuoteRequestModal from '@/components/QuoteRequestModal';
 
+export const dynamic = 'force-dynamic';
 
 
 export default function DeepHouseCleaningPage() {
@@ -43,7 +44,7 @@ export default function DeepHouseCleaningPage() {
       <section className="relative py-20 md:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10" />
         <div className="absolute inset-0 opacity-50 bg-[radial-gradient(circle_at_1px_1px,rgba(156,146,172,0.1)_1px,transparent_0)] bg-[length:20px_20px]" />
-        
+
         <div className="relative container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             {/* Back Button */}
@@ -59,11 +60,11 @@ export default function DeepHouseCleaningPage() {
                 <Home className="h-4 w-4" />
                 Cleaning Services
               </div>
-              
+
               <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
                 Deep House Cleaning
               </h1>
-              
+
               <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
                 Transform your home with our comprehensive cleaning service. Professional attention to every detail, from kitchen to bedrooms.
               </p>
@@ -125,7 +126,7 @@ export default function DeepHouseCleaningPage() {
               {/* Left Column - Service Information */}
               <div>
                 <h2 className="text-3xl font-bold text-gray-900 mb-8">Service Details</h2>
-                
+
                 <div className="space-y-8">
                   {/* What's Included */}
                   <div>
@@ -195,7 +196,7 @@ export default function DeepHouseCleaningPage() {
               <div>
                 <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 shadow-lg">
                   <h3 className="text-2xl font-bold text-gray-900 mb-6">Get Your Custom Quote</h3>
-                  
+
                   {/* Quote Information */}
                   <div className="bg-white rounded-lg p-6 mb-6">
                     <div className="text-center mb-4">
@@ -205,7 +206,7 @@ export default function DeepHouseCleaningPage() {
                       <h4 className="text-lg font-semibold text-gray-900 mb-2">Personalized Pricing</h4>
                       <p className="text-gray-600 text-sm">Every home is unique. Get a custom quote based on your specific needs and home size.</p>
                     </div>
-                    
+
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
                         <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
@@ -253,7 +254,7 @@ export default function DeepHouseCleaningPage() {
                   {/* Action Buttons */}
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Button 
+                      <Button
                         size="lg"
                         className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 text-lg font-semibold"
                         onClick={handleBookNow}
@@ -261,8 +262,8 @@ export default function DeepHouseCleaningPage() {
                         <BookOpen className="h-5 w-5 mr-2" />
                         Book Now
                       </Button>
-                      
-                      <Button 
+
+                      <Button
                         size="lg"
                         variant="outline"
                         className="w-full border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 text-gray-700 py-4 text-lg font-semibold"
@@ -272,7 +273,7 @@ export default function DeepHouseCleaningPage() {
                         Request Quote
                       </Button>
                     </div>
-                    
+
                     <div className="text-center">
                       <p className="text-sm text-gray-600">
                         Need help? <Link href="/contact" className="text-blue-600 hover:text-blue-700">Contact us</Link>
@@ -291,23 +292,23 @@ export default function DeepHouseCleaningPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Frequently Asked Questions</h2>
-            
+
             <div className="space-y-6">
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">How long does a deep house cleaning take?</h3>
                 <p className="text-gray-600">A typical deep house cleaning takes 3-4 hours depending on the size of your home and the level of detail required.</p>
               </div>
-              
+
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Do I need to be home during the cleaning?</h3>
                 <p className="text-gray-600">While you don't need to be home, many customers prefer to be present to answer questions and provide access to specific areas.</p>
               </div>
-              
+
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">What cleaning products do you use?</h3>
                 <p className="text-gray-600">We use eco-friendly, non-toxic cleaning products that are safe for your family and pets while being effective at removing dirt and grime.</p>
               </div>
-              
+
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">What quality standards do you maintain?</h3>
                 <p className="text-gray-600">We maintain the highest quality standards through rigorous professional screening and ongoing quality monitoring. Our team of verified experts ensures exceptional results every time.</p>
@@ -316,7 +317,7 @@ export default function DeepHouseCleaningPage() {
           </div>
         </div>
       </section>
-      
+
       {/* Quote Request Modal */}
       <QuoteRequestModal
         isOpen={showQuoteModal}

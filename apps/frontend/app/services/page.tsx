@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Button } from '@/components/ui/shared';
 import { Badge } from '@/components/ui/shared';
 import { useAuth } from '@/contexts/AuthContext';
@@ -33,7 +33,7 @@ import {
 import LocationPromptModal from '@/components/location/LocationPromptModal';
 import QuoteRequestModal from '@/components/QuoteRequestModal';
 
-
+export const dynamic = 'force-dynamic';
 
 const categories = [
   { id: 'ALL', name: 'All Services', icon: Star, color: 'from-blue-500 to-purple-500' },
