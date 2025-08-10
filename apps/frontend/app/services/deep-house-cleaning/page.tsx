@@ -19,7 +19,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Deep House Cleaning - Fixwell',
-  description: 'Professional deep house cleaning service with eco-friendly products and guaranteed satisfaction',
+  description: 'Professional deep house cleaning service with eco-friendly products and professional quality assurance',
 };
 
 export default function DeepHouseCleaningPage() {
@@ -161,7 +161,7 @@ export default function DeepHouseCleaningPage() {
                         <p className="text-sm text-blue-700">Safe for your family and pets</p>
                       </div>
                       <div className="bg-green-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-green-900 mb-2">Satisfaction Guaranteed</h4>
+                        <h4 className="font-semibold text-green-900 mb-2">Professional Results</h4>
                         <p className="text-sm text-green-700">We're not done until you're happy</p>
                       </div>
                       <div className="bg-purple-50 rounded-lg p-4">
@@ -282,8 +282,8 @@ export default function DeepHouseCleaningPage() {
               </div>
               
               <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Is the service guaranteed?</h3>
-                <p className="text-gray-600">Yes! We offer a 100% satisfaction guarantee. If you're not completely satisfied with our service, we'll come back and fix it at no additional cost.</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">What quality standards do you maintain?</h3>
+                <p className="text-gray-600">We maintain the highest quality standards through rigorous professional screening and ongoing quality monitoring. Our team of verified experts ensures exceptional results every time.</p>
               </div>
             </div>
           </div>

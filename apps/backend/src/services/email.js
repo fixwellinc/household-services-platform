@@ -359,7 +359,7 @@ class EmailService {
       ✅ No More Contractor Hunting
       ✅ Proactive Maintenance
       ✅ Predictable Costs
-      ✅ Quality Guaranteed
+      ✅ Professional Quality Assurance
       ✅ Fully Insured & Bonded
       ✅ Same-Day Response
 

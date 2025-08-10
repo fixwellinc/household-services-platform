@@ -166,7 +166,7 @@ export default function PlumbingRepairPage() {
                       </div>
                       <div className="bg-green-50 rounded-lg p-4">
                         <h4 className="font-semibold text-green-900 mb-2">Warranty Included</h4>
-                        <p className="text-sm text-green-700">All work guaranteed</p>
+                        <p className="text-sm text-green-700">All work backed by warranty</p>
                       </div>
                       <div className="bg-purple-50 rounded-lg p-4">
                         <h4 className="font-semibold text-purple-900 mb-2">Code Compliant</h4>
@@ -278,7 +278,7 @@ export default function PlumbingRepairPage() {
               
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">What warranty do you provide?</h3>
-                <p className="text-gray-600">We provide a comprehensive warranty on all our work. Parts and labor are guaranteed, and we stand behind our quality.</p>
+                <p className="text-gray-600">We provide a comprehensive warranty on all our work. Parts and labor are covered, and we stand behind our professional quality assurance.</p>
               </div>
               
               <div className="bg-white rounded-lg p-6 shadow-sm">

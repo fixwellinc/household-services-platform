@@ -26,14 +26,14 @@ export default function PlansPage() {
         </div>
       </section>
 
-      {/* Money-back Guarantee Banner */}
-      <section className="py-4 bg-gradient-to-r from-green-500 to-green-600">
+      {/* Quality Assurance Banner */}
+      <section className="py-4 bg-gradient-to-r from-blue-500 to-blue-600">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2 text-white">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span className="font-semibold">30-Day Money-Back Guarantee • No Questions Asked</span>
+            <span className="font-semibold">Professional Quality Assurance • Expert Service</span>
           </div>
         </div>
       </section>
@@ -76,10 +76,10 @@ export default function PlansPage() {
 
             <div className="bg-gray-50 rounded-2xl p-6 md:p-8">
               <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-4">
-                How does the money-back guarantee work?
+                How does your quality assurance work?
               </h3>
               <p className="text-gray-600">
-                We offer a 30-day money-back guarantee. If you're not completely satisfied with our service, contact us within 30 days and we'll refund your entire subscription fee, no questions asked.
+                We maintain the highest standards through rigorous professional screening, ongoing quality monitoring, and customer satisfaction tracking. Our team of verified experts ensures every service meets our quality benchmarks.
               </p>
             </div>
 
@@ -97,7 +97,7 @@ export default function PlansPage() {
                 How do I cancel my plan?
               </h3>
               <p className="text-gray-600">
-                You can cancel anytime from your account settings. Your access will continue until the end of your current billing period. No cancellation fees or penalties.
+                You can cancel anytime from your account settings. Your access will continue until the end of your current billing period.
               </p>
             </div>
 
@@ -123,9 +123,9 @@ export default function PlansPage() {
               <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-4">
                 What payment methods do you accept?
               </h3>
-              <p className="text-gray-600">
-                We accept all major credit cards, debit cards, and PayPal. All payments are processed securely through Stripe. You can pay monthly or yearly with a 10% discount for annual plans.
-              </p>
+                             <p className="text-gray-600">
+                 We accept all major credit cards, debit cards. All payments are processed securely through Stripe. You can pay monthly or yearly with a 10% discount for annual plans.
+               </p>
             </div>
 
             <div className="bg-gray-50 rounded-2xl p-6 md:p-8">

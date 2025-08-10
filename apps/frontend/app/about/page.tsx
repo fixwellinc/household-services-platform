@@ -81,8 +81,8 @@ export default function AboutPage() {
                     <Shield className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Quality Guaranteed</h3>
-                    <p className="text-blue-100">Satisfaction or service redone</p>
+                    <h3 className="font-semibold text-lg">Professional Quality</h3>
+                    <p className="text-blue-100">Expert service assured</p>
                   </div>
                 </div>
               </div>
@@ -212,7 +212,7 @@ export default function AboutPage() {
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">Verified Professionals</h3>
                   <p className="text-gray-600">
-                    Every service provider undergoes thorough background checks and skill verification.
+                    Fixwell is your go-to platform for every trade on all home repairs and renovations. Once call, Zero hassles.
                   </p>
                 </div>
               </div>
@@ -222,9 +222,9 @@ export default function AboutPage() {
                   <Shield className="w-6 h-6 text-green-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Quality Guarantee</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Professional Quality Assurance</h3>
                   <p className="text-gray-600">
-                    Not satisfied? We'll make it right. Your satisfaction is our priority.
+                    Our team of verified experts ensures exceptional results every time.
                   </p>
                 </div>
               </div>

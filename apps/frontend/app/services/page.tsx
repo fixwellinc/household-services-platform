@@ -53,7 +53,7 @@ const sampleServices = [
     complexity: 'MODERATE' as const,
     estimatedDuration: '3-4 hours',
     isPopular: true,
-    features: ['Eco-friendly products', 'Satisfaction guaranteed', 'Flexible scheduling'],
+    features: ['Eco-friendly products', 'Professional quality assurance', 'Flexible scheduling'],
     benefits: ['Healthier living environment', 'More time for family', 'Professional results'],
     icon: Home
   },
@@ -185,7 +185,7 @@ export default function ServicesPage() {
             
             <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
               Discover our comprehensive range of professional household services. 
-              Quality, reliability, and satisfaction guaranteed.
+              Quality, reliability, and professional excellence assured.
             </p>
 
             {/* Stats */}

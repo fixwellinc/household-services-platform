@@ -66,7 +66,7 @@ const plans = [
       'Service customization',
       'Recurring service setup',
       'Priority customer support',
-      'Service guarantees',
+      'Professional quality assurance',
       'Advanced filtering options',
       'Up to 10% service discount'
     ],
@@ -92,7 +92,7 @@ const plans = [
       'Custom service packages',
       'Premium service team',
       'White-glove service',
-      'Service quality guarantees',
+      'Professional quality assurance',
       'Flexible scheduling',
       'All service categories',
       'Advanced analytics dashboard',

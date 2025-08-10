@@ -101,7 +101,7 @@ export default function TermsPage() {
               </p>
               <ul className="list-disc pl-6 space-y-1">
                 <li>Our service providers are trained and background-checked according to BC standards</li>
-                <li>We offer satisfaction guarantees for our services</li>
+                <li>We offer professional quality assurance for our services</li>
                 <li>Issues should be reported within 24 hours of service completion</li>
                 <li>We will work to resolve any concerns promptly</li>
                 <li>All services comply with BC health and safety regulations within the Lower Mainland</li>

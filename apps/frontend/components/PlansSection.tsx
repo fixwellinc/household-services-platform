@@ -114,7 +114,7 @@ const stats = [
   { number: '10,000+', label: 'Happy Members', icon: Users },
   { number: '50+', label: 'Service Categories', icon: Wrench },
   { number: '24/7', label: 'Support Available', icon: Clock },
-  { number: '100%', label: 'Satisfaction Guarantee', icon: Shield }
+  { number: '100%', label: 'Professional Quality', icon: Shield }
 ];
 
 export default function PlansSection() {
@@ -128,6 +128,18 @@ export default function PlansSection() {
   const prerequisites = useSubscriptionPrerequisites();
   const { isAuthenticated } = useAuth();
   const { userLocation, isInBC } = useLocation();
+
+  // Handle Get in Touch button click
+  const handleGetInTouch = () => {
+    // If no location is set or not in BC, show location modal
+    if (!userLocation || !isInBC) {
+      setShowLocationModal(true);
+      return;
+    }
+    
+    // If location is valid, redirect to contact page
+    router.push('/contact');
+  };
 
   // Helper function to get button text based on authentication status
   const getButtonText = (plan: any) => {
@@ -307,7 +319,7 @@ export default function PlansSection() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center justify-center gap-2">
                   <Shield className="h-4 w-4 text-green-600" />
-                  <span>30-day money-back guarantee</span>
+                  <span>Professional quality assurance</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <MapPin className="h-4 w-4 text-blue-600" />
@@ -770,7 +782,7 @@ export default function PlansSection() {
                     <td className="px-6 py-4 text-center text-sm text-gray-600">Free</td>
                   </tr>
                   <tr>
-                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">Money-back Guarantee</td>
+                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">Quality Assurance</td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 mx-auto" />
                     </td>
@@ -885,23 +897,20 @@ export default function PlansSection() {
               Ready to Get Started?
             </h3>
             <p className="text-gray-600 mb-4 md:mb-6 max-w-2xl mx-auto text-sm md:text-base">
-              Join thousands of satisfied households who trust us with their home services. Start saving today with our 30-day money-back guarantee.
+              Join thousands of satisfied households who trust us with their home services. Start saving today.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-              <Button variant="outline" size="lg" className="border-2 border-gray-300 hover:border-blue-500 text-sm md:text-base py-3 md:py-4">
+              <Button 
+                onClick={handleGetInTouch}
+                variant="outline" 
+                size="lg" 
+                className="border-2 border-gray-300 hover:border-blue-500 text-sm md:text-base py-3 md:py-4"
+              >
                 <Phone className="h-4 w-4 mr-2" />
-                Contact Sales
-              </Button>
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-sm md:text-base py-3 md:py-4">
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Schedule Demo
+                Get in Touch
               </Button>
             </div>
             <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-2 md:gap-6 text-xs text-gray-500">
-              <div className="flex items-center gap-1">
-                <Shield className="h-3 w-3" />
-                <span>30-day guarantee</span>
-              </div>
               <div className="flex items-center gap-1">
                 <Truck className="h-3 w-3" />
                 <span>Lower Mainland service</span>

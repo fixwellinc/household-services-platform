@@ -301,16 +301,18 @@ app.get('/api/admin/subscriptions', requireAdmin, async (req, res) => {
   if (!prisma) {
     return res.status(503).json({ error: 'Database not available' });
   }
-  const subscriptions = await prisma.subscription.findMany({
-    include: {
-      user: {
-        include: {
-          subscriptionUsage: true
-        }
-      }
-    }
-  });
-  res.json({ subscriptions });
+  // Fetch subscriptions and join user + usage manually (no Prisma relation on Subscription.user)
+  const subscriptions = await prisma.subscription.findMany();
+  const userIds = subscriptions.map(s => s.userId).filter(Boolean);
+  const users = userIds.length > 0
+    ? await prisma.user.findMany({
+        where: { id: { in: userIds } },
+        include: { subscriptionUsage: true }
+      })
+    : [];
+  const userById = Object.fromEntries(users.map(u => [u.id, u]));
+  const enriched = subscriptions.map(s => ({ ...s, user: userById[s.userId] || null }));
+  res.json({ subscriptions: enriched });
 });
 
 // Admin: Get subscription usage details
@@ -319,20 +321,17 @@ app.get('/api/admin/subscriptions/:id/usage', requireAdmin, async (req, res) => 
     return res.status(503).json({ error: 'Database not available' });
   }
   const { id } = req.params;
-  const subscription = await prisma.subscription.findUnique({
-    where: { id },
-    include: {
-      user: {
-        include: {
-          subscriptionUsage: true
-        }
-      }
-    }
-  });
+  const subscription = await prisma.subscription.findUnique({ where: { id } });
   if (!subscription) {
     return res.status(404).json({ error: 'Subscription not found' });
   }
-  res.json({ subscription });
+  const user = subscription.userId
+    ? await prisma.user.findUnique({
+        where: { id: subscription.userId },
+        include: { subscriptionUsage: true }
+      })
+    : null;
+  res.json({ subscription: { ...subscription, user } });
 });
 
 // Admin: Block subscription cancellation

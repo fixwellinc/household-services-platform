@@ -20,7 +20,7 @@ The implementation includes a 3-tier subscription model (Starter Plan, HomeCare 
   - No booking fees
   - Service history tracking
   - Professional service team
-  - Basic service guarantees
+  - Basic service quality standards
   - Lower Mainland service area
 
 ### HomeCare Plan - $54.99/month ($593.89/year) ⭐ MOST POPULAR
@@ -38,7 +38,7 @@ The implementation includes a 3-tier subscription model (Starter Plan, HomeCare 
   - Service customization
   - Recurring service setup
   - Priority customer support
-  - Service guarantees
+  - Service quality standards
   - Advanced filtering options
   - **Up to 10% discount on all services**
   - Free service consultation
@@ -55,7 +55,7 @@ The implementation includes a 3-tier subscription model (Starter Plan, HomeCare 
   - Custom service packages
   - Premium service team
   - White-glove service
-  - Service quality guarantees
+  - Service quality standards
   - Flexible scheduling
   - All service categories
   - Advanced analytics dashboard
@@ -108,7 +108,7 @@ The implementation includes a 3-tier subscription model (Starter Plan, HomeCare 
 - Billing period toggle (monthly/yearly)
 - Feature comparison table
 - Testimonials and social proof
-- Trust badges and guarantees
+- Trust badges and quality standards
 
 #### 3. Admin Management (`apps/frontend/components/admin/PlanManagement.tsx`)
 - Plan overview dashboard
@@ -170,7 +170,6 @@ npm run dev
 ### 1. Pricing Psychology
 - **Original vs. Discounted Prices**: Shows "was $X, now $Y" pricing
 - **Yearly Savings**: 17% discount for annual plans
-- **Money-back Guarantee**: 30-day guarantee prominently displayed
 
 ### 2. Social Proof
 - Customer testimonials with savings amounts
@@ -185,7 +184,7 @@ npm run dev
 ### 4. Clear Value Communication
 - Feature comparison table
 - Savings calculations
-- Service guarantees
+- Service quality standards
 - Response time commitments (up to 48 hrs for Starter, up to 24 hrs for Home Care, up to 12 hrs for Priority)
 
 ## API Endpoints

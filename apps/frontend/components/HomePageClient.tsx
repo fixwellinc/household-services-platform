@@ -182,7 +182,7 @@ export default function HomePageClient() {
                 </div>
               </div>
               <p className="text-sm text-gray-600">
-                💡 <strong>Save up to 40%</strong> compared to traditional contractor rates while getting professional, insured, and guaranteed services
+                💡 <strong>Save up to 40%</strong> compared to traditional contractor rates while getting professional, insured, and reliable services
               </p>
             </div>
           </div>
@@ -292,7 +292,7 @@ export default function HomePageClient() {
                       
                       <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
                         <CheckCircle className="h-4 w-4 text-blue-500" />
-                        <span className="font-medium">Satisfaction Guaranteed</span>
+                        <span className="font-medium">Professional Service</span>
                       </div>
 
                       <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
@@ -339,6 +339,9 @@ export default function HomePageClient() {
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
               Why Choose Us?
             </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-4">
+              While other platforms focus on contracts, We focus on you.
+            </p>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               We make household services simple, reliable, and hassle-free for Lower Mainland residents
             </p>
@@ -364,11 +367,11 @@ export default function HomePageClient() {
                 <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                   <Shield className="h-10 w-10 text-white" />
                 </div>
-                <CardTitle className="text-xl font-bold">Quality Guaranteed</CardTitle>
+                <CardTitle className="text-xl font-bold">Quality Assured</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 leading-relaxed">
-                  We stand behind every service. If you&apos;re not 100% satisfied, we&apos;ll make it right or your money back.
+                  We stand behind every service with our professional quality assurance. Our team of verified experts ensures exceptional results every time.
                 </p>
               </CardContent>
             </Card>
@@ -396,7 +399,7 @@ export default function HomePageClient() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 leading-relaxed">
-                  Get professional quality at contractor rates. Save up to 40% compared to traditional contractor prices while getting better service and guarantees.
+                  Get professional quality at contractor rates. Save up to 40% compared to traditional contractor prices while getting better service and quality assurance.
                 </p>
               </CardContent>
             </Card>

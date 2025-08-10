@@ -539,7 +539,7 @@ export default function SubscribePlanForm({ planId }: SubscribePlanFormProps) {
           
           <div className="flex items-center justify-center gap-3 text-sm text-gray-500">
             <Shield className="h-4 w-4" />
-            <span>Secure payment with Stripe • 30-day money-back guarantee</span>
+            <span>Secure payment with Stripe • Professional quality assurance</span>
           </div>
         </div>
       </Card>

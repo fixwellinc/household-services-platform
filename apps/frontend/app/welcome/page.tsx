@@ -94,8 +94,8 @@ const WELCOME_FEATURES = [
   },
   {
     icon: Shield,
-    title: 'Guaranteed Quality',
-    description: '100% satisfaction guarantee with professional, vetted service providers and comprehensive insurance coverage.'
+    title: 'Professional Quality',
+    description: 'Professional quality assurance with verified, vetted service providers and comprehensive insurance coverage.'
   },
   {
     icon: Zap,

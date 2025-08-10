@@ -278,7 +278,7 @@ export default function ElectricalRepairPage() {
               
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">What warranty do you provide on electrical work?</h3>
-                <p className="text-gray-600">We provide a comprehensive warranty on all our electrical work. Parts and labor are guaranteed, and we stand behind our quality.</p>
+                <p className="text-gray-600">We provide a comprehensive warranty on all our electrical work. Parts and labor are covered, and we stand behind our professional quality assurance.</p>
               </div>
               
               <div className="bg-white rounded-lg p-6 shadow-sm">
