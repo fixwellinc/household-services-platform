@@ -31,6 +31,7 @@ import {
   MessageCircle
 } from 'lucide-react';
 import LocationPromptModal from '@/components/location/LocationPromptModal';
+import QuoteRequestModal from '@/components/QuoteRequestModal';
 
 
 
@@ -109,6 +110,8 @@ export default function ServicesPage() {
   const [selectedCategory, setSelectedCategory] = useState('ALL')
   const [searchQuery, setSearchQuery] = useState('')
   const [showLocationModal, setShowLocationModal] = useState(false)
+  const [showQuoteModal, setShowQuoteModal] = useState(false)
+  const [selectedService, setSelectedService] = useState<{ id: string; name: string } | null>(null)
   const { user, isAuthenticated } = useAuth();
   const { userLocation, userCity, isInBC, setUserLocation } = useLocation();
   const { data: userPlanData } = useUserPlan();
@@ -146,22 +149,15 @@ export default function ServicesPage() {
   }
 
   const handleViewDetails = (serviceId: string) => {
-    console.log('Viewing details for service:', serviceId)
+    console.log('Opening quote request for service:', serviceId)
     
-    // Map service IDs to their detail page routes
-    const serviceRoutes: Record<string, string> = {
-      '1': '/services/deep-house-cleaning',
-      '2': '/services/plumbing-repair',
-      '3': '/services/home-organization',
-      '4': '/services/hvac-maintenance',
-      '5': '/services/electrical-repair'
-    };
-    
-    const route = serviceRoutes[serviceId];
-    if (route) {
-      router.push(route);
+    // Find the service details
+    const service = sampleServices.find(s => s.id === serviceId);
+    if (service) {
+      setSelectedService({ id: serviceId, name: service.name });
+      setShowQuoteModal(true);
     } else {
-      console.log('No detail page found for service:', serviceId);
+      console.log('Service not found:', serviceId);
     }
   }
 
@@ -403,8 +399,8 @@ export default function ServicesPage() {
                                 className="flex-1 border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all duration-300"
                                 onClick={() => handleViewDetails(service.id)}
                               >
-                                <Eye className="h-4 w-4 mr-2" />
-                                Details
+                                <MessageCircle className="h-4 w-4 mr-2" />
+                                Request Quote
                               </Button>
                             </>
                           )}
@@ -453,14 +449,27 @@ export default function ServicesPage() {
                 variant="outline" 
                 size="lg" 
                 className="w-full sm:w-auto bg-white text-blue-600 hover:bg-gray-100 border-2 border-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium"
+                onClick={() => {
+                  setSelectedService({ id: 'custom', name: 'Custom Service' });
+                  setShowQuoteModal(true);
+                }}
               >
                 <MessageCircle className="h-4 w-5 mr-2" />
-                Contact Support
+                Request Custom Quote
               </Button>
             </div>
           </div>
         </div>
       </section>
+      <QuoteRequestModal
+        isOpen={showQuoteModal}
+        onClose={() => {
+          setShowQuoteModal(false);
+          setSelectedService(null);
+        }}
+        serviceName={selectedService?.name || ''}
+        serviceId={selectedService?.id || ''}
+      />
       <LocationPromptModal
         isOpen={showLocationModal}
         onClose={() => setShowLocationModal(false)}
