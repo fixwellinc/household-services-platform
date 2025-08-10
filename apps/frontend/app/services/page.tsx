@@ -168,39 +168,34 @@ export default function ServicesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Hero Section */}
-      <section className="relative py-20 md:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10" />
-        <div className="absolute inset-0 opacity-50 bg-[radial-gradient(circle_at_1px_1px,rgba(156,146,172,0.1)_1px,transparent_0)] bg-[length:20px_20px]" />
-        
-        <div className="relative container mx-auto px-4">
+      <section className="py-16 sm:py-20 bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="container mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 px-6 py-3 rounded-full text-sm font-medium mb-6 shadow-sm">
-              <Award className="h-4 w-4" />
-              Professional Services
-            </div>
-            
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
               Our Services
             </h1>
-            
-            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto mb-6 sm:mb-8 leading-relaxed">
               Discover our comprehensive range of professional household services. 
               Quality, reliability, and professional excellence assured.
             </p>
-
+            
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto mb-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600 mb-2">10K+</div>
-                <div className="text-sm text-gray-600">Happy Customers</div>
+                <div className="text-2xl sm:text-3xl font-bold text-blue-600 mb-1 sm:mb-2">500+</div>
+                <div className="text-xs sm:text-sm text-gray-600">Happy Customers</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600 mb-2">50+</div>
-                <div className="text-sm text-gray-600">Expert Professionals</div>
+                <div className="text-2xl sm:text-3xl font-bold text-purple-600 mb-1 sm:mb-2">50+</div>
+                <div className="text-xs sm:text-sm text-gray-600">Services</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-600 mb-2">99%</div>
-                <div className="text-sm text-gray-600">Satisfaction Rate</div>
+                <div className="text-2xl sm:text-3xl font-bold text-green-600 mb-1 sm:mb-2">24/7</div>
+                <div className="text-xs sm:text-sm text-gray-600">Support</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl sm:text-3xl font-bold text-green-600 mb-1 sm:mb-2">99%</div>
+                <div className="text-xs sm:text-sm text-gray-600">Satisfaction Rate</div>
               </div>
             </div>
           </div>
@@ -208,35 +203,35 @@ export default function ServicesPage() {
       </section>
 
       {/* Search and Filters */}
-      <section className="py-8 bg-white/50 backdrop-blur-sm border-b border-gray-200/50">
+      <section className="py-6 sm:py-8 bg-white/50 backdrop-blur-sm border-b border-gray-200/50">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             {/* Search Bar */}
-            <div className="relative mb-8">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <div className="relative mb-6 sm:mb-8">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5" />
               <Input
                 placeholder="Search for services..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 pr-4 py-4 text-lg border-2 border-gray-200 focus:border-blue-500 rounded-2xl shadow-sm"
+                className="pl-12 pr-4 py-3 sm:py-4 text-base sm:text-lg border-2 border-gray-200 focus:border-blue-500 rounded-2xl shadow-sm"
               />
             </div>
 
             {/* Category Filters */}
-            <div className="flex flex-wrap gap-3 justify-center">
+            <div className="flex flex-wrap gap-2 sm:gap-3 justify-center">
               {categories.map((category) => {
                 const Icon = category.icon;
                 return (
                   <button
                     key={category.id}
                     onClick={() => setSelectedCategory(category.id)}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105 ${
+                    className={`flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105 text-sm sm:text-base ${
                       selectedCategory === category.id
                         ? `bg-gradient-to-r ${category.color} text-white shadow-lg`
                         : 'bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-300 shadow-sm'
                     }`}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
                     {category.name}
                   </button>
                 );
@@ -250,12 +245,12 @@ export default function ServicesPage() {
       <section className="py-16">
         <div className="container mx-auto px-4">
           {filteredServices.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="w-24 h-24 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Search className="h-12 w-12 text-blue-600" />
+            <div className="text-center py-16 sm:py-20">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                <Search className="h-10 w-10 sm:h-12 sm:w-12 text-blue-600" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">No services found</h3>
-              <p className="text-gray-600 mb-8 max-w-md mx-auto">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">No services found</h3>
+              <p className="text-gray-600 mb-6 sm:mb-8 max-w-md mx-auto text-sm sm:text-base">
                 Try adjusting your search or filter criteria. We're always adding new services!
               </p>
               <Button
@@ -263,20 +258,20 @@ export default function ServicesPage() {
                   setSearchQuery('')
                   setSelectedCategory('ALL')
                 }}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-6 py-2 sm:px-8 sm:py-3"
               >
                 Clear Filters
               </Button>
             </div>
           ) : (
             <>
-              <div className="text-center mb-12">
-                <p className="text-gray-600 text-lg">
+              <div className="text-center mb-8 sm:mb-12">
+                <p className="text-gray-600 text-base sm:text-lg">
                   Showing {filteredServices.length} of {sampleServices.length} services
                 </p>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                 {filteredServices.map((service) => {
                   const Icon = service.icon;
                   return (
@@ -315,43 +310,43 @@ export default function ServicesPage() {
                         </div>
                       </div>
 
-                      <CardHeader className="pb-4">
+                      <CardHeader className="pb-4 px-4 sm:px-6">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <CardTitle className="text-xl group-hover:text-blue-600 transition-colors duration-300 flex items-center gap-2">
+                            <CardTitle className="text-lg sm:text-xl group-hover:text-blue-600 transition-colors duration-300 flex items-center gap-2">
                               {service.name}
                               {service.isPopular && <Sparkles className="h-4 w-4 text-yellow-500 animate-pulse" />}
                             </CardTitle>
-                            <CardDescription className="mt-2 text-gray-600 line-clamp-2">
+                            <CardDescription className="mt-2 text-gray-600 line-clamp-2 text-sm sm:text-base">
                               {service.description}
                             </CardDescription>
                           </div>
-                          <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-700 border-blue-200">
+                          <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-700 border-blue-200 text-xs sm:text-sm">
                             {service.category}
                           </Badge>
                         </div>
                       </CardHeader>
 
-                      <CardContent className="pt-0">
+                      <CardContent className="pt-0 px-4 sm:px-6 pb-4 sm:pb-6">
                         {/* Service Features */}
-                        <div className="space-y-3 mb-6">
+                        <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
                           {service.features.map((feature, index) => (
-                            <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
-                              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                            <div key={index} className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500 flex-shrink-0" />
                               <span>{feature}</span>
                             </div>
                           ))}
                         </div>
 
                         {/* Benefits */}
-                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 mb-6">
-                          <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                            <TrendingUp className="h-4 w-4 text-blue-600" />
+                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+                          <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2 text-sm sm:text-base">
+                            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
                             Key Benefits
                           </h4>
                           <div className="space-y-1">
                             {service.benefits.map((benefit, index) => (
-                              <div key={index} className="text-sm text-gray-600 flex items-center gap-2">
+                              <div key={index} className="text-xs sm:text-sm text-gray-600 flex items-center gap-2">
                                 <div className="w-1 h-1 bg-blue-400 rounded-full" />
                                 {benefit}
                               </div>
@@ -360,56 +355,59 @@ export default function ServicesPage() {
                         </div>
 
                         {/* Service Info */}
-                        <div className="flex items-center justify-between mb-6">
-                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-2 sm:gap-0">
+                          <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600">
                             <div className="flex items-center gap-1">
-                              <Clock className="h-4 w-4 text-blue-500" />
+                              <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
                               {service.estimatedDuration}
                             </div>
                             <div className="flex items-center gap-1">
-                              <Shield className="h-4 w-4 text-green-500" />
+                              <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
                               Professional
                             </div>
                           </div>
-                          <Badge variant="secondary" className="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700">
+                          <Badge variant="secondary" className="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 text-xs sm:text-sm self-start sm:self-auto">
                             {service.complexity}
                           </Badge>
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex gap-3">
-                          <Button 
-                            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transition-all duration-300 transform hover:scale-105"
-                            onClick={() => handleBook(service.id)}
-                          >
-                            <BookOpen className="h-4 w-4 mr-2" />
-                            {isAuthenticated ? 'Book Now' : 'Let\'s Get You Started'}
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            className="border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all duration-300"
-                            onClick={() => {
-                              if (!isAuthenticated || !isSubscribed) {
-                                // If not authenticated or not subscribed, redirect to pricing
-                                if (!isAuthenticated) {
-                                  if (!userLocation || !isInBC) {
-                                    setShowLocationModal(true);
-                                  } else {
-                                    router.push(`/register?redirect=${encodeURIComponent('/services')}`);
-                                  }
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          {!isAuthenticated || !isSubscribed ? (
+                            // Single button for non-authenticated or non-subscribed users
+                            <Button 
+                              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transition-all duration-300 transform hover:scale-105"
+                              onClick={() => {
+                                if (!userLocation || !isInBC) {
+                                  setShowLocationModal(true);
                                 } else {
-                                  // User is authenticated but not subscribed
-                                  router.push('/pricing');
+                                  router.push(`/register?redirect=${encodeURIComponent('/services')}`);
                                 }
-                              } else {
-                                // User is subscribed, show details
-                                handleViewDetails(service.id);
-                              }
-                            }}
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            {!isAuthenticated || !isSubscribed ? 'Let\'s Get You Started' : 'Request Custom Quote'}
-                          </Button>
+                              }}
+                            >
+                              <BookOpen className="h-4 w-4 mr-2" />
+                              Let's Get You Started
+                            </Button>
+                          ) : (
+                            // Two buttons for authenticated and subscribed users
+                            <>
+                              <Button 
+                                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transition-all duration-300 transform hover:scale-105"
+                                onClick={() => handleBook(service.id)}
+                              >
+                                <BookOpen className="h-4 w-4 mr-2" />
+                                Book Now
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                className="flex-1 border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all duration-300"
+                                onClick={() => handleViewDetails(service.id)}
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                Details
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -422,19 +420,19 @@ export default function ServicesPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+      <section className="py-16 sm:py-20 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6">
               Can't find what you're looking for?
             </h2>
-            <p className="text-xl text-blue-100 mb-8">
+            <p className="text-lg sm:text-xl text-blue-100 mb-6 sm:mb-8">
               We're always expanding our services. Let us know what you need and we'll make it happen!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 size="lg" 
-                className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg"
+                className="w-full sm:w-auto bg-white text-blue-600 hover:bg-gray-100 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg"
                 onClick={() => {
                   if (!isAuthenticated) {
                     if (!userLocation || !isInBC) {
@@ -448,15 +446,15 @@ export default function ServicesPage() {
                   }
                 }}
               >
-                <Users className="h-5 w-5 mr-2" />
+                <Users className="h-4 w-5 mr-2" />
                 {isAuthenticated ? 'Book Now' : 'Let\'s Get You Started'}
               </Button>
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="bg-white text-blue-600 hover:bg-gray-100 border-2 border-white px-8 py-4 text-lg font-medium"
+                className="w-full sm:w-auto bg-white text-blue-600 hover:bg-gray-100 border-2 border-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium"
               >
-                <MessageCircle className="h-5 w-5 mr-2" />
+                <MessageCircle className="h-4 w-5 mr-2" />
                 Contact Support
               </Button>
             </div>
