@@ -161,6 +161,28 @@ export default function ServicesPage() {
     }
   }
 
+  const handleViewServiceDetails = (serviceId: string) => {
+    console.log('Viewing details for service:', serviceId)
+    
+    // Find the service details
+    const service = sampleServices.find(s => s.id === serviceId);
+    if (service) {
+      // For now, we'll show an alert with service details
+      // In the future, this could open a modal or navigate to a detail page
+      const details = `
+Service: ${service.name}
+Category: ${service.category}
+Duration: ${service.estimatedDuration}
+Complexity: ${service.complexity}
+Description: ${service.description}
+      `.trim();
+      
+      alert(details);
+    } else {
+      console.log('Service not found:', serviceId);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Hero Section */}
@@ -385,7 +407,7 @@ export default function ServicesPage() {
                               Let's Get You Started
                             </Button>
                           ) : (
-                            // Two buttons for authenticated users (considered subscribers)
+                            // Three buttons for authenticated users (considered subscribers)
                             <>
                               <Button 
                                 className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transition-all duration-300 transform hover:scale-105"
@@ -401,6 +423,15 @@ export default function ServicesPage() {
                               >
                                 <MessageCircle className="h-4 w-4 mr-2" />
                                 Request Quote
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 border border-gray-200 hover:border-blue-300"
+                                onClick={() => handleViewServiceDetails(service.id)}
+                                title="View Service Details"
+                              >
+                                <Eye className="h-4 w-4" />
                               </Button>
                             </>
                           )}
