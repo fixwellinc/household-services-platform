@@ -182,7 +182,7 @@ export default function ServicesPage() {
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
               <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-blue-600 mb-1 sm:mb-2">500+</div>
+                <div className="text-2xl sm:text-3xl font-bold text-blue-600 mb-1 sm:mb-2">10K+</div>
                 <div className="text-xs sm:text-sm text-gray-600">Happy Customers</div>
               </div>
               <div className="text-center">
