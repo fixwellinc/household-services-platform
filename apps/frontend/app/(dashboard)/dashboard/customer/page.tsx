@@ -257,6 +257,36 @@ export default function CustomerDashboardPage() {
           </div>
         )}
 
+        {/* Members Discount Card */}
+        {isSubscribed && (
+          <div className="mb-8">
+            <Card className="border-0 shadow-lg bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                      <Gift className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold">Member Discounts</h2>
+                      <p className="text-green-100">
+                        Access exclusive savings from our partner businesses
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <Link href="/members-discount">
+                      <Button size="sm" variant="outline" className="border-white text-white hover:bg-white hover:text-green-600">
+                        View Discounts
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="border-0 shadow-lg">

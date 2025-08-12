@@ -41,6 +41,61 @@ export default function PlansPage() {
       {/* Plans Section */}
       <PlansSection />
 
+      {/* Member Discounts Section */}
+      <section className="py-12 md:py-20 bg-gradient-to-r from-blue-50 to-indigo-100">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Exclusive Member Discounts
+            </h2>
+            <p className="text-xl text-gray-600 leading-relaxed mb-8">
+              As a Fixwell member, you'll get exclusive access to special discounts and offers from our trusted partner businesses across the Lower Mainland.
+            </p>
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+              <div className="grid md:grid-cols-2 gap-8 items-center">
+                <div className="text-left">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                    Partner Business Discounts
+                  </h3>
+                  <ul className="space-y-3 text-gray-600">
+                    <li className="flex items-center">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                      Up to 20% off at Infinite Optical
+                    </li>
+                    <li className="flex items-center">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                      Up to 10% off body scans at Nutrition Well
+                    </li>
+                    <li className="flex items-center">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                      15% off landscaping services
+                    </li>
+                    <li className="flex items-center">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                      And many more exclusive offers
+                    </li>
+                  </ul>
+                </div>
+                <div className="text-center">
+                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-2xl">
+                    <h4 className="text-xl font-bold mb-2">Ready to Unlock Savings?</h4>
+                    <p className="text-blue-100 mb-4">
+                      Subscribe to any plan and start saving today!
+                    </p>
+                    <a 
+                      href="/members-discount" 
+                      className="inline-block bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-6 py-3 rounded-lg transition-colors duration-200"
+                    >
+                      View All Discounts
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section className="py-12 md:py-20 bg-white">
         <div className="container mx-auto px-4">

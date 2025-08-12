@@ -16,7 +16,8 @@ import {
   Twitter,
   Instagram,
   Linkedin,
-  Heart
+  Heart,
+  Gift
 } from 'lucide-react'
 import LocationPromptModal from '@/components/location/LocationPromptModal'
 
@@ -144,6 +145,28 @@ const Footer: React.FC = () => {
                 <Link href="/press" className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center gap-2">
                   <div className="w-1 h-1 bg-purple-400 rounded-full"></div>
                   Press
+                </Link>
+              </li>
+            </ul>
+          </div>
+          
+          {/* Members Discount */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Gift className="h-5 w-5" />
+              Members Discount
+            </h3>
+            <ul className="space-y-3">
+              <li>
+                <Link href="/members-discount" className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center gap-2">
+                  <div className="w-1 h-1 bg-yellow-400 rounded-full"></div>
+                  View Discounts
+                </Link>
+              </li>
+              <li>
+                <Link href="/pricing" className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center gap-2">
+                  <div className="w-1 h-1 bg-yellow-400 rounded-full"></div>
+                  Become a Member
                 </Link>
               </li>
             </ul>

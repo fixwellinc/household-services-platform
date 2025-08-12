@@ -19,7 +19,8 @@ import {
   ChevronDown,
   Settings,
   LayoutDashboard,
-  DollarSign
+  DollarSign,
+  Gift
 } from 'lucide-react'
 
 
@@ -151,6 +152,14 @@ const Header: React.FC = () => {
             >
               <DollarSign className="h-4 w-4" />
               Plans
+            </Link>
+
+            <Link 
+              href="/members-discount" 
+              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50"
+            >
+              <Gift className="h-4 w-4" />
+              Members Discount
             </Link>
 
             <Link 
@@ -309,6 +318,15 @@ const Header: React.FC = () => {
               >
                 <DollarSign className="h-5 w-5" />
                 Plans
+              </Link>
+
+              <Link 
+                href="/members-discount" 
+                className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Gift className="h-5 w-5" />
+                Members Discount
               </Link>
 
               <Link 
