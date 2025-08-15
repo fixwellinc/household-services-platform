@@ -39,7 +39,7 @@ const BUSINESSES: Business[] = [
     id: '1',
     name: 'Infinite Optical',
     website: 'https://infiniteoptical.ca/',
-    discount: 'Up to 20% discount',
+    discount: 'Up to 10% discount',
     description: 'Professional eye care and eyewear services',
     category: 'Healthcare',
     location: 'Vancouver, BC',
