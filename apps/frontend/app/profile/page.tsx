@@ -39,7 +39,16 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (user) {
+      console.log('User data loaded:', user);
+      console.log('User postal code:', user.postalCode);
       setFormData({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        address: user.address || '',
+        postalCode: user.postalCode || ''
+      });
+      console.log('Form data initialized:', {
         name: user.name || '',
         email: user.email || '',
         phone: user.phone || '',
@@ -50,18 +59,29 @@ export default function ProfilePage() {
   }, [user]);
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    console.log(`Updating field: ${field} with value: ${value}`);
+    console.log(`Previous form data:`, formData);
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [field]: value
+      };
+      console.log(`New form data:`, newData);
+      return newData;
+    });
   };
 
   const handleSave = async () => {
     setIsSaving(true);
     setSaveStatus('idle');
     
+    // Debug logging
+    console.log('Saving profile data:', formData);
+    console.log('Postal code value:', formData.postalCode);
+    
     try {
-      await api.updateProfile(formData);
+      const response = await api.updateProfile(formData);
+      console.log('Profile update response:', response);
       setSaveStatus('success');
       setIsEditing(false);
       refetch(); // Refresh user data

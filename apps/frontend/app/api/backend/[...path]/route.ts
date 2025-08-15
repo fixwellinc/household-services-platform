@@ -10,12 +10,22 @@ export async function GET(
   try {
     const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
     const backendBase = base.replace(/\/$/, '');
+    
+    // Get headers from the request
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Cookie': request.headers.get('cookie') || '',
+    };
+    
+    // Add Authorization header if present
+    const authHeader = request.headers.get('authorization');
+    if (authHeader) {
+      headers['Authorization'] = authHeader;
+    }
+    
     const response = await fetch(`${backendBase}/${path}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': request.headers.get('cookie') || '',
-      },
+      headers,
     });
     
     const data = await response.json();
@@ -39,12 +49,22 @@ export async function POST(
   try {
     const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
     const backendBase = base.replace(/\/$/, '');
+    
+    // Get headers from the request
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Cookie': request.headers.get('cookie') || '',
+    };
+    
+    // Add Authorization header if present
+    const authHeader = request.headers.get('authorization');
+    if (authHeader) {
+      headers['Authorization'] = authHeader;
+    }
+    
     const response = await fetch(`${backendBase}/${path}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': request.headers.get('cookie') || '',
-      },
+      headers,
       body: JSON.stringify(body),
     });
     
@@ -69,12 +89,62 @@ export async function PUT(
   try {
     const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
     const backendBase = base.replace(/\/$/, '');
+    
+    // Get headers from the request
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Cookie': request.headers.get('cookie') || '',
+    };
+    
+    // Add Authorization header if present
+    const authHeader = request.headers.get('authorization');
+    if (authHeader) {
+      headers['Authorization'] = authHeader;
+    }
+    
     const response = await fetch(`${backendBase}/${path}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': request.headers.get('cookie') || '',
-      },
+      headers,
+      body: JSON.stringify(body),
+    });
+    
+    const data = await response.json();
+    return NextResponse.json(data, { status: response.status });
+  } catch (error) {
+    console.error('Backend proxy error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { path: string[] } }
+) {
+  const path = params.path.join('/');
+  const body = await request.json();
+  
+  try {
+    const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const backendBase = base.replace(/\/$/, '');
+    
+    // Get headers from the request
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Cookie': request.headers.get('cookie') || '',
+    };
+    
+    // Add Authorization header if present
+    const authHeader = request.headers.get('authorization');
+    if (authHeader) {
+      headers['Authorization'] = authHeader;
+    }
+    
+    const response = await fetch(`${backendBase}/${path}`, {
+      method: 'PATCH',
+      headers,
       body: JSON.stringify(body),
     });
     
@@ -98,12 +168,22 @@ export async function DELETE(
   try {
     const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
     const backendBase = base.replace(/\/$/, '');
+    
+    // Get headers from the request
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Cookie': request.headers.get('cookie') || '',
+    };
+    
+    // Add Authorization header if present
+    const authHeader = request.headers.get('authorization');
+    if (authHeader) {
+      headers['Authorization'] = authHeader;
+    }
+    
     const response = await fetch(`${backendBase}/${path}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': request.headers.get('cookie') || '',
-      },
+      headers,
     });
     
     const data = await response.json();

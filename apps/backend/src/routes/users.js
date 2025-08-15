@@ -14,7 +14,10 @@ router.patch('/me', auth, async (req, res) => {
     // Debug logging
     console.log('Profile update request:', {
       userId,
-      receivedData: { name, email, phone, avatar, address, postalCode }
+      receivedData: { name, email, phone, avatar, address, postalCode },
+      bodyKeys: Object.keys(req.body),
+      postalCodeType: typeof postalCode,
+      postalCodeValue: postalCode
     });
     
     const updated = await prisma.user.update({

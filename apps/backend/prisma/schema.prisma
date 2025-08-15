@@ -1,6 +1,3 @@
-// This is your Prisma schema file for PostgreSQL
-// learn more: https://pris.ly/d/postgresql
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,29 +8,26 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  password      String
-  name          String?
-  role          String   @default("CUSTOMER")
-  avatar        String?
-  phone         String?
-  address       String?
-  postalCode    String?
-  isActive      Boolean  @default(true)
-  notifications Json?    @default("{\"email\": true, \"sms\": false}")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  // Reference fields (manual lookup in code)
-  subscriptionId String?
-  serviceIds     String[]
-  bookingIds     String[]
-  messageIds     String[]
-  quoteIds       String[]
-  // Employee assignments
+  id                String                       @id @default(cuid())
+  email             String                       @unique
+  password          String
+  name              String?
+  role              String                       @default("CUSTOMER")
+  avatar            String?
+  phone             String?
+  address           String?
+  createdAt         DateTime                     @default(now())
+  updatedAt         DateTime                     @updatedAt
+  subscriptionId    String?
+  serviceIds        String[]
+  bookingIds        String[]
+  messageIds        String[]
+  quoteIds          String[]
+  isActive          Boolean                      @default(true)
+  notifications     Json?                        @default("{\"sms\": false, \"email\": true}")
+  postalCode        String?
+  assignedEmployee  CustomerEmployeeAssignment?  @relation("CustomerAssignment")
   assignedCustomers CustomerEmployeeAssignment[] @relation("EmployeeAssignments")
-  assignedEmployee   CustomerEmployeeAssignment? @relation("CustomerAssignment")
-  // Subscription usage tracking
   subscriptionUsage SubscriptionUsage?
 }
 
@@ -43,111 +37,105 @@ model CustomerEmployeeAssignment {
   employeeId String
   assignedAt DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  
   customer   User     @relation("CustomerAssignment", fields: [customerId], references: [id])
   employee   User     @relation("EmployeeAssignments", fields: [employeeId], references: [id])
 }
 
 model Subscription {
-  id            String   @id @default(cuid())
-  userId        String   @unique
-  tier          String
-  status        String   @default("ACTIVE")
-  stripeCustomerId String?
-  stripeSubscriptionId String?
-  currentPeriodStart DateTime?
-  currentPeriodEnd   DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  // Prevent cancellation after perks used
-  canCancel     Boolean  @default(true)
-  cancellationBlockedAt DateTime?
+  id                        String    @id @default(cuid())
+  userId                    String    @unique
+  tier                      String
+  status                    String    @default("ACTIVE")
+  stripeCustomerId          String?
+  stripeSubscriptionId      String?
+  currentPeriodStart        DateTime?
+  currentPeriodEnd          DateTime?
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+  canCancel                 Boolean   @default(true)
+  cancellationBlockedAt     DateTime?
   cancellationBlockedReason String?
 }
 
 model SubscriptionUsage {
-  id            String   @id @default(cuid())
-  userId        String   @unique
-  subscriptionId String
-  tier          String
-  // Perk usage tracking
-  priorityBookingUsed     Boolean  @default(false)
-  priorityBookingUsedAt   DateTime?
-  priorityBookingCount    Int      @default(0)
-  discountUsed            Boolean  @default(false)
-  discountUsedAt          DateTime?
-  discountAmount          Float    @default(0)
-  freeServiceUsed         Boolean  @default(false)
-  freeServiceUsedAt       DateTime?
-  freeServiceType         String?
-  emergencyServiceUsed    Boolean  @default(false)
-  emergencyServiceUsedAt  DateTime?
-  // Usage limits
-  maxPriorityBookings     Int      @default(0)
-  maxDiscountAmount       Float    @default(0)
-  maxFreeServices         Int      @default(0)
-  maxEmergencyServices    Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  user         User     @relation(fields: [userId], references: [id])
+  id                     String    @id @default(cuid())
+  userId                 String    @unique
+  subscriptionId         String
+  tier                   String
+  priorityBookingUsed    Boolean   @default(false)
+  priorityBookingUsedAt  DateTime?
+  priorityBookingCount   Int       @default(0)
+  discountUsed           Boolean   @default(false)
+  discountUsedAt         DateTime?
+  discountAmount         Float     @default(0)
+  freeServiceUsed        Boolean   @default(false)
+  freeServiceUsedAt      DateTime?
+  freeServiceType        String?
+  emergencyServiceUsed   Boolean   @default(false)
+  emergencyServiceUsedAt DateTime?
+  maxPriorityBookings    Int       @default(0)
+  maxDiscountAmount      Float     @default(0)
+  maxFreeServices        Int       @default(0)
+  maxEmergencyServices   Int       @default(0)
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  user                   User      @relation(fields: [userId], references: [id])
 }
 
 model Service {
-  id            String   @id @default(cuid())
-  name          String   @unique
-  description   String
-  category      String
-  complexity    String
-  basePrice     Float
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  bookingIds    String[]
-  quoteIds      String[]
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  category    String
+  complexity  String
+  basePrice   Float
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  bookingIds  String[]
+  quoteIds    String[]
 }
 
 model Booking {
-  id            String   @id @default(cuid())
-  customerId    String
-  serviceId     String
-  scheduledDate DateTime
-  status        String   @default("PENDING")
-  totalAmount   Float
-  discountAmount Float   @default(0)
-  finalAmount   Float
-  notes         String?
+  id                    String   @id @default(cuid())
+  customerId            String
+  serviceId             String
+  scheduledDate         DateTime
+  status                String   @default("PENDING")
+  totalAmount           Float
+  discountAmount        Float    @default(0)
+  finalAmount           Float
+  notes                 String?
   stripePaymentIntentId String?
-  // Subscription perk tracking
-  usedSubscriptionPerk Boolean @default(false)
-  perkType             String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  messageIds    String[]
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  messageIds            String[]
+  perkType              String?
+  usedSubscriptionPerk  Boolean  @default(false)
 }
 
 model Message {
-  id            String   @id @default(cuid())
-  bookingId     String
-  senderId      String
-  receiverId    String
-  content       String
-  isRead        Boolean  @default(false)
-  createdAt     DateTime @default(now())
+  id         String   @id @default(cuid())
+  bookingId  String
+  senderId   String
+  receiverId String
+  content    String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
 }
 
 model Quote {
-  id              String   @id @default(cuid())
-  userId          String?
-  email           String
-  serviceId       String?
-  message         String
-  status          String   @default("PENDING")
-  adminReply      String?
-  adminReplyPrice Float?
+  id               String    @id @default(cuid())
+  userId           String?
+  email            String
+  serviceId        String?
+  message          String
+  status           String    @default("PENDING")
+  adminReply       String?
+  adminReplyPrice  Float?
   adminReplySentAt DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 }
 
 model Setting {
@@ -157,56 +145,47 @@ model Setting {
   updatedAt DateTime @updatedAt
 }
 
-// Enums are not supported in MongoDB, using strings instead
-// UserRole: "CUSTOMER", "ADMIN"
-// SubscriptionTier: "STARTER", "HOMECARE", "PRIORITY"
-// SubscriptionStatus: "ACTIVE", "CANCELLED", "PAST_DUE", "UNPAID"
-// ServiceCategory: "CLEANING", "MAINTENANCE", "REPAIR", "ORGANIZATION", "OTHER"
-// ServiceComplexity: "SIMPLE", "MODERATE", "COMPLEX"
-// BookingStatus: "PENDING", "CONFIRMED", "IN_PROGRESS", "COMPLETED", "CANCELLED" 
-
 model EmailTemplate {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  subject   String
-  body      String?
-  html      String?
+  id         String   @id @default(cuid())
+  name       String   @unique
+  subject    String
+  body       String?
+  html       String?
   isHtmlMode Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  createdBy String?
-} 
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String?
+}
 
 model ChatSession {
-  id            String   @id @default(cuid())
-  customerName  String
-  customerEmail String?
-  status        String   @default("ACTIVE")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  lastAdminReadAt DateTime?
+  id                 String        @id @default(cuid())
+  customerName       String
+  customerEmail      String?
+  status             String        @default("ACTIVE")
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  lastAdminReadAt    DateTime?
   lastCustomerReadAt DateTime?
-  messages      ChatMessage[]
+  messages           ChatMessage[]
 }
 
 model ChatMessage {
-  id            String   @id @default(cuid())
-  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id])
+  id            String      @id @default(cuid())
   chatSessionId String
-  sender        String   // 'customer', 'admin', 'manager', or phone/email
-  senderType    String   // 'customer', 'admin', 'sms'
+  sender        String
+  senderType    String
   message       String
-  sentAt        DateTime @default(now())
-  viaSMS        Boolean  @default(false)
-  readBy        String[] // 'customer', 'admin'
-  // File attachment fields
+  sentAt        DateTime    @default(now())
+  viaSMS        Boolean     @default(false)
+  readBy        String[]
   fileName      String?
   fileType      String?
   fileUrl       String?
-} 
+  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id])
+}
 
 enum SubscriptionTier {
   STARTER
   HOMECARE
   PRIORITY
-} 
+}
