@@ -171,7 +171,11 @@ app.use(performanceMonitor);
 // Rate limiting
 app.use('/api/', generalLimiter);
 if (process.env.NODE_ENV === 'production') {
-  app.use('/api/auth', authLimiter);
+  // Apply strict rate limiting only to login and register routes
+  app.use('/api/auth/login', authLimiter);
+  app.use('/api/auth/register', authLimiter);
+  // Apply general rate limiting to other auth routes (including logout)
+  app.use('/api/auth', generalLimiter);
 }
 app.use('/api/', apiLimiter);
 
