@@ -18,9 +18,7 @@ import {
   CheckCircle,
   Percent,
   MapPin,
-  Globe,
-  Phone,
-  Mail
+  Globe
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -33,8 +31,6 @@ interface Business {
   description: string;
   category: string;
   location?: string;
-  phone?: string;
-  email?: string;
   image?: string;
 }
 
@@ -47,8 +43,6 @@ const BUSINESSES: Business[] = [
     description: 'Professional eye care and eyewear services',
     category: 'Healthcare',
     location: 'Vancouver, BC',
-    phone: '+1 (604) 555-0123',
-    email: 'info@infiniteoptical.ca',
     image: '/api/placeholder/300/200'
   },
   {
@@ -59,8 +53,6 @@ const BUSINESSES: Business[] = [
     description: 'Comprehensive nutrition and wellness services',
     category: 'Health & Wellness',
     location: 'Vancouver, BC',
-    phone: '+1 (604) 555-0456',
-    email: 'hello@nutritionwell.ca',
     image: '/api/placeholder/300/200'
   },
   {
@@ -71,8 +63,6 @@ const BUSINESSES: Business[] = [
     description: 'Professional landscaping and garden maintenance',
     category: 'Home & Garden',
     location: 'Burnaby, BC',
-    phone: '+1 (604) 555-0789',
-    email: 'contact@greenthumblandscaping.ca',
     image: '/api/placeholder/300/200'
   },
   {
@@ -83,8 +73,6 @@ const BUSINESSES: Business[] = [
     description: 'Computer and mobile device repair services',
     category: 'Technology',
     location: 'Richmond, BC',
-    phone: '+1 (604) 555-0321',
-    email: 'support@techfixpro.ca',
     image: '/api/placeholder/300/200'
   },
   {
@@ -95,8 +83,6 @@ const BUSINESSES: Business[] = [
     description: 'Professional residential and commercial cleaning',
     category: 'Home Services',
     location: 'Surrey, BC',
-    phone: '+1 (604) 555-0654',
-    email: 'info@freshstartcleaning.ca',
     image: '/api/placeholder/300/200'
   },
   {
@@ -107,8 +93,6 @@ const BUSINESSES: Business[] = [
     description: 'Modern fitness facility with personal training',
     category: 'Fitness',
     location: 'Coquitlam, BC',
-    phone: '+1 (604) 555-0987',
-    email: 'membership@fitlifegym.ca',
     image: '/api/placeholder/300/200'
   }
 ];
@@ -266,25 +250,7 @@ export default function MembersDiscountPage() {
                   {business.description}
                 </p>
 
-                {/* Contact Info */}
-                <div className="space-y-2 text-sm">
-                  {business.phone && (
-                    <div className="flex items-center text-gray-600">
-                      <Phone className="h-4 w-4 mr-2" />
-                      <a href={`tel:${business.phone}`} className="hover:text-blue-600">
-                        {business.phone}
-                      </a>
-                    </div>
-                  )}
-                  {business.email && (
-                    <div className="flex items-center text-gray-600">
-                      <Mail className="h-4 w-4 mr-2" />
-                      <a href={`mailto:${business.email}`} className="hover:text-blue-600">
-                        {business.email}
-                      </a>
-                    </div>
-                  )}
-                </div>
+
 
                 {/* Action Buttons */}
                 <div className="flex gap-2 pt-2">
