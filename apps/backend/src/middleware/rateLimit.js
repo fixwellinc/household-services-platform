@@ -3,7 +3,7 @@ import rateLimit from 'express-rate-limit';
 // General rate limiter
 export const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 200, // limit each IP to 200 requests per windowMs (increased from 100)
   message: {
     error: 'Too many requests from this IP, please try again later.',
     retryAfter: '15 minutes'
@@ -18,10 +18,10 @@ export const generalLimiter = rateLimit({
   }
 });
 
-// Strict rate limiter for auth routes
+// Production-friendly rate limiter for auth routes
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 requests per windowMs
+  max: 20, // limit each IP to 20 requests per windowMs (increased from 5)
   message: {
     error: 'Too many authentication attempts, please try again later.',
     retryAfter: '15 minutes'
@@ -29,6 +29,7 @@ export const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true, // Don't count successful requests
+  skipFailedRequests: false, // Count failed requests to prevent brute force
   handler: (req, res) => {
     res.status(429).json({
       error: 'Too many authentication attempts, please try again later.',
@@ -42,7 +43,7 @@ export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: (req) => {
     // Authenticated users get more requests
-    return req.user ? 200 : 50;
+    return req.user ? 500 : 100; // Increased limits
   },
   message: {
     error: 'Too many API requests, please try again later.',
@@ -65,7 +66,7 @@ export const apiLimiter = rateLimit({
 // File upload rate limiter
 export const uploadLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // limit each IP to 10 uploads per hour
+  max: 20, // limit each IP to 20 uploads per hour (increased from 10)
   message: {
     error: 'Too many file uploads, please try again later.',
     retryAfter: '1 hour'
@@ -83,7 +84,7 @@ export const uploadLimiter = rateLimit({
 // Admin rate limiter (very lenient)
 export const adminLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 500, // limit each admin to 500 requests per windowMs
+  max: 1000, // limit each admin to 1000 requests per windowMs (increased from 500)
   message: {
     error: 'Too many admin requests, please try again later.',
     retryAfter: '15 minutes'
@@ -97,22 +98,22 @@ export const adminLimiter = rateLimit({
       retryAfter: Math.ceil(req.rateLimit.resetTime / 1000)
     });
   }
-}); 
+});
 
-// Stricter limiter for bulk admin actions (email blasts, notifications)
+// Bulk admin operations limiter (for email blasts, etc.)
 export const bulkAdminLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // very limited bulk actions
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // limit bulk operations to 10 per hour
   message: {
-    error: 'Bulk admin action limit reached. Try again later.',
-    retryAfter: '15 minutes'
+    error: 'Too many bulk operations, please try again later.',
+    retryAfter: '1 hour'
   },
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => req.user?.id || req.ip,
   handler: (req, res) => {
     res.status(429).json({
-      error: 'Bulk admin action limit reached. Try again later.',
+      error: 'Too many bulk operations, please try again later.',
       retryAfter: Math.ceil(req.rateLimit.resetTime / 1000)
     });
   }

@@ -21,7 +21,6 @@ export interface DashboardData {
     totalBookings: number;
     upcomingBookings: number;
     completedBookings: number;
-    totalSpent: number;
   };
   usageStats: {
     perksUsed: number;

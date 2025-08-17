@@ -551,8 +551,8 @@ export default function PlansSection() {
                             return;
                           }
                           
-                          // All prerequisites met, proceed to subscription
-                          router.push(`/pricing/subscribe?plan=${plan.id}`);
+                          // All prerequisites met, proceed to Stripe payment
+                          router.push(`/pricing/stripe-payment?plan=${plan.id}`);
                         }}
                       >
                         {loadingPlan === plan.id ? (

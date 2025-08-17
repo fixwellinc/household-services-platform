@@ -235,20 +235,29 @@ router.post('/refund', authMiddleware, async (req, res) => {
   }
 });
 
-// Stripe webhook handler
+// Stripe webhook handler (legacy endpoint - redirects to /api/webhooks/stripe)
 router.post('/webhook', async (req, res) => {
-  const sig = req.headers['stripe-signature'];
-
+  console.log('🔄 Legacy webhook endpoint called, redirecting to /api/webhooks/stripe');
+  
+  // Redirect to the new webhook endpoint
+  const newUrl = req.originalUrl.replace('/api/payments/webhook', '/api/webhooks/stripe');
+  
+  // Forward the request to the new endpoint
   try {
-    const event = verifyWebhookSignature(req.rawBody || req.body, sig);
-
-    // Use the subscription service to process webhook events
-    await subscriptionService.processWebhookEvent(event);
-
-    res.json({ received: true });
+    const response = await fetch(`${req.protocol}://${req.get('host')}${newUrl}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'stripe-signature': req.headers['stripe-signature'] || '',
+      },
+      body: JSON.stringify(req.body),
+    });
+    
+    const data = await response.json();
+    res.status(response.status).json(data);
   } catch (error) {
-    console.error('Webhook error:', error);
-    res.status(400).json({ error: 'Webhook signature verification failed' });
+    console.error('Error forwarding webhook:', error);
+    res.status(500).json({ error: 'Failed to forward webhook' });
   }
 });
 

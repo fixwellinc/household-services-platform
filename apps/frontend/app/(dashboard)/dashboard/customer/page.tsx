@@ -97,7 +97,7 @@ export default function CustomerDashboardPage() {
   });
   
   // Use real dashboard data
-  const stats = dashboardData?.statistics || { totalBookings: 0, upcomingBookings: 0, completedBookings: 0, totalSpent: 0 };
+  const stats = dashboardData?.statistics || { totalBookings: 0, upcomingBookings: 0, completedBookings: 0 };
   const usageStats = dashboardData?.usageStats;
   const recentActivity = dashboardData?.recentActivity || [];
   const availableServices = dashboardData?.availableServices || [];
@@ -211,6 +211,13 @@ export default function CustomerDashboardPage() {
                           <span className="text-gray-600">Monthly Cost:</span>
                           <span className="font-medium">${plan?.monthlyPrice || 0}</span>
                         </div>
+                        <div className="mt-4">
+                          <Link href="/pricing">
+                            <Button variant="outline" className="w-full">
+                              Change Plan
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
                     ) : (
                       <div className="space-y-2">
@@ -296,8 +303,8 @@ export default function CustomerDashboardPage() {
           </div>
         )}
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                 {/* Quick Stats */}
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <Card className="border-0 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -344,23 +351,7 @@ export default function CustomerDashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    {usageStats ? 'Total Savings' : 'Total Spent'}
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    ${usageStats ? usageStats.savings.toFixed(2) : stats.totalSpent.toFixed(2)}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-yellow-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          
         </div>
 
         {/* Main Content Grid */}

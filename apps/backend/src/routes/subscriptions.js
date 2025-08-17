@@ -296,6 +296,7 @@ router.get('/plans', async (req, res) => {
       monthlyPrice: plan.monthlyPrice,
       yearlyPrice: plan.yearlyPrice,
       originalPrice: plan.originalPrice,
+      stripePriceIds: plan.stripePriceIds,
       features: plan.features,
       savings: plan.savings,
       color: plan.color,
@@ -313,6 +314,48 @@ router.get('/plans', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching plans:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/subscriptions/plans/:planId - Get specific plan by ID
+router.get('/plans/:planId', async (req, res) => {
+  try {
+    const { planId } = req.params;
+    const plan = PLANS[planId.toUpperCase()];
+
+    if (!plan) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Plan not found' 
+      });
+    }
+
+    const planData = {
+      id: plan.id,
+      name: plan.name,
+      description: plan.description,
+      monthlyPrice: plan.monthlyPrice,
+      yearlyPrice: plan.yearlyPrice,
+      originalPrice: plan.originalPrice,
+      stripePriceIds: plan.stripePriceIds,
+      features: plan.features,
+      savings: plan.savings,
+      color: plan.color,
+      icon: plan.icon,
+      popular: plan.popular,
+      visitFrequency: plan.visitFrequency,
+      timePerVisit: plan.timePerVisit,
+      visitsPerMonth: plan.visitsPerMonth
+    };
+
+    res.json({
+      success: true,
+      plan: planData,
+      message: 'Plan retrieved successfully'
+    });
+  } catch (error) {
+    console.error('Error fetching plan:', error);
     res.status(500).json({ error: error.message });
   }
 });

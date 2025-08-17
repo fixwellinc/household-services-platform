@@ -7,12 +7,14 @@ console.log('  - NODE_ENV:', process.env.NODE_ENV);
 console.log('  - STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
 console.log('  - STRIPE_SECRET_KEY length:', process.env.STRIPE_SECRET_KEY?.length || 0);
 console.log('  - STRIPE_SECRET_KEY starts with sk_test:', process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_') || false);
+console.log('  - STRIPE_SECRET_KEY starts with sk_live:', process.env.STRIPE_SECRET_KEY?.startsWith('sk_live_') || false);
 
-// Check if we have valid Stripe keys
+// Check if we have valid Stripe keys (both test and live keys are valid)
 const hasValidStripeKeys = process.env.STRIPE_SECRET_KEY && 
   process.env.STRIPE_SECRET_KEY !== 'sk_test_your_stripe_secret_key' &&
+  process.env.STRIPE_SECRET_KEY !== 'your_live_secret_key_here' &&
   process.env.STRIPE_SECRET_KEY.length > 0 &&
-  process.env.STRIPE_SECRET_KEY.startsWith('sk_test_');
+  (process.env.STRIPE_SECRET_KEY.startsWith('sk_test_') || process.env.STRIPE_SECRET_KEY.startsWith('sk_live_'));
 
 console.log('🔍 hasValidStripeKeys:', hasValidStripeKeys);
 
@@ -78,13 +80,18 @@ if (!hasValidStripeKeys) {
       constructEvent: (payload, signature, secret) => {
         // Mock webhook event
         return {
-          type: 'payment_intent.succeeded',
+          type: 'customer.subscription.created',
           data: {
             object: {
-              id: `pi_mock_${Date.now()}`,
-              amount: 1000,
-              currency: 'usd',
-              status: 'succeeded',
+              id: `sub_mock_${Date.now()}`,
+              customer: `cus_mock_${Date.now()}`,
+              status: 'active',
+              current_period_start: Math.floor(Date.now() / 1000),
+              current_period_end: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60), // 30 days
+              metadata: {
+                userId: 'mock_user_id',
+                tier: 'STARTER'
+              }
             },
           },
         };
@@ -231,10 +238,13 @@ export const cancelSubscription = async (subscriptionId) => {
 };
 
 // Webhook signature verification
-export const verifyWebhookSignature = (payload, signature) => {
+export const verifyWebhookSignature = (payload, signature, webhookSecret = null) => {
   try {
+    // Use provided webhook secret or fall back to environment variable
+    const secret = webhookSecret || process.env.STRIPE_WEBHOOK_SECRET;
+    
     // Check if webhook secret is configured
-    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+    if (!secret) {
       console.log('⚠️ STRIPE_WEBHOOK_SECRET not configured, skipping signature verification for testing');
       // For testing, handle the payload appropriately
       try {
@@ -263,7 +273,7 @@ export const verifyWebhookSignature = (payload, signature) => {
     const event = stripe.webhooks.constructEvent(
       payload,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET
+      secret
     );
     return event;
   } catch (error) {
@@ -327,7 +337,7 @@ export const createCheckoutSession = async (lineItems, successUrl, cancelUrl, me
 export const createSubscriptionCheckoutSession = async (priceId, successUrl, cancelUrl, metadata = {}) => {
   try {
     // Check if we're using a mock price ID (for testing)
-    const isMockPriceId = priceId.startsWith('price_') && !priceId.includes('_test_') && !priceId.includes('_live_');
+    const isMockPriceId = priceId.startsWith('price_mock_') || priceId.startsWith('price_test_');
     
     if (isMockPriceId) {
       console.log('🔧 Using mock checkout session for testing price ID:', priceId);

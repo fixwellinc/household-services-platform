@@ -408,7 +408,7 @@ export class ApiClient {
     };
     message: string;
   }> => {
-    return this.request('/plans');
+    return this.request('/api/subscriptions/plans');
   }
 
   getPlan = async (planId: string): Promise<{
@@ -432,7 +432,7 @@ export class ApiClient {
     };
     message: string;
   }> => {
-    return this.request(`/plans/${planId}`);
+    return this.request(`/api/subscriptions/plans/${planId}`);
   }
 
   getUserPlan = async (): Promise<{
@@ -465,6 +465,31 @@ export class ApiClient {
     message: string;
   }> => {
     return this.request('/plans/user/current');
+  }
+
+  selectPlan = async (tier: string, billingCycle: 'monthly' | 'yearly'): Promise<{
+    success: boolean;
+    message: string;
+    tier: string;
+    billingCycle: string;
+  }> => {
+    return this.request('/plans/user/select-plan', {
+      method: 'POST',
+      body: JSON.stringify({ tier, billingCycle }),
+    });
+  }
+
+  changePlan = async (newTier: string, billingCycle: 'monthly' | 'yearly'): Promise<{
+    success: boolean;
+    message: string;
+    newTier: string;
+    billingCycle: string;
+    currentStatus: string;
+  }> => {
+    return this.request('/plans/user/change-plan', {
+      method: 'POST',
+      body: JSON.stringify({ newTier, billingCycle }),
+    });
   }
 
   calculateDiscount = async (servicePrice: number): Promise<{
@@ -528,12 +553,11 @@ export class ApiClient {
         maxServicesPerMonth: number;
       };
     } | null;
-    statistics: {
-      totalBookings: number;
-      upcomingBookings: number;
-      completedBookings: number;
-      totalSpent: number;
-    };
+      statistics: {
+    totalBookings: number;
+    upcomingBookings: number;
+    completedBookings: number;
+  };
     usageStats: {
       perksUsed: number;
       totalPerks: number;

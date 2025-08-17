@@ -381,13 +381,13 @@ export default function SubscribePlanForm({ planId }: SubscribePlanFormProps) {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Link href={`/login?redirect=${encodeURIComponent(`/dashboard/customer/book-service?plan=${planId}`)}`}>
+              <Link href={`/login?redirect=${encodeURIComponent(`/pricing/stripe-payment?plan=${planId}`)}`}>
                 <Button variant="outline" className="w-full">
                   <LogIn className="mr-2 h-4 w-4" />
                   Sign In
                 </Button>
               </Link>
-              <Link href={`/register?redirect=${encodeURIComponent(`/dashboard/customer/book-service?plan=${planId}`)}`}>
+              <Link href={`/register?redirect=${encodeURIComponent(`/pricing/stripe-payment?plan=${planId}`)}`}>
                 <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                   <UserPlus className="mr-2 h-4 w-4" />
                   Create Account

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useCurrentUser } from '@/hooks/use-api';
 import { Button } from '@/components/ui/shared';
+import { toast } from 'sonner';
 import { 
   Users, 
   MessageSquare, 
@@ -377,9 +378,14 @@ export default function AdminPage() {
       if (response.ok) {
         setUsers(users.filter(user => user.id !== userId));
         setDeletingUser(null);
+        toast.success('User deleted successfully');
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.error || 'Failed to delete user');
       }
     } catch (error) {
       console.error('Error deleting user:', error);
+      toast.error('Failed to delete user');
     }
   };
 
@@ -1358,8 +1364,17 @@ export default function AdminPage() {
                                 </button>
                                 <button 
                                   onClick={() => setDeletingUser(user)}
-                                  className="text-red-600 hover:text-red-900 transition-colors"
-                                  title="Delete user"
+                                  className={`transition-colors ${
+                                    user.role === 'ADMIN' 
+                                      ? 'text-gray-400 cursor-not-allowed' 
+                                      : 'text-red-600 hover:text-red-900'
+                                  }`}
+                                  title={
+                                    user.role === 'ADMIN' 
+                                      ? 'Admin accounts cannot be deleted' 
+                                      : 'Delete user'
+                                  }
+                                  disabled={user.role === 'ADMIN'}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </button>
@@ -1855,9 +1870,17 @@ export default function AdminPage() {
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                     <h3 className="text-lg leading-6 font-medium text-gray-900">Delete User</h3>
                     <div className="mt-2">
-                      <p className="text-sm text-gray-500">
-                        Are you sure you want to delete <strong>{deletingUser.name}</strong>? This action cannot be undone.
-                      </p>
+                      {deletingUser.role === 'ADMIN' ? (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-3">
+                          <p className="text-sm text-yellow-800">
+                            <strong>Warning:</strong> This is an admin account. Admin accounts are protected and cannot be deleted.
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500">
+                          Are you sure you want to delete <strong>{deletingUser.name}</strong>? This action cannot be undone.
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1865,8 +1888,13 @@ export default function AdminPage() {
               <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <Button 
                   variant="outline" 
-                  className="border-red-300 text-red-700 hover:bg-red-50 mr-2"
+                  className={`mr-2 ${
+                    deletingUser.role === 'ADMIN' 
+                      ? 'border-gray-300 text-gray-500 cursor-not-allowed' 
+                      : 'border-red-300 text-red-700 hover:bg-red-50'
+                  }`}
                   onClick={() => deleteUser(deletingUser.id)}
+                  disabled={deletingUser.role === 'ADMIN'}
                 >
                   Delete User
                 </Button>

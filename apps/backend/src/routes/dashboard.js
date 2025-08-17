@@ -24,8 +24,14 @@ router.get('/customer', authMiddleware, requireCustomer, async (req, res, next) 
     // Get user's bookings with statistics
     const bookings = await prisma.booking.findMany({
       where: { customerId: userId },
-      include: {
-        service: {
+      orderBy: { scheduledDate: 'desc' }
+    });
+    
+    // Manually fetch service data for each booking
+    const bookingsWithServices = await Promise.all(
+      bookings.map(async (booking) => {
+        const service = await prisma.service.findUnique({
+          where: { id: booking.serviceId },
           select: {
             id: true,
             name: true,
@@ -33,26 +39,23 @@ router.get('/customer', authMiddleware, requireCustomer, async (req, res, next) 
             basePrice: true,
             category: true
           }
-        }
-      },
-      orderBy: { scheduledDate: 'desc' }
-    });
+        });
+        return { ...booking, service };
+      })
+    );
     
     // Calculate statistics
-    const totalBookings = bookings.length;
-    const upcomingBookings = bookings.filter(b => 
+    const totalBookings = bookingsWithServices.length;
+    const upcomingBookings = bookingsWithServices.filter(b => 
       ['PENDING', 'CONFIRMED', 'IN_PROGRESS'].includes(b.status) && 
       new Date(b.scheduledDate) > new Date()
     ).length;
-    const completedBookings = bookings.filter(b => b.status === 'COMPLETED').length;
-    const totalSpent = bookings
-      .filter(b => b.status === 'COMPLETED')
-      .reduce((sum, b) => sum + parseFloat(b.finalAmount || 0), 0);
+    const completedBookings = bookingsWithServices.filter(b => b.status === 'COMPLETED').length;
     
     // Get recent activity (last 5 bookings)
-    const recentActivity = bookings.slice(0, 5).map(booking => ({
+    const recentActivity = bookingsWithServices.slice(0, 5).map(booking => ({
       id: booking.id,
-      service: booking.service.name,
+      service: booking.service?.name || 'Unknown Service',
       date: booking.scheduledDate,
       status: booking.status,
       amount: booking.finalAmount,
@@ -63,7 +66,7 @@ router.get('/customer', authMiddleware, requireCustomer, async (req, res, next) 
     let usageStats = null;
     if (subscription && subscription.status === 'ACTIVE') {
       const plan = tierPerks[subscription.tier] || { maxServicesPerMonth: 4 };
-      const usedPerks = bookings.filter(b => b.status === 'COMPLETED').length;
+      const usedPerks = bookingsWithServices.filter(b => b.status === 'COMPLETED').length;
       const totalPerks = plan.maxServicesPerMonth;
       const perksUsed = Math.min(usedPerks, totalPerks);
       
@@ -71,7 +74,7 @@ router.get('/customer', authMiddleware, requireCustomer, async (req, res, next) 
         perksUsed: perksUsed,
         totalPerks: totalPerks,
         remainingPerks: Math.max(0, totalPerks - perksUsed),
-        savings: bookings
+        savings: bookingsWithServices
           .filter(b => b.status === 'COMPLETED' && b.discountAmount)
           .reduce((sum, b) => sum + parseFloat(b.discountAmount || 0), 0)
       };
@@ -109,8 +112,7 @@ router.get('/customer', authMiddleware, requireCustomer, async (req, res, next) 
       statistics: {
         totalBookings,
         upcomingBookings,
-        completedBookings,
-        totalSpent: parseFloat(totalSpent.toFixed(2))
+        completedBookings
       },
       usageStats,
       recentActivity,
