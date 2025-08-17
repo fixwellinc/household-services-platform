@@ -40,7 +40,9 @@ export const authMiddleware = async (req, res, next) => {
         role: true,
         avatar: true,
         phone: true,
-        address: true
+        address: true,
+        postalCode: true,
+        createdAt: true
       }
     });
     
