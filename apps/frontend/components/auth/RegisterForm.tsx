@@ -17,6 +17,7 @@ const registerSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   phone: z.string().min(10, 'Phone number must be at least 10 characters'),
   address: z.string().min(5, 'Address must be at least 5 characters'),
+  postalCode: z.string().optional(),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -39,14 +40,10 @@ export default function RegisterForm() {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
-
-  // Watch postal code to display it
-  const postalCode = watch('postalCode');
 
   // Check location on component mount and set postal code
   useEffect(() => {
@@ -56,8 +53,8 @@ export default function RegisterForm() {
       } else {
         setLocationVerified(true);
         // Automatically set postal code from location context
-        if (userLocation?.postalCode) {
-          setValue('postalCode', userLocation.postalCode);
+        if (userLocation) {
+          setValue('postalCode', userLocation);
         }
       }
     }
@@ -69,7 +66,7 @@ export default function RegisterForm() {
       const registrationData = { 
         ...data, 
         role: 'CUSTOMER' as const,
-        postalCode: userLocation?.postalCode || data.postalCode
+        postalCode: userLocation || data.postalCode
       };
       await registerMutation.mutateAsync(registrationData);
       toast.success('Registration successful! Welcome to Fixwell Services!');
@@ -142,8 +139,8 @@ export default function RegisterForm() {
             setShowLocationModal(false);
             setLocationVerified(true);
             // Set postal code when location is set
-            if (userLocation?.postalCode) {
-              setValue('postalCode', userLocation.postalCode);
+            if (userLocation) {
+              setValue('postalCode', userLocation);
             }
           }}
           planName="account"
@@ -240,7 +237,6 @@ export default function RegisterForm() {
             className="block w-full px-3 py-2 pl-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm bg-gray-50"
             placeholder="Postal code will be set automatically"
             readOnly
-            value={userLocation?.postalCode || ''}
           />
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <MapPin className="h-5 w-5 text-gray-400" />
