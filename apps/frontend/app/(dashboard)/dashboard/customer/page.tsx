@@ -147,7 +147,10 @@ export default function CustomerDashboardPage() {
                       <div className="flex justify-between">
                         <span className="text-gray-600">Member Since:</span>
                         <span className="font-medium">
-                          {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                          {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'long' 
+                          }) : 'N/A'}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -201,22 +204,17 @@ export default function CustomerDashboardPage() {
                     ) : (
                       <div className="space-y-2">
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Plan:</span>
-                          <span className="font-medium text-gray-500">No Active Plan</span>
-                        </div>
-                        <div className="flex justify-between">
                           <span className="text-gray-600">Status:</span>
-                          <Badge className="bg-gray-100 text-gray-600">Inactive</Badge>
+                          <Badge className="bg-gray-100 text-gray-800">No Active Subscription</Badge>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Benefits:</span>
-                          <span className="font-medium text-gray-500">Standard Services</span>
+                          <span className="text-gray-600">Plan:</span>
+                          <span className="font-medium text-gray-500">Not subscribed</span>
                         </div>
-                        <div className="pt-2">
+                        <div className="mt-4">
                           <Link href="/pricing">
-                            <Button size="sm" className="w-full">
-                              <StarIcon className="h-4 w-4 mr-2" />
-                              Subscribe Now
+                            <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                              Choose a Plan
                             </Button>
                           </Link>
                         </div>

@@ -362,7 +362,7 @@ export class ApiClient {
   }
 
   changePassword = async (data: { currentPassword: string; newPassword: string }): Promise<{ message: string }> => {
-    return this.request<{ message: string }>('/users/me/change-password', {
+    return this.request<{ message: string }>('/auth/change-password', {
       method: 'POST',
       body: JSON.stringify(data),
     });

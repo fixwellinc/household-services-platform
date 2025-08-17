@@ -9,12 +9,14 @@ import { useRegister } from '@/hooks/use-api';
 import { useLocation } from '@/contexts/LocationContext';
 import { Button } from '@/components/ui/shared';
 import { toast } from 'sonner';
-import { Eye, EyeOff, Loader2, MapPin, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, Loader2, MapPin, AlertCircle, Phone, Home } from 'lucide-react';
 import LocationPromptModal from '@/components/location/LocationPromptModal';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
+  phone: z.string().min(10, 'Phone number must be at least 10 characters'),
+  address: z.string().min(5, 'Address must be at least 5 characters'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -36,26 +38,39 @@ export default function RegisterForm() {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
 
-  // Check location on component mount
+  // Watch postal code to display it
+  const postalCode = watch('postalCode');
+
+  // Check location on component mount and set postal code
   useEffect(() => {
     if (!locationLoading) {
       if (!userLocation || !isInBC) {
         setShowLocationModal(true);
       } else {
         setLocationVerified(true);
+        // Automatically set postal code from location context
+        if (userLocation?.postalCode) {
+          setValue('postalCode', userLocation.postalCode);
+        }
       }
     }
-  }, [userLocation, isInBC, locationLoading]);
+  }, [userLocation, isInBC, locationLoading, setValue]);
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
       // Always register as CUSTOMER since we removed provider option
-      const registrationData = { ...data, role: 'CUSTOMER' as const };
+      const registrationData = { 
+        ...data, 
+        role: 'CUSTOMER' as const,
+        postalCode: userLocation?.postalCode || data.postalCode
+      };
       await registerMutation.mutateAsync(registrationData);
       toast.success('Registration successful! Welcome to Fixwell Services!');
       
@@ -126,6 +141,10 @@ export default function RegisterForm() {
           onLocationSet={() => {
             setShowLocationModal(false);
             setLocationVerified(true);
+            // Set postal code when location is set
+            if (userLocation?.postalCode) {
+              setValue('postalCode', userLocation.postalCode);
+            }
           }}
           planName="account"
         />
@@ -165,6 +184,71 @@ export default function RegisterForm() {
         {errors.email && (
           <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
         )}
+      </div>
+
+      <div>
+        <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+          Phone Number
+        </label>
+        <div className="mt-1 relative">
+          <input
+            {...register('phone')}
+            type="tel"
+            id="phone"
+            className="block w-full px-3 py-2 pl-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+            placeholder="Enter your phone number"
+          />
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Phone className="h-5 w-5 text-gray-400" />
+          </div>
+        </div>
+        {errors.phone && (
+          <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+          Address
+        </label>
+        <div className="mt-1 relative">
+          <input
+            {...register('address')}
+            type="text"
+            id="address"
+            className="block w-full px-3 py-2 pl-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+            placeholder="Enter your full address"
+          />
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Home className="h-5 w-5 text-gray-400" />
+          </div>
+        </div>
+        {errors.address && (
+          <p className="mt-1 text-sm text-red-600">{errors.address.message}</p>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700">
+          Postal Code
+        </label>
+        <div className="mt-1 relative">
+          <input
+            {...register('postalCode')}
+            type="text"
+            id="postalCode"
+            className="block w-full px-3 py-2 pl-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm bg-gray-50"
+            placeholder="Postal code will be set automatically"
+            readOnly
+            value={userLocation?.postalCode || ''}
+          />
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <MapPin className="h-5 w-5 text-gray-400" />
+          </div>
+        </div>
+        <p className="mt-1 text-xs text-gray-500">
+          Postal code is automatically set based on your verified location
+        </p>
       </div>
 
       <div>
@@ -214,8 +298,8 @@ export default function RegisterForm() {
             type="button"
             className="absolute inset-y-0 right-0 pr-3 flex items-center"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
-            title={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+            title={showConfirmPassword ? "Hide password" : "Show password"}
           >
             {showConfirmPassword ? (
               <EyeOff className="h-5 w-5 text-gray-400" />
@@ -232,26 +316,17 @@ export default function RegisterForm() {
       <Button
         type="submit"
         disabled={registerMutation.isPending}
-        className="w-full flex justify-center py-2 px-4"
+        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-4 rounded-md font-medium transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
       >
         {registerMutation.isPending ? (
-          <>
-            <Loader2 className="animate-spin -ml-1 mr-3 h-5 w-5" />
-            Creating account...
-          </>
+          <div className="flex items-center justify-center">
+            <Loader2 className="animate-spin h-5 w-5 mr-2" />
+            Creating Account...
+          </div>
         ) : (
           'Create Account'
         )}
       </Button>
-
-      <div className="text-center">
-        <p className="text-sm text-gray-600">
-          Already have an account?{' '}
-          <a href="/login" className="font-medium text-primary hover:text-primary/90">
-            Sign in
-          </a>
-        </p>
-      </div>
     </form>
   );
 } 

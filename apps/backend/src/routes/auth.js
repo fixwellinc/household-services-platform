@@ -10,7 +10,7 @@ const router = express.Router();
 // Register new user
 router.post('/register', async (req, res, next) => {
   try {
-    const { email, password, name, role = 'CUSTOMER' } = req.body;
+    const { email, password, name, phone, address, postalCode, role = 'CUSTOMER' } = req.body;
     
     // Validation
     if (!email || !password || !name) {
@@ -42,6 +42,9 @@ router.post('/register', async (req, res, next) => {
       data: {
         email,
         name,
+        phone,
+        address,
+        postalCode,
         role,
         password: hashedPassword
       },
@@ -49,6 +52,9 @@ router.post('/register', async (req, res, next) => {
         id: true,
         email: true,
         name: true,
+        phone: true,
+        address: true,
+        postalCode: true,
         role: true,
         createdAt: true
       }
@@ -159,6 +165,54 @@ router.post('/logout', authMiddleware, async (req, res) => {
   res.json({
     message: 'Logout successful'
   });
+});
+
+// Change password
+router.post('/change-password', authMiddleware, async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+    
+    // Validation
+    if (!currentPassword || !newPassword) {
+      throw new ValidationError('Current password and new password are required');
+    }
+    
+    if (newPassword.length < 6) {
+      throw new ValidationError('New password must be at least 6 characters');
+    }
+    
+    // Get user with current password
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { password: true }
+    });
+    
+    if (!user) {
+      throw new ValidationError('User not found');
+    }
+    
+    // Verify current password
+    const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+    if (!isValidPassword) {
+      throw new ValidationError('Current password is incorrect');
+    }
+    
+    // Hash new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 12);
+    
+    // Update password
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedNewPassword }
+    });
+    
+    res.json({
+      message: 'Password changed successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 export default router; 
