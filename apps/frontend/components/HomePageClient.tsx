@@ -116,7 +116,7 @@ export default function HomePageClient() {
                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 animate-glow-slow hover:animate-none px-8 py-4 text-lg font-semibold" 
                   >
                     <span className="flex items-center gap-3">
-                      Create Your Account
+                      Let's Get You Started
                       <User className="h-5 w-5" />
                     </span>
                   </Button>
@@ -432,7 +432,7 @@ export default function HomePageClient() {
                 className="bg-white text-blue-600 hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-8 py-4 font-medium" 
               >
                 <span className="flex items-center gap-2">
-                  Create Your Account
+                  Let's Get You Started
                   <ArrowRight className="h-5 w-5" />
                 </span>
               </Button>
