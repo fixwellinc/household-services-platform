@@ -3,17 +3,6 @@
 import { useSearchParams } from 'next/navigation';
 import PlansSection from '@/components/PlansSection';
 
-export const metadata = {
-  title: 'Pricing Plans - Fixwell Services',
-  description: 'Choose your perfect plan: Starter Plan, HomeCare Plan, or Priority Plan. Get professional household services with transparent pricing and flexible options.',
-  keywords: 'pricing, plans, subscription, household services, maintenance, cleaning, repair',
-  openGraph: {
-    title: 'Pricing Plans - Fixwell Services',
-    description: 'Choose your perfect plan: Starter Plan, HomeCare Plan, or Priority Plan. Get professional household services with transparent pricing and flexible options.',
-    type: 'website',
-  },
-};
-
 export default function PlansPage() {
   const searchParams = useSearchParams();
   const isNewUser = searchParams.get('new_user') === 'true';
