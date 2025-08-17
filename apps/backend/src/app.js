@@ -828,6 +828,54 @@ app.patch('/api/admin/users/:id/role', requireAdmin, async (req, res) => {
   }
 });
 
+// Admin: Update user information
+app.patch('/api/admin/users/:id', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+  const { id } = req.params;
+  const { name, email, role, phone, address, postalCode } = req.body;
+  
+  try {
+    const user = await prisma.user.update({
+      where: { id },
+      data: { 
+        name, 
+        email, 
+        role, 
+        phone, 
+        address, 
+        postalCode 
+      }
+    });
+    res.json({ user });
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to update user information' });
+  }
+});
+
+// Admin: Delete user
+app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+  const { id } = req.params;
+  
+  try {
+    // Check if user exists
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Delete user
+    await prisma.user.delete({ where: { id } });
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to delete user' });
+  }
+});
+
 // Admin: Assign employee to customer
 app.post('/api/admin/users/:id/assign-employee', requireAdmin, async (req, res) => {
   if (!prisma) {

@@ -49,10 +49,19 @@ interface User {
   id: string;
   email: string;
   name: string;
-  role: 'USER' | 'ADMIN' | 'PROVIDER';
-  status: 'active' | 'inactive';
+  role: 'CUSTOMER' | 'EMPLOYEE' | 'ADMIN';
+  isActive: boolean;
   createdAt: string;
   lastLogin?: string;
+  phone?: string;
+  address?: string;
+  postalCode?: string;
+  subscription?: {
+    id: string;
+    tier: string;
+    status: string;
+    currentPeriodEnd: string;
+  };
 }
 
 interface ChatMessage {
@@ -89,6 +98,19 @@ export default function AdminPage() {
   const [subscriptionAnalytics, setSubscriptionAnalytics] = useState<any>({});
   const [selectedSubscription, setSelectedSubscription] = useState<any>(null);
   const [blockCancellationReason, setBlockCancellationReason] = useState('');
+  
+  // User Management State
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [deletingUser, setDeletingUser] = useState<User | null>(null);
+  const [viewingUser, setViewingUser] = useState<User | null>(null);
+  const [editUserForm, setEditUserForm] = useState({
+    name: '',
+    email: '',
+    role: 'CUSTOMER' as 'CUSTOMER' | 'EMPLOYEE' | 'ADMIN',
+    phone: '',
+    address: '',
+    postalCode: ''
+  });
   
   function ChatMessages({ chatId }: { chatId: string }) {
     const [messages, setMessages] = useState<any[]>([]);
@@ -307,20 +329,104 @@ export default function AdminPage() {
 
   const updateUserStatus = async (userId: string, status: 'active' | 'inactive') => {
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const response = await fetch(`/api/admin/users/${userId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ isActive: status === 'active' })
       });
       
       if (response.ok) {
         setUsers(users.map(user => 
-          user.id === userId ? { ...user, status } : user
+          user.id === userId 
+            ? { ...user, isActive: status === 'active' }
+            : user
         ));
       }
     } catch (error) {
       console.error('Error updating user status:', error);
     }
+  };
+
+  const updateUserRole = async (userId: string, role: 'CUSTOMER' | 'EMPLOYEE' | 'ADMIN') => {
+    try {
+      const response = await fetch(`/api/admin/users/${userId}/role`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role })
+      });
+      
+      if (response.ok) {
+        setUsers(users.map(user => 
+          user.id === userId 
+            ? { ...user, role }
+            : user
+        ));
+      }
+    } catch (error) {
+      console.error('Error updating user role:', error);
+    }
+  };
+
+  const deleteUser = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        setUsers(users.filter(user => user.id !== userId));
+        setDeletingUser(null);
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
+  };
+
+  const editUser = async (userId: string, userData: any) => {
+    try {
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      });
+      
+      if (response.ok) {
+        const updatedUser = await response.json();
+        setUsers(users.map(user => 
+          user.id === userId 
+            ? { ...user, ...updatedUser.user }
+            : user
+        ));
+        setEditingUser(null);
+        setEditUserForm({
+          name: '',
+          email: '',
+          role: 'CUSTOMER',
+          phone: '',
+          address: '',
+          postalCode: ''
+        });
+      }
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
+  };
+
+  const openEditUser = (user: User) => {
+    setEditingUser(user);
+    setEditUserForm({
+      name: user.name || '',
+      email: user.email || '',
+      role: user.role,
+      phone: user.phone || '',
+      address: user.address || '',
+      postalCode: user.postalCode || ''
+    });
+  };
+
+  const openViewUser = (user: User) => {
+    setViewingUser(user);
   };
 
   const saveSettings = async () => {
@@ -1148,6 +1254,10 @@ export default function AdminPage() {
               {/* USER MANAGEMENT TAB */}
               {activeTab === 'users' && (
                 <div className="p-6">
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">User Management</h2>
+                    <p className="text-gray-600">Manage all users, their roles, and account status. You can view details, edit information, activate/deactivate accounts, and delete users.</p>
+                  </div>
                   <div className="flex justify-between items-center mb-6">
                     <div className="flex items-center space-x-4">
                       <div className="relative">
@@ -1156,36 +1266,36 @@ export default function AdminPage() {
                           type="text"
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          placeholder="Search users..."
+                          placeholder="Search users by name or email..."
                           className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          title="Search for users by their name or email address"
                         />
                       </div>
-                      <Button variant="outline">
+                      <Button variant="outline" title="Filter users by various criteria (coming soon)">
                         <Filter className="mr-2 h-4 w-4" />
                         Filter
                       </Button>
                     </div>
                     <div className="flex space-x-2">
-                      <Button variant="outline">
+                      <Button variant="outline" title="Export user data to CSV (coming soon)">
                         <Download className="mr-2 h-4 w-4" />
                         Export
                       </Button>
-                      <Button>
+                      <Button title="Add a new user to the system (coming soon)">
                         <Plus className="mr-2 h-4 w-4" />
                         Add User
                       </Button>
                     </div>
                   </div>
-
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Login</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" title="User's name and email address">User</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" title="User's role in the system (Customer, Employee, or Admin)">Role</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" title="Whether the user account is active or inactive">Status</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" title="Last time the user logged into the system">Last Login</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" title="Available actions for this user">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
@@ -1200,7 +1310,7 @@ export default function AdminPage() {
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className={`px-2 py-1 text-xs rounded-full ${
                                 user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' :
-                                user.role === 'PROVIDER' ? 'bg-blue-100 text-blue-800' :
+                                user.role === 'EMPLOYEE' ? 'bg-blue-100 text-blue-800' :
                                 'bg-gray-100 text-gray-800'
                               }`}>
                                 {user.role}
@@ -1208,15 +1318,15 @@ export default function AdminPage() {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
-                                {user.status === 'active' ? (
+                                {user.isActive ? (
                                   <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
                                 ) : (
                                   <XCircle className="h-4 w-4 text-red-500 mr-2" />
                                 )}
                                 <span className={`text-sm ${
-                                  user.status === 'active' ? 'text-green-800' : 'text-red-800'
+                                  user.isActive ? 'text-green-800' : 'text-red-800'
                                 }`}>
-                                  {user.status}
+                                  {user.isActive ? 'Active' : 'Inactive'}
                                 </span>
                               </div>
                             </td>
@@ -1225,36 +1335,54 @@ export default function AdminPage() {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <div className="flex space-x-2">
-                                <button className="text-blue-600 hover:text-blue-900">
+                                <button 
+                                  onClick={() => openViewUser(user)}
+                                  className="text-blue-600 hover:text-blue-900 transition-colors"
+                                  title="View user details"
+                                >
                                   <Eye className="h-4 w-4" />
                                 </button>
-                                <button className="text-green-600 hover:text-green-900">
+                                <button 
+                                  onClick={() => openEditUser(user)}
+                                  className="text-green-600 hover:text-green-900 transition-colors"
+                                  title="Edit user information"
+                                >
                                   <Edit className="h-4 w-4" />
                                 </button>
                                 <button 
-                                  onClick={() => updateUserStatus(user.id, user.status === 'active' ? 'inactive' : 'active')}
-                                  className="text-yellow-600 hover:text-yellow-900"
+                                  onClick={() => updateUserStatus(user.id, user.isActive ? 'inactive' : 'active')}
+                                  className="text-yellow-600 hover:text-yellow-900 transition-colors"
+                                  title={user.isActive ? 'Deactivate user' : 'Activate user'}
                                 >
-                                  {user.status === 'active' ? <XCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
+                                  {user.isActive ? <XCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
                                 </button>
-                                <button className="text-red-600 hover:text-red-900">
+                                <button 
+                                  onClick={() => setDeletingUser(user)}
+                                  className="text-red-600 hover:text-red-900 transition-colors"
+                                  title="Delete user"
+                                >
                                   <Trash2 className="h-4 w-4" />
                                 </button>
                               </div>
                             </td>
                           </tr>
                         ))}
+                        {filteredUsers.length === 0 && (
+                          <tr>
+                            <td colSpan={5} className="px-6 py-12 text-center">
+                              <div className="text-gray-500">
+                                <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                                <p className="text-lg font-medium text-gray-900 mb-2">No users found</p>
+                                <p className="text-gray-600">
+                                  {searchTerm ? `No users match "${searchTerm}". Try adjusting your search terms.` : 'No users have been registered yet.'}
+                                </p>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     </table>
                   </div>
-
-                  {filteredUsers.length === 0 && (
-                    <div className="text-center py-8">
-                      <Users className="mx-auto h-12 w-12 text-gray-400" />
-                      <h3 className="mt-2 text-sm font-medium text-gray-900">No users found</h3>
-                      <p className="mt-1 text-sm text-gray-500">Try adjusting your search criteria.</p>
-                    </div>
-                  )}
                 </div>
               )}
 
@@ -1520,6 +1648,236 @@ export default function AdminPage() {
           </div>
         </main>
       </div>
+
+      {/* USER VIEW MODAL */}
+      {viewingUser && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 opacity-75" onClick={() => setViewingUser(null)}></div>
+            </div>
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <Users className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">User Details</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Name</label>
+                        <p className="mt-1 text-sm text-gray-900">{viewingUser.name}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Email</label>
+                        <p className="mt-1 text-sm text-gray-900">{viewingUser.email}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Role</label>
+                        <span className={`mt-1 inline-flex px-2 py-1 text-xs rounded-full ${
+                          viewingUser.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' :
+                          viewingUser.role === 'EMPLOYEE' ? 'bg-blue-100 text-blue-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {viewingUser.role}
+                        </span>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Status</label>
+                        <span className={`mt-1 inline-flex items-center px-2 py-1 text-xs rounded-full ${
+                          viewingUser.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {viewingUser.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                      {viewingUser.phone && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Phone</label>
+                          <p className="mt-1 text-sm text-gray-900">{viewingUser.phone}</p>
+                        </div>
+                      )}
+                      {viewingUser.address && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Address</label>
+                          <p className="mt-1 text-sm text-gray-900">{viewingUser.address}</p>
+                        </div>
+                      )}
+                      {viewingUser.postalCode && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Postal Code</label>
+                          <p className="mt-1 text-sm text-gray-900">{viewingUser.postalCode}</p>
+                        </div>
+                      )}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Member Since</label>
+                        <p className="mt-1 text-sm text-gray-900">
+                          {new Date(viewingUser.createdAt).toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'long' 
+                          })}
+                        </p>
+                      </div>
+                      {viewingUser.subscription && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Subscription</label>
+                          <div className="mt-1 space-y-1">
+                            <p className="text-sm text-gray-900">Plan: {viewingUser.subscription.tier}</p>
+                            <p className="text-sm text-gray-900">Status: {viewingUser.subscription.status}</p>
+                            <p className="text-sm text-gray-900">
+                              Renews: {new Date(viewingUser.subscription.currentPeriodEnd).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <Button onClick={() => setViewingUser(null)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* USER EDIT MODAL */}
+      {editingUser && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 opacity-75" onClick={() => setEditingUser(null)}></div>
+            </div>
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <Edit className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Edit User</h3>
+                    <form className="space-y-4" onSubmit={(e) => {
+                      e.preventDefault();
+                      editUser(editingUser.id, editUserForm);
+                    }}>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Name</label>
+                        <input
+                          type="text"
+                          value={editUserForm.name}
+                          onChange={(e) => setEditUserForm({...editUserForm, name: e.target.value})}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Email</label>
+                        <input
+                          type="email"
+                          value={editUserForm.email}
+                          onChange={(e) => setEditUserForm({...editUserForm, email: e.target.value})}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Role</label>
+                        <select
+                          value={editUserForm.role}
+                          onChange={(e) => setEditUserForm({...editUserForm, role: e.target.value as 'CUSTOMER' | 'EMPLOYEE' | 'ADMIN'})}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="CUSTOMER">Customer</option>
+                          <option value="EMPLOYEE">Employee</option>
+                          <option value="ADMIN">Admin</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Phone</label>
+                        <input
+                          type="tel"
+                          value={editUserForm.phone}
+                          onChange={(e) => setEditUserForm({...editUserForm, phone: e.target.value})}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Address</label>
+                        <input
+                          type="text"
+                          value={editUserForm.address}
+                          onChange={(e) => setEditUserForm({...editUserForm, address: e.target.value})}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Postal Code</label>
+                        <input
+                          type="text"
+                          value={editUserForm.postalCode}
+                          onChange={(e) => setEditUserForm({...editUserForm, postalCode: e.target.value})}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <Button type="submit" className="mr-2">
+                          Save Changes
+                        </Button>
+                        <Button variant="outline" onClick={() => setEditingUser(null)}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* USER DELETE CONFIRMATION MODAL */}
+      {deletingUser && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 opacity-75" onClick={() => setDeletingUser(null)}></div>
+            </div>
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <AlertCircle className="h-6 w-6 text-red-600" />
+                  </div>
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">Delete User</h3>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        Are you sure you want to delete <strong>{deletingUser.name}</strong>? This action cannot be undone.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <Button 
+                  variant="outline" 
+                  className="border-red-300 text-red-700 hover:bg-red-50 mr-2"
+                  onClick={() => deleteUser(deletingUser.id)}
+                >
+                  Delete User
+                </Button>
+                <Button variant="outline" onClick={() => setDeletingUser(null)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
