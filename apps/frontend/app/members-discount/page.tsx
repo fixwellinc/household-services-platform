@@ -52,47 +52,7 @@ const BUSINESSES: Business[] = [
     discount: 'Up to 10% discount on body scan',
     description: 'Comprehensive nutrition and wellness services',
     category: 'Health & Wellness',
-    location: 'Vancouver, BC',
-    image: '/api/placeholder/300/200'
-  },
-  {
-    id: '3',
-    name: 'Green Thumb Landscaping',
-    website: 'https://greenthumblandscaping.ca/',
-    discount: '15% discount on all services',
-    description: 'Professional landscaping and garden maintenance',
-    category: 'Home & Garden',
     location: 'Burnaby, BC',
-    image: '/api/placeholder/300/200'
-  },
-  {
-    id: '4',
-    name: 'TechFix Pro',
-    website: 'https://techfixpro.ca/',
-    discount: '20% discount on device repair',
-    description: 'Computer and mobile device repair services',
-    category: 'Technology',
-    location: 'Richmond, BC',
-    image: '/api/placeholder/300/200'
-  },
-  {
-    id: '5',
-    name: 'Fresh Start Cleaning',
-    website: 'https://freshstartcleaning.ca/',
-    discount: '25% discount on first booking',
-    description: 'Professional residential and commercial cleaning',
-    category: 'Home Services',
-    location: 'Surrey, BC',
-    image: '/api/placeholder/300/200'
-  },
-  {
-    id: '6',
-    name: 'FitLife Gym',
-    website: 'https://fitlifegym.ca/',
-    discount: '30% discount on annual membership',
-    description: 'Modern fitness facility with personal training',
-    category: 'Fitness',
-    location: 'Coquitlam, BC',
     image: '/api/placeholder/300/200'
   }
 ];
@@ -108,7 +68,7 @@ export default function MembersDiscountPage() {
   const plan = userPlanData?.plan;
 
   // Show all businesses for non-members, or just member-exclusive ones for members
-  const displayedBusinesses = isMember ? BUSINESSES : BUSINESSES.slice(0, 3);
+  const displayedBusinesses = isMember ? BUSINESSES : BUSINESSES.slice(0, 2);
 
   if (isLoading) {
     return (

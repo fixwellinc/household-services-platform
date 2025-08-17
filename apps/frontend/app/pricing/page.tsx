@@ -60,15 +60,11 @@ export default function PlansPage() {
                   <ul className="space-y-3 text-gray-600">
                     <li className="flex items-center">
                       <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
-                      Up to 20% off at Infinite Optical
+                      Up to 10% off at Infinite Optical
                     </li>
                     <li className="flex items-center">
                       <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
                       Up to 10% off body scans at Nutrition Well
-                    </li>
-                    <li className="flex items-center">
-                      <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
-                      15% off landscaping services
                     </li>
                     <li className="flex items-center">
                       <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
