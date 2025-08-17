@@ -85,6 +85,17 @@ export default function CustomerDashboardPage() {
   const subscription = userPlanData?.subscription;
   const plan = userPlanData?.plan;
   
+  // Debug logging
+  console.log('Dashboard Debug Info:', {
+    user,
+    userPlanData,
+    isSubscribed,
+    subscription,
+    plan,
+    userCreatedAt: user?.createdAt,
+    userPostalCode: user?.postalCode
+  });
+  
   // Use real dashboard data
   const stats = dashboardData?.statistics || { totalBookings: 0, upcomingBookings: 0, completedBookings: 0, totalSpent: 0 };
   const usageStats = dashboardData?.usageStats;
