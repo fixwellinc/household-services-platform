@@ -69,7 +69,7 @@ export default function RegisterForm() {
         postalCode: userLocation || data.postalCode
       };
       await registerMutation.mutateAsync(registrationData);
-      toast.success('Registration successful! Welcome to Fixwell Services!');
+      toast.success('Registration successful! Now choose your subscription plan.');
       
       // Handle redirect after successful registration
       const redirectUrl = searchParams.get('redirect');
@@ -79,8 +79,8 @@ export default function RegisterForm() {
         console.log('Redirecting to:', decodedUrl);
         window.location.href = decodedUrl;
       } else {
-        // Default redirect to dashboard
-        window.location.href = '/dashboard';
+        // Redirect to pricing page to choose a subscription plan
+        window.location.href = '/pricing?new_user=true';
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Registration failed');

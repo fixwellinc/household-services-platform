@@ -36,6 +36,7 @@ import {
 import { useSubscriptionPrerequisites } from '@/hooks/use-subscription-prerequisites';
 import { toast } from 'sonner';
 import LocationPromptModal from '@/components/location/LocationPromptModal';
+import { useSearchParams } from 'next/navigation';
 
 // Icon mapping for plans
 const getPlanIcon = (iconName: string) => {
@@ -129,6 +130,8 @@ export default function PlansSection() {
   const prerequisites = useSubscriptionPrerequisites();
   const { isAuthenticated } = useAuth();
   const { userLocation, isInBC } = useLocation();
+  const searchParams = useSearchParams();
+  const isNewUser = searchParams.get('new_user') === 'true';
 
   // Handle Get in Touch button click
   const handleGetInTouch = () => {
@@ -144,6 +147,10 @@ export default function PlansSection() {
 
   // Helper function to get button text based on authentication status
   const getButtonText = (plan: any) => {
+    if (isNewUser) {
+      return `Start ${plan.name} Plan - Get Started Today!`;
+    }
+    
     if (!prerequisites.isAuthenticated) {
       return 'Let\'s Get You Started';
     }
@@ -279,6 +286,33 @@ export default function PlansSection() {
   return (
     <section className="py-12 md:py-20 bg-gradient-to-br from-gray-50 via-white to-blue-50">
       <div className="container-mobile mx-auto">
+        {/* Special Message for New Users */}
+        {isNewUser && (
+          <div className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-2xl p-6 text-center">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                <CheckCircle className="h-6 w-6 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900">Ready to Choose Your Plan?</h2>
+            </div>
+            <p className="text-lg text-gray-600 mb-4 max-w-2xl mx-auto">
+              You're just one step away from unlocking all the benefits of Fixwell Services. 
+              Choose the plan that best fits your needs and start saving on household services today!
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="bg-blue-100 rounded-lg px-4 py-2">
+                <span className="text-blue-800 font-medium">✓ Account Created</span>
+              </div>
+              <div className="bg-blue-100 rounded-lg px-4 py-2">
+                <span className="text-blue-800 font-medium">✓ Location Verified</span>
+              </div>
+              <div className="bg-green-100 rounded-lg px-4 py-2">
+                <span className="text-green-800 font-medium">→ Select Your Plan</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Header - BCAA Style */}
         <div className="text-center mb-12 md:mb-16">
           <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
