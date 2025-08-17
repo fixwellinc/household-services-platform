@@ -1,9 +1,10 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import PlansSection from '@/components/PlansSection';
 
-export default function PlansPage() {
+function PricingPageContent() {
   const searchParams = useSearchParams();
   const isNewUser = searchParams.get('new_user') === 'true';
 
@@ -196,9 +197,9 @@ export default function PlansPage() {
               <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-4">
                 What payment methods do you accept?
               </h3>
-                             <p className="text-gray-600">
-                 We accept all major credit cards, debit cards. All payments are processed securely through Stripe. You can pay monthly or yearly with a 10% discount for annual plans.
-               </p>
+              <p className="text-gray-600">
+                We accept all major credit cards, debit cards. All payments are processed securely through Stripe. You can pay monthly or yearly with a 10% discount for annual plans.
+              </p>
             </div>
 
             <div className="bg-gray-50 rounded-2xl p-6 md:p-8">
@@ -231,5 +232,20 @@ export default function PlansPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function PlansPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Loading pricing plans...</p>
+        </div>
+      </div>
+    }>
+      <PricingPageContent />
+    </Suspense>
   );
 } 
