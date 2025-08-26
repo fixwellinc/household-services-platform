@@ -408,7 +408,7 @@ export class ApiClient {
     };
     message: string;
   }> => {
-    return this.request('/api/subscriptions/plans');
+    return this.request('/subscriptions/plans');
   }
 
   getPlan = async (planId: string): Promise<{
@@ -432,7 +432,7 @@ export class ApiClient {
     };
     message: string;
   }> => {
-    return this.request(`/api/subscriptions/plans/${planId}`);
+    return this.request(`/subscriptions/plans/${planId}`);
   }
 
   getUserPlan = async (): Promise<{
