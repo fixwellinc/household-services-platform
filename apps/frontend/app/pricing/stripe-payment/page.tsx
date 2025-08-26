@@ -41,6 +41,26 @@ const PLAN_COLORS = {
   priority: 'from-amber-500 to-amber-600'
 };
 
+// Function to get actual Stripe price IDs from Railway environment
+const getStripePriceId = (planId: string, billingPeriod: 'monthly' | 'yearly'): string => {
+  const priceIds = {
+    starter: {
+      monthly: 'price_1RsdVGQxUWZeVMlb24COfBkX', // STRIPE_STARTER_MONTHLY_PRICE_ID
+      yearly: 'price_1RsdVHQxUWZeVMlbtVqU3qwd'   // STRIPE_STARTER_YEARLY_PRICE_ID
+    },
+    homecare: {
+      monthly: 'price_1RsdVHQxUWZeVMlbTmt22JS2', // STRIPE_HOMECARE_MONTHLY_PRICE_ID
+      yearly: 'price_1RsdVIQxUWZeVMlbmRunIJxw'   // STRIPE_HOMECARE_YEARLY_PRICE_ID
+    },
+    priority: {
+      monthly: 'price_1RsdVJQxUWZeVMlbm1JZqhXt', // STRIPE_PRIORITY_MONTHLY_PRICE_ID
+      yearly: 'price_1RsdVJQxUWZeVMlbn8NmyXWo'   // STRIPE_PRIORITY_YEARLY_PRICE_ID
+    }
+  };
+  
+  return priceIds[planId as keyof typeof priceIds]?.[billingPeriod] || `price_${billingPeriod}_${planId}`;
+};
+
 function StripePaymentPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -77,8 +97,8 @@ function StripePaymentPageContent() {
       ],
       popular: false,
       stripePriceIds: {
-        monthly: `price_monthly_${planId}`,
-        yearly: `price_yearly_${planId}`
+        monthly: getStripePriceId(planId, 'monthly'),
+        yearly: getStripePriceId(planId, 'yearly')
       }
     };
 
@@ -133,8 +153,8 @@ function StripePaymentPageContent() {
     try {
       // Use proper Stripe price IDs based on environment
       const priceId = billingPeriod === 'yearly' 
-        ? selectedPlan.stripePriceIds?.yearly || `price_yearly_${planId}`
-        : selectedPlan.stripePriceIds?.monthly || `price_monthly_${planId}`;
+        ? selectedPlan.stripePriceIds?.yearly || getStripePriceId(planId, 'yearly')
+        : selectedPlan.stripePriceIds?.monthly || getStripePriceId(planId, 'monthly');
 
       console.log('💳 Creating Stripe checkout session with:', { 
         priceId, 

@@ -69,8 +69,8 @@ const FALLBACK_PLANS: Record<string, any> = {
       'Access to discounted upgrade services'
     ],
     stripePriceIds: {
-      monthly: 'price_monthly_starter',
-      yearly: 'price_yearly_starter'
+      monthly: 'price_1RsdVGQxUWZeVMlb24COfBkX', // STRIPE_STARTER_MONTHLY_PRICE_ID
+      yearly: 'price_1RsdVHQxUWZeVMlbtVqU3qwd'   // STRIPE_STARTER_YEARLY_PRICE_ID
     }
   },
   homecare: {
@@ -99,8 +99,8 @@ const FALLBACK_PLANS: Record<string, any> = {
       'Emergency visits at standard rate (priority booking)'
     ],
     stripePriceIds: {
-      monthly: 'price_monthly_homecare',
-      yearly: 'price_yearly_homecare'
+      monthly: 'price_1RsdVHQxUWZeVMlbTmt22JS2', // STRIPE_HOMECARE_MONTHLY_PRICE_ID
+      yearly: 'price_1RsdVIQxUWZeVMlbmRunIJxw'   // STRIPE_HOMECARE_YEARLY_PRICE_ID
     }
   },
   priority: {
@@ -131,8 +131,8 @@ const FALLBACK_PLANS: Record<string, any> = {
       'Early access to Fixwell promos and partner perks'
     ],
     stripePriceIds: {
-      monthly: 'price_monthly_priority',
-      yearly: 'price_yearly_priority'
+      monthly: 'price_1RsdVJQxUWZeVMlbm1JZqhXt', // STRIPE_PRIORITY_MONTHLY_PRICE_ID
+      yearly: 'price_1RsdVJQxUWZeVMlbn8NmyXWo'   // STRIPE_PRIORITY_YEARLY_PRICE_ID
     }
   }
 };
