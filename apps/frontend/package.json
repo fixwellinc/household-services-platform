@@ -5,8 +5,8 @@
   "description": "Frontend for Fixwell Services Subscription Platform (Next.js 14)",
   "scripts": {
     "dev": "next dev",
-    "build": "echo 'Setting up environment...' && prisma generate && next build",
-    "postinstall": "prisma generate",
+    "build": "next build",
+    "postinstall": "echo 'Frontend postinstall complete'",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",

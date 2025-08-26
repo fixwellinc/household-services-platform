@@ -39,7 +39,7 @@ COPY . .
 WORKDIR /app/apps/backend
 RUN npx prisma generate
 
-# Build frontend
+# Build frontend (without Prisma dependencies)
 WORKDIR /app/apps/frontend
 RUN npm run build
 
