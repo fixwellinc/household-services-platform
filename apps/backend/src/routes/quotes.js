@@ -1,6 +1,6 @@
 import express from 'express';
 import prisma from '../config/database.js';
-import { authMiddleware, requireAdmin, requireTechnician } from '../middleware/auth.js';
+import { authMiddleware, requireAdmin, requireTechnician, requireCustomer } from '../middleware/auth.js';
 import nodemailer from 'nodemailer';
 import multer from 'multer';
 import xlsx from 'xlsx';
