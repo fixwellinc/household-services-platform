@@ -32,6 +32,15 @@ model User {
   
   // Add relation to Subscription
   subscription      Subscription?
+  
+  // New relations for complete workflow
+  serviceRequests   ServiceRequest[] @relation("CustomerServiceRequests")
+  technicianServiceRequests ServiceRequest[] @relation("TechnicianServiceRequests")
+  technicianQuotes Quote[] @relation("TechnicianQuotes")
+  customerJobs     Job[]   @relation("CustomerJobs")
+  technicianJobs   Job[]   @relation("TechnicianJobs")
+  customerInvoices Invoice[] @relation("CustomerInvoices")
+  technicianInvoices Invoice[] @relation("TechnicianInvoices")
 }
 
 model CustomerEmployeeAssignment {
@@ -100,6 +109,7 @@ model Service {
   updatedAt   DateTime @updatedAt
   bookingIds  String[]
   quoteIds    String[]
+  serviceRequestIds String[]
 }
 
 model Booking {
@@ -142,6 +152,17 @@ model Quote {
   adminReplySentAt DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+  serviceRequestId String?
+  technicianId     String?
+  estimatedHours   Float?
+  materialsCost    Float?
+  laborCost        Float?
+  totalCost        Float?
+  technicianNotes  String?
+  customerAccepted Boolean   @default(false)
+  acceptedAt       DateTime?
+  serviceRequest   ServiceRequest? @relation("QuoteToServiceRequest", fields: [serviceRequestId], references: [id])
+  technician       User?     @relation("TechnicianQuotes", fields: [technicianId], references: [id])
 }
 
 model Setting {
@@ -188,6 +209,76 @@ model ChatMessage {
   fileType      String?
   fileUrl       String?
   chatSession   ChatSession @relation(fields: [chatSessionId], references: [id])
+}
+
+// New models for complete workflow
+model ServiceRequest {
+  id                String   @id @default(cuid())
+  customerId        String
+  serviceId         String?
+  category          String
+  description       String
+  urgency           String   @default("NORMAL") // LOW, NORMAL, HIGH, EMERGENCY
+  status            String   @default("PENDING") // PENDING, ASSIGNED, IN_PROGRESS, COMPLETED, CANCELLED
+  photos            String[] // URLs to uploaded photos
+  videos            String[] // URLs to uploaded videos
+  address           String?
+  preferredDate    DateTime?
+  assignedTechnicianId String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  customer          User     @relation("CustomerServiceRequests", fields: [customerId], references: [id])
+  service           Service? @relation("ServiceToServiceRequests", fields: [serviceId], references: [id])
+  assignedTechnician User?   @relation("TechnicianServiceRequests", fields: [assignedTechnicianId], references: [id])
+  quotes            Quote[]  @relation("QuoteToServiceRequest")
+  jobs              Job[]
+}
+
+model Job {
+  id                String   @id @default(cuid())
+  serviceRequestId  String
+  quoteId           String?
+  customerId        String
+  technicianId      String
+  status            String   @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
+  scheduledDate     DateTime
+  startTime         DateTime?
+  endTime           DateTime?
+  actualHours       Float?
+  materialsUsed     String?
+  notes             String?
+  customerRating    Int?     // 1-5 stars
+  customerFeedback  String?
+  completedAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  serviceRequest    ServiceRequest @relation("ServiceRequestToJob", fields: [serviceRequestId], references: [id])
+  quote             Quote?   @relation("QuoteToJob", fields: [quoteId], references: [id])
+  customer          User     @relation("CustomerJobs", fields: [customerId], references: [id])
+  technician        User     @relation("TechnicianJobs", fields: [technicianId], references: [id])
+  invoices          Invoice[]
+}
+
+model Invoice {
+  id                String   @id @default(cuid())
+  jobId             String
+  customerId        String
+  technicianId      String
+  invoiceNumber     String   @unique
+  subtotal          Float
+  taxAmount         Float
+  discountAmount    Float   @default(0)
+  totalAmount       Float
+  status            String   @default("PENDING") // PENDING, PAID, OVERDUE, CANCELLED
+  dueDate           DateTime
+  paidAt            DateTime?
+  stripePaymentIntentId String?
+  pdfUrl            String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  job               Job      @relation("JobToInvoice", fields: [jobId], references: [id])
+  customer          User     @relation("CustomerInvoices", fields: [customerId], references: [id])
+  technician        User     @relation("TechnicianInvoices", fields: [technicianId], references: [id])
 }
 
 enum SubscriptionTier {

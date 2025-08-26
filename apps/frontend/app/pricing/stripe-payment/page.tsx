@@ -82,6 +82,13 @@ function StripePaymentPageContent() {
       }
     };
 
+  // Debug logging
+  console.log('🔍 Plans data:', plansData);
+  console.log('🔍 Selected plan ID:', planId);
+  console.log('🔍 Available plans:', plansData?.plans);
+  console.log('🔍 Final selected plan:', selectedPlan);
+  console.log('🔍 Stripe price IDs:', selectedPlan.stripePriceIds);
+
   const PlanIcon = PLAN_ICONS[planId as keyof typeof PLAN_ICONS] || Star;
   const planColor = PLAN_COLORS[planId as keyof typeof PLAN_COLORS] || 'from-blue-500 to-blue-600';
 

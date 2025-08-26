@@ -202,6 +202,38 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Services & Booking */}
           <div className="lg:col-span-2 space-y-8">
+            {/* Book a Service */}
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Wrench className="h-5 w-5 text-blue-600" />
+                  Book a Service
+                </CardTitle>
+                <CardDescription>
+                  Submit a service request and get a quote from our qualified technicians
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Wrench className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Need a Service?</h3>
+                  <p className="text-gray-600 mb-6">
+                    Describe what you need, upload photos if helpful, and we'll assign a qualified technician to provide you with a detailed quote.
+                  </p>
+                  <div className="flex gap-3 justify-center">
+                    <Button onClick={() => router.push('/dashboard/service-request')}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Request Service
+                    </Button>
+                    <Button variant="outline" onClick={() => router.push('/dashboard/service-requests')}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      View Requests
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Available Services */}
             <Card className="border-0 shadow-lg">
               <CardHeader>

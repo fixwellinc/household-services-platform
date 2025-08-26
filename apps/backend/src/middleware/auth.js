@@ -85,6 +85,8 @@ export const requireRole = (roles) => {
 // Specific role middlewares
 export const requireCustomer = requireRole(['CUSTOMER']);
 export const requireAdmin = requireRole(['ADMIN']);
+export const requireTechnician = requireRole(['TECHNICIAN']);
 export const requireCustomerOrAdmin = requireRole(['CUSTOMER', 'ADMIN']);
+export const requireTechnicianOrAdmin = requireRole(['TECHNICIAN', 'ADMIN']);
 
 export default authMiddleware; 

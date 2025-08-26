@@ -33,6 +33,8 @@ import plansRoutes from './routes/plans.js';
 import subscriptionRoutes from './routes/subscriptions.js';
 import dashboardRoutes from './routes/dashboard.js';
 import webhookRoutes from './routes/webhooks.js';
+import serviceRequestRoutes from './routes/service-requests.js';
+import jobRoutes from './routes/jobs.js';
 
 // Import middleware
 import { authMiddleware, requireAdmin } from './middleware/auth.js';
@@ -268,6 +270,8 @@ app.use('/api/services', serviceRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/quotes', quotesRoutes);
+app.use('/api/service-requests', serviceRequestRoutes);
+app.use('/api/jobs', jobRoutes);
 app.use('/api/docs', docsRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/plans', plansRoutes);

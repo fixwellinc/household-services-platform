@@ -141,6 +141,148 @@ router.post('/:id/reply', authMiddleware, requireAdmin, async (req, res) => {
   }
 });
 
+// Technician: Create a quote for a service request
+router.post('/create', authMiddleware, requireTechnician, async (req, res, next) => {
+  try {
+    const { 
+      serviceRequestId, 
+      estimatedHours, 
+      materialsCost, 
+      laborCost, 
+      technicianNotes 
+    } = req.body;
+
+    if (!serviceRequestId || !estimatedHours || !materialsCost || !laborCost) {
+      return res.status(400).json({ 
+        error: 'Service request ID, estimated hours, materials cost, and labor cost are required' 
+      });
+    }
+
+    // Verify the service request exists and is assigned to this technician
+    const serviceRequest = await prisma.serviceRequest.findUnique({
+      where: { id: serviceRequestId },
+      include: {
+        customer: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
+      }
+    });
+
+    if (!serviceRequest) {
+      return res.status(404).json({ error: 'Service request not found' });
+    }
+
+    if (serviceRequest.assignedTechnicianId !== req.user.id) {
+      return res.status(403).json({ error: 'Not authorized to create quote for this service request' });
+    }
+
+    const totalCost = materialsCost + laborCost;
+
+    const quote = await prisma.quote.create({
+      data: {
+        userId: serviceRequest.customerId,
+        email: serviceRequest.customer.email,
+        serviceId: serviceRequest.serviceId,
+        message: serviceRequest.description,
+        serviceRequestId: serviceRequest.id,
+        technicianId: req.user.id,
+        estimatedHours: parseFloat(estimatedHours),
+        materialsCost: parseFloat(materialsCost),
+        laborCost: parseFloat(laborCost),
+        totalCost: totalCost,
+        technicianNotes: technicianNotes || null,
+        status: 'PENDING'
+      },
+      include: {
+        serviceRequest: {
+          include: {
+            customer: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            }
+          }
+        },
+        technician: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      }
+    });
+
+    // Update service request status to ASSIGNED if not already
+    if (serviceRequest.status === 'PENDING') {
+      await prisma.serviceRequest.update({
+        where: { id: serviceRequestId },
+        data: { status: 'ASSIGNED' }
+      });
+    }
+
+    res.status(201).json({ 
+      success: true, 
+      message: 'Quote created successfully',
+      quote 
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Customer: Accept a quote
+router.post('/:id/accept', authMiddleware, requireCustomer, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    
+    const quote = await prisma.quote.findUnique({
+      where: { id },
+      include: {
+        serviceRequest: {
+          select: {
+            customerId: true
+          }
+        }
+      }
+    });
+
+    if (!quote) {
+      return res.status(404).json({ error: 'Quote not found' });
+    }
+
+    if (quote.serviceRequest.customerId !== req.user.id) {
+      return res.status(403).json({ error: 'Not authorized to accept this quote' });
+    }
+
+    if (quote.status !== 'PENDING') {
+      return res.status(400).json({ error: 'Quote is not in pending status' });
+    }
+
+    const updatedQuote = await prisma.quote.update({
+      where: { id },
+      data: {
+        customerAccepted: true,
+        acceptedAt: new Date(),
+        status: 'ACCEPTED'
+      }
+    });
+
+    res.json({ 
+      success: true, 
+      message: 'Quote accepted successfully',
+      quote: updatedQuote 
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Admin: Email blast for marketing
 router.post('/email-blast', authMiddleware, requireAdmin, upload.single('file'), async (req, res) => {
   try {
