@@ -110,6 +110,7 @@ model Service {
   bookingIds  String[]
   quoteIds    String[]
   serviceRequestIds String[]
+  serviceRequests ServiceRequest[] @relation("ServiceToServiceRequests")
 }
 
 model Booking {
@@ -163,6 +164,7 @@ model Quote {
   acceptedAt       DateTime?
   serviceRequest   ServiceRequest? @relation("QuoteToServiceRequest", fields: [serviceRequestId], references: [id])
   technician       User?     @relation("TechnicianQuotes", fields: [technicianId], references: [id])
+  jobs             Job[]      @relation("QuoteToJob")
 }
 
 model Setting {
@@ -231,7 +233,7 @@ model ServiceRequest {
   service           Service? @relation("ServiceToServiceRequests", fields: [serviceId], references: [id])
   assignedTechnician User?   @relation("TechnicianServiceRequests", fields: [assignedTechnicianId], references: [id])
   quotes            Quote[]  @relation("QuoteToServiceRequest")
-  jobs              Job[]
+  jobs              Job[]     @relation("ServiceRequestToJob")
 }
 
 model Job {
@@ -256,7 +258,7 @@ model Job {
   quote             Quote?   @relation("QuoteToJob", fields: [quoteId], references: [id])
   customer          User     @relation("CustomerJobs", fields: [customerId], references: [id])
   technician        User     @relation("TechnicianJobs", fields: [technicianId], references: [id])
-  invoices          Invoice[]
+  invoices          Invoice[] @relation("JobToInvoice")
 }
 
 model Invoice {
