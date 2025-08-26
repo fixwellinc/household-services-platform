@@ -68,10 +68,10 @@ const FALLBACK_PLANS: Record<string, any> = {
       'Free annual home inspection',
       'Access to discounted upgrade services'
     ],
-    stripePriceIds: {
-      monthly: 'price_1RsdVGQxUWZeVMlb24COfBkX', // STRIPE_STARTER_MONTHLY_PRICE_ID
-      yearly: 'price_1RsdVHQxUWZeVMlbtVqU3qwd'   // STRIPE_STARTER_YEARLY_PRICE_ID
-    }
+                  stripePriceIds: {
+                monthly: 'price_1S0WSNJZZWUMDx2PI1LEa5rs', // Real Stripe Starter Monthly
+                yearly: 'price_1S0WSTJZZWUMDx2P2k749Zyc'   // Real Stripe Starter Yearly
+              }
   },
   homecare: {
     id: 'homecare',
@@ -98,10 +98,10 @@ const FALLBACK_PLANS: Record<string, any> = {
       'Seasonal home maintenance reminders',
       'Emergency visits at standard rate (priority booking)'
     ],
-    stripePriceIds: {
-      monthly: 'price_1RsdVHQxUWZeVMlbTmt22JS2', // STRIPE_HOMECARE_MONTHLY_PRICE_ID
-      yearly: 'price_1RsdVIQxUWZeVMlbmRunIJxw'   // STRIPE_HOMECARE_YEARLY_PRICE_ID
-    }
+                  stripePriceIds: {
+                monthly: 'price_1S0WRtJZZWUMDx2PsO8c62ar', // Real Stripe HomeCare Monthly
+                yearly: 'price_1S0WRyJZZWUMDx2PJP4ZWw6Q'   // Real Stripe HomeCare Yearly
+              }
   },
   priority: {
     id: 'priority',
@@ -131,8 +131,8 @@ const FALLBACK_PLANS: Record<string, any> = {
       'Early access to Fixwell promos and partner perks'
     ],
     stripePriceIds: {
-      monthly: 'price_1RsdVJQxUWZeVMlbm1JZqhXt', // STRIPE_PRIORITY_MONTHLY_PRICE_ID
-      yearly: 'price_1RsdVJQxUWZeVMlbn8NmyXWo'   // STRIPE_PRIORITY_YEARLY_PRICE_ID
+      monthly: 'price_1S0WS4JZZWUMDx2PrxSwIetN', // Real Stripe Priority Monthly
+      yearly: 'price_1S0WSBJZZWUMDx2PQkcSZNba'   // Real Stripe Priority Yearly
     }
   }
 };
