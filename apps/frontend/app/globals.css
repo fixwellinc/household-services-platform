@@ -73,6 +73,68 @@
     line-height: 1.6;
     -webkit-user-select: text;
     user-select: text;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  /* Dark mode text and background overrides */
+  .dark body {
+    @apply bg-gray-900 text-gray-100;
+  }
+
+  /* Dark mode for common elements */
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+    @apply text-gray-100;
+  }
+
+  .dark p, .dark span, .dark div {
+    @apply text-gray-200;
+  }
+
+  .dark a {
+    @apply text-blue-400 hover:text-blue-300;
+  }
+
+  .dark button {
+    @apply text-gray-100;
+  }
+
+  /* Dark mode for form elements */
+  .dark input, .dark textarea, .dark select {
+    @apply bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-400;
+  }
+
+  .dark input:focus, .dark textarea:focus, .dark select:focus {
+    @apply border-blue-500 ring-blue-500;
+  }
+
+  /* Dark mode for cards and containers */
+  .dark .card, .dark .bg-white {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .dark .bg-gray-50, .dark .bg-gray-100 {
+    @apply bg-gray-800;
+  }
+
+  .dark .border-gray-200, .dark .border-gray-300 {
+    @apply border-gray-700;
+  }
+
+  /* Dark mode for tables */
+  .dark table {
+    @apply bg-gray-800;
+  }
+
+  .dark th, .dark td {
+    @apply border-gray-700 text-gray-200;
+  }
+
+  .dark tr:nth-child(even) {
+    @apply bg-gray-700;
+  }
+
+  .dark tr:hover {
+    @apply bg-gray-600;
   }
 
   /* Ensure all text elements use monospace font */
@@ -94,6 +156,12 @@
       z-index: 60;
       background: white;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Dark mode mobile menu */
+    .dark .mobile-menu-container {
+      background: rgb(31 41 55); /* bg-gray-800 */
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
     }
     
     /* Better touch targets for mobile menu items */
@@ -478,5 +546,49 @@
 
   .grid-auto-fill {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  /* ===== DARK MODE UTILITIES ===== */
+  
+  /* Dark mode background utilities */
+  .dark .bg-white { @apply bg-gray-900; }
+  .dark .bg-gray-50 { @apply bg-gray-800; }
+  .dark .bg-gray-100 { @apply bg-gray-800; }
+  .dark .bg-gray-200 { @apply bg-gray-700; }
+  .dark .bg-gray-300 { @apply bg-gray-600; }
+  
+  /* Dark mode text utilities */
+  .dark .text-gray-900 { @apply text-gray-100; }
+  .dark .text-gray-800 { @apply text-gray-200; }
+  .dark .text-gray-700 { @apply text-gray-300; }
+  .dark .text-gray-600 { @apply text-gray-400; }
+  .dark .text-gray-500 { @apply text-gray-400; }
+  
+  /* Dark mode border utilities */
+  .dark .border-gray-200 { @apply border-gray-700; }
+  .dark .border-gray-300 { @apply border-gray-600; }
+  .dark .border-gray-400 { @apply border-gray-500; }
+  
+  /* Dark mode shadow utilities */
+  .dark .shadow-lg { @apply shadow-gray-900/20; }
+  .dark .shadow-xl { @apply shadow-gray-900/30; }
+  
+  /* Dark mode hover states */
+  .dark .hover\:bg-gray-50:hover { @apply bg-gray-700; }
+  .dark .hover\:bg-gray-100:hover { @apply bg-gray-700; }
+  .dark .hover\:bg-blue-50:hover { @apply bg-blue-900/20; }
+  
+  /* Dark mode for specific components */
+  .dark .bg-gradient-to-r.from-gray-50.to-blue-50 {
+    @apply from-gray-800 to-blue-900;
+  }
+  
+  .dark .bg-gradient-to-r.from-blue-50.to-purple-50 {
+    @apply from-blue-900 to-purple-900;
+  }
+  
+  /* Dark mode transitions */
+  .dark * {
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
   }
 } 
