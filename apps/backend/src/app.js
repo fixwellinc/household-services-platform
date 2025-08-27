@@ -186,13 +186,29 @@ app.set('trust proxy', 1);
 
 // PATTERN: Body parsing for JSON and form data
 // Capture raw body for Stripe webhook signature verification
-app.use(express.json({
-  limit: '10mb',
-  verify: (req, res, buf) => {
-    // Store raw body for routes that need it (e.g., Stripe webhooks)
-    req.rawBody = buf;
+// IMPORTANT: Exclude webhook routes from JSON parsing to preserve raw body for signature verification
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/webhooks')) {
+    // For webhook routes, use raw body parsing
+    let data = '';
+    req.setEncoding('utf8');
+    req.on('data', chunk => {
+      data += chunk;
+    });
+    req.on('end', () => {
+      req.rawBody = Buffer.from(data, 'utf8');
+      next();
+    });
+  } else {
+    // For all other routes, use JSON parsing
+    express.json({
+      limit: '10mb',
+      verify: (req, res, buf) => {
+        req.rawBody = buf;
+      }
+    })(req, res, next);
   }
-}));
+});
 app.use(express.urlencoded({ extended: true }));
 
 // Cookie parsing
