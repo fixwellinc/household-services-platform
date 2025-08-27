@@ -246,13 +246,56 @@ class SubscriptionService {
   // Handle subscription created webhook
   async handleSubscriptionCreated(subscription) {
     try {
-      const { userId, tier } = subscription.metadata;
+      console.log('🔔 Processing subscription created webhook:', subscription.id);
+      console.log('📋 Subscription metadata:', subscription.metadata);
+      
+      // Try to get userId from metadata first
+      let { userId, tier } = subscription.metadata;
+      
+      // If no userId in metadata, try to find user by Stripe customer ID
+      if (!userId && subscription.customer) {
+        console.log('🔍 Looking up user by Stripe customer ID:', subscription.customer);
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { subscription: { stripeCustomerId: subscription.customer } },
+              { email: { not: null } } // We'll need to get customer email from Stripe
+            ]
+          }
+        });
+        
+        if (user) {
+          userId = user.id;
+          console.log('✅ Found user by customer ID:', userId);
+        }
+      }
+      
+      // If still no userId, try to get customer email from Stripe and find user
+      if (!userId && subscription.customer) {
+        try {
+          const { getCustomer } = await import('./stripe.js');
+          const customer = await getCustomer(subscription.customer);
+          if (customer.email) {
+            const user = await prisma.user.findUnique({
+              where: { email: customer.email }
+            });
+            if (user) {
+              userId = user.id;
+              tier = tier || 'STARTER'; // Default tier if not specified
+              console.log('✅ Found user by email:', userId);
+            }
+          }
+        } catch (stripeError) {
+          console.error('Error fetching customer from Stripe:', stripeError);
+        }
+      }
       
       if (userId) {
+        console.log('✅ Creating/updating subscription for user:', userId);
         await prisma.subscription.upsert({
           where: { userId },
           update: {
-            tier,
+            tier: tier || 'STARTER',
             status: subscription.status.toUpperCase(),
             stripeCustomerId: subscription.customer,
             stripeSubscriptionId: subscription.id,
@@ -261,7 +304,7 @@ class SubscriptionService {
           },
           create: {
             userId,
-            tier,
+            tier: tier || 'STARTER',
             status: subscription.status.toUpperCase(),
             stripeCustomerId: subscription.customer,
             stripeSubscriptionId: subscription.id,
@@ -269,6 +312,16 @@ class SubscriptionService {
             currentPeriodEnd: new Date(subscription.current_period_end * 1000),
           },
         });
+        
+        // Update user's subscriptionId reference
+        await prisma.user.update({
+          where: { id: userId },
+          data: { subscriptionId: subscription.id }
+        });
+        
+        console.log('✅ Subscription created/updated successfully for user:', userId);
+      } else {
+        console.error('❌ Could not determine userId for subscription:', subscription.id);
       }
     } catch (error) {
       console.error('Error handling subscription created:', error);
@@ -279,17 +332,26 @@ class SubscriptionService {
   // Handle subscription updated webhook
   async handleSubscriptionUpdated(subscription) {
     try {
-      const { userId } = subscription.metadata;
+      console.log('🔔 Processing subscription updated webhook:', subscription.id);
       
-      if (userId) {
+      // Try to find subscription by Stripe subscription ID
+      const existingSubscription = await prisma.subscription.findUnique({
+        where: { stripeSubscriptionId: subscription.id }
+      });
+      
+      if (existingSubscription) {
+        console.log('✅ Updating existing subscription for user:', existingSubscription.userId);
         await prisma.subscription.update({
-          where: { userId },
+          where: { id: existingSubscription.id },
           data: {
             status: subscription.status.toUpperCase(),
             currentPeriodStart: new Date(subscription.current_period_start * 1000),
             currentPeriodEnd: new Date(subscription.current_period_end * 1000),
           },
         });
+      } else {
+        console.log('⚠️ Subscription not found in database, processing as new');
+        await this.handleSubscriptionCreated(subscription);
       }
     } catch (error) {
       console.error('Error handling subscription updated:', error);
