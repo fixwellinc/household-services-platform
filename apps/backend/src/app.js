@@ -1096,9 +1096,13 @@ app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
         include: {
           subscription: true,
           subscriptionUsage: true,
-          bookings: true,
-          messages: true,
-          quotes: true,
+          serviceRequests: true,
+          technicianServiceRequests: true,
+          technicianQuotes: true,
+          customerJobs: true,
+          technicianJobs: true,
+          customerInvoices: true,
+          technicianInvoices: true,
           assignedEmployee: true,
           assignedCustomers: true
         }
@@ -1121,13 +1125,16 @@ app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
         throw new Error('Cannot delete the last admin account. At least one admin must remain.');
       }
       
-      // CRITICAL SAFEGUARD 3: Check for active bookings
-      const activeBookings = user.bookings.filter(booking => 
-        ['PENDING', 'CONFIRMED', 'IN_PROGRESS'].includes(booking.status)
+      // CRITICAL SAFEGUARD 3: Check for active service requests and jobs
+      const activeServiceRequests = user.serviceRequests.filter(request => 
+        ['PENDING', 'ASSIGNED', 'IN_PROGRESS'].includes(request.status)
+      );
+      const activeJobs = user.customerJobs.filter(job => 
+        ['SCHEDULED', 'IN_PROGRESS'].includes(job.status)
       );
       
-      if (activeBookings.length > 0) {
-        throw new Error(`Cannot delete user with ${activeBookings.length} active bookings. Please cancel or complete all bookings first.`);
+      if (activeServiceRequests.length > 0 || activeJobs.length > 0) {
+        throw new Error(`Cannot delete user with ${activeServiceRequests.length} active service requests and ${activeJobs.length} active jobs. Please cancel or complete all requests/jobs first.`);
       }
       
       // CRITICAL SAFEGUARD 4: Check for active subscription
@@ -1154,9 +1161,13 @@ app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
         targetUserRole: user.role,
         timestamp: new Date().toISOString(),
         relatedData: {
-          bookings: user.bookings.length,
-          messages: user.messages.length,
-          quotes: user.quotes.length,
+          serviceRequests: user.serviceRequests.length,
+          technicianServiceRequests: user.technicianServiceRequests.length,
+          technicianQuotes: user.technicianQuotes.length,
+          customerJobs: user.customerJobs.length,
+          technicianJobs: user.technicianJobs.length,
+          customerInvoices: user.customerInvoices.length,
+          technicianInvoices: user.technicianInvoices.length,
           subscription: !!user.subscription,
           assignedCustomers: user.assignedCustomers.length
         }
