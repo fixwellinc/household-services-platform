@@ -1114,15 +1114,14 @@ app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
       
       // CRITICAL SAFEGUARD 1: Prevent deletion of admin accounts
       if (user.role === 'ADMIN') {
+        // Only check admin count when actually trying to delete an admin
+        const adminCount = await tx.user.count({
+          where: { role: 'ADMIN' }
+        });
+        if (adminCount <= 1) {
+          throw new Error('Cannot delete the last admin account. At least one admin must remain.');
+        }
         throw new Error('Cannot delete admin accounts. Admin accounts are protected from deletion.');
-      }
-      
-      // CRITICAL SAFEGUARD 2: Check if this is the last admin account
-      const adminCount = await tx.user.count({
-        where: { role: 'ADMIN' }
-      });
-      if (adminCount <= 1) {
-        throw new Error('Cannot delete the last admin account. At least one admin must remain.');
       }
       
       // CRITICAL SAFEGUARD 3: Check for active service requests and jobs
