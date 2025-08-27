@@ -22,7 +22,7 @@ import {
   DollarSign,
   Gift
 } from 'lucide-react'
-import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { ThemeToggle, ThemeToggleCompact } from '@/components/ui/ThemeToggle'
 
 
 const Header: React.FC = () => {
