@@ -234,10 +234,10 @@ export default function HomePageClient() {
                 const savingsPercentage = Math.round((savings / contractorPrice) * 100);
 
                 return (
-                  <Card key={service.id} className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 shadow-lg overflow-hidden bg-white">
-                    <div className="h-48 bg-gradient-to-br from-blue-100 via-purple-100 to-green-100 flex items-center justify-center relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10"></div>
-                      <div className="text-6xl opacity-30 relative z-10">
+                  <Card key={service.id} className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 shadow-lg overflow-hidden bg-white dark:bg-gray-800">
+                    <div className="h-48 bg-gradient-to-br from-blue-100 via-purple-100 to-green-100 dark:from-blue-900/30 dark:via-purple-900/30 dark:to-green-900/30 flex items-center justify-center relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20"></div>
+                      <div className="text-6xl opacity-30 dark:opacity-20 relative z-10 text-gray-600 dark:text-gray-300">
                         {service.category === 'CLEANING' && <Home />}
                         {service.category === 'MAINTENANCE' && <Wrench />}
                         {service.category === 'REPAIR' && <Zap />}
@@ -249,54 +249,54 @@ export default function HomePageClient() {
                     <CardHeader className="pb-4">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <CardTitle className="text-xl group-hover:text-blue-600 transition-colors font-bold">
+                          <CardTitle className="text-xl group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors font-bold text-gray-900 dark:text-gray-100">
                             {service.name}
                           </CardTitle>
-                          <CardDescription className="mt-3 text-gray-600 leading-relaxed">
+                          <CardDescription className="mt-3 text-gray-600 dark:text-gray-300 leading-relaxed">
                             {service.description}
                           </CardDescription>
                         </div>
-                        <Badge variant="outline" className="ml-2 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 border-blue-200 font-medium">
+                        <Badge variant="outline" className="ml-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-600 font-medium">
                           {service.category}
                         </Badge>
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0">
                       {/* Price Comparison */}
-                      <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm text-gray-600">Contractor Rate:</span>
-                          <span className="text-sm line-through text-red-600 font-medium">
+                          <span className="text-sm text-gray-600 dark:text-gray-300">Contractor Rate:</span>
+                          <span className="text-sm line-through text-red-600 dark:text-red-400 font-medium">
                             ${contractorPrice}
                           </span>
                         </div>
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm text-gray-600">Fixwell Rate:</span>
-                          <span className="text-2xl font-bold text-green-600">
+                          <span className="text-sm text-gray-600 dark:text-gray-300">Fixwell Rate:</span>
+                          <span className="text-2xl font-bold text-green-600 dark:text-green-400">
                             ${service.basePrice}
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">You Save:</span>
-                          <span className="text-sm font-bold text-green-600">
+                          <span className="text-sm text-gray-600 dark:text-gray-300">You Save:</span>
+                          <span className="text-sm font-bold text-green-600 dark:text-green-400">
                             ${savings} ({savingsPercentage}%)
                           </span>
                         </div>
                       </div>
 
                       {/* Service Benefits */}
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-                        <Shield className="h-4 w-4 text-green-500" />
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 mb-4">
+                        <Shield className="h-4 w-4 text-green-500 dark:text-green-400" />
                         <span className="font-medium">Professional & Insured</span>
                       </div>
                       
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-                        <CheckCircle className="h-4 w-4 text-blue-500" />
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 mb-4">
+                        <CheckCircle className="h-4 w-4 text-blue-500 dark:text-blue-400" />
                         <span className="font-medium">Professional Service</span>
                       </div>
 
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
-                        <Clock className="h-4 w-4 text-purple-500" />
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 mb-6">
+                        <Clock className="h-4 w-4 text-purple-500 dark:text-purple-400" />
                         <span className="font-medium">Same-day booking available</span>
                       </div>
 
@@ -313,13 +313,13 @@ export default function HomePageClient() {
               })}
             </div>
           ) : (
-            <Card className="max-w-md mx-auto border-0 shadow-lg">
+            <Card className="max-w-md mx-auto border-0 shadow-lg bg-white dark:bg-gray-800">
               <CardContent className="text-center py-16">
-                <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Star className="h-10 w-10 text-blue-600" />
+                <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Star className="h-10 w-10 text-blue-600 dark:text-blue-400" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-gray-900">No services available</h3>
-                <p className="text-gray-600 mb-6">
+                <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-gray-100">No services available</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-6">
                   Check back soon for amazing new services.
                 </p>
               </CardContent>
@@ -329,76 +329,76 @@ export default function HomePageClient() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+      <section className="py-20 bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-full text-sm font-medium mb-6">
               <Star className="h-4 w-4" />
               Why Choose Us
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-6">
               Why Choose Us?
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-4">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed mb-4">
               While other platforms focus on contracts, We focus on you.
             </p>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
               We make household services simple, reliable, and hassle-free for Lower Mainland residents
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white">
+            <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white dark:bg-gray-800">
               <CardHeader>
                 <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                   <Shield className="h-10 w-10 text-white" />
                 </div>
-                <CardTitle className="text-xl font-bold">Professional Quality</CardTitle>
+                <CardTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">Professional Quality</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                   All our services are professionally managed, thoroughly vetted, and insured for your complete peace of mind across the Lower Mainland.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white">
+            <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white dark:bg-gray-800">
               <CardHeader>
                 <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                   <Shield className="h-10 w-10 text-white" />
                 </div>
-                <CardTitle className="text-xl font-bold">Quality Assured</CardTitle>
+                <CardTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">Quality Assured</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                   We stand behind every service with our professional quality assurance. Our team of verified experts ensures exceptional results every time.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white">
+            <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white dark:bg-gray-800">
               <CardHeader>
                 <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                   <Zap className="h-10 w-10 text-white" />
                 </div>
-                <CardTitle className="text-xl font-bold">Instant Booking</CardTitle>
+                <CardTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">Instant Booking</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                   Book services in minutes with our streamlined platform. No phone calls, no waiting - just instant confirmation.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white">
+            <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white dark:bg-gray-800">
               <CardHeader>
                 <div className="w-20 h-20 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                   <TrendingUp className="h-10 w-10 text-white" />
                 </div>
-                <CardTitle className="text-xl font-bold">Save Up to 40%</CardTitle>
+                <CardTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">Save Up to 40%</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                   Get professional quality at contractor rates. Save up to 40% compared to traditional contractor prices while getting better service and quality assurance.
                 </p>
               </CardContent>
@@ -408,7 +408,7 @@ export default function HomePageClient() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 relative overflow-hidden">
+      <section className="py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 dark:from-blue-700 dark:via-purple-700 dark:to-blue-800 relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
           <div className="absolute bottom-10 right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
@@ -421,7 +421,7 @@ export default function HomePageClient() {
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Ready to Get Started?
           </h2>
-          <p className="text-xl text-blue-100 mb-10 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-blue-100 dark:text-blue-200 mb-10 max-w-3xl mx-auto leading-relaxed">
             Join thousands of satisfied Lower Mainland customers who trust us with their household needs
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
@@ -429,7 +429,7 @@ export default function HomePageClient() {
               <Button 
                 size="lg" 
                 variant="secondary" 
-                className="bg-white text-blue-600 hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-8 py-4 font-medium" 
+                className="bg-white text-blue-600 hover:bg-gray-100 dark:bg-gray-100 dark:text-blue-700 dark:hover:bg-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-8 py-4 font-medium" 
               >
                 <span className="flex items-center gap-2">
                   Let's Get You Started
@@ -438,7 +438,7 @@ export default function HomePageClient() {
               </Button>
             </Link>
             <Link href="/services">
-              <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 font-medium transition-all duration-300 transform hover:scale-105">
+              <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-blue-600 dark:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white px-8 py-4 font-medium transition-all duration-300 transform hover:scale-105">
                 <span className="flex items-center gap-2">
                   Browse Services
                   <MapPin className="h-5 w-5" />
