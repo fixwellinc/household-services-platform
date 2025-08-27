@@ -116,7 +116,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${jetbrainsMono.className} min-h-screen bg-background text-foreground antialiased`}>
+      <body className={`${jetbrainsMono.className} min-h-screen bg-background text-foreground antialiased transition-colors duration-200`}>
         <ErrorBoundary>
           <Providers>
             <div className="flex min-h-screen flex-col">

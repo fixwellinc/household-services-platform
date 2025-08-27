@@ -22,6 +22,7 @@ import {
   DollarSign,
   Gift
 } from 'lucide-react'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 
 const Header: React.FC = () => {
@@ -85,12 +86,12 @@ const Header: React.FC = () => {
   // Show loading skeleton during hydration to prevent mismatch
   if (!isHydrated) {
     return (
-      <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/98 backdrop-blur-md shadow-lg">
+      <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-700 bg-white/98 dark:bg-gray-900/98 backdrop-blur-md shadow-lg dark:shadow-gray-900/20">
         <div className="container mx-auto px-4">
           <div className="flex h-20 items-center justify-between">
             {/* Logo */}
             <div className="flex items-center">
-              <div className="w-12 h-12 animate-pulse bg-gray-200 rounded-lg shadow-md mr-3"></div>
+              <div className="w-12 h-12 animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg shadow-md mr-3"></div>
               <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
                 Fixwell
               </span>
@@ -108,13 +109,13 @@ const Header: React.FC = () => {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/98 backdrop-blur-md shadow-lg">
+    <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-700 bg-white/98 dark:bg-gray-900/98 backdrop-blur-md shadow-lg dark:shadow-gray-900/20">
       <div className="container mx-auto px-4">
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-3 group">
-              <div className="w-12 h-12 flex items-center justify-center bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-110">
+              <div className="w-12 h-12 flex items-center justify-center bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-110">
                 <Image 
                   src="/fixwelltop.png" 
                   alt="Fixwell Logo" 
@@ -134,21 +135,21 @@ const Header: React.FC = () => {
           <nav className="hidden md:flex items-center space-x-8">
             <Link 
               href="/" 
-              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50"
+              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
             >
               <Home className="h-4 w-4" />
               Home
             </Link>
             <Link 
               href="/services" 
-              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50"
+              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
             >
               <Wrench className="h-4 w-4" />
               Services
             </Link>
             <Link 
               href="/pricing" 
-              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50"
+              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
             >
               <DollarSign className="h-4 w-4" />
               Plans
@@ -156,7 +157,7 @@ const Header: React.FC = () => {
 
             <Link 
               href="/members-discount" 
-              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50"
+              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
             >
               <Gift className="h-4 w-4" />
               Members Discount
@@ -164,14 +165,14 @@ const Header: React.FC = () => {
 
             <Link 
               href="/about" 
-              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50"
+              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
             >
               <Info className="h-4 w-4" />
               About
             </Link>
             <Link 
               href="/contact" 
-              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50"
+              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
             >
               <MessageCircle className="h-4 w-4" />
               Contact
@@ -180,31 +181,33 @@ const Header: React.FC = () => {
 
           {/* User Actions */}
           <div className="flex items-center space-x-4">
+            {/* Theme Toggle */}
+            <ThemeToggle />
             {isLoading ? (
               <div className="h-8 w-8 animate-pulse bg-gray-200 rounded-full"></div>
             ) : user ? (
               <div className="relative">
                 <button
                   onClick={toggleUserMenu}
-                  className="flex items-center space-x-3 bg-gradient-to-r from-gray-50 to-blue-50 hover:from-blue-50 hover:to-purple-50 px-4 py-2 rounded-full transition-all duration-200 shadow-sm hover:shadow-md"
+                  className="flex items-center space-x-3 bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-800 dark:to-blue-900 hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-900 dark:hover:to-purple-900 px-4 py-2 rounded-full transition-all duration-200 shadow-sm hover:shadow-md"
                 >
                   <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-sm">
                     <User className="h-4 w-4 text-white" />
                   </div>
                   <div className="hidden sm:block text-left">
-                    <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                    <div className="text-xs text-gray-500">{user.role}</div>
+                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.name}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{user.role}</div>
                   </div>
-                  <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`h-4 w-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {/* User Dropdown Menu */}
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
                     {/* Dashboard for all users */}
                     <Link 
                       href={user.role === 'ADMIN' ? '/admin' : '/dashboard/customer'}
-                      className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                      className="flex items-center gap-3 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       <LayoutDashboard className="h-4 w-4" />
@@ -213,7 +216,7 @@ const Header: React.FC = () => {
                     {user.role === 'ADMIN' ? (
                       <Link 
                         href="/profile"
-                        className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                        className="flex items-center gap-3 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         <User className="h-4 w-4" />
@@ -222,7 +225,7 @@ const Header: React.FC = () => {
                     ) : (
                       <Link 
                         href="/profile"
-                        className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                        className="flex items-center gap-3 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         <User className="h-4 w-4" />
@@ -231,17 +234,17 @@ const Header: React.FC = () => {
                     )}
                     <Link 
                       href="/settings"
-                      className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                      className="flex items-center gap-3 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       <Settings className="h-4 w-4" />
                       Settings
                     </Link>
-                    <div className="border-t border-gray-200 my-1"></div>
+                    <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                     <button
                       onClick={handleLogout}
                       disabled={isLoading}
-                      className="flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 transition-colors duration-200 w-full text-left"
+                      className="flex items-center gap-3 px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 w-full text-left"
                     >
                       <LogOut className="h-4 w-4" />
                       {isLoading ? 'Signing out...' : 'Sign Out'}
@@ -276,13 +279,13 @@ const Header: React.FC = () => {
             {/* Mobile Menu Button - Improved touch target */}
             <button
               onClick={toggleMobileMenu}
-              className="mobile-menu-button md:hidden p-3 rounded-lg hover:bg-gray-100 transition-colors duration-200 touch-manipulation"
+              className="mobile-menu-button md:hidden p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 touch-manipulation"
               aria-label="Toggle mobile menu"
             >
               {isMobileMenuOpen ? (
-                <X className="h-6 w-6 text-gray-700" />
+                <X className="h-6 w-6 text-gray-700 dark:text-gray-300" />
               ) : (
-                <Menu className="h-6 w-6 text-gray-700" />
+                <Menu className="h-6 w-6 text-gray-700 dark:text-gray-300" />
               )}
             </button>
           </div>
@@ -290,14 +293,14 @@ const Header: React.FC = () => {
 
         {/* Mobile Menu - Improved positioning and z-index */}
         {isMobileMenuOpen && (
-          <div className="mobile-menu-container md:hidden border-t border-gray-200 py-4 bg-white relative z-50 shadow-lg">
+          <div className="mobile-menu-container md:hidden border-t border-gray-200 dark:border-gray-700 py-4 bg-white dark:bg-gray-900 relative z-50 shadow-lg dark:shadow-gray-900/20">
             <div className="px-4 mb-2">
-              <span className="text-sm text-gray-500 font-medium">Navigation Menu</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">Navigation Menu</span>
             </div>
             <nav className="flex flex-col space-y-4">
               <Link 
                 href="/" 
-                className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
+                className="flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <Home className="h-5 w-5" />
@@ -305,7 +308,7 @@ const Header: React.FC = () => {
               </Link>
               <Link 
                 href="/services" 
-                className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
+                className="flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <Wrench className="h-5 w-5" />
@@ -313,7 +316,7 @@ const Header: React.FC = () => {
               </Link>
               <Link 
                 href="/pricing" 
-                className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
+                className="flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <DollarSign className="h-5 w-5" />
@@ -322,7 +325,7 @@ const Header: React.FC = () => {
 
               <Link 
                 href="/members-discount" 
-                className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
+                className="flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <Gift className="h-5 w-5" />
@@ -331,7 +334,7 @@ const Header: React.FC = () => {
 
               <Link 
                 href="/about" 
-                className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
+                className="flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <Info className="h-5 w-5" />
@@ -339,19 +342,27 @@ const Header: React.FC = () => {
               </Link>
               <Link 
                 href="/contact" 
-                className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
+                className="flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <MessageCircle className="h-5 w-5" />
                 Contact
               </Link>
               
+              {/* Theme Toggle in Mobile Menu */}
+              <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                <div className="px-4 py-2">
+                  <span className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-2 block">Theme</span>
+                  <ThemeToggleCompact />
+                </div>
+              </div>
+              
               {/* User-specific mobile menu items */}
               {user && (
-                <div className="pt-4 border-t border-gray-200 space-y-3">
+                <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
                   <Link 
                     href={user.role === 'ADMIN' ? '/admin' : '/dashboard/customer'}
-                    className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
+                    className="flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <LayoutDashboard className="h-5 w-5" />
@@ -359,7 +370,7 @@ const Header: React.FC = () => {
                   </Link>
                   <Link 
                     href="/profile"
-                    className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
+                    className="flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <User className="h-5 w-5" />
@@ -367,7 +378,7 @@ const Header: React.FC = () => {
                   </Link>
                   <Link 
                     href="/settings"
-                    className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50"
+                    className="flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <Settings className="h-5 w-5" />
@@ -376,7 +387,7 @@ const Header: React.FC = () => {
                   <button
                     onClick={handleLogout}
                     disabled={isLoading}
-                    className="flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 transition-colors duration-200 w-full text-left font-medium rounded-lg"
+                    className="flex items-center gap-3 px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 w-full text-left font-medium rounded-lg"
                   >
                     <LogOut className="h-5 w-5" />
                     {isLoading ? 'Signing out...' : 'Sign Out'}

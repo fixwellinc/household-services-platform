@@ -6,6 +6,7 @@ import { Toaster } from 'sonner';
 import { useState } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { LocationProvider } from '@/contexts/LocationContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -33,11 +34,13 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <LocationProvider>
-          {children}
-        </LocationProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <LocationProvider>
+            {children}
+          </LocationProvider>
+        </AuthProvider>
+      </ThemeProvider>
       <Toaster position="top-right" />
       {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
