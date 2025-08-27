@@ -86,7 +86,7 @@ const Header: React.FC = () => {
   // Show loading skeleton during hydration to prevent mismatch
   if (!isHydrated) {
     return (
-      <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-700 bg-white/98 dark:bg-gray-900/98 backdrop-blur-md shadow-lg dark:shadow-gray-900/20">
+      <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 backdrop-blur-md shadow-lg dark:shadow-gray-900/20">
         <div className="container mx-auto px-4">
           <div className="flex h-20 items-center justify-between">
             {/* Logo */}
@@ -109,7 +109,7 @@ const Header: React.FC = () => {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-700 bg-white/98 dark:bg-gray-900/98 backdrop-blur-md shadow-lg dark:shadow-gray-900/20">
+    <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 backdrop-blur-md shadow-lg dark:shadow-gray-900/20">
       <div className="container mx-auto px-4">
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
