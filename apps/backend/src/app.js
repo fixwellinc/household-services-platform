@@ -1088,25 +1088,90 @@ app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
   const { id } = req.params;
   
   try {
-    // Use transaction for atomicity with increased timeout (15 seconds)
+    // Use transaction for atomicity with increased timeout (30 seconds)
     const result = await prisma.$transaction(async (tx) => {
-      // Check if user exists with all related data
+      // Set transaction timeout to 30 seconds
+      await tx.$executeRaw`SET LOCAL statement_timeout = 30000;`;
+      
+      // Check if user exists first (basic check)
       const user = await tx.user.findUnique({ 
         where: { id },
-        include: {
-          subscription: true,
-          subscriptionUsage: true,
-          serviceRequests: true,
-          technicianServiceRequests: true,
-          technicianQuotes: true,
-          customerJobs: true,
-          technicianJobs: true,
-          customerInvoices: true,
-          technicianInvoices: true,
-          assignedEmployee: true,
-          assignedCustomers: true
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          isActive: true
         }
       });
+      
+      if (!user) {
+        throw new Error('User not found');
+      }
+      
+      // CRITICAL SAFEGUARD 1: Prevent deletion of admin accounts
+      if (user.role === 'ADMIN') {
+        const adminCount = await tx.user.count({
+          where: { role: 'ADMIN' }
+        });
+        if (adminCount <= 1) {
+          throw new Error('Cannot delete the last admin account. At least one admin must remain.');
+        }
+        throw new Error('Cannot delete admin accounts. Admin accounts are protected from deletion.');
+      }
+      
+      // Check for active service requests and jobs (simplified)
+      const activeServiceRequests = await tx.serviceRequest.count({
+        where: { 
+          customerId: id,
+          status: { in: ['PENDING', 'ASSIGNED', 'IN_PROGRESS'] }
+        }
+      });
+      
+      const activeJobs = await tx.job.count({
+        where: { 
+          customerId: id,
+          status: { in: ['SCHEDULED', 'IN_PROGRESS'] }
+        }
+      });
+      
+      if (activeServiceRequests > 0 || activeJobs > 0) {
+        throw new Error(`Cannot delete user with ${activeServiceRequests} active service requests and ${activeJobs} active jobs. Please cancel or complete all requests/jobs first.`);
+      }
+      
+      // Check for active subscription
+      const activeSubscription = await tx.subscription.findFirst({
+        where: { 
+          userId: id,
+          status: 'ACTIVE'
+        }
+      });
+      
+      if (activeSubscription) {
+        throw new Error('Cannot delete user with active subscription. Please cancel the subscription first.');
+      }
+      
+      // Check for assigned customers (if employee)
+      if (user.role === 'EMPLOYEE') {
+        const assignedCustomers = await tx.user.count({
+          where: { assignedEmployeeId: id }
+        });
+        
+        if (assignedCustomers > 0) {
+          throw new Error(`Cannot delete employee with ${assignedCustomers} assigned customers. Please reassign customers first.`);
+        }
+      }
+      
+      // Check for assigned employee (if customer)
+      if (user.role === 'CUSTOMER') {
+        const assignedEmployee = await tx.user.findFirst({
+          where: { assignedEmployeeId: id }
+        });
+        
+        if (assignedEmployee) {
+          throw new Error('Cannot delete customer with assigned employee. Please remove the assignment first.');
+        }
+      }
       
       if (!user) {
         throw new Error('User not found');
@@ -1124,33 +1189,6 @@ app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
         throw new Error('Cannot delete admin accounts. Admin accounts are protected from deletion.');
       }
       
-      // CRITICAL SAFEGUARD 3: Check for active service requests and jobs
-      const activeServiceRequests = user.serviceRequests.filter(request => 
-        ['PENDING', 'ASSIGNED', 'IN_PROGRESS'].includes(request.status)
-      );
-      const activeJobs = user.customerJobs.filter(job => 
-        ['SCHEDULED', 'IN_PROGRESS'].includes(job.status)
-      );
-      
-      if (activeServiceRequests.length > 0 || activeJobs.length > 0) {
-        throw new Error(`Cannot delete user with ${activeServiceRequests.length} active service requests and ${activeJobs.length} active jobs. Please cancel or complete all requests/jobs first.`);
-      }
-      
-      // CRITICAL SAFEGUARD 4: Check for active subscription
-      if (user.subscription && user.subscription.status === 'ACTIVE') {
-        throw new Error('Cannot delete user with active subscription. Please cancel the subscription first.');
-      }
-      
-      // CRITICAL SAFEGUARD 5: Check for assigned customers (if employee)
-      if (user.role === 'EMPLOYEE' && user.assignedCustomers.length > 0) {
-        throw new Error(`Cannot delete employee with ${user.assignedCustomers.length} assigned customers. Please reassign customers first.`);
-      }
-      
-      // CRITICAL SAFEGUARD 6: Check for assigned employee (if customer)
-      if (user.assignedEmployee) {
-        throw new Error('Cannot delete customer with assigned employee. Please remove the assignment first.');
-      }
-      
       // CRITICAL SAFEGUARD 7: Log the deletion attempt
       console.log(`🚨 ADMIN USER DELETION ATTEMPT:`, {
         adminId: req.user.id,
@@ -1158,18 +1196,7 @@ app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
         targetUserId: id,
         targetUserEmail: user.email,
         targetUserRole: user.role,
-        timestamp: new Date().toISOString(),
-        relatedData: {
-          serviceRequests: user.serviceRequests.length,
-          technicianServiceRequests: user.technicianServiceRequests.length,
-          technicianQuotes: user.technicianQuotes.length,
-          customerJobs: user.customerJobs.length,
-          technicianJobs: user.technicianJobs.length,
-          customerInvoices: user.customerInvoices.length,
-          technicianInvoices: user.technicianInvoices.length,
-          subscription: !!user.subscription,
-          assignedCustomers: user.assignedCustomers.length
-        }
+        timestamp: new Date().toISOString()
       });
       
       // CRITICAL SAFEGUARD 8: Soft delete instead of hard delete (recommended for production)
@@ -1186,12 +1213,7 @@ app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
       
       // CRITICAL SAFEGUARD 9: Archive related data instead of deleting
       // This prevents data loss and maintains audit trail
-      if (user.subscription) {
-        await tx.subscription.update({
-          where: { id: user.subscription.id },
-          data: { status: 'CANCELLED' }
-        });
-      }
+      // Note: We'll handle subscription cancellation separately if needed
       
       return {
         success: true,
