@@ -1151,27 +1151,27 @@ app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
         throw new Error('Cannot delete user with active subscription. Please cancel the subscription first.');
       }
       
-      // Check for assigned customers (if employee)
-      if (user.role === 'EMPLOYEE') {
-        const assignedCustomers = await tx.user.count({
-          where: { assignedEmployeeId: id }
-        });
-        
-        if (assignedCustomers > 0) {
-          throw new Error(`Cannot delete employee with ${assignedCustomers} assigned customers. Please reassign customers first.`);
-        }
-      }
-      
-      // Check for assigned employee (if customer)
-      if (user.role === 'CUSTOMER') {
-        const assignedEmployee = await tx.user.findFirst({
-          where: { assignedEmployeeId: id }
-        });
-        
-        if (assignedEmployee) {
-          throw new Error('Cannot delete customer with assigned employee. Please remove the assignment first.');
-        }
-      }
+             // Check for assigned customers (if employee)
+       if (user.role === 'EMPLOYEE') {
+         const assignedCustomers = await tx.customerEmployeeAssignment.count({
+           where: { employeeId: id }
+         });
+         
+         if (assignedCustomers > 0) {
+           throw new Error(`Cannot delete employee with ${assignedCustomers} assigned customers. Please reassign customers first.`);
+         }
+       }
+       
+       // Check for assigned employee (if customer)
+       if (user.role === 'CUSTOMER') {
+         const assignedEmployee = await tx.customerEmployeeAssignment.findFirst({
+           where: { customerId: id }
+         });
+         
+         if (assignedEmployee) {
+           throw new Error('Cannot delete customer with assigned employee. Please remove the assignment first.');
+         }
+       }
       
       if (!user) {
         throw new Error('User not found');
