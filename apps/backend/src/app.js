@@ -1088,7 +1088,7 @@ app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
   const { id } = req.params;
   
   try {
-    // Use transaction for atomicity
+    // Use transaction for atomicity with increased timeout (15 seconds)
     const result = await prisma.$transaction(async (tx) => {
       // Check if user exists with all related data
       const user = await tx.user.findUnique({ 

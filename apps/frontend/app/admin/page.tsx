@@ -134,7 +134,7 @@ export default function AdminPage() {
       let mounted = true;
       (async () => {
         try {
-          const r = await fetch(`/api/backend/chat/${chatId}/messages`);
+          const r = await fetch(`/api/chat/${chatId}/messages`);
           if (r.ok) {
             const d = await r.json();
             if (mounted) setMessages(d.messages || []);
@@ -145,14 +145,14 @@ export default function AdminPage() {
     }, [chatId]);
     const send = async () => {
       if (!text.trim()) return;
-      await fetch('/api/backend/chat/message', {
+      await fetch('/api/chat/message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chatId, message: text, sender: 'admin', senderType: 'admin' })
       });
       setText('');
       // naive refresh
-      const r = await fetch(`/api/backend/chat/${chatId}/messages`);
+      const r = await fetch(`/api/chat/${chatId}/messages`);
       if (r.ok) {
         const d = await r.json();
         setMessages(d.messages || []);
@@ -271,7 +271,7 @@ export default function AdminPage() {
 
       // Load chat sessions
       try {
-        const s = await fetch('/api/backend/chat/sessions');
+        const s = await fetch('/api/chat/sessions');
         if (s.ok) {
           const sd = await s.json();
           setChatSessions(sd.sessions || []);
