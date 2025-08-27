@@ -8,7 +8,7 @@ if (!process.env.DATABASE_URL) {
   console.warn('⚠️  DATABASE_URL environment variable is not set!');
   console.warn('⚠️  Database features will not work properly');
   console.warn('⚠️  Please set DATABASE_URL in your Railway environment variables.');
-  console.warn('⚠️  Example: mongodb+srv://username:password@cluster.mongodb.net/database?retryWrites=true&w=majority');
+  console.warn('⚠️  Example: postgresql://username:password@host:port/database');
   // Don't exit - let the app start and handle missing DB gracefully
 }
 
@@ -17,36 +17,71 @@ const globalForPrisma = globalThis;
 
 let prisma = null;
 
-if (process.env.DATABASE_URL) {
-  try {
-    prisma = globalForPrisma.prisma || new PrismaClient({
-      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-      datasources: {
-        db: {
-          url: process.env.DATABASE_URL
-        }
-      },
-      // Add connection pool configuration for better stability
-      __internal: {
-        engine: {
-          connectionLimit: 5,
-          pool: {
-            min: 0,
-            max: 10
+// Database connection retry logic
+const initializePrisma = async (retries = 5, delay = 2000) => {
+  if (!process.env.DATABASE_URL) {
+    console.log('⚠️  Skipping Prisma client initialization (no DATABASE_URL)');
+    return null;
+  }
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      console.log(`🔌 Attempting database connection (attempt ${attempt}/${retries})...`);
+      
+      prisma = globalForPrisma.prisma || new PrismaClient({
+        log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+        datasources: {
+          db: {
+            url: process.env.DATABASE_URL
+          }
+        },
+        // Add connection pool configuration for better stability
+        __internal: {
+          engine: {
+            connectionLimit: 5,
+            pool: {
+              min: 0,
+              max: 10
+            }
           }
         }
-      }
-    });
-    console.log('✅ Prisma client initialized successfully');
-  } catch (error) {
-    console.error('❌ Failed to initialize Prisma client:', error.message);
-    prisma = null;
-  }
-} else {
-  console.log('⚠️  Skipping Prisma client initialization (no DATABASE_URL)');
-}
+      });
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+      // Test the connection
+      await prisma.$queryRaw`SELECT 1`;
+      console.log('✅ Prisma client initialized and connected successfully');
+      
+      if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+      return prisma;
+      
+    } catch (error) {
+      console.error(`❌ Database connection attempt ${attempt} failed:`, error.message);
+      
+      if (prisma) {
+        try {
+          await prisma.$disconnect();
+        } catch (disconnectError) {
+          console.error('❌ Error disconnecting Prisma client:', disconnectError.message);
+        }
+        prisma = null;
+      }
+      
+      if (attempt < retries) {
+        console.log(`⏳ Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        delay *= 1.5; // Exponential backoff
+      } else {
+        console.error('❌ All database connection attempts failed');
+        return null;
+      }
+    }
+  }
+  
+  return null;
+};
+
+// Initialize Prisma client
+prisma = await initializePrisma();
 
 // Graceful shutdown
 process.on('beforeExit', async () => {

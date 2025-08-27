@@ -12,7 +12,6 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
@@ -44,8 +43,30 @@ import { generalLimiter, authLimiter, apiLimiter, bulkAdminLimiter } from './mid
 import { sanitize } from './middleware/validation.js';
 
 // Import database and config
-import prisma from './config/database.js';
+import prisma, { checkDatabaseConnection } from './config/database.js';
 import { getCorsOptions } from './config/environment.js';
+
+// Database connection check middleware
+const checkDatabaseMiddleware = async (req, res, next) => {
+  if (!prisma) {
+    return res.status(503).json({ 
+      error: 'Database not available. Please try again later.',
+      timestamp: new Date().toISOString()
+    });
+  }
+  
+  try {
+    // Quick connection check
+    await prisma.$queryRaw`SELECT 1`;
+    next();
+  } catch (error) {
+    console.error('❌ Database connection check failed:', error.message);
+    return res.status(503).json({ 
+      error: 'Database connection failed. Please try again later.',
+      timestamp: new Date().toISOString()
+    });
+  }
+};
 
 const app = express();
 const server = http.createServer(app);
@@ -231,13 +252,28 @@ app.use('/api', (req, res, next) => {
 // Health check endpoint
 app.get('/api/health', async (req, res) => {
   try {
-    const dbStatus = prisma ? 'connected' : 'not_configured';
+    if (!prisma) {
+      return res.status(503).json({ 
+        status: 'error', 
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development',
+        database: 'not_configured',
+        stripe: process.env.STRIPE_SECRET_KEY ? 'configured' : 'mock',
+        error: 'Database not configured'
+      });
+    }
+    
+    // Test database connection
+    const dbConnection = await checkDatabaseConnection();
+    const dbStatus = dbConnection.status;
+    
     res.json({ 
-      status: 'ok', 
+      status: dbStatus === 'healthy' ? 'ok' : 'error', 
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development',
       database: dbStatus,
-      stripe: process.env.STRIPE_SECRET_KEY ? 'configured' : 'mock'
+      stripe: process.env.STRIPE_SECRET_KEY ? 'configured' : 'mock',
+      databaseDetails: dbConnection
     });
   } catch (error) {
     res.status(503).json({ 
@@ -279,20 +315,20 @@ app.use('/api/admin', authMiddleware);
 // app.use('/api/bookings', authMiddleware);
 // app.use('/api/payments', authMiddleware);
 
-// Route registration
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/services', serviceRoutes);
-app.use('/api/bookings', bookingRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/quotes', quotesRoutes);
-app.use('/api/service-requests', serviceRequestRoutes);
-app.use('/api/jobs', jobRoutes);
-app.use('/api/docs', docsRoutes);
-app.use('/api/chat', chatRoutes);
-app.use('/api/plans', plansRoutes);
-app.use('/api/subscriptions', subscriptionRoutes);
-app.use('/api/dashboard', dashboardRoutes);
+// Route registration with database connection checks
+app.use('/api/auth', checkDatabaseMiddleware, authRoutes);
+app.use('/api/users', checkDatabaseMiddleware, userRoutes);
+app.use('/api/services', checkDatabaseMiddleware, serviceRoutes);
+app.use('/api/bookings', checkDatabaseMiddleware, bookingRoutes);
+app.use('/api/payments', checkDatabaseMiddleware, paymentRoutes);
+app.use('/api/quotes', checkDatabaseMiddleware, quotesRoutes);
+app.use('/api/service-requests', checkDatabaseMiddleware, serviceRequestRoutes);
+app.use('/api/jobs', checkDatabaseMiddleware, jobRoutes);
+app.use('/api/docs', checkDatabaseMiddleware, docsRoutes);
+app.use('/api/chat', checkDatabaseMiddleware, chatRoutes);
+app.use('/api/plans', checkDatabaseMiddleware, plansRoutes);
+app.use('/api/subscriptions', checkDatabaseMiddleware, subscriptionRoutes);
+app.use('/api/dashboard', checkDatabaseMiddleware, dashboardRoutes);
 app.use('/api/webhooks', webhookRoutes);
 
 function requireAdminLocal(req, res, next) {
