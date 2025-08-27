@@ -195,7 +195,7 @@ router.post('/user/select-plan', authMiddleware, async (req, res) => {
         where: { userId },
         data: {
           tier,
-          status: 'ACTIVE', // Set to ACTIVE immediately for now
+          status: 'PENDING', // Set to PENDING until payment is processed
           updatedAt: new Date()
         }
       });
@@ -205,7 +205,7 @@ router.post('/user/select-plan', authMiddleware, async (req, res) => {
         data: {
           userId,
           tier,
-          status: 'ACTIVE', // Set to ACTIVE immediately for now
+          status: 'PENDING', // Set to PENDING until payment is processed
           canCancel: true
         }
       });
