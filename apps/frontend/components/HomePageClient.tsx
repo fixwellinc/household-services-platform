@@ -49,11 +49,11 @@ export default function HomePageClient() {
 
   if (!isHydrated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
-            <p className="text-gray-600">Loading your experience...</p>
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600 dark:text-blue-400 mx-auto mb-4" />
+            <p className="text-gray-600 dark:text-gray-300">Loading your experience...</p>
           </div>
         </div>
       </div>
@@ -61,48 +61,48 @@ export default function HomePageClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         {/* Background Pattern */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 dark:from-blue-400/20 dark:to-purple-400/20"></div>
         <div className="absolute top-0 left-0 w-full h-full">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute top-40 right-10 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-          <div className="absolute bottom-20 left-1/4 w-64 h-64 bg-green-400/15 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/20 dark:bg-blue-400/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-40 right-10 w-96 h-96 bg-purple-400/20 dark:bg-purple-400/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+          <div className="absolute bottom-20 left-1/4 w-64 h-64 bg-green-400/15 dark:bg-green-400/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
         </div>
         
         <div className="relative container mx-auto px-4 py-24">
           <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 px-6 py-3 rounded-full text-sm font-medium mb-8 shadow-sm">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 text-blue-700 dark:text-blue-300 px-6 py-3 rounded-full text-sm font-medium mb-8 shadow-sm">
               <Sparkles className="h-4 w-4" />
               {isInBC && userCity ? `Trusted by ${userCity} homeowners` : 'Trusted by Lower Mainland homeowners'}
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent animate-fade-in">
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 dark:from-gray-100 dark:via-blue-300 dark:to-purple-300 bg-clip-text text-transparent animate-fade-in">
               Your Home,
               <br />
-              <span className="text-blue-600 animate-fade-in-delay">Our Expertise</span>
+              <span className="text-blue-600 dark:text-blue-400 animate-fade-in-delay">Our Expertise</span>
             </h1>
             
-            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
+            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8 leading-relaxed">
               Connect with verified professionals for all your household needs. Choose from Starter Plan, HomeCare Plan, or Priority Plan.
             </p>
             
             {/* Decorative elements */}
             <div className="flex justify-center items-center gap-8 mb-8 opacity-60">
-              <div className="w-16 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse"></div>
-              <div className="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
-              <div className="w-16 h-1 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full animate-pulse"></div>
+              <div className="w-16 h-1 bg-gradient-to-r from-blue-400 to-purple-400 dark:from-blue-300 dark:to-purple-300 rounded-full animate-pulse"></div>
+              <div className="w-4 h-4 bg-blue-500 dark:bg-blue-400 rounded-full animate-bounce"></div>
+              <div className="w-16 h-1 bg-gradient-to-r from-purple-400 to-blue-400 dark:from-purple-300 dark:to-blue-300 rounded-full animate-pulse"></div>
             </div>
             
             {user ? (
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-                <div className="flex items-center gap-3 bg-white/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg">
+                <div className="flex items-center gap-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg">
                   <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
                     <User className="h-4 w-4 text-white" />
                   </div>
-                  <span className="font-semibold text-gray-800">Welcome back, {user.name}!</span>
+                  <span className="font-semibold text-gray-800 dark:text-gray-200">Welcome back, {user.name}!</span>
                 </div>
                 <Badge variant="secondary" className="text-sm px-4 py-2">
                   {user.role}
@@ -137,17 +137,17 @@ export default function HomePageClient() {
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20">
-              <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                <div className="text-4xl font-bold text-blue-600 mb-2">50+</div>
-                <div className="text-gray-600 font-medium">Services Available</div>
+              <div className="text-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">50+</div>
+                <div className="text-gray-600 dark:text-gray-300 font-medium">Services Available</div>
               </div>
-              <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                <div className="text-4xl font-bold text-purple-600 mb-2">10k+</div>
-                <div className="text-gray-600 font-medium">Happy Members</div>
+              <div className="text-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                <div className="text-4xl font-bold text-purple-600 dark:text-purple-400 mb-2">10k+</div>
+                <div className="text-gray-600 dark:text-gray-300 font-medium">Happy Members</div>
               </div>
-              <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                              <div className="text-4xl font-bold text-green-600 mb-2">Up to $1k+</div>
-              <div className="text-gray-600 font-medium">Possible Annual Savings</div>
+              <div className="text-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                              <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-2">Up to $1k+</div>
+              <div className="text-gray-600 dark:text-gray-300 font-medium">Possible Annual Savings</div>
               </div>
             </div>
           </div>
@@ -155,33 +155,33 @@ export default function HomePageClient() {
       </section>
 
       {/* Services Section */}
-      <section className="py-20 bg-gradient-to-br from-white to-gray-50">
+      <section className="py-20 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-full text-sm font-medium mb-6">
               <Wrench className="h-4 w-4" />
               Professional Services
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-6">
               Professional Services
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed mb-8">
               Choose from our wide range of household services, all professionally managed and delivered across the Lower Mainland
             </p>
             
             {/* Cost Comparison Banner */}
-            <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-2xl p-6 max-w-4xl mx-auto">
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border border-green-200 dark:border-green-700 rounded-2xl p-6 max-w-4xl mx-auto">
               <div className="flex items-center justify-center gap-4 mb-4">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-gray-700">Contractor Average</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Contractor Average</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-gray-700">Fixwell Service</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Fixwell Service</span>
                 </div>
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 💡 <strong>Save up to 40%</strong> compared to traditional contractor rates while getting professional, insured, and reliable services
               </p>
             </div>
