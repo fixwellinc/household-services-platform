@@ -9,16 +9,16 @@ function PricingPageContent() {
   const isNewUser = searchParams.get('new_user') === 'true';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Welcome Banner for New Users */}
       {isNewUser && (
-        <section className="pt-8 pb-4 bg-gradient-to-r from-green-500 to-emerald-600">
+        <section className="pt-8 pb-4 bg-gradient-to-r from-green-500 to-emerald-600 dark:from-green-600 dark:to-emerald-700">
           <div className="container mx-auto px-4 text-center">
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 max-w-4xl mx-auto">
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
                 🎉 Welcome to Fixwell!
               </h2>
-              <p className="text-lg text-green-100 mb-4">
+              <p className="text-lg text-green-100 dark:text-green-200 mb-4">
                 Your account has been created successfully. Now choose your subscription plan to unlock all member benefits and start saving on household services.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -28,8 +28,8 @@ function PricingPageContent() {
                 <div className="bg-white/20 rounded-lg px-4 py-2">
                   <span className="text-white font-medium">✓ Location Verified</span>
                 </div>
-                <div className="bg-yellow-400 rounded-lg px-4 py-2">
-                  <span className="text-gray-900 font-medium">→ Choose Your Plan</span>
+                <div className="bg-yellow-400 dark:bg-yellow-500 rounded-lg px-4 py-2">
+                  <span className="text-gray-900 dark:text-gray-900 font-medium">→ Choose Your Plan</span>
                 </div>
               </div>
             </div>
@@ -38,19 +38,19 @@ function PricingPageContent() {
       )}
 
       {/* Hero Section for Plans */}
-      <section className="pt-16 md:pt-20 pb-8 md:pb-12 bg-gradient-to-r from-blue-600 to-purple-600">
+      <section className="pt-16 md:pt-20 pb-8 md:pb-12 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-700 dark:to-purple-700">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6">
             Choose Your Perfect Plan
           </h1>
-          <p className="text-lg md:text-xl text-blue-100 max-w-3xl mx-auto px-4">
+          <p className="text-lg md:text-xl text-blue-100 dark:text-blue-200 max-w-3xl mx-auto px-4">
             Get professional household services with transparent pricing. Choose the plan that fits your lifestyle and save up to $1,000+ per year.
           </p>
         </div>
       </section>
 
       {/* Quality Assurance Banner */}
-      <section className="py-4 bg-gradient-to-r from-blue-500 to-blue-600">
+      <section className="py-4 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2 text-white">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -65,38 +65,38 @@ function PricingPageContent() {
       <PlansSection />
 
       {/* Member Discounts Section */}
-      <section className="py-12 md:py-20 bg-gradient-to-r from-blue-50 to-indigo-100">
+      <section className="py-12 md:py-20 bg-gradient-to-r from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-700">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-6">
               Exclusive Member Discounts
             </h2>
-            <p className="text-xl text-gray-600 leading-relaxed mb-8">
+            <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed mb-8">
               As a Fixwell member, you'll get exclusive access to special discounts and offers from our trusted partner businesses across the Lower Mainland.
             </p>
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
               <div className="grid md:grid-cols-2 gap-8 items-center">
                 <div className="text-left">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
                     Partner Business Discounts
                   </h3>
-                  <ul className="space-y-3 text-gray-600">
+                  <ul className="space-y-3 text-gray-600 dark:text-gray-300">
                     <li className="flex items-center">
-                      <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                      <span className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full mr-3"></span>
                       Up to 10% off at Infinite Optical
                     </li>
                     <li className="flex items-center">
-                      <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                      <span className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full mr-3"></span>
                       Up to 10% off body scans at Nutrition Well
                     </li>
                     <li className="flex items-center">
-                      <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                      <span className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full mr-3"></span>
                       And many more exclusive offers
                     </li>
                   </ul>
                 </div>
                 <div className="text-center">
-                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-2xl">
+                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white p-6 rounded-2xl">
                     <h4 className="text-xl font-bold mb-2">Ready to Unlock Savings?</h4>
                     <p className="text-blue-100 mb-4">
                       Subscribe to any plan and start saving today!

@@ -135,21 +135,21 @@ const Header: React.FC = () => {
           <nav className="hidden md:flex items-center space-x-8">
             <Link 
               href="/" 
-              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              className="flex items-center gap-2 text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30"
             >
               <Home className="h-4 w-4" />
               Home
             </Link>
             <Link 
               href="/services" 
-              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              className="flex items-center gap-2 text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30"
             >
               <Wrench className="h-4 w-4" />
               Services
             </Link>
             <Link 
               href="/pricing" 
-              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              className="flex items-center gap-2 text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30"
             >
               <DollarSign className="h-4 w-4" />
               Plans
@@ -157,7 +157,7 @@ const Header: React.FC = () => {
 
             <Link 
               href="/members-discount" 
-              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              className="flex items-center gap-2 text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30"
             >
               <Gift className="h-4 w-4" />
               Members Discount
@@ -165,14 +165,14 @@ const Header: React.FC = () => {
 
             <Link 
               href="/about" 
-              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              className="flex items-center gap-2 text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30"
             >
               <Info className="h-4 w-4" />
               About
             </Link>
             <Link 
               href="/contact" 
-              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              className="flex items-center gap-2 text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30"
             >
               <MessageCircle className="h-4 w-4" />
               Contact
@@ -300,7 +300,7 @@ const Header: React.FC = () => {
             <nav className="flex flex-col space-y-4">
               <Link 
                 href="/" 
-                className="flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="flex items-center gap-3 text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <Home className="h-5 w-5" />
@@ -308,7 +308,7 @@ const Header: React.FC = () => {
               </Link>
               <Link 
                 href="/services" 
-                className="flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="flex items-center gap-3 text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <Wrench className="h-5 w-5" />
@@ -316,7 +316,7 @@ const Header: React.FC = () => {
               </Link>
               <Link 
                 href="/pricing" 
-                className="flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="flex items-center gap-3 text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <DollarSign className="h-5 w-5" />
@@ -325,7 +325,7 @@ const Header: React.FC = () => {
 
               <Link 
                 href="/members-discount" 
-                className="flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="flex items-center gap-3 text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <Gift className="h-5 w-5" />
@@ -334,7 +334,7 @@ const Header: React.FC = () => {
 
               <Link 
                 href="/about" 
-                className="flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="flex items-center gap-3 text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <Info className="h-5 w-5" />
@@ -342,7 +342,7 @@ const Header: React.FC = () => {
               </Link>
               <Link 
                 href="/contact" 
-                className="flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="flex items-center gap-3 text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <MessageCircle className="h-5 w-5" />

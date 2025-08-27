@@ -72,11 +72,11 @@ export default function MembersDiscountPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-12">
         <div className="container mx-auto px-4">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading member benefits...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto"></div>
+            <p className="mt-4 text-gray-600 dark:text-gray-300">Loading member benefits...</p>
           </div>
         </div>
       </div>
@@ -84,16 +84,16 @@ export default function MembersDiscountPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 text-white">
+      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 dark:from-blue-700 dark:via-purple-700 dark:to-indigo-800 text-white">
         <div className="container mx-auto px-4 py-16">
           <div className="text-center max-w-4xl mx-auto">
             <div className="flex items-center justify-center mb-6">
-              <Gift className="h-16 w-16 text-yellow-300 mr-4" />
+              <Gift className="h-16 w-16 text-yellow-300 dark:text-yellow-200 mr-4" />
               <h1 className="text-5xl font-bold">Members Discount</h1>
             </div>
-            <p className="text-xl text-blue-100 mb-8">
+            <p className="text-xl text-blue-100 dark:text-blue-200 mb-8">
               Exclusive savings and special offers from our trusted partner businesses
             </p>
             
