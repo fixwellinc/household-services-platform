@@ -736,15 +736,15 @@ app.get('/api/admin/analytics', requireAdmin, async (req, res) => {
     const bookingCount = await prisma.booking.count();
     const quoteCount = await prisma.quote.count();
     
-    // Get active chat sessions count
-    const activeSessionsCount = await prisma.chatSession.count({
-      where: {
-        OR: [
-          { lastCustomerMessageAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
-          { lastAdminMessageAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } }
-        ]
-      }
-    });
+          // Get active chat sessions count
+      const activeSessionsCount = await prisma.chatSession.count({
+        where: {
+          OR: [
+            { lastCustomerReadAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
+            { lastAdminReadAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } }
+          ]
+        }
+      });
     
     // Calculate revenue from subscriptions
     const subscriptions = await prisma.subscription.findMany({
