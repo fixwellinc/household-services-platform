@@ -81,6 +81,34 @@ interface NavigationItem {
   external?: boolean;
 }
 
+interface TopService {
+  name: string;
+  bookings: number;
+}
+
+interface NotificationStats {
+  totalSentToday: number;
+  deliveryRate: number;
+  openRate: number;
+  clickRate: number;
+}
+
+interface AnalyticsData {
+  totalUsers: number;
+  totalRevenue: number;
+  totalBookings: number;
+  activeSessions: number;
+  userGrowth: number;
+  revenueGrowth: number;
+  bookingGrowth: number;
+  sessionGrowth: number;
+  totalQuotes: number;
+  totalServices: number;
+  totalSubscriptions: number;
+  topServices: TopService[];
+  notificationStats: NotificationStats;
+}
+
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -188,7 +216,7 @@ export default function AdminPage() {
   const [templates, setTemplates] = useState<any[]>([]);
   
   // Analytics State
-  const [analyticsData, setAnalyticsData] = useState({
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
     totalUsers: 0,
     totalRevenue: 0,
     totalBookings: 0,
