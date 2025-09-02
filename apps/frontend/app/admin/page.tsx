@@ -189,14 +189,24 @@ export default function AdminPage() {
   
   // Analytics State
   const [analyticsData, setAnalyticsData] = useState({
-    totalUsers: 1234,
-    totalRevenue: 45678,
-    totalBookings: 567,
-    activeSessions: 89,
-    userGrowth: 12.5,
-    revenueGrowth: 8.3,
-    bookingGrowth: -2.1,
-    sessionGrowth: 15.7
+    totalUsers: 0,
+    totalRevenue: 0,
+    totalBookings: 0,
+    activeSessions: 0,
+    userGrowth: 0,
+    revenueGrowth: 0,
+    bookingGrowth: 0,
+    sessionGrowth: 0,
+    totalQuotes: 0,
+    totalServices: 0,
+    totalSubscriptions: 0,
+    topServices: [],
+    notificationStats: {
+      totalSentToday: 0,
+      deliveryRate: 0,
+      openRate: 0,
+      clickRate: 0
+    }
   });
   
   // Settings State
@@ -258,6 +268,13 @@ export default function AdminPage() {
       if (analyticsResponse.ok) {
         const analyticsData = await analyticsResponse.json();
         setSubscriptionAnalytics(analyticsData);
+      }
+
+      // Fetch main analytics data
+      const mainAnalyticsResponse = await fetch('/api/admin/analytics');
+      if (mainAnalyticsResponse.ok) {
+        const mainAnalyticsData = await mainAnalyticsResponse.json();
+        setAnalyticsData(mainAnalyticsData);
       }
 
       // Load email templates
@@ -828,22 +845,18 @@ export default function AdminPage() {
                     <div className="border rounded-lg p-6">
                       <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Services</h3>
                       <div className="space-y-3">
-                        <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                          <span className="text-sm">House Cleaning</span>
-                          <span className="font-semibold">245 bookings</span>
-                        </div>
-                        <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                          <span className="text-sm">Lawn Care</span>
-                          <span className="font-semibold">189 bookings</span>
-                        </div>
-                        <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                          <span className="text-sm">Home Repair</span>
-                          <span className="font-semibold">156 bookings</span>
-                        </div>
-                        <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                          <span className="text-sm">Pet Care</span>
-                          <span className="font-semibold">98 bookings</span>
-                        </div>
+                        {analyticsData.topServices && analyticsData.topServices.length > 0 ? (
+                          analyticsData.topServices.map((service, index) => (
+                            <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                              <span className="text-sm">{service.name}</span>
+                              <span className="font-semibold">{service.bookings} bookings</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-4 text-gray-500">
+                            No service data available
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1488,7 +1501,7 @@ export default function AdminPage() {
                             <p className="text-sm text-gray-600 mb-2">Get 20% off all home cleaning services this week!</p>
                             <div className="flex items-center justify-between">
                               <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Delivered</span>
-                              <span className="text-xs text-gray-500">2,567 recipients</span>
+                              <span className="text-xs text-gray-500">{analyticsData.totalUsers?.toLocaleString() || 0} recipients</span>
                             </div>
                           </div>
                           
@@ -1511,19 +1524,19 @@ export default function AdminPage() {
                         <div className="space-y-2">
                           <div className="flex justify-between">
                             <span className="text-sm text-gray-600">Total Sent Today</span>
-                            <span className="font-semibold">3,421</span>
+                            <span className="font-semibold">{analyticsData.notificationStats?.totalSentToday?.toLocaleString() || 0}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-sm text-gray-600">Delivery Rate</span>
-                            <span className="font-semibold">98.5%</span>
+                            <span className="font-semibold">{analyticsData.notificationStats?.deliveryRate || 0}%</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-sm text-gray-600">Open Rate</span>
-                            <span className="font-semibold">67.2%</span>
+                            <span className="font-semibold">{analyticsData.notificationStats?.openRate || 0}%</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-sm text-gray-600">Click Rate</span>
-                            <span className="font-semibold">23.8%</span>
+                            <span className="font-semibold">{analyticsData.notificationStats?.clickRate || 0}%</span>
                           </div>
                         </div>
                       </div>

@@ -728,21 +728,141 @@ app.get('/api/admin/analytics', requireAdmin, async (req, res) => {
   if (!prisma) {
     return res.status(503).json({ error: 'Database not available' });
   }
-  const userCount = await prisma.user.count();
-  const serviceCount = await prisma.service.count();
-  const bookingCount = await prisma.booking.count();
-  // TODO: Replace with real email stats if available
-  const emailOpenRate = 0.72;
-  const emailClickRate = 0.38;
-  const emailBounceRate = 0.04;
-  res.json({
-    userCount,
-    serviceCount,
-    bookingCount,
-    emailOpenRate,
-    emailClickRate,
-    emailBounceRate
-  });
+  
+  try {
+    // Get current counts
+    const userCount = await prisma.user.count();
+    const serviceCount = await prisma.service.count();
+    const bookingCount = await prisma.booking.count();
+    const quoteCount = await prisma.quote.count();
+    
+    // Get active chat sessions count
+    const activeSessionsCount = await prisma.chatSession.count({
+      where: {
+        OR: [
+          { lastCustomerMessageAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
+          { lastAdminMessageAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } }
+        ]
+      }
+    });
+    
+    // Calculate revenue from subscriptions
+    const subscriptions = await prisma.subscription.findMany({
+      where: { status: 'ACTIVE' },
+      include: { plan: true }
+    });
+    
+    const totalRevenue = subscriptions.reduce((sum, sub) => {
+      const planPrice = sub.plan?.monthlyPrice || sub.plan?.yearlyPrice || 0;
+      return sum + planPrice;
+    }, 0);
+    
+    // Calculate growth percentages (comparing last 30 days vs previous 30 days)
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+    
+    // User growth
+    const recentUsers = await prisma.user.count({
+      where: { createdAt: { gte: thirtyDaysAgo } }
+    });
+    const previousUsers = await prisma.user.count({
+      where: { 
+        createdAt: { 
+          gte: sixtyDaysAgo,
+          lt: thirtyDaysAgo 
+        } 
+      }
+    });
+    const userGrowth = previousUsers > 0 ? ((recentUsers - previousUsers) / previousUsers) * 100 : 0;
+    
+    // Booking growth
+    const recentBookings = await prisma.booking.count({
+      where: { createdAt: { gte: thirtyDaysAgo } }
+    });
+    const previousBookings = await prisma.booking.count({
+      where: { 
+        createdAt: { 
+          gte: sixtyDaysAgo,
+          lt: thirtyDaysAgo 
+        } 
+      }
+    });
+    const bookingGrowth = previousBookings > 0 ? ((recentBookings - previousBookings) / previousBookings) * 100 : 0;
+    
+    // Session growth
+    const recentSessions = await prisma.chatSession.count({
+      where: { createdAt: { gte: thirtyDaysAgo } }
+    });
+    const previousSessions = await prisma.chatSession.count({
+      where: { 
+        createdAt: { 
+          gte: sixtyDaysAgo,
+          lt: thirtyDaysAgo 
+        } 
+      }
+    });
+    const sessionGrowth = previousSessions > 0 ? ((recentSessions - previousSessions) / previousSessions) * 100 : 0;
+    
+    // Revenue growth (simplified - using subscription count as proxy)
+    const recentSubscriptions = await prisma.subscription.count({
+      where: { createdAt: { gte: thirtyDaysAgo } }
+    });
+    const previousSubscriptions = await prisma.subscription.count({
+      where: { 
+        createdAt: { 
+          gte: sixtyDaysAgo,
+          lt: thirtyDaysAgo 
+        } 
+      }
+    });
+    const revenueGrowth = previousSubscriptions > 0 ? ((recentSubscriptions - previousSubscriptions) / previousSubscriptions) * 100 : 0;
+    
+    // Get top services by booking count
+    const topServices = await prisma.service.findMany({
+      include: {
+        _count: {
+          select: { bookings: true }
+        }
+      },
+      orderBy: {
+        bookings: {
+          _count: 'desc'
+        }
+      },
+      take: 5
+    });
+
+    // Calculate notification statistics (mock for now, can be enhanced later)
+    const notificationStats = {
+      totalSentToday: Math.floor(Math.random() * 1000) + 2000, // Mock data
+      deliveryRate: 98.5,
+      openRate: 67.2,
+      clickRate: 23.8
+    };
+
+    res.json({
+      totalUsers: userCount,
+      totalRevenue: totalRevenue,
+      totalBookings: bookingCount,
+      activeSessions: activeSessionsCount,
+      userGrowth: Math.round(userGrowth * 10) / 10,
+      revenueGrowth: Math.round(revenueGrowth * 10) / 10,
+      bookingGrowth: Math.round(bookingGrowth * 10) / 10,
+      sessionGrowth: Math.round(sessionGrowth * 10) / 10,
+      totalQuotes: quoteCount,
+      totalServices: serviceCount,
+      totalSubscriptions: subscriptions.length,
+      topServices: topServices.map(service => ({
+        name: service.name,
+        bookings: service._count.bookings
+      })),
+      notificationStats
+    });
+  } catch (error) {
+    console.error('Analytics calculation error:', error);
+    res.status(500).json({ error: 'Failed to calculate analytics' });
+  }
 });
 
 // Admin: Email blast
