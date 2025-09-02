@@ -15,8 +15,8 @@ export function ThemeToggle() {
       className="relative w-10 h-10 rounded-full transition-all duration-300 hover:scale-110 hover:bg-gray-100 dark:hover:bg-gray-800"
       aria-label="Toggle theme"
     >
-      <Sun className="h-5 w-5 rotate-0 scale-100 transition-all duration-300 dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all duration-300 dark:rotate-0 dark:scale-100" />
+      <Sun className="h-5 w-5 text-gray-900 dark:text-gray-100 rotate-0 scale-100 transition-all duration-300 dark:-rotate-90 dark:scale-0" />
+      <Moon className="absolute h-5 w-5 text-gray-900 dark:text-gray-100 rotate-90 scale-0 transition-all duration-300 dark:rotate-0 dark:scale-100" />
       <span className="sr-only">Toggle theme</span>
     </Button>
   );
@@ -35,13 +35,13 @@ export function ThemeToggleCompact() {
     >
       {theme === 'light' ? (
         <>
-          <Moon className="h-4 w-4" />
-          <span className="text-sm">Dark</span>
+          <Moon className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+          <span className="text-sm text-gray-900 dark:text-gray-100">Dark</span>
         </>
       ) : (
         <>
-          <Sun className="h-4 w-4" />
-          <span className="text-sm">Light</span>
+          <Sun className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+          <span className="text-sm text-gray-900 dark:text-gray-100">Light</span>
         </>
       )}
     </Button>
