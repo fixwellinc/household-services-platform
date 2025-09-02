@@ -116,43 +116,43 @@ function PricingPageContent() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-12 md:py-20 bg-white">
+      <section className="py-12 md:py-20 bg-white dark:bg-gray-900">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-6">
               Simple, Transparent Pricing
             </h1>
-            <p className="text-xl text-gray-600 leading-relaxed">
+            <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
               All plans include access to our core household services. Starter Plan includes cleaning and maintenance, HomeCare Plan adds repair and organization, and Priority Plan includes all services plus custom packages and concierge service.
             </p>
           </div>
 
           <div className="max-w-4xl mx-auto text-center mb-12">
-            <div className="bg-blue-50 rounded-2xl p-6 md:p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-6 md:p-8 border border-blue-200 dark:border-blue-700">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
                 Response Times by Plan
               </h2>
-              <p className="text-lg text-gray-600">
+              <p className="text-lg text-gray-600 dark:text-gray-300">
                 Response times vary by plan: Starter Plan (up to 48 hrs), HomeCare Plan (up to 24 hrs), Priority Plan (up to 12 hrs). Emergency services are available for urgent situations with Priority Plan members getting priority scheduling.
               </p>
             </div>
           </div>
 
           <div className="max-w-4xl mx-auto grid gap-6 md:gap-8">
-            <div className="bg-gray-50 rounded-2xl p-6 md:p-8">
-              <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-4">
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 md:p-8 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 Can I change my plan anytime?
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-300">
                 Yes! You can upgrade or downgrade your plan at any time. Changes take effect at the start of your next billing cycle. No fees for plan changes.
               </p>
             </div>
 
-            <div className="bg-gray-50 rounded-2xl p-6 md:p-8">
-              <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-4">
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 md:p-8 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 How does your quality assurance work?
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-300">
                 We maintain the highest standards through rigorous professional screening, ongoing quality monitoring, and customer satisfaction tracking. Our team of verified experts ensures every service meets our quality benchmarks.
               </p>
             </div>

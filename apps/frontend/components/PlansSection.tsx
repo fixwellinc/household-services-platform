@@ -284,30 +284,30 @@ export default function PlansSection() {
   };
 
   return (
-    <section className="py-12 md:py-20 bg-gradient-to-br from-gray-50 via-white to-blue-50">
+    <section className="py-12 md:py-20 bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="container-mobile mx-auto">
         {/* Special Message for New Users */}
         {isNewUser && (
-          <div className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-2xl p-6 text-center">
+          <div className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-700 rounded-2xl p-6 text-center">
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
                 <CheckCircle className="h-6 w-6 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Ready to Choose Your Plan?</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Ready to Choose Your Plan?</h2>
             </div>
-            <p className="text-lg text-gray-600 mb-4 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-4 max-w-2xl mx-auto">
               You're just one step away from unlocking all the benefits of Fixwell Services. 
               Choose the plan that best fits your needs and start saving on household services today!
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <div className="bg-blue-100 rounded-lg px-4 py-2">
-                <span className="text-blue-800 font-medium">✓ Account Created</span>
+              <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg px-4 py-2">
+                <span className="text-blue-800 dark:text-blue-200 font-medium">✓ Account Created</span>
               </div>
-              <div className="bg-blue-100 rounded-lg px-4 py-2">
-                <span className="text-blue-800 font-medium">✓ Location Verified</span>
+              <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg px-4 py-2">
+                <span className="text-blue-800 dark:text-blue-200 font-medium">✓ Location Verified</span>
               </div>
-              <div className="bg-green-100 rounded-lg px-4 py-2">
-                <span className="text-green-800 font-medium">→ Select Your Plan</span>
+              <div className="bg-green-100 dark:bg-green-900/30 rounded-lg px-4 py-2">
+                <span className="text-green-800 dark:text-green-200 font-medium">→ Select Your Plan</span>
               </div>
             </div>
           </div>
@@ -315,50 +315,50 @@ export default function PlansSection() {
 
         {/* Header - BCAA Style */}
         <div className="text-center mb-12 md:mb-16">
-          <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-full text-sm font-medium mb-6">
             <Award className="h-4 w-4" />
             MEMBERSHIP PLANS
           </div>
           
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-6">
             Choose Your Plan
           </h2>
           
-          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-8 px-4 leading-relaxed">
+          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8 px-4 leading-relaxed">
             Select the perfect plan for your household needs. All plans include our core services with different levels of convenience and support.
           </p>
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center p-3 md:p-4 bg-white rounded-lg shadow-sm">
+              <div key={index} className="text-center p-3 md:p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <stat.icon className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
-                  <span className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">{stat.number}</span>
+                  <stat.icon className="h-4 w-4 md:h-5 md:w-5 text-blue-600 dark:text-blue-400" />
+                  <span className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100">{stat.number}</span>
                 </div>
-                <p className="text-xs md:text-sm text-gray-600">{stat.label}</p>
+                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">{stat.label}</p>
               </div>
             ))}
           </div>
 
           {/* Savings Highlight - BCAA Style */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 md:p-8 max-w-2xl mx-auto mb-12 shadow-sm">
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 md:p-8 max-w-2xl mx-auto mb-12 shadow-sm">
             <div className="text-center">
               <div className="flex items-center justify-center gap-3 mb-4">
-                <TrendingUp className="h-6 w-6 text-blue-600" />
-                <h3 className="text-xl font-bold text-gray-900">Save Up to $1,000+ Per Year</h3>
+                <TrendingUp className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Save Up to $1,000+ Per Year</h3>
               </div>
-              <p className="text-gray-600 mb-6 text-base leading-relaxed">
+              <p className="text-gray-600 dark:text-gray-300 mb-6 text-base leading-relaxed">
                 Our members save up to $1,000+ annually compared to hiring individual contractors for each service. With our subscription model, you get predictable pricing, priority scheduling, and comprehensive coverage across all household needs.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center justify-center gap-2">
-                  <Shield className="h-4 w-4 text-green-600" />
-                  <span>Professional quality assurance</span>
+                  <Shield className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <span className="text-gray-700 dark:text-gray-300">Professional quality assurance</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
-                  <MapPin className="h-4 w-4 text-blue-600" />
-                  <span>Lower Mainland service area</span>
+                  <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <span className="text-gray-700 dark:text-gray-300">Lower Mainland service area</span>
                 </div>
               </div>
             </div>
@@ -366,13 +366,13 @@ export default function PlansSection() {
 
           {/* Billing Toggle - BCAA Style */}
           <div className="flex items-center justify-center gap-4 mb-12">
-            <span className={`text-sm font-medium ${billingPeriod === 'month' ? 'text-gray-900' : 'text-gray-500'}`}>
+            <span className={`text-sm font-medium ${billingPeriod === 'month' ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'}`}>
               Monthly
             </span>
             <button
               onClick={() => setBillingPeriod(billingPeriod === 'month' ? 'year' : 'month')}
               className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
-                billingPeriod === 'year' ? 'bg-blue-600' : 'bg-gray-300'
+                billingPeriod === 'year' ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
               }`}
             >
               <span
@@ -381,7 +381,7 @@ export default function PlansSection() {
                 }`}
               />
             </button>
-            <span className={`text-sm font-medium ${billingPeriod === 'year' ? 'text-gray-900' : 'text-gray-500'}`}>
+            <span className={`text-sm font-medium ${billingPeriod === 'year' ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'}`}>
               Yearly
             </span>
             {billingPeriod === 'year' && (
@@ -750,81 +750,81 @@ export default function PlansSection() {
           </div>
 
           {/* Desktop Table */}
-          <div className="hidden md:block bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div className="hidden md:block bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Features</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Starter</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Home Care</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Priority</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Features</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-gray-100">Starter</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-gray-100">Home Care</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-gray-100">Priority</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
                   <tr>
-                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">Response Time</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">Up to 48 hrs</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">Up to 24 hrs</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">Up to 12 hrs</td>
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Response Time</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Up to 48 hrs</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Up to 24 hrs</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Up to 12 hrs</td>
                   </tr>
                   <tr>
-                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">Customer Support</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">Email only</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">Phone & Email</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">24/7 Priority</td>
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Customer Support</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Email only</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Phone & Email</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">24/7 Priority</td>
                   </tr>
                   <tr>
-                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">Service Categories</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">Basic</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">Extended</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">All + Custom</td>
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Service Categories</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Basic</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Extended</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">All + Custom</td>
                   </tr>
                   <tr>
-                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">Service Discount</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">None</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">Up to 10%</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">Up to 20%</td>
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Service Discount</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">None</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Up to 10%</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Up to 20%</td>
                   </tr>
                   <tr>
-                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">Account Manager</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Account Manager</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
                       <X className="h-4 w-4 text-red-500 mx-auto" />
                     </td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
                       <X className="h-4 w-4 text-red-500 mx-auto" />
                     </td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
                       <Check className="h-4 w-4 text-green-500 mx-auto" />
                     </td>
                   </tr>
                   <tr>
-                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">Concierge Service</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Concierge Service</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
                       <X className="h-4 w-4 text-red-500 mx-auto" />
                     </td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
                       <X className="h-4 w-4 text-red-500 mx-auto" />
                     </td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
                       <Check className="h-4 w-4 text-green-500 mx-auto" />
                     </td>
                   </tr>
                   <tr>
-                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">Emergency Call-out</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">Standard rate</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">Standard rate</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">Free</td>
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Emergency Call-out</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Standard rate</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Standard rate</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Free</td>
                   </tr>
                   <tr>
-                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">Quality Assurance</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Quality Assurance</td>
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
                       <Check className="h-4 w-4 text-green-500 mx-auto" />
                     </td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
                       <Check className="h-4 w-4 text-green-500 mx-auto" />
                     </td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">
+                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
                       <Check className="h-4 w-4 text-green-500 mx-auto" />
                     </td>
                   </tr>
@@ -840,39 +840,39 @@ export default function PlansSection() {
               { name: 'Home Care', color: 'purple', icon: Crown },
               { name: 'Priority', color: 'amber', icon: Sparkles }
             ].map((plan, index) => (
-              <Card key={index} className="bg-white shadow-lg">
+              <Card key={index} className="bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700">
                 <CardHeader className="pb-4">
                   <div className="flex items-center gap-3 mb-4">
                     <div className={`w-10 h-10 rounded-full bg-gradient-to-r from-${plan.color}-500 to-${plan.color}-600 flex items-center justify-center`}>
                       <plan.icon className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <h4 className="text-lg font-bold text-gray-900">{plan.name} Plan</h4>
-                      <p className="text-sm text-gray-600">Key features and benefits</p>
+                      <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">{plan.name} Plan</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Key features and benefits</p>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="font-medium text-gray-900">Response Time</p>
-                      <p className="text-gray-600">{index === 0 ? 'Up to 48 hrs' : index === 1 ? 'Up to 24 hrs' : 'Up to 12 hrs'}</p>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">Response Time</p>
+                      <p className="text-gray-600 dark:text-gray-400">{index === 0 ? 'Up to 48 hrs' : index === 1 ? 'Up to 24 hrs' : 'Up to 12 hrs'}</p>
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">Support</p>
-                      <p className="text-gray-600">{index === 0 ? 'Email only' : index === 1 ? 'Phone & Email' : '24/7 Priority'}</p>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">Support</p>
+                      <p className="text-gray-600 dark:text-gray-400">{index === 0 ? 'Email only' : index === 1 ? 'Phone & Email' : '24/7 Priority'}</p>
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">Service Discount</p>
-                      <p className="text-gray-600">{index === 0 ? 'None' : index === 1 ? 'Up to 10%' : 'Up to 20%'}</p>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">Service Discount</p>
+                      <p className="text-gray-600 dark:text-gray-400">{index === 0 ? 'None' : index === 1 ? 'Up to 10%' : 'Up to 20%'}</p>
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">Account Manager</p>
-                      <p className="text-gray-600">{index === 2 ? '✓ Included' : '✗ Not included'}</p>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">Account Manager</p>
+                      <p className="text-gray-600 dark:text-gray-400">{index === 2 ? '✓ Included' : '✗ Not included'}</p>
                     </div>
                   </div>
-                  <div className="pt-4 border-t border-gray-200">
-                    <p className="text-sm text-gray-600">
+                  <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       {index === 0 ? 'Essential services for everyday needs' : 
                        index === 1 ? 'Enhanced features for busy families' : 
                        'Ultimate convenience for luxury households'}
@@ -887,24 +887,24 @@ export default function PlansSection() {
         {/* Testimonials */}
         <div className="mb-16 mt-16">
           <div className="text-center mb-8 md:mb-12">
-            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               What Our Members Say
             </h3>
-            <p className="text-base md:text-lg text-gray-600">
+            <p className="text-base md:text-lg text-gray-600 dark:text-gray-300">
               Join thousands of satisfied households
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="bg-white shadow-lg hover:shadow-xl transition-all duration-300">
+              <Card key={index} className="bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700">
                 <CardContent className="p-4 md:p-6">
                   <div className="flex items-center gap-1 md:gap-2 mb-3 md:mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
                       <Star key={i} className="h-3 w-3 md:h-4 md:w-4 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <p className="text-gray-600 mb-3 md:mb-4 text-sm md:text-base leading-relaxed">
+                  <p className="text-gray-600 dark:text-gray-300 mb-3 md:mb-4 text-sm md:text-base leading-relaxed">
                     "{testimonial.content}"
                   </p>
                   <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
@@ -912,12 +912,12 @@ export default function PlansSection() {
                       {testimonial.avatar}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 text-sm truncate">{testimonial.name}</p>
-                      <p className="text-gray-500 text-xs truncate">{testimonial.role} • {testimonial.location}</p>
+                      <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">{testimonial.name}</p>
+                      <p className="text-gray-500 dark:text-gray-400 text-xs truncate">{testimonial.role} • {testimonial.location}</p>
                     </div>
                   </div>
-                  <div className="bg-green-50 rounded-lg p-2">
-                    <p className="text-green-700 text-xs font-medium">{testimonial.savings}</p>
+                  <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-2">
+                    <p className="text-green-700 dark:text-green-300 text-xs font-medium">{testimonial.savings}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -927,26 +927,26 @@ export default function PlansSection() {
 
         {/* Members Discount Preview */}
         <div className="mb-16">
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 md:p-8 border border-green-200">
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-6 md:p-8 border border-green-200 dark:border-green-700">
             <div className="text-center mb-6">
-              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
                 🎁 Exclusive Member Discounts
               </h3>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
                 Subscribe to any plan and unlock exclusive savings from our partner businesses
               </p>
             </div>
             
             <div className="grid md:grid-cols-2 gap-4 mb-6">
-              <div className="bg-white rounded-lg p-4 text-center border border-green-200">
-                <div className="text-2xl font-bold text-green-600 mb-2">10%</div>
-                <div className="text-sm text-gray-600">Infinite Optical</div>
-                <div className="text-xs text-gray-500">Eye care & eyewear</div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center border border-green-200 dark:border-green-700">
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">10%</div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">Infinite Optical</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Eye care & eyewear</div>
               </div>
-              <div className="bg-white rounded-lg p-4 text-center border border-green-200">
-                <div className="text-2xl font-bold text-green-600 mb-2">10%</div>
-                <div className="text-sm text-gray-600">Nutrition Well</div>
-                <div className="text-xs text-gray-500">Body scan services</div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center border border-green-200 dark:border-green-700">
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">10%</div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">Nutrition Well</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Body scan services</div>
               </div>
             </div>
             
@@ -962,11 +962,11 @@ export default function PlansSection() {
 
         {/* Bottom CTA */}
         <div className="text-center">
-          <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">
-            <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 mb-3 md:mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 md:p-6 lg:p-8 max-w-4xl mx-auto border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3 md:mb-4">
               Ready to Get Started?
             </h3>
-            <p className="text-gray-600 mb-4 md:mb-6 max-w-2xl mx-auto text-sm md:text-base">
+            <p className="text-gray-600 dark:text-gray-300 mb-4 md:mb-6 max-w-2xl mx-auto text-sm md:text-base">
               Join thousands of satisfied households who trust us with their home services. Start saving today.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
@@ -974,13 +974,13 @@ export default function PlansSection() {
                 onClick={handleGetInTouch}
                 variant="outline" 
                 size="lg" 
-                className="border-2 border-gray-300 hover:border-blue-500 text-sm md:text-base py-3 md:py-4"
+                className="border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 text-sm md:text-base py-3 md:py-4"
               >
                 <Phone className="h-4 w-4 mr-2" />
                 Get in Touch
               </Button>
             </div>
-            <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-2 md:gap-6 text-xs text-gray-500">
+            <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-2 md:gap-6 text-xs text-gray-500 dark:text-gray-400">
               <div className="flex items-center gap-1">
                 <Truck className="h-3 w-3" />
                 <span>Lower Mainland service</span>
