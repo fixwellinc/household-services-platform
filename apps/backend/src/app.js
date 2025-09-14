@@ -17,6 +17,11 @@ import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import path from 'path';
 
+// Import services
+import socketService from './services/socketService.js';
+import queueService from './services/queueService.js';
+import auditService from './services/auditService.js';
+
 // Import routes
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
@@ -42,6 +47,11 @@ import rewardsRoutes from './routes/rewards.js';
 import performanceRoutes from './routes/performance.js';
 import securityRoutes from './routes/security.js';
 import healthRoutes from './routes/health.js';
+import adminRoutes from './routes/admin.js';
+import adminPermissionsRoutes from './routes/adminPermissions.js';
+import adminImpersonationRoutes from './routes/adminImpersonation.js';
+import adminUsersRoutes from './routes/adminUsers.js';
+import bulkOperationsRoutes from './routes/bulkOperations.js';
 
 // Import middleware
 import { authMiddleware, requireAdmin } from './middleware/auth.js';
@@ -88,39 +98,8 @@ const io = new SocketIOServer(server, {
   }
 });
 
-// Socket.IO real-time chat events
-io.on('connection', (socket) => {
-  console.log('🔌 New client connected:', socket.id);
-
-  // Join a chat room
-  socket.on('join-session', (chatId) => {
-    socket.join(chatId);
-    console.log(`Socket ${socket.id} joined chat ${chatId}`);
-  });
-
-  // Relay new messages to the room
-  socket.on('new-message', (data) => {
-    if (data && data.chatId) {
-      io.to(data.chatId).emit('new-message', data);
-    }
-  });
-
-  // Typing indicators
-  socket.on('typing', (data) => {
-    if (data && data.chatId) {
-      socket.to(data.chatId).emit('typing', { chatId: data.chatId, sender: data.sender });
-    }
-  });
-  socket.on('stop-typing', (data) => {
-    if (data && data.chatId) {
-      socket.to(data.chatId).emit('stop-typing', { chatId: data.chatId, sender: data.sender });
-    }
-  });
-
-  socket.on('disconnect', () => {
-    console.log('🔌 Client disconnected:', socket.id);
-  });
-});
+// Initialize enhanced Socket.IO service
+socketService.initialize(io);
 
 // Make io available to routes
 app.set('io', io);
@@ -346,6 +325,11 @@ app.use('/api/performance', checkDatabaseMiddleware, performanceRoutes);
 app.use('/api/security', checkDatabaseMiddleware, securityRoutes);
 app.use('/health', healthRoutes); // Health check endpoint (no database check needed)
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api/admin', checkDatabaseMiddleware, adminRoutes);
+app.use('/api/admin/users', checkDatabaseMiddleware, adminUsersRoutes);
+app.use('/api/admin/permissions', checkDatabaseMiddleware, adminPermissionsRoutes);
+app.use('/api/admin/impersonation', checkDatabaseMiddleware, adminImpersonationRoutes);
+app.use('/api/bulk-operations', checkDatabaseMiddleware, bulkOperationsRoutes);
 
 function requireAdminLocal(req, res, next) {
   if (!req.user || req.user.role !== 'ADMIN') {

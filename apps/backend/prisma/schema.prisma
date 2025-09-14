@@ -26,6 +26,14 @@ model User {
   isActive          Boolean                      @default(true)
   notifications     Json?                        @default("{\"sms\": false, \"email\": true}")
   postalCode        String?
+  
+  // Suspension tracking fields
+  suspendedAt       DateTime?
+  suspendedBy       String?
+  suspensionReason  String?
+  activatedAt       DateTime?
+  activatedBy       String?
+  activationReason  String?
   assignedEmployee  CustomerEmployeeAssignment?  @relation("CustomerAssignment")
   assignedCustomers CustomerEmployeeAssignment[] @relation("EmployeeAssignments")
   subscriptionUsage SubscriptionUsage?
@@ -46,6 +54,21 @@ model User {
   familyMemberships FamilyMember[] @relation("FamilyMemberUser")
   rewardCredits     RewardCredit[] @relation("UserRewardCredits")
   installmentPlans  InstallmentPlan[] @relation("UserInstallmentPlans")
+  
+  // Audit log relation
+  auditLogs         AuditLog[] @relation("AdminAuditLogs")
+  
+  // Granular permission system relations
+  userRoles         UserRole[] @relation("UserRoles")
+  assignedRoles     UserRole[] @relation("AssignedByUser")
+  impersonationSessions ImpersonationSession[] @relation("AdminImpersonationSessions")
+  targetedImpersonations ImpersonationSession[] @relation("TargetUserImpersonationSessions")
+  
+  // Suspension tracking relations
+  suspendedByUser   User?      @relation("UserSuspensions", fields: [suspendedBy], references: [id])
+  suspendedUsers    User[]     @relation("UserSuspensions")
+  activatedByUser   User?      @relation("UserActivations", fields: [activatedBy], references: [id])
+  activatedUsers    User[]     @relation("UserActivations")
 }
 
 model CustomerEmployeeAssignment {
@@ -378,4 +401,115 @@ model InstallmentPlan {
   status         String @default("ACTIVE")
   createdAt      DateTime @default(now())
   user           User @relation("UserInstallmentPlans", fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  action     String
+  entityType String
+  entityId   String
+  changes    String   // JSON string of changes
+  metadata   String   // JSON string of metadata
+  severity   String   @default("medium") // low, medium, high, critical
+  createdAt  DateTime @default(now())
+  
+  // Relation to admin user
+  admin      User     @relation("AdminAuditLogs", fields: [adminId], references: [id])
+  
+  @@index([adminId])
+  @@index([action])
+  @@index([entityType])
+  @@index([severity])
+  @@index([createdAt])
+}
+
+// Granular Permission System Models
+model Permission {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  resource    String
+  action      String
+  description String?
+  category    String   @default("general")
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  rolePermissions RolePermission[]
+  
+  @@unique([resource, action])
+  @@index([resource])
+  @@index([category])
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  isSystem    Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  rolePermissions RolePermission[]
+  userRoles       UserRole[]
+}
+
+model RolePermission {
+  id           String   @id @default(cuid())
+  roleId       String
+  permissionId String
+  conditions   Json?    // Additional conditions for the permission
+  createdAt    DateTime @default(now())
+  
+  // Relations
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+}
+
+model UserRole {
+  id         String    @id @default(cuid())
+  userId     String
+  roleId     String
+  assignedBy String
+  assignedAt DateTime  @default(now())
+  expiresAt  DateTime?
+  isActive   Boolean   @default(true)
+  
+  // Relations
+  user       User @relation("UserRoles", fields: [userId], references: [id], onDelete: Cascade)
+  role       Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  assignedByUser User @relation("AssignedByUser", fields: [assignedBy], references: [id])
+  
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+  @@index([assignedBy])
+}
+
+model ImpersonationSession {
+  id           String    @id @default(cuid())
+  adminId      String
+  targetUserId String
+  reason       String
+  startedAt    DateTime  @default(now())
+  endedAt      DateTime?
+  isActive     Boolean   @default(true)
+  ipAddress    String?
+  userAgent    String?
+  
+  // Relations
+  admin        User @relation("AdminImpersonationSessions", fields: [adminId], references: [id], onDelete: Cascade)
+  targetUser   User @relation("TargetUserImpersonationSessions", fields: [targetUserId], references: [id], onDelete: Cascade)
+  
+  @@index([adminId])
+  @@index([targetUserId])
+  @@index([isActive])
 }
