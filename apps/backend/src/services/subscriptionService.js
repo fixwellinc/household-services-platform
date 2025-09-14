@@ -387,12 +387,20 @@ class SubscriptionService {
         });
         
         if (subscription) {
+          // Update subscription to active
           await prisma.subscription.update({
             where: { id: subscription.id },
             data: {
               status: 'ACTIVE',
             },
           });
+
+          // If subscription was paused due to payment failure, recover it
+          if (subscription.isPaused) {
+            const { default: subscriptionPauseService } = await import('./subscriptionPauseService.js');
+            await subscriptionPauseService.handlePaymentRecovered(subscription.id);
+            console.log(`Recovered subscription ${subscription.id} from payment failure`);
+          }
         }
       }
     } catch (error) {
@@ -410,12 +418,17 @@ class SubscriptionService {
         });
         
         if (subscription) {
-          await prisma.subscription.update({
-            where: { id: subscription.id },
-            data: {
-              status: 'PAST_DUE',
-            },
-          });
+          // Import pause service dynamically to avoid circular dependencies
+          const { default: subscriptionPauseService } = await import('./subscriptionPauseService.js');
+          
+          // Pause subscription due to payment failure with 7-day grace period
+          await subscriptionPauseService.pauseSubscriptionForPaymentFailure(
+            subscription.id,
+            'PAYMENT_FAILED',
+            7 // 7-day grace period
+          );
+          
+          console.log(`Paused subscription ${subscription.id} due to payment failure`);
         }
       }
     } catch (error) {

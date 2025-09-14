@@ -34,6 +34,7 @@ prisma/dev.db
 .idea/
 *.swp
 *.swo
+*.kiro
 
 # Temporary files
 *.tmp

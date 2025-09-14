@@ -370,6 +370,65 @@ export const createSubscriptionCheckoutSession = async (priceId, successUrl, can
   }
 };
 
+// Update subscription schedule for payment frequency changes
+export const updateSubscriptionSchedule = async (subscriptionId, newPriceId, nextPaymentDate) => {
+  try {
+    // For mock subscriptions, return a mock response
+    if (subscriptionId.startsWith('sub_mock_')) {
+      console.log('🔧 Using mock subscription schedule update for:', subscriptionId);
+      return {
+        id: `sub_sched_mock_${Date.now()}`,
+        subscription: subscriptionId,
+        phases: [{
+          start_date: Math.floor(nextPaymentDate.getTime() / 1000),
+          items: [{ price: newPriceId, quantity: 1 }]
+        }]
+      };
+    }
+
+    // Create a subscription schedule to handle the frequency change
+    const schedule = await stripe.subscriptionSchedules.create({
+      from_subscription: subscriptionId,
+    });
+
+    // Update the schedule with new pricing and timing
+    const updatedSchedule = await stripe.subscriptionSchedules.update(schedule.id, {
+      phases: [
+        {
+          items: [{ price: newPriceId, quantity: 1 }],
+          start_date: Math.floor(nextPaymentDate.getTime() / 1000),
+        }
+      ],
+    });
+
+    return updatedSchedule;
+  } catch (error) {
+    console.error('Error updating subscription schedule:', error);
+    throw new Error('Failed to update subscription schedule');
+  }
+};
+
+// Update subscription payment method or other details
+export const updateSubscription = async (subscriptionId, updates) => {
+  try {
+    // For mock subscriptions, return a mock response
+    if (subscriptionId.startsWith('sub_mock_')) {
+      console.log('🔧 Using mock subscription update for:', subscriptionId);
+      return {
+        id: subscriptionId,
+        ...updates,
+        status: 'active'
+      };
+    }
+
+    const subscription = await stripe.subscriptions.update(subscriptionId, updates);
+    return subscription;
+  } catch (error) {
+    console.error('Error updating subscription:', error);
+    throw new Error('Failed to update subscription');
+  }
+};
+
 // Refund payment
 export const refundPayment = async (paymentIntentId, amount = null, reason = 'requested_by_customer') => {
   try {
@@ -387,5 +446,64 @@ export const refundPayment = async (paymentIntentId, amount = null, reason = 're
   } catch (error) {
     console.error('Error creating refund:', error);
     throw new Error('Failed to create refund');
+  }
+};
+
+// Pause subscription
+export const pauseSubscription = async (subscriptionId, options = {}) => {
+  try {
+    // For mock subscriptions, return a mock response
+    if (subscriptionId.startsWith('sub_mock_')) {
+      console.log('🔧 Using mock subscription pause for:', subscriptionId);
+      return {
+        id: subscriptionId,
+        status: 'paused',
+        pause_collection: {
+          behavior: options.behavior || 'void',
+          resumes_at: options.resumesAt ? Math.floor(options.resumesAt.getTime() / 1000) : null
+        }
+      };
+    }
+
+    // Pause the subscription in Stripe
+    const pauseData = {
+      pause_collection: {
+        behavior: options.behavior || 'void'
+      }
+    };
+
+    if (options.resumesAt) {
+      pauseData.pause_collection.resumes_at = Math.floor(options.resumesAt.getTime() / 1000);
+    }
+
+    const subscription = await stripe.subscriptions.update(subscriptionId, pauseData);
+    return subscription;
+  } catch (error) {
+    console.error('Error pausing subscription:', error);
+    throw new Error('Failed to pause subscription');
+  }
+};
+
+// Resume subscription
+export const resumeSubscription = async (subscriptionId) => {
+  try {
+    // For mock subscriptions, return a mock response
+    if (subscriptionId.startsWith('sub_mock_')) {
+      console.log('🔧 Using mock subscription resume for:', subscriptionId);
+      return {
+        id: subscriptionId,
+        status: 'active',
+        pause_collection: null
+      };
+    }
+
+    // Resume the subscription in Stripe by removing pause_collection
+    const subscription = await stripe.subscriptions.update(subscriptionId, {
+      pause_collection: ''
+    });
+    return subscription;
+  } catch (error) {
+    console.error('Error resuming subscription:', error);
+    throw new Error('Failed to resume subscription');
   }
 }; 

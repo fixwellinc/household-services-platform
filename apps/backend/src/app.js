@@ -28,12 +28,20 @@ import docsRoutes from './routes/docs.js';
 import notificationRoutes from './routes/notifications.js';
 import chatRoutes from './routes/chat.js';
 import smsService from './services/sms.js';
+
+// Enhanced Analytics Service imports
+import AnalyticsService from './services/analyticsService.js';
+import ChurnPredictionService from './services/churnPredictionService.js';
 import plansRoutes from './routes/plans.js';
 import subscriptionRoutes from './routes/subscriptions.js';
 import dashboardRoutes from './routes/dashboard.js';
 import webhookRoutes from './routes/webhooks.js';
 import serviceRequestRoutes from './routes/service-requests.js';
 import jobRoutes from './routes/jobs.js';
+import rewardsRoutes from './routes/rewards.js';
+import performanceRoutes from './routes/performance.js';
+import securityRoutes from './routes/security.js';
+import healthRoutes from './routes/health.js';
 
 // Import middleware
 import { authMiddleware, requireAdmin } from './middleware/auth.js';
@@ -41,6 +49,8 @@ import { errorHandler } from './middleware/error.js';
 import { requestLogger, errorLogger, performanceMonitor } from './middleware/logging.js';
 import { generalLimiter, authLimiter, apiLimiter, bulkAdminLimiter } from './middleware/rateLimit.js';
 import { sanitize } from './middleware/validation.js';
+import { performanceMiddleware, memoryMonitor } from './config/performance.js';
+import { releaseLockMiddleware } from './middleware/concurrency.js';
 
 // Import database and config
 import prisma, { checkDatabaseConnection } from './config/database.js';
@@ -190,6 +200,8 @@ app.use((req, res, next) => {
 // Enhanced logging and monitoring
 app.use(requestLogger);
 app.use(performanceMonitor);
+app.use(performanceMiddleware);
+app.use(releaseLockMiddleware);
 
 // Rate limiting
 app.use('/api/', generalLimiter);
@@ -328,7 +340,11 @@ app.use('/api/docs', checkDatabaseMiddleware, docsRoutes);
 app.use('/api/chat', checkDatabaseMiddleware, chatRoutes);
 app.use('/api/plans', checkDatabaseMiddleware, plansRoutes);
 app.use('/api/subscriptions', checkDatabaseMiddleware, subscriptionRoutes);
+app.use('/api/rewards', checkDatabaseMiddleware, rewardsRoutes);
 app.use('/api/dashboard', checkDatabaseMiddleware, dashboardRoutes);
+app.use('/api/performance', checkDatabaseMiddleware, performanceRoutes);
+app.use('/api/security', checkDatabaseMiddleware, securityRoutes);
+app.use('/health', healthRoutes); // Health check endpoint (no database check needed)
 app.use('/api/webhooks', webhookRoutes);
 
 function requireAdminLocal(req, res, next) {
@@ -723,7 +739,11 @@ app.get('/api/admin/bookings', requireAdmin, async (req, res) => {
   res.json({ bookings: bookingsWithDetails });
 });
 
-// Admin: Analytics summary (real data for counts, dummy for email stats)
+// Initialize analytics services
+const analyticsService = new AnalyticsService(prisma);
+const churnPredictionService = new ChurnPredictionService(prisma);
+
+// Admin: Enhanced Analytics summary with subscription-specific metrics
 app.get('/api/admin/analytics', requireAdmin, async (req, res) => {
   if (!prisma) {
     return res.status(503).json({ error: 'Database not available' });
@@ -736,15 +756,15 @@ app.get('/api/admin/analytics', requireAdmin, async (req, res) => {
     const bookingCount = await prisma.booking.count();
     const quoteCount = await prisma.quote.count();
     
-          // Get active chat sessions count
-      const activeSessionsCount = await prisma.chatSession.count({
-        where: {
-          OR: [
-            { lastCustomerReadAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
-            { lastAdminReadAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } }
-          ]
-        }
-      });
+    // Get active chat sessions count
+    const activeSessionsCount = await prisma.chatSession.count({
+      where: {
+        OR: [
+          { lastCustomerReadAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
+          { lastAdminReadAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } }
+        ]
+      }
+    });
     
     // Calculate revenue from subscriptions
     const subscriptions = await prisma.subscription.findMany({
@@ -833,6 +853,15 @@ app.get('/api/admin/analytics', requireAdmin, async (req, res) => {
       take: 5
     });
 
+    // Enhanced subscription analytics
+    const churnRate = await analyticsService.calculateChurnRate({
+      startDate: thirtyDaysAgo.toISOString(),
+      endDate: now.toISOString()
+    });
+
+    const clvAnalysis = await analyticsService.calculateCustomerLifetimeValue();
+    const perkUtilization = await analyticsService.getPerkUtilization();
+
     // Calculate notification statistics (mock for now, can be enhanced later)
     const notificationStats = {
       totalSentToday: Math.floor(Math.random() * 1000) + 2000, // Mock data
@@ -842,6 +871,7 @@ app.get('/api/admin/analytics', requireAdmin, async (req, res) => {
     };
 
     res.json({
+      // Original metrics
       totalUsers: userCount,
       totalRevenue: totalRevenue,
       totalBookings: bookingCount,
@@ -857,11 +887,97 @@ app.get('/api/admin/analytics', requireAdmin, async (req, res) => {
         name: service.name,
         bookings: service._count.bookings
       })),
-      notificationStats
+      notificationStats,
+      
+      // Enhanced subscription metrics
+      subscriptionMetrics: {
+        churnRate: churnRate.overallChurnRate,
+        churnByTier: churnRate.churnByTier,
+        churnByFrequency: churnRate.churnByFrequency,
+        averageCLV: clvAnalysis.averageCLV,
+        clvByTier: clvAnalysis.clvByTier,
+        perkUtilization: perkUtilization.utilizationRates
+      }
     });
   } catch (error) {
     console.error('Analytics calculation error:', error);
     res.status(500).json({ error: 'Failed to calculate analytics' });
+  }
+});
+
+// New endpoint: Churn risk analysis
+app.get('/api/analytics/churn-risk', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+
+  try {
+    const { limit = 50, riskThreshold = 70 } = req.query;
+    
+    const highRiskCustomers = await churnPredictionService.getBulkChurnRiskScores({
+      limit: parseInt(limit),
+      riskThreshold: parseFloat(riskThreshold)
+    });
+
+    // Get summary statistics
+    const totalActiveSubscriptions = await prisma.subscription.count({
+      where: { status: 'ACTIVE' }
+    });
+
+    const riskDistribution = {
+      critical: highRiskCustomers.filter(c => c.riskScore >= 80).length,
+      high: highRiskCustomers.filter(c => c.riskScore >= 60 && c.riskScore < 80).length,
+      medium: highRiskCustomers.filter(c => c.riskScore >= 40 && c.riskScore < 60).length,
+      low: highRiskCustomers.filter(c => c.riskScore < 40).length
+    };
+
+    res.json({
+      summary: {
+        totalActiveSubscriptions,
+        highRiskCount: highRiskCustomers.length,
+        riskDistribution
+      },
+      highRiskCustomers: highRiskCustomers.slice(0, parseInt(limit))
+    });
+  } catch (error) {
+    console.error('Churn risk analysis error:', error);
+    res.status(500).json({ error: 'Failed to analyze churn risk' });
+  }
+});
+
+// New endpoint: Revenue trends analysis
+app.get('/api/analytics/revenue-trends', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+
+  try {
+    const { months = 12 } = req.query;
+    
+    const revenueTrends = await analyticsService.getRevenueTrends({
+      months: parseInt(months)
+    });
+
+    res.json(revenueTrends);
+  } catch (error) {
+    console.error('Revenue trends analysis error:', error);
+    res.status(500).json({ error: 'Failed to analyze revenue trends' });
+  }
+});
+
+// New endpoint: Perk utilization analysis
+app.get('/api/analytics/perk-utilization', requireAdmin, async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+
+  try {
+    const perkUtilization = await analyticsService.getPerkUtilization();
+    
+    res.json(perkUtilization);
+  } catch (error) {
+    console.error('Perk utilization analysis error:', error);
+    res.status(500).json({ error: 'Failed to analyze perk utilization' });
   }
 });
 
@@ -1531,8 +1647,14 @@ app.use((err, req, res, next) => {
 // Only start the server if this file is run directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   const PORT = process.env.PORT || 5000;
+  
+  // Start memory monitoring
+  memoryMonitor.startMonitoring();
+  console.log('🔍 Memory monitoring started');
+  
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+    console.log('🚀 Performance monitoring enabled');
   });
 }
 

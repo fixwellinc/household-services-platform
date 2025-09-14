@@ -98,6 +98,46 @@ const validationSchemas = {
       }
       return value?.trim() || null;
     }
+  },
+
+  paymentFrequency: {
+    frequency: (value) => {
+      if (!value) throw new ValidationError('Payment frequency is required');
+      const validFrequencies = ['MONTHLY', 'YEARLY'];
+      const upperValue = value.toUpperCase();
+      if (!validFrequencies.includes(upperValue)) {
+        throw new ValidationError(`Invalid frequency. Must be one of: ${validFrequencies.join(', ')}`);
+      }
+      return upperValue;
+    },
+    planTier: (value) => {
+      if (value) {
+        const validTiers = ['STARTER', 'HOMECARE', 'PRIORITY'];
+        const upperValue = value.toUpperCase();
+        if (!validTiers.includes(upperValue)) {
+          throw new ValidationError(`Invalid plan tier. Must be one of: ${validTiers.join(', ')}`);
+        }
+        return upperValue;
+      }
+      return value;
+    }
+  },
+
+  subscriptionPause: {
+    durationMonths: (value) => {
+      if (!value) throw new ValidationError('Duration in months is required');
+      const duration = parseInt(value);
+      if (isNaN(duration) || duration < 1 || duration > 6) {
+        throw new ValidationError('Duration must be between 1 and 6 months');
+      }
+      return duration;
+    },
+    reason: (value) => {
+      if (value && value.length > 500) {
+        throw new ValidationError('Reason must be less than 500 characters');
+      }
+      return value?.trim() || null;
+    }
   }
 };
 

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useCurrentUser } from '@/hooks/use-api';
 import { Button } from '@/components/ui/shared';
 import { toast } from 'sonner';
+import EnhancedAnalytics from '@/components/admin/EnhancedAnalytics';
 import { 
   Users, 
   MessageSquare, 
@@ -780,126 +781,7 @@ export default function AdminPage() {
 
               {/* ANALYTICS TAB */}
               {activeTab === 'analytics' && (
-                <div className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div className="bg-white border border-gray-200 p-6 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">User Growth</p>
-                          <p className="text-2xl font-bold text-gray-900">{analyticsData.userGrowth}%</p>
-                        </div>
-                        <div className={`p-2 rounded-full ${analyticsData.userGrowth > 0 ? 'bg-green-100' : 'bg-red-100'}`}>
-                          {analyticsData.userGrowth > 0 ? (
-                            <TrendingUp className="h-5 w-5 text-green-600" />
-                          ) : (
-                            <TrendingDown className="h-5 w-5 text-red-600" />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white border border-gray-200 p-6 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">Revenue Growth</p>
-                          <p className="text-2xl font-bold text-gray-900">{analyticsData.revenueGrowth}%</p>
-                        </div>
-                        <div className={`p-2 rounded-full ${analyticsData.revenueGrowth > 0 ? 'bg-green-100' : 'bg-red-100'}`}>
-                          {analyticsData.revenueGrowth > 0 ? (
-                            <TrendingUp className="h-5 w-5 text-green-600" />
-                          ) : (
-                            <TrendingDown className="h-5 w-5 text-red-600" />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white border border-gray-200 p-6 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">Booking Growth</p>
-                          <p className="text-2xl font-bold text-gray-900">{analyticsData.bookingGrowth}%</p>
-                        </div>
-                        <div className={`p-2 rounded-full ${analyticsData.bookingGrowth > 0 ? 'bg-green-100' : 'bg-red-100'}`}>
-                          {analyticsData.bookingGrowth > 0 ? (
-                            <TrendingUp className="h-5 w-5 text-green-600" />
-                          ) : (
-                            <TrendingDown className="h-5 w-5 text-red-600" />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white border border-gray-200 p-6 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">Session Growth</p>
-                          <p className="text-2xl font-bold text-gray-900">{analyticsData.sessionGrowth}%</p>
-                        </div>
-                        <div className={`p-2 rounded-full ${analyticsData.sessionGrowth > 0 ? 'bg-green-100' : 'bg-red-100'}`}>
-                          {analyticsData.sessionGrowth > 0 ? (
-                            <TrendingUp className="h-5 w-5 text-green-600" />
-                          ) : (
-                            <TrendingDown className="h-5 w-5 text-red-600" />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <div className="border rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Overview</h3>
-                      <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Page Views</span>
-                          <span className="font-semibold">125,430</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Unique Visitors</span>
-                          <span className="font-semibold">45,230</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Bounce Rate</span>
-                          <span className="font-semibold">32.4%</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Avg. Session Duration</span>
-                          <span className="font-semibold">4m 32s</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="border rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Services</h3>
-                      <div className="space-y-3">
-                        {analyticsData.topServices && analyticsData.topServices.length > 0 ? (
-                          analyticsData.topServices.map((service, index) => (
-                            <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                              <span className="text-sm">{service.name}</span>
-                              <span className="font-semibold">{service.bookings} bookings</span>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-center py-4 text-gray-500">
-                            No service data available
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end space-x-3">
-                    <Button variant="outline">
-                      <Download className="mr-2 h-4 w-4" />
-                      Export Report
-                    </Button>
-                    <Button onClick={() => fetchData()}>
-                      <RefreshCw className="mr-2 h-4 w-4" />
-                      Refresh Data
-                    </Button>
-                  </div>
-                </div>
+                <EnhancedAnalytics />
               )}
 
               {/* SUBSCRIPTIONS TAB */}

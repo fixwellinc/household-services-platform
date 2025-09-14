@@ -24,6 +24,11 @@ import {
   Info
 } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-api';
+import PaymentFrequencyManager from '@/components/features/payment/PaymentFrequencyManager';
+import SubscriptionPauseStatus from '@/components/features/subscription/SubscriptionPauseStatus';
+import PropertyManager from '@/components/features/subscription/PropertyManager';
+import PlanUpgradeModal from '@/components/features/subscription/PlanUpgradeModal';
+import PlanComparisonTable from '@/components/features/subscription/PlanComparisonTable';
 
 interface Subscription {
   id: string;
@@ -36,6 +41,7 @@ interface Subscription {
   canCancel: boolean;
   cancellationBlockedReason?: string;
   cancellationBlockedAt?: string;
+  paymentFrequency?: string;
   plan?: any;
   stripeSubscription?: any;
   usage?: any;
@@ -69,6 +75,9 @@ export default function SubscriptionManagement({ className = '' }: SubscriptionM
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showPlanUpgrade, setShowPlanUpgrade] = useState(false);
+  const [showPlanComparison, setShowPlanComparison] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<{tier: string, billingCycle: 'monthly' | 'yearly'} | null>(null);
   const { data: userData, isLoading: userLoading } = useCurrentUser();
 
   useEffect(() => {
@@ -292,8 +301,11 @@ export default function SubscriptionManagement({ className = '' }: SubscriptionM
                   Cancel Subscription
                 </Button>
               )}
-              <Button asChild className="flex-1">
-                <a href="/pricing">Change Plan</a>
+              <Button 
+                onClick={() => setShowPlanComparison(true)}
+                className="flex-1"
+              >
+                Change Plan
               </Button>
             </div>
           </div>
@@ -363,6 +375,75 @@ export default function SubscriptionManagement({ className = '' }: SubscriptionM
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Subscription Pause Management */}
+      <SubscriptionPauseStatus
+        subscriptionStatus={subscription.status}
+        onStatusChange={fetchSubscription}
+      />
+
+      {/* Payment Frequency Management */}
+      <PaymentFrequencyManager
+        currentFrequency={subscription.paymentFrequency || 'MONTHLY'}
+        planTier={subscription.tier}
+        onFrequencyChanged={(newFrequency) => {
+          // Update the local subscription state
+          setSubscription(prev => prev ? { ...prev, paymentFrequency: newFrequency } : null);
+          // Optionally refresh the subscription data
+          fetchSubscription();
+        }}
+      />
+
+      {/* Additional Property Management */}
+      <PropertyManager />
+
+      {/* Plan Comparison Modal */}
+      {showPlanComparison && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b">
+              <h2 className="text-xl font-semibold">Choose Your Plan</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPlanComparison(false)}
+                className="h-8 w-8 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="p-6">
+              <PlanComparisonTable
+                currentTier={subscription?.tier || 'STARTER'}
+                onPlanSelect={(tier, billingCycle) => {
+                  setSelectedPlan({ tier, billingCycle });
+                  setShowPlanComparison(false);
+                  setShowPlanUpgrade(true);
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Plan Upgrade Modal */}
+      {showPlanUpgrade && selectedPlan && subscription && (
+        <PlanUpgradeModal
+          isOpen={showPlanUpgrade}
+          onClose={() => {
+            setShowPlanUpgrade(false);
+            setSelectedPlan(null);
+          }}
+          currentTier={subscription.tier}
+          targetTier={selectedPlan.tier}
+          billingCycle={selectedPlan.billingCycle}
+          onPlanChanged={() => {
+            fetchSubscription();
+            setShowPlanUpgrade(false);
+            setSelectedPlan(null);
+          }}
+        />
       )}
 
       {/* Cancel Confirmation Modal */}

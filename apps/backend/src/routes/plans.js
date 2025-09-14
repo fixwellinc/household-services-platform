@@ -2,6 +2,7 @@ import express from 'express';
 import { authMiddleware } from '../middleware/auth.js';
 import { getAllPlans, getPlanById, getPlanByTier, calculateServiceDiscount } from '../config/plans.js';
 import prisma from '../config/database.js';
+import enhancedPlanService from '../services/enhancedPlanService.js';
 
 const router = express.Router();
 
@@ -276,7 +277,58 @@ router.post('/user/activate-subscription', authMiddleware, async (req, res) => {
   }
 });
 
-// Change user's plan (from dashboard)
+// Get plan change preview
+router.post('/user/change-plan/preview', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { newTier, billingCycle } = req.body;
+    
+    if (!newTier || !billingCycle) {
+      return res.status(400).json({
+        success: false,
+        error: 'New tier and billing cycle are required'
+      });
+    }
+
+    // Validate billing cycle
+    if (!['monthly', 'yearly'].includes(billingCycle)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Billing cycle must be monthly or yearly'
+      });
+    }
+
+    // Validate tier
+    const validTiers = ['STARTER', 'HOMECARE', 'PRIORITY'];
+    if (!validTiers.includes(newTier.toUpperCase())) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid plan tier'
+      });
+    }
+    
+    // Get plan change preview
+    const preview = await enhancedPlanService.getChangePreview(
+      userId, 
+      newTier.toUpperCase(), 
+      billingCycle
+    );
+    
+    res.json({
+      success: true,
+      preview: preview,
+      message: 'Plan change preview generated successfully'
+    });
+  } catch (error) {
+    console.error('Error generating plan change preview:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to generate plan change preview'
+    });
+  }
+});
+
+// Enhanced plan change with prorated billing and visit carryover
 router.post('/user/change-plan', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -288,41 +340,50 @@ router.post('/user/change-plan', authMiddleware, async (req, res) => {
         error: 'New tier and billing cycle are required'
       });
     }
-    
-    // Check if user has an active subscription
-    const existingSubscription = await prisma.subscription.findUnique({
-      where: { userId }
-    });
-    
-    if (!existingSubscription || existingSubscription.status !== 'ACTIVE') {
+
+    // Validate billing cycle
+    if (!['monthly', 'yearly'].includes(billingCycle)) {
       return res.status(400).json({
         success: false,
-        error: 'No active subscription found'
+        error: 'Billing cycle must be monthly or yearly'
+      });
+    }
+
+    // Validate tier
+    const validTiers = ['STARTER', 'HOMECARE', 'PRIORITY'];
+    if (!validTiers.includes(newTier.toUpperCase())) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid plan tier'
       });
     }
     
-    // Update subscription with new plan
-    await prisma.subscription.update({
-      where: { userId },
-      data: {
-        tier: newTier,
-        status: 'PENDING_CHANGE', // Will be updated to ACTIVE after payment
-        updatedAt: new Date()
-      }
-    });
+    // Use enhanced plan service for plan change
+    const result = await enhancedPlanService.changePlan(
+      userId, 
+      newTier.toUpperCase(), 
+      billingCycle
+    );
     
     res.json({
       success: true,
-      message: 'Plan change requested successfully',
-      newTier,
-      billingCycle,
-      currentStatus: 'PENDING_CHANGE'
+      message: result.message,
+      subscription: {
+        tier: result.subscription.tier,
+        status: result.subscription.status,
+        paymentFrequency: result.subscription.paymentFrequency,
+        nextPaymentAmount: result.subscription.nextPaymentAmount
+      },
+      billingPreview: result.billingPreview,
+      visitCarryover: result.visitCarryover,
+      effectiveDate: result.effectiveDate,
+      isUpgrade: result.isUpgrade
     });
   } catch (error) {
     console.error('Error changing plan:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to change plan'
+      error: error.message || 'Failed to change plan'
     });
   }
 });

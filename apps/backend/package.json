@@ -14,7 +14,9 @@
     "migrate:dev": "npx prisma migrate dev",
     "lint": "eslint .",
     "type-check": "tsc --noEmit || echo 'No TS config yet'",
-    "test": "echo \"No tests yet\" && exit 0",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
     "postinstall": "npx prisma generate"
   },
   "dependencies": {
@@ -31,6 +33,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.17.0",
     "multer": "^2.0.1",
+    "node-cache": "^5.1.2",
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.10.1",
     "socket.io": "^4.7.4",
@@ -41,8 +44,11 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@vitest/ui": "^3.2.4",
     "eslint": "^8.56.0",
     "nodemon": "^3.1.10",
-    "prisma": "^6.11.1"
+    "prisma": "^6.11.1",
+    "supertest": "^7.1.4",
+    "vitest": "^3.2.4"
   }
 }

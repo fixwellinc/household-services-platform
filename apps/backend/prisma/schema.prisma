@@ -41,6 +41,11 @@ model User {
   technicianJobs   Job[]   @relation("TechnicianJobs")
   customerInvoices Invoice[] @relation("CustomerInvoices")
   technicianInvoices Invoice[] @relation("TechnicianInvoices")
+  
+  // New relations for flexible payment options
+  familyMemberships FamilyMember[] @relation("FamilyMemberUser")
+  rewardCredits     RewardCredit[] @relation("UserRewardCredits")
+  installmentPlans  InstallmentPlan[] @relation("UserInstallmentPlans")
 }
 
 model CustomerEmployeeAssignment {
@@ -68,8 +73,25 @@ model Subscription {
   cancellationBlockedAt     DateTime?
   cancellationBlockedReason String?
   
+  // New fields for flexible payment options
+  paymentFrequency          String    @default("MONTHLY") // WEEKLY, BIWEEKLY, MONTHLY, QUARTERLY, YEARLY
+  nextPaymentAmount         Float?
+  isPaused                  Boolean   @default(false)
+  pauseStartDate            DateTime?
+  pauseEndDate              DateTime?
+  availableCredits          Float     @default(0)
+  loyaltyPoints             Int       @default(0)
+  churnRiskScore            Float     @default(0)
+  lifetimeValue             Float     @default(0)
+  
   // Add relation back to User
   user                     User      @relation(fields: [userId], references: [id])
+  
+  // New relations for flexible payment options
+  paymentFrequencies       PaymentFrequency[]
+  subscriptionPauses       SubscriptionPause[]
+  familyMembers            FamilyMember[]
+  additionalProperties     AdditionalProperty[]
 }
 
 model SubscriptionUsage {
@@ -287,4 +309,73 @@ enum SubscriptionTier {
   STARTER
   HOMECARE
   PRIORITY
+}
+
+// New models for flexible payment options
+model PaymentFrequency {
+  id             String @id @default(cuid())
+  subscriptionId String
+  frequency      String // WEEKLY, BIWEEKLY, MONTHLY, QUARTERLY, YEARLY
+  amount         Float
+  nextPaymentDate DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model SubscriptionPause {
+  id             String @id @default(cuid())
+  subscriptionId String
+  startDate      DateTime
+  endDate        DateTime
+  reason         String?
+  status         String @default("ACTIVE") // ACTIVE, COMPLETED, CANCELLED
+  createdAt      DateTime @default(now())
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model FamilyMember {
+  id             String @id @default(cuid())
+  subscriptionId String
+  userId         String
+  relationship   String
+  addedAt        DateTime @default(now())
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  user           User @relation("FamilyMemberUser", fields: [userId], references: [id])
+}
+
+model AdditionalProperty {
+  id             String @id @default(cuid())
+  subscriptionId String
+  address        String
+  nickname       String?
+  monthlyFee     Float
+  addedAt        DateTime @default(now())
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model RewardCredit {
+  id             String @id @default(cuid())
+  userId         String
+  amount         Float
+  type           String // REFERRAL, LOYALTY, BONUS
+  description    String
+  earnedAt       DateTime @default(now())
+  usedAt         DateTime?
+  expiresAt      DateTime?
+  user           User @relation("UserRewardCredits", fields: [userId], references: [id])
+}
+
+model InstallmentPlan {
+  id             String @id @default(cuid())
+  userId         String
+  serviceQuoteId String?
+  provider       String // KLARNA, AFFIRM, SEZZLE
+  totalAmount    Float
+  monthlyAmount  Float
+  duration       Int
+  remainingBalance Float
+  status         String @default("ACTIVE")
+  createdAt      DateTime @default(now())
+  user           User @relation("UserInstallmentPlans", fields: [userId], references: [id])
 }

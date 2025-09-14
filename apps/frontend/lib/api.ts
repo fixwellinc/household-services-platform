@@ -479,14 +479,85 @@ export class ApiClient {
     });
   }
 
+  // Enhanced plan change with prorated billing and visit carryover
   changePlan = async (newTier: string, billingCycle: 'monthly' | 'yearly'): Promise<{
     success: boolean;
     message: string;
-    newTier: string;
-    billingCycle: string;
-    currentStatus: string;
+    subscription: {
+      tier: string;
+      status: string;
+      paymentFrequency: string;
+      nextPaymentAmount: number;
+    };
+    billingPreview: {
+      currentPrice: number;
+      newPrice: number;
+      proratedDifference: number;
+      immediateCharge: number;
+      creditAmount: number;
+      nextAmount: number;
+      remainingDays: number;
+      totalDays: number;
+      billingCycle: string;
+    };
+    visitCarryover: {
+      currentVisitsPerMonth: number;
+      newVisitsPerMonth: number;
+      unusedVisits: number;
+      carryoverVisits: number;
+      totalVisitsNextPeriod: number;
+    };
+    effectiveDate: string;
+    isUpgrade: boolean;
   }> => {
     return this.request('/plans/user/change-plan', {
+      method: 'POST',
+      body: JSON.stringify({ newTier, billingCycle }),
+    });
+  }
+
+  // Get plan change preview without making changes
+  getPlanChangePreview = async (newTier: string, billingCycle: 'monthly' | 'yearly'): Promise<{
+    success: boolean;
+    preview: {
+      currentPlan: {
+        id: string;
+        name: string;
+        monthlyPrice: number;
+        yearlyPrice?: number;
+      };
+      newPlan: {
+        id: string;
+        name: string;
+        monthlyPrice: number;
+        yearlyPrice?: number;
+      };
+      isUpgrade: boolean;
+      canChange: boolean;
+      restrictions: string[];
+      billingPreview: {
+        currentPrice: number;
+        newPrice: number;
+        proratedDifference: number;
+        immediateCharge: number;
+        creditAmount: number;
+        nextAmount: number;
+        remainingDays: number;
+        totalDays: number;
+        billingCycle: string;
+      };
+      visitCarryover: {
+        currentVisitsPerMonth: number;
+        newVisitsPerMonth: number;
+        unusedVisits: number;
+        carryoverVisits: number;
+        totalVisitsNextPeriod: number;
+      };
+      effectiveDate: string;
+    };
+    message: string;
+  }> => {
+    return this.request('/plans/user/change-plan/preview', {
       method: 'POST',
       body: JSON.stringify({ newTier, billingCycle }),
     });
