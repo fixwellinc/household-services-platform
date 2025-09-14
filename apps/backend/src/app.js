@@ -769,7 +769,13 @@ app.get('/api/admin/analytics', requireAdmin, async (req, res) => {
     // Calculate revenue from subscriptions
     const subscriptions = await prisma.subscription.findMany({
       where: { status: 'ACTIVE' },
-      include: { plan: true }
+      include: { 
+        user: true,
+        paymentFrequencies: true,
+        subscriptionPauses: true,
+        familyMembers: true,
+        additionalProperties: true
+      }
     });
     
     const totalRevenue = subscriptions.reduce((sum, sub) => {
