@@ -1,8 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useCurrentUser, useLogin, useLogout, useRegister } from '@/hooks/use-api';
-import { User } from '@/lib/api';
+import { useCurrentUser, useLogin, useLogout, useRegister } from '../hooks/use-api';
+import { User } from '../lib/api';
 import { toast } from 'sonner';
 
 interface AuthContextType {

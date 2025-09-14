@@ -29,6 +29,9 @@ model User {
   bookingIds     String[]
   messageIds     String[]
   quoteIds       String[]
+  
+  // Relations
+  auditLogs     AuditLog[]
 }
 
 model Subscription {
@@ -103,6 +106,27 @@ model Setting {
   key       String   @unique
   value     String
   updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  adminId     String
+  action      String
+  entityType  String
+  entityId    String
+  changes     String?  // JSON string of changes
+  metadata    String?  // JSON string of metadata (IP, user agent, etc.)
+  severity    String   @default("medium") // low, medium, high, critical
+  createdAt   DateTime @default(now())
+  
+  // Relation to admin user
+  admin       User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  
+  @@index([adminId])
+  @@index([action])
+  @@index([entityType])
+  @@index([severity])
+  @@index([createdAt])
 }
 
 // Enums are not supported in MongoDB, using strings instead

@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import ServiceCard from '@/components/features/ServiceCard'
+import ServiceCard from '../../components/features/ServiceCard'
 
 const mockService = {
   id: '1',
@@ -18,7 +18,7 @@ describe('ServiceCard', () => {
       <ServiceCard
         service={mockService}
         onBook={jest.fn()}
-        onViewDetails={jest.fn()}
+        onView={jest.fn()}
       />
     )
 
@@ -34,7 +34,7 @@ describe('ServiceCard', () => {
       <ServiceCard
         service={mockService}
         onBook={mockOnBook}
-        onViewDetails={jest.fn()}
+        onView={jest.fn()}
       />
     )
 
@@ -48,7 +48,7 @@ describe('ServiceCard', () => {
       <ServiceCard
         service={mockService}
         onBook={jest.fn()}
-        onViewDetails={mockOnViewDetails}
+        onView={mockOnViewDetails}
       />
     )
 

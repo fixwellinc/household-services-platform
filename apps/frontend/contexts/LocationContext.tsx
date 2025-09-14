@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { isBCPostalCode, getBCCityFromPostalCode, formatPostalCode } from '@/lib/location';
+import { isBCPostalCode, getBCCityFromPostalCode, formatPostalCode } from '../lib/location';
 
 interface LocationContextType {
   userLocation: string | null;

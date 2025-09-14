@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api, { type User, type Service, type Booking } from '@/lib/api';
+import api, { type User, type Service, type Booking } from '../lib/api';
+import { useCallback } from 'react';
 
 // Query keys
 export const queryKeys = {
@@ -185,4 +186,71 @@ export const useHealthCheck = () => {
 export const useUpdateProfile = () => useMutation<{ user: User }, Error, { name?: string; email?: string; phone?: string; avatar?: string }>({ mutationFn: api.updateProfile });
 export const useChangePassword = () => useMutation<{ message: string }, Error, { currentPassword: string; newPassword: string }>({ mutationFn: api.changePassword });
 export const useUpdateNotifications = () => useMutation<{ user: User }, Error, { notifications: Record<string, boolean> }>({ mutationFn: api.updateNotifications });
-export const useDeleteAccount = () => useMutation<{ message: string }, Error, void>({ mutationFn: api.deleteAccount }); 
+export const useDeleteAccount = () => useMutation<{ message: string }, Error, void>({ mutationFn: api.deleteAccount });
+
+// Generic API hook for making custom requests
+export const useApi = () => {
+  const request = useCallback(async <T = any>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> => {
+    const baseURL = process.env.NEXT_PUBLIC_API_URL || '/api';
+    const url = `${baseURL}${endpoint}`;
+    
+    // Get token from localStorage
+    let token: string | null = null;
+    if (typeof window !== 'undefined') {
+      token = localStorage.getItem('auth_token');
+    }
+    
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(options.headers as Record<string, string>),
+    };
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    try {
+      const fetchOptions: RequestInit = {
+        method: options.method || 'GET',
+        headers,
+        credentials: 'include',
+        ...options,
+      };
+      
+      // Ensure method is not overridden by spread
+      if (options.method) {
+        fetchOptions.method = options.method;
+      }
+
+      const response = await fetch(url, fetchOptions);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        
+        // Provide more specific error messages
+        if (response.status === 401) {
+          throw new Error('Authentication required. Please log in to continue.');
+        } else if (response.status === 403) {
+          throw new Error('Access denied. You do not have permission to perform this action.');
+        } else if (response.status === 404) {
+          throw new Error('Resource not found.');
+        } else if (response.status >= 500) {
+          throw new Error('Server error. Please try again later.');
+        } else {
+          throw new Error(errorData.error || `Request failed with status ${response.status}`);
+        }
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('API request failed:', error);
+      throw error;
+    }
+  }, []);
+
+  return { request };
+}; 
