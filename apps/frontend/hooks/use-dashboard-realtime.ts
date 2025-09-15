@@ -42,7 +42,11 @@ export function useDashboardRealtime(widgets: DashboardWidget[]) {
 
   // Subscribe to widget data updates
   const subscribeToWidget = useCallback((widget: DashboardWidget) => {
-    if (!socket || !isConnected) return;
+    // Skip WebSocket features if not connected
+    if (!socket || !isConnected) {
+      console.warn('WebSocket not available, skipping real-time subscription for widget:', widget.id);
+      return;
+    }
 
     const subscription: WidgetSubscription = {
       widgetId: widget.id,

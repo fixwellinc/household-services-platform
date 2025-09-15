@@ -14,7 +14,7 @@ interface AdminRealtimeEvents {
 }
 
 export function useAdminRealtime() {
-  const { socket, isConnected } = useSocket();
+  const { socket, isConnected, connectionStatus } = useSocket();
   const queryClient = useQueryClient();
   const [notifications, setNotifications] = useState<any[]>([]);
 

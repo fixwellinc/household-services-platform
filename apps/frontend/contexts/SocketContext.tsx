@@ -31,7 +31,7 @@ interface SocketProviderProps {
 
 export function SocketProvider({ 
   children, 
-  url = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001',
+  url = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
   options = {}
 }: SocketProviderProps) {
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -42,15 +42,22 @@ export function SocketProvider({
     // Only connect on client side
     if (typeof window === 'undefined') return;
 
+    // Skip WebSocket connection in production if no proper URL is configured
+    if (process.env.NODE_ENV === 'production' && (!url || url.includes('localhost'))) {
+      console.warn('WebSocket disabled: No production URL configured');
+      setConnectionStatus('disconnected');
+      return;
+    }
+
     setConnectionStatus('connecting');
 
     const socketInstance = io(url, {
       transports: ['websocket', 'polling'],
       autoConnect: true,
       reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionAttempts: 5,
-      timeout: 20000,
+      reconnectionDelay: 2000,
+      reconnectionAttempts: 3,
+      timeout: 10000,
       ...options
     });
 
@@ -71,6 +78,14 @@ export function SocketProvider({
       console.error('Socket connection error:', error);
       setIsConnected(false);
       setConnectionStatus('error');
+      
+      // Don't retry indefinitely in production
+      if (process.env.NODE_ENV === 'production') {
+        setTimeout(() => {
+          socketInstance.disconnect();
+          setConnectionStatus('disconnected');
+        }, 5000);
+      }
     });
 
     socketInstance.on('reconnect', (attemptNumber) => {
@@ -85,8 +100,9 @@ export function SocketProvider({
     });
 
     socketInstance.on('reconnect_failed', () => {
-      console.error('Socket reconnection failed');
-      setConnectionStatus('error');
+      console.error('Socket reconnection failed - disabling WebSocket features');
+      setConnectionStatus('disconnected');
+      setSocket(null);
     });
 
     setSocket(socketInstance);
