@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { X, LogOut, ChevronLeft, ChevronRight, Star, Clock, Search, Keyboard } from 'lucide-react';
+import { X, LogOut, ChevronLeft, ChevronRight, Star, Search, Keyboard } from 'lucide-react';
 import { NavigationItem } from '../../../types/admin';
 import { useAdminNavigation } from '../../../hooks/use-admin-navigation';
 
@@ -26,7 +26,6 @@ export function AdminSidebar({ isOpen, onClose, navigationItems, activeTab }: Ad
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showQuickAccess, setShowQuickAccess] = useState(false);
 
   // Load collapsed state from localStorage
   useEffect(() => {
@@ -102,8 +101,6 @@ export function AdminSidebar({ isOpen, onClose, navigationItems, activeTab }: Ad
               favoriteItems={favoriteItems}
               recentItems={recentItems}
               onToggleFavorite={toggleFavorite}
-              showQuickAccess={showQuickAccess}
-              onToggleQuickAccess={() => setShowQuickAccess(!showQuickAccess)}
             />
           </div>
         </div>
@@ -127,8 +124,6 @@ export function AdminSidebar({ isOpen, onClose, navigationItems, activeTab }: Ad
             favoriteItems={favoriteItems}
             recentItems={recentItems}
             onToggleFavorite={toggleFavorite}
-            showQuickAccess={showQuickAccess}
-            onToggleQuickAccess={() => setShowQuickAccess(!showQuickAccess)}
           />
         </div>
       </div>
@@ -150,8 +145,6 @@ interface SidebarContentProps {
   favoriteItems: NavigationItem[];
   recentItems: NavigationItem[];
   onToggleFavorite: (itemId: string) => void;
-  showQuickAccess: boolean;
-  onToggleQuickAccess: () => void;
 }
 
 function SidebarContent({ 
@@ -167,9 +160,7 @@ function SidebarContent({
   onSearchChange,
   favoriteItems,
   recentItems,
-  onToggleFavorite,
-  showQuickAccess,
-  onToggleQuickAccess
+  onToggleFavorite
 }: SidebarContentProps) {
   const [keyboardNavIndex, setKeyboardNavIndex] = useState(-1);
 
@@ -251,72 +242,6 @@ function SidebarContent({
         </div>
       )}
 
-      {/* Quick Access Toggle */}
-      {!isCollapsed && (favoriteItems.length > 0 || recentItems.length > 0) && (
-        <div className="px-4 py-2 border-b">
-          <button
-            onClick={onToggleQuickAccess}
-            className="flex items-center text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            <Clock className="h-3 w-3 mr-1" />
-            Quick Access
-            <ChevronRight className={`h-3 w-3 ml-1 transition-transform ${showQuickAccess ? 'rotate-90' : ''}`} />
-          </button>
-        </div>
-      )}
-
-      {/* Quick Access Section */}
-      {!isCollapsed && showQuickAccess && (
-        <div className="px-4 py-2 border-b bg-gray-50">
-          {/* Favorites */}
-          {favoriteItems.length > 0 && (
-            <div className="mb-3">
-              <h4 className="text-xs font-medium text-gray-500 mb-2 flex items-center">
-                <Star className="h-3 w-3 mr-1" />
-                Favorites
-              </h4>
-              <div className="space-y-1">
-                {favoriteItems.slice(0, 3).map((item) => (
-                  <NavigationItemComponent
-                    key={`fav-${item.id}`}
-                    item={item}
-                    isActive={activeTab === item.id}
-                    onClick={() => onNavClick(item.id, item.path || '/admin')}
-                    onToggleFavorite={onToggleFavorite}
-                    isCollapsed={false}
-                    isCompact={true}
-                    isFavorite={true}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Recent */}
-          {recentItems.length > 0 && (
-            <div>
-              <h4 className="text-xs font-medium text-gray-500 mb-2 flex items-center">
-                <Clock className="h-3 w-3 mr-1" />
-                Recent
-              </h4>
-              <div className="space-y-1">
-                {recentItems.slice(0, 3).map((item) => (
-                  <NavigationItemComponent
-                    key={`recent-${item.id}`}
-                    item={item}
-                    isActive={activeTab === item.id}
-                    onClick={() => onNavClick(item.id, item.path || '/admin')}
-                    onToggleFavorite={onToggleFavorite}
-                    isCollapsed={false}
-                    isCompact={true}
-                    isFavorite={favoriteItems.some(fav => fav.id === item.id)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
       
       {/* Main Navigation */}
       <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
@@ -331,7 +256,7 @@ function SidebarContent({
             key={item.id}
             item={item}
             isActive={activeTab === item.id}
-            onClick={() => onNavClick(item.id)}
+            onClick={() => onNavClick(item.id, item.path)}
             onToggleFavorite={onToggleFavorite}
             isCollapsed={isCollapsed}
             isCompact={false}
