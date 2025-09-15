@@ -1,45 +1,192 @@
-# Node modules
+# Dependencies
 node_modules/
 **/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 # Environment variables
 .env
 .env.*
 **/.env
 **/.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Build output
 .next/
 dist/
 build/
+out/
 coverage/
+.turbo/
+.vercel/
+.netlify/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
 
 # Logs
+*.log
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
 
-# OS
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+Desktop.ini
 
 # Database
 *.db
 *.sqlite
 *.sqlite3
 prisma/dev.db
+prisma/migrations/dev.db
 
-# IDE
+# IDE and editors
 .vscode/
 .idea/
 *.swp
 *.swo
+*.sublime-project
+*.sublime-workspace
+.atom/
+.brackets.json
 *.kiro
 
 # Temporary files
 *.tmp
 *.temp
 .cache/
+.parcel-cache/
+.sass-cache/
+.stylelintcache
+
+# TypeScript
+*.tsbuildinfo
+.tscache/
+
+# ESLint
+.eslintcache
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+out
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
+.grunt
+
+# Bower dependency directory (https://bower.io/)
+bower_components
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons (https://nodejs.org/api/addons.html)
+build/Release
+
+# Dependency directories
+jspm_packages/
+
+# Snowpack dependency directory (https://snowpack.dev/)
+web_modules/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
 
 # Railway
 .railway/
@@ -47,12 +194,43 @@ prisma/dev.db
 # Testing
 coverage/
 .nyc_output/
+test-results/
+playwright-report/
+
+# Deployment
+.vercel
+.netlify
+
+# Local development
+.local
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Lock files (keep package-lock.json but ignore others)
+yarn.lock
+pnpm-lock.yaml
+
+# Documentation and markdown files (except README.md)
+*.md
+!README.md
+!readme.md
+!Readme.md
+docs/
+documentation/
+
+# Configuration files that shouldn't be tracked
+config.local.*
+*.local.json
+
+# Generated files
+generated/
+auto-generated/
 
 # Misc
-*.log
-logs/
-
-# Ignore all markdown files except README.md
-*.md
-!README.md 
+*.tgz
+*.tar.gz
+.pnp.* 
 
