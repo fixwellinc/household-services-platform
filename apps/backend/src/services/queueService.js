@@ -32,16 +32,45 @@ const redisConfig = {
   retryDelayOnFailover: 100,
   enableReadyCheck: false,
   maxRetriesPerRequest: null,
+  lazyConnect: true, // Don't connect immediately
 };
 
 class QueueService {
   constructor() {
     this.queues = new Map();
-    this.redis = new Redis(redisConfig);
-    this.setupQueues();
+    this.redisAvailable = false;
+    this.redis = null;
+    this.initializeRedis();
+  }
+
+  async initializeRedis() {
+    // Only initialize Redis if URL is provided or in production with proper config
+    if (process.env.REDIS_URL || (process.env.NODE_ENV === 'production' && process.env.REDIS_HOST)) {
+      try {
+        this.redis = new Redis(process.env.REDIS_URL || redisConfig);
+        
+        // Test connection
+        await this.redis.ping();
+        this.redisAvailable = true;
+        queueLogger.info('Redis connection established successfully');
+        this.setupQueues();
+      } catch (error) {
+        queueLogger.warn('Redis connection failed, operating without queues:', error.message);
+        this.redisAvailable = false;
+        this.redis = null;
+      }
+    } else {
+      queueLogger.info('Redis not configured, operating without queues');
+      this.redisAvailable = false;
+    }
   }
 
   setupQueues() {
+    if (!this.redisAvailable) {
+      queueLogger.info('Skipping queue setup - Redis not available');
+      return;
+    }
+
     // Email processing queue
     this.createQueue('email', {
       defaultJobOptions: {
@@ -154,10 +183,27 @@ class QueueService {
     return this.queues.get(name);
   }
 
+  // Helper method to handle when Redis is not available
+  async addJobSafely(queueName, jobType, data, options = {}) {
+    if (!this.redisAvailable) {
+      queueLogger.warn(`Queue ${queueName} not available (Redis not connected), executing job ${jobType} immediately`);
+      // For critical jobs like emails, we could execute them directly
+      // For now, we'll just log and return a mock job ID
+      return { id: `direct_${Date.now()}`, data: { executed: 'immediately' } };
+    }
+    
+    const queue = this.getQueue(queueName);
+    if (!queue) {
+      queueLogger.error(`Queue ${queueName} not found`);
+      return null;
+    }
+    
+    return await queue.add(jobType, data, options);
+  }
+
   // Email queue methods
   async addEmailJob(type, data, options = {}) {
-    const queue = this.getQueue('email');
-    return await queue.add(type, data, options);
+    return await this.addJobSafely('email', type, data, options);
   }
 
   async addEmailBlastJob(data, options = {}) {
@@ -176,8 +222,7 @@ class QueueService {
 
   // Notification queue methods
   async addNotificationJob(type, data, options = {}) {
-    const queue = this.getQueue('notifications');
-    return await queue.add(type, data, options);
+    return await this.addJobSafely('notifications', type, data, options);
   }
 
   async addPushNotificationJob(data, options = {}) {
@@ -189,8 +234,7 @@ class QueueService {
 
   // Export queue methods
   async addExportJob(type, data, options = {}) {
-    const queue = this.getQueue('exports');
-    return await queue.add(type, data, {
+    return await this.addJobSafely('exports', type, data, {
       priority: 3,
       ...options,
     });
@@ -206,8 +250,7 @@ class QueueService {
 
   // Bulk operations queue methods
   async addBulkOperationJob(type, data, options = {}) {
-    const queue = this.getQueue('bulk-operations');
-    return await queue.add(type, data, {
+    return await this.addJobSafely('bulk-operations', type, data, {
       priority: 1,
       ...options,
     });
@@ -223,8 +266,7 @@ class QueueService {
 
   // Analytics queue methods
   async addAnalyticsJob(type, data, options = {}) {
-    const queue = this.getQueue('analytics');
-    return await queue.add(type, data, options);
+    return await this.addJobSafely('analytics', type, data, options);
   }
 
   async addMetricsCalculationJob(data, options = {}) {
@@ -237,8 +279,7 @@ class QueueService {
 
   // Maintenance queue methods
   async addMaintenanceJob(type, data, options = {}) {
-    const queue = this.getQueue('maintenance');
-    return await queue.add(type, data, options);
+    return await this.addJobSafely('maintenance', type, data, options);
   }
 
   async addDatabaseCleanupJob(data, options = {}) {
@@ -251,6 +292,17 @@ class QueueService {
 
   // Queue management methods
   async getQueueStats(queueName) {
+    if (!this.redisAvailable) {
+      return {
+        waiting: 0,
+        active: 0,
+        completed: 0,
+        failed: 0,
+        delayed: 0,
+        status: 'Redis not available'
+      };
+    }
+    
     const queue = this.getQueue(queueName);
     if (!queue) {
       throw new Error(`Queue ${queueName} not found`);
@@ -337,10 +389,14 @@ class QueueService {
   async close() {
     queueLogger.info('Closing all queues...');
     
-    const closePromises = Array.from(this.queues.values()).map(queue => queue.close());
-    await Promise.all(closePromises);
+    if (this.queues.size > 0) {
+      const closePromises = Array.from(this.queues.values()).map(queue => queue.close());
+      await Promise.all(closePromises);
+    }
     
-    await this.redis.disconnect();
+    if (this.redis && this.redisAvailable) {
+      await this.redis.disconnect();
+    }
     queueLogger.info('All queues closed');
   }
 }

@@ -50,5 +50,9 @@ coverage/
 
 # Misc
 *.log
-logs/ 
+logs/
+
+# Ignore all markdown files except README.md
+*.md
+!README.md 
 

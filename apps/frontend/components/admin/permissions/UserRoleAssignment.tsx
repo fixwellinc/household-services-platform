@@ -219,8 +219,8 @@ export function UserRoleAssignment({
                                         <div
                                             key={userRole.id}
                                             className={`border rounded-lg p-4 ${isExpired ? 'border-red-200 bg-red-50' :
-                                                    isExpiringSoon ? 'border-yellow-200 bg-yellow-50' :
-                                                        'border-gray-200 bg-white'
+                                                isExpiringSoon ? 'border-yellow-200 bg-yellow-50' :
+                                                    'border-gray-200 bg-white'
                                                 }`}
                                         >
                                             <div className="flex items-start justify-between">

@@ -3,17 +3,12 @@ import { NextRequest, NextResponse } from 'next/server';
 // Force dynamic rendering since we access request headers
 export const dynamic = 'force-dynamic'
 
-// Get all subscriptions (admin)
-export async function GET(request: NextRequest) {
+// Test churn algorithm (admin)
+export async function POST(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const queryString = searchParams.toString();
-    
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
-    const url = `${backendUrl}/api/admin/subscriptions${queryString ? `?${queryString}` : ''}`;
-    
-    const response = await fetch(url, {
-      method: 'GET',
+    const response = await fetch(`${backendUrl}/api/admin/subscriptions/churn-algorithm/test`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Cookie': request.headers.get('cookie') || '',
@@ -21,8 +16,9 @@ export async function GET(request: NextRequest) {
     });
     
     if (!response.ok) {
+      const errorData = await response.json();
       return NextResponse.json(
-        { error: 'Failed to fetch subscriptions' },
+        { error: errorData.error || 'Failed to test algorithm' },
         { status: response.status }
       );
     }
@@ -30,10 +26,10 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Admin subscriptions GET error:', error);
+    console.error('Admin churn algorithm test error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     );
   }
-} 
+}

@@ -18,6 +18,7 @@ import {
 import EnhancedAnalytics from './EnhancedAnalytics';
 import { DashboardContainer } from './dashboard/DashboardContainer';
 import { UserManagement } from './users/UserManagement';
+import { SubscriptionManagement } from './subscriptions/SubscriptionManagement';
 
 export function AdminDashboard() {
   const { activeTab } = useAdminNavigation();
@@ -48,12 +49,7 @@ export function AdminDashboard() {
         );
       
       case 'subscriptions':
-        return (
-          <div className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Subscription Management</h2>
-            <p className="text-gray-600">Enhanced subscription management interface coming soon...</p>
-          </div>
-        );
+        return <SubscriptionManagement />;
       
       case 'email-blast':
         return (

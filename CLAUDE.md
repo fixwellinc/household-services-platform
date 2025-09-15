@@ -54,10 +54,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Authentication middleware in `apps/backend/src/middleware/auth.js`
 
 **Database Schema Key Models:**
-- `User` - Core user model with roles, subscription data, audit relations
+- `User` - Core user model with roles, subscription data, audit relations, suspension tracking
 - `Subscription` - Flexible payment frequencies, pause functionality, family members
 - `ServiceRequest` -> `Quote` -> `Job` -> `Invoice` workflow
 - `AuditLog` - Comprehensive admin action tracking
+- `Permission`, `Role`, `UserRole` - Granular permission system for fine-grained access control
+- `ImpersonationSession` - Admin impersonation tracking for support scenarios
 - Enhanced models for payment flexibility, rewards, churn prediction
 
 **API Architecture:**
@@ -107,6 +109,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Bulk operation restrictions and monitoring
 - System health monitoring at `/api/admin/system-safety`
 - Audit logging for all admin actions
+- Granular permission system with `/api/admin/permissions` routes
+- Admin impersonation system with `/api/admin/impersonation` routes
+- User suspension/activation tracking with detailed audit trail
 
 **Performance & Monitoring:**
 - Performance middleware with metrics tracking
@@ -123,3 +128,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Railway deployment uses environment variables for database and API keys
 - JetBrains Mono font is used throughout the application
 - All admin operations are audited and logged for security
+
+## Common Issues
+
+**Redis Configuration:**
+- The app uses Redis for caching and queue management via ioredis
+- **Production:** Redis is configured via REDIS_URL environment variable in Railway
+- **Development:** If Redis is not running locally, you'll see connection errors (can be ignored)
+- Redis services: caching, rate limiting, queue processing, background jobs
+- The queue service gracefully handles Redis unavailability with fallback mode
+- To add Redis in Railway: Project Dashboard → New Service → Database → Redis
+
+**Database Issues:**
+- Run `npx prisma generate` after any schema changes
+- Use `npx prisma migrate dev` for development database migrations
+- Check DATABASE_URL environment variable is properly configured
