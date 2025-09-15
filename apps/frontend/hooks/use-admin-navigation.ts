@@ -42,24 +42,12 @@ const defaultNavigationItems: NavigationItem[] = [
     icon: DollarSign,
     path: '/admin/subscriptions'
   },
-  { 
-    id: 'email-blast', 
-    name: 'Email Marketing', 
-    icon: Mail,
-    path: '/admin/email-blast'
-  },
-  { 
-    id: 'live-chat', 
-    name: 'Live Chat', 
+  {
+    id: 'communications',
+    name: 'Communications',
     icon: MessageSquare,
-    path: '/admin/chat',
-    badge: { count: 3, variant: 'warning' }
-  },
-  { 
-    id: 'mobile-notifications', 
-    name: 'Push Notifications', 
-    icon: Smartphone,
-    path: '/admin/notifications'
+    path: '/admin/communications',
+    badge: { count: 23, variant: 'warning' }
   },
   { 
     id: 'audit', 

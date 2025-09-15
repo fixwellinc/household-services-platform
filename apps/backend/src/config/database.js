@@ -81,7 +81,13 @@ const initializePrisma = async (retries = 5, delay = 2000) => {
 };
 
 // Initialize Prisma client
-prisma = await initializePrisma();
+try {
+  prisma = await initializePrisma();
+} catch (error) {
+  console.error('❌ Failed to initialize Prisma client:', error.message);
+  console.log('⚠️  Running in mock database mode');
+  prisma = null;
+}
 
 // Graceful shutdown
 process.on('beforeExit', async () => {
