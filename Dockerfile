@@ -41,7 +41,10 @@ RUN npx prisma generate
 
 # Build frontend (without Prisma dependencies)
 WORKDIR /app/apps/frontend
-RUN npm run build
+# Increase Node.js memory limit and build timeout for complex app
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN timeout 600 npm run build || npm run build
 
 # Set working directory back to root
 WORKDIR /app

@@ -64,11 +64,14 @@ const nextConfig = {
     ];
   },
   // Configure for production deployment
-  serverExternalPackages: ['@prisma/client'],
-  // Force server-side rendering for all pages
-  output: 'standalone',
+  experimental: {
+    serverComponentsExternalPackages: ['@prisma/client'],
+  },
   // Disable static optimization and force server-side rendering
   staticPageGenerationTimeout: 120,
+  // Disable static exports to prevent build timeouts
+  trailingSlash: false,
+  skipTrailingSlashRedirect: true,
   eslint: {
     ignoreDuringBuilds: true,
   },
