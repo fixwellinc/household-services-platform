@@ -64,9 +64,7 @@ const nextConfig = {
     ];
   },
   // Configure for production deployment
-  experimental: {
-    serverComponentsExternalPackages: ['@prisma/client'],
-  },
+  serverExternalPackages: ['@prisma/client'],
   // Disable static optimization and force server-side rendering
   staticPageGenerationTimeout: 0,
   eslint: {

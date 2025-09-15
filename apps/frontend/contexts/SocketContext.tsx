@@ -42,9 +42,11 @@ export function SocketProvider({
     // Only connect on client side
     if (typeof window === 'undefined') return;
 
+    console.log('Socket URL:', url, 'NODE_ENV:', process.env.NODE_ENV);
+
     // Skip WebSocket connection in production if no proper URL is configured
-    if (process.env.NODE_ENV === 'production' && (!url || url.includes('localhost'))) {
-      console.warn('WebSocket disabled: No production URL configured');
+    if (process.env.NODE_ENV === 'production' && (!url || url.includes('localhost') || url === 'http://localhost:3001')) {
+      console.warn('WebSocket disabled: No production URL configured. URL:', url);
       setConnectionStatus('disconnected');
       return;
     }
