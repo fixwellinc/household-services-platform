@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import LocationPromptModal from '@/components/location/LocationPromptModal';
+import DynamicLocationPromptModal from '@/components/location/DynamicLocationPromptModal';
 
 const PLAN_INFO = {
   starter: {
@@ -348,7 +348,7 @@ function WelcomeContent() {
       </div>
 
       {/* Location Prompt Modal */}
-      <LocationPromptModal
+      <DynamicLocationPromptModal
         isOpen={showLocationModal}
         onClose={() => setShowLocationModal(false)}
         onLocationSet={() => {

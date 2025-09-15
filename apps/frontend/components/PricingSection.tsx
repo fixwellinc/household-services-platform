@@ -20,7 +20,7 @@ import {
   MessageSquare,
   Quote
 } from 'lucide-react';
-import LocationPromptModal from '@/components/location/LocationPromptModal';
+import DynamicLocationPromptModal from '@/components/location/DynamicLocationPromptModal';
 
 const plans = [
   {
@@ -422,7 +422,7 @@ export default function PricingSection() {
       </div>
 
       {/* Location Prompt Modal */}
-      <LocationPromptModal
+      <DynamicLocationPromptModal
         isOpen={showLocationModal}
         onClose={() => setShowLocationModal(false)}
         onLocationSet={() => {

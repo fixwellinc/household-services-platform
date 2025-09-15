@@ -35,7 +35,7 @@ import {
 } from 'lucide-react';
 import { useSubscriptionPrerequisites } from '@/hooks/use-subscription-prerequisites';
 import { toast } from 'sonner';
-import LocationPromptModal from '@/components/location/LocationPromptModal';
+import DynamicLocationPromptModal from '@/components/location/DynamicLocationPromptModal';
 import { useSearchParams } from 'next/navigation';
 
 // Icon mapping for plans
@@ -995,7 +995,7 @@ export default function PlansSection() {
       </div>
 
       {/* Location Prompt Modal */}
-      <LocationPromptModal
+      <DynamicLocationPromptModal
         isOpen={showLocationModal}
         onClose={() => {
           setShowLocationModal(false);

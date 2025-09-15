@@ -24,7 +24,7 @@ import { useCurrentUser } from '@/hooks/use-api';
 import { usePlans } from '@/hooks/use-plans';
 import Link from 'next/link';
 import { useSubscriptionPrerequisites } from '@/hooks/use-subscription-prerequisites';
-import LocationPromptModal from '@/components/location/LocationPromptModal';
+import DynamicLocationPromptModal from '@/components/location/DynamicLocationPromptModal';
 
 interface SubscribePlanFormProps {
   planId: string;
@@ -403,7 +403,7 @@ export default function SubscribePlanForm({ planId }: SubscribePlanFormProps) {
       </Card>
 
       {/* Location Prompt Modal */}
-      <LocationPromptModal
+      <DynamicLocationPromptModal
         isOpen={showLocationModal}
         onClose={() => setShowLocationModal(false)}
         onLocationSet={() => {

@@ -10,7 +10,7 @@ import { useLocation } from '@/contexts/LocationContext';
 import { Button } from '@/components/ui/shared';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2, MapPin, AlertCircle, Phone, Home } from 'lucide-react';
-import LocationPromptModal from '@/components/location/LocationPromptModal';
+import DynamicLocationPromptModal from '@/components/location/DynamicLocationPromptModal';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -132,7 +132,7 @@ export default function RegisterForm() {
         </div>
         
         {/* Location Prompt Modal */}
-        <LocationPromptModal
+        <DynamicLocationPromptModal
           isOpen={showLocationModal}
           onClose={() => setShowLocationModal(false)}
           onLocationSet={() => {

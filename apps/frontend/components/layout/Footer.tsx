@@ -19,7 +19,7 @@ import {
   Heart,
   Gift
 } from 'lucide-react'
-import LocationPromptModal from '@/components/location/LocationPromptModal'
+import DynamicLocationPromptModal from '@/components/location/DynamicLocationPromptModal'
 
 const Footer: React.FC = () => {
   const router = useRouter();
@@ -226,7 +226,7 @@ const Footer: React.FC = () => {
       </div>
 
       {/* Location Prompt Modal */}
-      <LocationPromptModal
+      <DynamicLocationPromptModal
         isOpen={showLocationModal}
         onClose={() => {
           setShowLocationModal(false);

@@ -23,7 +23,7 @@ import {
 import { useCurrentUser } from '@/hooks/use-api';
 import { usePlans } from '@/hooks/use-plans';
 import { useSubscriptionPrerequisites } from '@/hooks/use-subscription-prerequisites';
-import LocationPromptModal from '@/components/location/LocationPromptModal';
+import DynamicLocationPromptModal from '@/components/location/DynamicLocationPromptModal';
 
 interface StripePaymentPageProps {
   planId: string;
@@ -416,7 +416,7 @@ function StripePaymentPageContent() {
       </div>
 
       {/* Location Prompt Modal */}
-      <LocationPromptModal
+      <DynamicLocationPromptModal
         isOpen={showLocationModal}
         onClose={() => setShowLocationModal(false)}
         onLocationSet={() => {

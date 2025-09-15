@@ -30,7 +30,7 @@ import {
   TrendingUp,
   MessageCircle
 } from 'lucide-react';
-import LocationPromptModal from '@/components/location/LocationPromptModal';
+import DynamicLocationPromptModal from '@/components/location/DynamicLocationPromptModal';
 import QuoteRequestModal from '@/components/QuoteRequestModal';
 
 export const dynamic = 'force-dynamic';
@@ -508,7 +508,7 @@ export default function ServicesPage() {
         serviceName={selectedService?.name || ''}
         serviceId={selectedService?.id || ''}
       />
-      <LocationPromptModal
+      <DynamicLocationPromptModal
         isOpen={showLocationModal}
         onClose={() => setShowLocationModal(false)}
         onLocationSet={() => {

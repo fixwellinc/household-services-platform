@@ -65,8 +65,10 @@ const nextConfig = {
   },
   // Configure for production deployment
   serverExternalPackages: ['@prisma/client'],
+  // Force server-side rendering for all pages
+  output: 'standalone',
   // Disable static optimization and force server-side rendering
-  staticPageGenerationTimeout: 0,
+  staticPageGenerationTimeout: 120,
   eslint: {
     ignoreDuringBuilds: true,
   },
