@@ -1,11 +1,11 @@
 import express from 'express';
-import { authenticateToken, requireAdmin } from '../../middleware/auth.js';
+import { authMiddleware, requireAdmin } from '../../middleware/auth.js';
 import prisma from '../../config/database.js';
 
 const router = express.Router();
 
 // Apply authentication middleware to all admin routes
-router.use(authenticateToken);
+router.use(authMiddleware);
 router.use(requireAdmin);
 
 // Users metrics endpoint
