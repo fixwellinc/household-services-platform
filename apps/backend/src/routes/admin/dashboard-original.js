@@ -2,8 +2,6 @@ import express from 'express';
 import { authMiddleware, requireAdmin } from '../../middleware/auth.js';
 import prisma from '../../config/database.js';
 
-const router = express.Router();
-
 // Simple in-memory cache for dashboard metrics (5 minute TTL)
 const cache = new Map();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
@@ -21,72 +19,13 @@ function setCachedResult(key, data) {
   return data;
 }
 
+const router = express.Router();
+
 // Apply authentication middleware to all admin routes
 router.use(authMiddleware);
 router.use(requireAdmin);
 
-// Optimized alerts endpoint - most frequently called
-router.get('/alerts', async (req, res) => {
-  try {
-    const { severity = 'all', limit = 10 } = req.query;
-    const limitNum = parseInt(limit);
-    const cacheKey = `alerts_${severity}_${limit}`;
-    
-    // Check cache first
-    const cached = getCachedResult(cacheKey);
-    if (cached) {
-      return res.json(cached);
-    }
-
-    // Return static alerts to avoid database queries
-    const alerts = [
-      {
-        id: 'email-service-disabled',
-        type: 'PERFORMANCE',
-        severity: 'LOW',
-        title: 'Email Service Disabled',
-        message: 'Email notifications are currently disabled',
-        timestamp: new Date().toISOString(),
-        resolved: false
-      },
-      {
-        id: 'system-healthy',
-        type: 'SYSTEM',
-        severity: 'LOW',
-        title: 'System Status',
-        message: 'All systems operational',
-        timestamp: new Date().toISOString(),
-        resolved: false
-      }
-    ];
-
-    // Filter by severity if specified
-    let filteredAlerts = alerts;
-    if (severity !== 'all') {
-      filteredAlerts = alerts.filter(alert => 
-        alert.severity.toLowerCase() === severity.toLowerCase()
-      );
-    }
-
-    // Apply limit
-    const limitedAlerts = filteredAlerts.slice(0, limitNum);
-
-    const result = {
-      alerts: limitedAlerts,
-      total: filteredAlerts.length,
-      unresolved: filteredAlerts.filter(a => !a.resolved).length
-    };
-
-    // Cache the result
-    setCachedResult(cacheKey, result);
-    res.json(result);
-  } catch (error) {
-    console.error('Admin dashboard alerts error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Optimized users endpoint
+// Users metrics endpoint
 router.get('/users', async (req, res) => {
   try {
     const { metric = 'count', period = '30d' } = req.query;
@@ -163,7 +102,7 @@ router.get('/users', async (req, res) => {
   }
 });
 
-// Optimized bookings endpoint
+// Bookings metrics endpoint
 router.get('/bookings', async (req, res) => {
   try {
     const { metric = 'active_count', period = '30d' } = req.query;
@@ -239,7 +178,7 @@ router.get('/bookings', async (req, res) => {
   }
 });
 
-// Optimized revenue endpoint
+// Revenue metrics endpoint
 router.get('/revenue', async (req, res) => {
   try {
     const { metric = 'total', unit = 'currency', period = '30d' } = req.query;
@@ -354,21 +293,161 @@ router.get('/revenue', async (req, res) => {
   }
 });
 
+// Alerts endpoint
+router.get('/alerts', async (req, res) => {
+  try {
+    const { severity = 'all', limit = 10 } = req.query;
+    const limitNum = parseInt(limit);
+
+    // Generate system alerts based on current data
+    const alerts = [];
+
+    // Check for failed bookings
+    const failedBookings = await prisma.booking.count({
+      where: {
+        status: 'CANCELLED',
+        createdAt: {
+          gte: new Date(Date.now() - 24 * 60 * 60 * 1000) // Last 24 hours
+        }
+      }
+    });
+
+    if (failedBookings > 5) {
+      alerts.push({
+        id: 'high-cancellation-rate',
+        type: 'SYSTEM',
+        severity: 'HIGH',
+        title: 'High Cancellation Rate',
+        message: `${failedBookings} bookings cancelled in the last 24 hours`,
+        timestamp: new Date().toISOString(),
+        resolved: false
+      });
+    }
+
+    // Check for inactive users (based on updatedAt since lastLoginAt doesn't exist)
+    const inactiveUsers = await prisma.user.count({
+      where: {
+        updatedAt: {
+          lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // 30 days ago
+        },
+        isActive: true
+      }
+    });
+
+    if (inactiveUsers > 10) {
+      alerts.push({
+        id: 'inactive-users',
+        type: 'USER',
+        severity: 'MEDIUM',
+        title: 'Potentially Inactive Users',
+        message: `${inactiveUsers} users haven't been updated in 30+ days`,
+        timestamp: new Date().toISOString(),
+        resolved: false
+      });
+    }
+
+    // Check for subscription issues
+    const expiredSubscriptions = await prisma.subscription.count({
+      where: {
+        status: 'EXPIRED',
+        updatedAt: {
+          gte: new Date(Date.now() - 24 * 60 * 60 * 1000) // Last 24 hours
+        }
+      }
+    });
+
+    if (expiredSubscriptions > 0) {
+      alerts.push({
+        id: 'expired-subscriptions',
+        type: 'BILLING',
+        severity: 'HIGH',
+        title: 'Expired Subscriptions',
+        message: `${expiredSubscriptions} subscriptions expired in the last 24 hours`,
+        timestamp: new Date().toISOString(),
+        resolved: false
+      });
+    }
+
+    // Check for low revenue
+    const todayRevenue = await prisma.booking.aggregate({
+      where: {
+        status: 'COMPLETED',
+        createdAt: {
+          gte: new Date(new Date().setHours(0, 0, 0, 0))
+        }
+      },
+      _sum: {
+        totalAmount: true
+      }
+    });
+
+    const revenue = todayRevenue._sum.totalAmount || 0;
+    if (revenue < 100) { // Threshold can be adjusted
+      alerts.push({
+        id: 'low-daily-revenue',
+        type: 'REVENUE',
+        severity: 'MEDIUM',
+        title: 'Low Daily Revenue',
+        message: `Today's revenue is only $${revenue.toFixed(2)}`,
+        timestamp: new Date().toISOString(),
+        resolved: false
+      });
+    }
+
+    // Add email service alert if email is not configured
+    alerts.push({
+      id: 'email-service-disabled',
+      type: 'PERFORMANCE',
+      severity: 'LOW',
+      title: 'Email Service Disabled',
+      message: 'Email notifications are currently disabled',
+      timestamp: new Date().toISOString(),
+      resolved: false
+    });
+
+    // Filter by severity if specified
+    let filteredAlerts = alerts;
+    if (severity !== 'all') {
+      filteredAlerts = alerts.filter(alert => 
+        alert.severity.toLowerCase() === severity.toLowerCase()
+      );
+    }
+
+    // Apply limit
+    const limitedAlerts = filteredAlerts.slice(0, limitNum);
+
+    res.json({
+      alerts: limitedAlerts,
+      total: filteredAlerts.length,
+      unresolved: filteredAlerts.filter(a => !a.resolved).length
+    });
+  } catch (error) {
+    console.error('Admin dashboard alerts error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Performance alerts endpoint
 router.get('/performance-alerts', async (req, res) => {
   try {
     const { limit = 10 } = req.query;
     const limitNum = parseInt(limit);
-    const cacheKey = `performance_alerts_${limit}`;
-    
-    // Check cache first
-    const cached = getCachedResult(cacheKey);
-    if (cached) {
-      return res.json(cached);
-    }
 
     // Generate performance-specific alerts
     const performanceAlerts = [
+      {
+        id: 'slow-database-queries',
+        type: 'PERFORMANCE',
+        severity: 'MEDIUM',
+        title: 'Slow Database Queries',
+        message: 'Multiple queries taking >1s to complete',
+        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+        resolved: false,
+        metrics: {
+          avgResponseTime: '1.2s',
+          affectedQueries: 5
+        }
+      },
       {
         id: 'email-service-disabled',
         type: 'PERFORMANCE',
@@ -383,16 +462,16 @@ router.get('/performance-alerts', async (req, res) => {
         }
       },
       {
-        id: 'database-optimized',
+        id: 'api-rate-limit-approaching',
         type: 'PERFORMANCE',
-        severity: 'LOW',
-        title: 'Database Performance Optimized',
-        message: 'Dashboard queries have been optimized with caching',
-        timestamp: new Date().toISOString(),
+        severity: 'MEDIUM',
+        title: 'API Rate Limit Approaching',
+        message: 'Stripe API usage at 80% of rate limit',
+        timestamp: new Date(Date.now() - 45 * 60 * 1000).toISOString(), // 45 minutes ago
         resolved: true,
         metrics: {
-          cacheHitRate: '95%',
-          avgResponseTime: '<200ms'
+          currentUsage: '80%',
+          limit: '100 req/min'
         }
       }
     ];
@@ -400,7 +479,7 @@ router.get('/performance-alerts', async (req, res) => {
     // Apply limit
     const limitedAlerts = performanceAlerts.slice(0, limitNum);
 
-    const result = {
+    res.json({
       alerts: limitedAlerts,
       total: performanceAlerts.length,
       unresolved: performanceAlerts.filter(a => !a.resolved).length,
@@ -409,11 +488,7 @@ router.get('/performance-alerts', async (req, res) => {
         warning: performanceAlerts.filter(a => a.severity === 'MEDIUM' && !a.resolved).length,
         info: performanceAlerts.filter(a => a.severity === 'LOW' && !a.resolved).length
       }
-    };
-
-    // Cache the result
-    setCachedResult(cacheKey, result);
-    res.json(result);
+    });
   } catch (error) {
     console.error('Admin dashboard performance alerts error:', error);
     res.status(500).json({ error: 'Internal server error' });
