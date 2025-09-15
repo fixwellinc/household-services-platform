@@ -26,8 +26,6 @@ export default function LocationPromptModal({
   const [validationError, setValidationError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Debug logging
-  console.log('LocationPromptModal render - isOpen:', isOpen, 'planName:', planName);
 
   // Focus the input when modal opens
   useEffect(() => {
@@ -51,7 +49,6 @@ export default function LocationPromptModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('LocationPromptModal handleSubmit called');
     
     if (!postalCodeInput.trim()) {
       setValidationError('Please enter your postal code');
@@ -76,7 +73,6 @@ export default function LocationPromptModal({
         return;
       }
 
-      console.log('Location is valid, saving and calling onLocationSet');
       // Location is valid, save it
       setUserLocation(formattedPostalCode);
       toast.success('Location saved successfully!', {
@@ -100,6 +96,9 @@ export default function LocationPromptModal({
       handleSubmit(e as any);
     }
   };
+
+  // Don't render during SSR/SSG
+  if (typeof window === 'undefined') return null;
 
   if (!isOpen) return null;
 
