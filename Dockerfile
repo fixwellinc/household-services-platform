@@ -48,6 +48,12 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NEXT_BUILD_CACHE_DISABLED=1
 RUN npm run build -- --no-lint || { echo "Frontend build failed, trying without optimizations..."; npm run build -- --no-lint --no-check || echo "Build completed with warnings"; }
 
+# Create missing font manifest if it doesn't exist
+RUN mkdir -p .next/server && \
+    if [ ! -f .next/server/font-manifest.json ]; then \
+      echo '{"pages":{},"app":{},"appUsingSizeAdjust":false,"pagesUsingSizeAdjust":false}' > .next/server/font-manifest.json; \
+    fi
+
 # Verify build artifacts exist
 RUN ls -la .next/ && ls -la .next/server/ || echo "Warning: Some build artifacts missing"
 

@@ -88,16 +88,23 @@ class QueueService {
           queueLogger.info('Redis reconnecting...');
         });
         
-        // Test connection with timeout
-        const connectionTimeout = setTimeout(() => {
-          throw new Error('Redis connection timeout');
-        }, 10000);
-        
-        await this.redis.ping();
-        clearTimeout(connectionTimeout);
-        
-        this.redisAvailable = true;
-        queueLogger.info('Redis connection established successfully');
+        // Test connection with timeout - make it non-blocking
+        try {
+          const connectionTimeout = setTimeout(() => {
+            queueLogger.warn('Redis connection timeout - continuing without Redis');
+            this.redisAvailable = false;
+          }, 5000);
+          
+          await this.redis.ping();
+          clearTimeout(connectionTimeout);
+          
+          this.redisAvailable = true;
+          queueLogger.info('Redis connection established successfully');
+        } catch (error) {
+          queueLogger.warn('Redis connection failed - continuing without Redis:', error.message);
+          this.redisAvailable = false;
+          // Don't throw error, just continue without Redis
+        }
         this.setupQueues();
       } catch (error) {
         queueLogger.warn('Redis connection failed, operating without queues:', error.message);

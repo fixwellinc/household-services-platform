@@ -64,16 +64,16 @@ const nextConfig = {
     ];
   },
   // Configure for production deployment
-  experimental: {
-    serverComponentsExternalPackages: ['@prisma/client'],
-  },
+  serverExternalPackages: ['@prisma/client'],
   // Disable static optimization and force server-side rendering
   staticPageGenerationTimeout: 10,
   // Disable static exports to prevent build timeouts
   trailingSlash: false,
   skipTrailingSlashRedirect: true,
-  // Disable optimizations that can cause build timeouts
-  swcMinify: false,
+  // Enable SWC minifier (removing deprecated swcMinify option)
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
   poweredByHeader: false,
   generateEtags: false,
   eslint: {
