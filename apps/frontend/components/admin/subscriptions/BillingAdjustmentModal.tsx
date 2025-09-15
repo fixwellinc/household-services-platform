@@ -179,7 +179,7 @@ export function BillingAdjustmentModal({
         if (expirationDate) adjustmentData.metadata!.expirationDate = expirationDate;
       }
 
-      const response = await request(`/api/admin/subscriptions/${subscription.id}/billing-adjustment`, {
+      const response = await request(`/admin/subscriptions/${subscription.id}/billing-adjustment`, {
         method: 'POST',
         body: JSON.stringify(adjustmentData)
       });

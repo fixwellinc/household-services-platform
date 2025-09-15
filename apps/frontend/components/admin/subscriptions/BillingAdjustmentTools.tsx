@@ -98,7 +98,7 @@ export function BillingAdjustmentTools() {
                 ...filters
             });
 
-            const response = await request(`/api/admin/billing-adjustments?${params}`);
+            const response = await request(`/admin/billing-adjustments?${params}`);
 
             if (response.success) {
                 setAdjustments(response.adjustments);
@@ -118,7 +118,7 @@ export function BillingAdjustmentTools() {
     // Fetch statistics
     const fetchStats = async () => {
         try {
-            const response = await request('/api/admin/billing-adjustments/stats');
+            const response = await request('/admin/billing-adjustments/stats');
             if (response.success) {
                 setStats(response.stats);
             }
@@ -137,7 +137,7 @@ export function BillingAdjustmentTools() {
     const handleExport = async () => {
         try {
             const params = new URLSearchParams(filters);
-            const response = await request(`/api/admin/billing-adjustments/export?${params}`);
+            const response = await request(`/admin/billing-adjustments/export?${params}`);
 
             if (response.success) {
                 // Create and download file

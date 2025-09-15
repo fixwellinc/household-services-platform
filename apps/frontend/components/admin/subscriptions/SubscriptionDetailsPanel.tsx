@@ -123,13 +123,13 @@ export function SubscriptionDetailsPanel({
         setLoading(true);
         
         // Fetch history
-        const historyResponse = await request(`/api/admin/subscriptions/${subscription.id}/history`);
+        const historyResponse = await request(`/admin/subscriptions/${subscription.id}/history`);
         if (historyResponse.success) {
           setHistory(historyResponse.history);
         }
 
         // Fetch analytics
-        const analyticsResponse = await request(`/api/admin/subscriptions/${subscription.id}/analytics`);
+        const analyticsResponse = await request(`/admin/subscriptions/${subscription.id}/analytics`);
         if (analyticsResponse.success) {
           setAnalytics(analyticsResponse.analytics);
         }
@@ -188,7 +188,7 @@ export function SubscriptionDetailsPanel({
 
   const handleModify = async () => {
     try {
-      const response = await request(`/api/admin/subscriptions/${subscription.id}/modify`, {
+      const response = await request(`/admin/subscriptions/${subscription.id}/modify`, {
         method: 'PUT',
         body: JSON.stringify({
           tier: modifyData.tier,

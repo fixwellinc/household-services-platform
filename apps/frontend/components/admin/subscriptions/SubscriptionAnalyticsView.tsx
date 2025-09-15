@@ -56,7 +56,7 @@ export function SubscriptionAnalyticsView() {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const response = await request(`/api/admin/subscriptions/analytics?timeRange=${timeRange}`);
+      const response = await request(`/admin/subscriptions/analytics?timeRange=${timeRange}`);
       
       if (response.success) {
         setAnalytics(response.analytics);
@@ -72,7 +72,7 @@ export function SubscriptionAnalyticsView() {
   const handleExport = async () => {
     try {
       setExportLoading(true);
-      const response = await request(`/api/admin/subscriptions/analytics/export?timeRange=${timeRange}&format=csv`);
+      const response = await request(`/admin/subscriptions/analytics/export?timeRange=${timeRange}&format=csv`);
       
       if (response.success) {
         // Create download link

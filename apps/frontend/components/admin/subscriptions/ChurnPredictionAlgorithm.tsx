@@ -142,7 +142,7 @@ export function ChurnPredictionAlgorithm() {
   const fetchConfig = async () => {
     try {
       setLoading(true);
-      const response = await request('/api/admin/subscriptions/churn-algorithm/config');
+      const response = await request('/admin/subscriptions/churn-algorithm/config');
       
       if (response.success) {
         setConfig(response.config);
@@ -182,7 +182,7 @@ export function ChurnPredictionAlgorithm() {
 
   const fetchPerformance = async () => {
     try {
-      const response = await request('/api/admin/subscriptions/churn-algorithm/performance');
+      const response = await request('/admin/subscriptions/churn-algorithm/performance');
       
       if (response.success) {
         setPerformance(response.performance);
@@ -197,7 +197,7 @@ export function ChurnPredictionAlgorithm() {
 
     try {
       setSaving(true);
-      const response = await request('/api/admin/subscriptions/churn-algorithm/config', {
+      const response = await request('/admin/subscriptions/churn-algorithm/config', {
         method: 'PUT',
         body: JSON.stringify(config)
       });
@@ -215,7 +215,7 @@ export function ChurnPredictionAlgorithm() {
   const runAlgorithmTest = async () => {
     try {
       setSaving(true);
-      const response = await request('/api/admin/subscriptions/churn-algorithm/test', {
+      const response = await request('/admin/subscriptions/churn-algorithm/test', {
         method: 'POST'
       });
 

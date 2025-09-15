@@ -84,7 +84,7 @@ export function UserManagement() {
   useEffect(() => {
     const getCurrentUser = async () => {
       try {
-        const response = await request('/api/auth/me');
+        const response = await request('/auth/me');
         if (response.success) {
           setCurrentUserEmail(response.user.email);
         }
@@ -107,7 +107,7 @@ export function UserManagement() {
         ...filters
       });
 
-      const response = await request(`/api/admin/users?${params}`);
+      const response = await request(`/admin/users?${params}`);
       
       if (response.success) {
         setUsers(response.users);
@@ -151,7 +151,7 @@ export function UserManagement() {
     if (!showDeleteDialog) return;
 
     try {
-      const response = await request(`/api/admin/users/${showDeleteDialog.id}`, {
+      const response = await request(`/admin/users/${showDeleteDialog.id}`, {
         method: 'DELETE'
       });
 
@@ -168,7 +168,7 @@ export function UserManagement() {
 
   const handleSuspendUser = async (userId: string, reason: string) => {
     try {
-      const response = await request(`/api/admin/users/${userId}/suspend`, {
+      const response = await request(`/admin/users/${userId}/suspend`, {
         method: 'POST',
         body: JSON.stringify({ reason })
       });
@@ -187,7 +187,7 @@ export function UserManagement() {
 
   const handleActivateUser = async (userId: string, reason: string, newRole: string) => {
     try {
-      const response = await request(`/api/admin/users/${userId}/activate`, {
+      const response = await request(`/admin/users/${userId}/activate`, {
         method: 'POST',
         body: JSON.stringify({ role: newRole, reason })
       });
@@ -212,7 +212,7 @@ export function UserManagement() {
     if (!showPasswordDialog) return;
 
     try {
-      const response = await request(`/api/admin/users/${showPasswordDialog.id}/reset-password`, {
+      const response = await request(`/admin/users/${showPasswordDialog.id}/reset-password`, {
         method: 'POST',
         body: JSON.stringify({ newPassword: data.password })
       });

@@ -89,19 +89,19 @@ export function ChurnPredictionPanel() {
       setLoading(true);
       
       // Fetch churn predictions
-      const predictionsResponse = await request(`/api/admin/subscriptions/churn-predictions?riskLevel=${riskFilter}`);
+      const predictionsResponse = await request(`/admin/subscriptions/churn-predictions?riskLevel=${riskFilter}`);
       if (predictionsResponse.success) {
         setPredictions(predictionsResponse.predictions);
       }
 
       // Fetch churn metrics
-      const metricsResponse = await request('/api/admin/subscriptions/churn-metrics');
+      const metricsResponse = await request('/admin/subscriptions/churn-metrics');
       if (metricsResponse.success) {
         setMetrics(metricsResponse.metrics);
       }
 
       // Fetch retention campaigns
-      const campaignsResponse = await request('/api/admin/subscriptions/retention-campaigns');
+      const campaignsResponse = await request('/admin/subscriptions/retention-campaigns');
       if (campaignsResponse.success) {
         setCampaigns(campaignsResponse.campaigns);
       }
@@ -120,7 +120,7 @@ export function ChurnPredictionPanel() {
     }
 
     try {
-      const response = await request('/api/admin/subscriptions/retention-campaign', {
+      const response = await request('/admin/subscriptions/retention-campaign', {
         method: 'POST',
         body: JSON.stringify({
           type: campaignType,

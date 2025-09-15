@@ -72,7 +72,7 @@ export function BillingAdjustmentApproval({ onRefresh }: BillingAdjustmentApprov
         sortOrder: 'desc'
       });
 
-      const response = await request(`/api/admin/billing-adjustments?${params}`);
+      const response = await request(`/admin/billing-adjustments?${params}`);
       
       if (response.success) {
         setAdjustments(response.adjustments);
@@ -90,7 +90,7 @@ export function BillingAdjustmentApproval({ onRefresh }: BillingAdjustmentApprov
 
     try {
       setProcessingId(selectedAdjustment.id);
-      const response = await request(`/api/admin/billing-adjustments/${selectedAdjustment.id}/approve`, {
+      const response = await request(`/admin/billing-adjustments/${selectedAdjustment.id}/approve`, {
         method: 'POST',
         body: JSON.stringify({ note: approvalNote })
       });
@@ -119,7 +119,7 @@ export function BillingAdjustmentApproval({ onRefresh }: BillingAdjustmentApprov
 
     try {
       setProcessingId(selectedAdjustment.id);
-      const response = await request(`/api/admin/billing-adjustments/${selectedAdjustment.id}/reject`, {
+      const response = await request(`/admin/billing-adjustments/${selectedAdjustment.id}/reject`, {
         method: 'POST',
         body: JSON.stringify({ reason: approvalNote })
       });

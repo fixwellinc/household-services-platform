@@ -61,7 +61,7 @@ export function UserImpersonation({
   // Check impersonation status
   const checkStatus = async () => {
     try {
-      const response = await request('/api/admin/impersonation/status');
+      const response = await request('/admin/impersonation/status');
       if (response.success) {
         setStatus(response);
       }
@@ -78,7 +78,7 @@ export function UserImpersonation({
   const startImpersonation = async (targetUserId: string, reason: string) => {
     try {
       setLoading(true);
-      const response = await request('/api/admin/impersonation/start', {
+      const response = await request('/admin/impersonation/start', {
         method: 'POST',
         body: JSON.stringify({
           targetUserId,
@@ -115,7 +115,7 @@ export function UserImpersonation({
   const endImpersonation = async () => {
     try {
       setLoading(true);
-      const response = await request('/api/admin/impersonation/end', {
+      const response = await request('/admin/impersonation/end', {
         method: 'POST'
       });
 
@@ -417,7 +417,7 @@ export function ImpersonationHistory() {
         limit: pagination.limit.toString()
       });
 
-      const response = await request(`/api/admin/impersonation/history?${params}`);
+      const response = await request(`/admin/impersonation/history?${params}`);
       
       if (response.success) {
         setSessions(response.sessions);

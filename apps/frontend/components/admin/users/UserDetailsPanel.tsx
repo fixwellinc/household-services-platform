@@ -84,7 +84,7 @@ export function UserDetailsPanel({ user, onClose, onEdit, onRefresh }: UserDetai
 
   const getCurrentUser = async () => {
     try {
-      const response = await request('/api/auth/me');
+      const response = await request('/auth/me');
       if (response.success) {
         setCurrentUserEmail(response.user.email);
       }
@@ -95,7 +95,7 @@ export function UserDetailsPanel({ user, onClose, onEdit, onRefresh }: UserDetai
 
   const handleSuspendUser = async (userId: string, reason: string) => {
     try {
-      const response = await request(`/api/admin/users/${userId}/suspend`, {
+      const response = await request(`/admin/users/${userId}/suspend`, {
         method: 'POST',
         body: JSON.stringify({ reason })
       });
@@ -114,7 +114,7 @@ export function UserDetailsPanel({ user, onClose, onEdit, onRefresh }: UserDetai
 
   const handleActivateUser = async (userId: string, reason: string, newRole: string) => {
     try {
-      const response = await request(`/api/admin/users/${userId}/activate`, {
+      const response = await request(`/admin/users/${userId}/activate`, {
         method: 'POST',
         body: JSON.stringify({ role: newRole, reason })
       });
@@ -134,7 +134,7 @@ export function UserDetailsPanel({ user, onClose, onEdit, onRefresh }: UserDetai
   const fetchUserDetails = async () => {
     try {
       setLoading(true);
-      const response = await request(`/api/admin/users/${user.id}`);
+      const response = await request(`/admin/users/${user.id}`);
       
       if (response.success) {
         setUserDetails(response.user);

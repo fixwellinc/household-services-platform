@@ -115,7 +115,7 @@ export function SubscriptionManagement() {
                 ...filters
             });
 
-            const response = await request(`/api/admin/subscriptions?${params}`);
+            const response = await request(`/admin/subscriptions?${params}`);
 
             if (response.success) {
                 setSubscriptions(response.subscriptions);
@@ -135,7 +135,7 @@ export function SubscriptionManagement() {
     // Fetch subscription statistics
     const fetchStats = async () => {
         try {
-            const response = await request('/api/admin/subscriptions/analytics');
+            const response = await request('/admin/subscriptions/analytics');
             if (response.success) {
                 setStats(response.stats);
             }
@@ -163,7 +163,7 @@ export function SubscriptionManagement() {
 
     const handlePauseSubscription = async (subscriptionId: string, reason: string, endDate: Date) => {
         try {
-            const response = await request(`/api/admin/subscriptions/${subscriptionId}/pause`, {
+            const response = await request(`/admin/subscriptions/${subscriptionId}/pause`, {
                 method: 'POST',
                 body: JSON.stringify({ reason, endDate: endDate.toISOString() })
             });
@@ -181,7 +181,7 @@ export function SubscriptionManagement() {
 
     const handleResumeSubscription = async (subscriptionId: string) => {
         try {
-            const response = await request(`/api/admin/subscriptions/${subscriptionId}/resume`, {
+            const response = await request(`/admin/subscriptions/${subscriptionId}/resume`, {
                 method: 'POST'
             });
 
@@ -198,7 +198,7 @@ export function SubscriptionManagement() {
 
     const handleCancelSubscription = async (subscriptionId: string, reason: string) => {
         try {
-            const response = await request(`/api/admin/subscriptions/${subscriptionId}/cancel`, {
+            const response = await request(`/admin/subscriptions/${subscriptionId}/cancel`, {
                 method: 'POST',
                 body: JSON.stringify({ reason })
             });

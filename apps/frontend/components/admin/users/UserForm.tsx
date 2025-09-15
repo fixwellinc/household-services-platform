@@ -126,11 +126,11 @@ export function UserForm({ user, onClose, onSave }: UserFormProps) {
       };
 
       const response = isEditing
-        ? await request(`/api/admin/users/${user.id}`, {
+        ? await request(`/admin/users/${user.id}`, {
             method: 'PUT',
             body: JSON.stringify(payload)
           })
-        : await request('/api/admin/users', {
+        : await request('/admin/users', {
             method: 'POST',
             body: JSON.stringify(payload)
           });

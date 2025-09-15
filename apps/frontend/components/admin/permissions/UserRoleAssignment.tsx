@@ -71,8 +71,8 @@ export function UserRoleAssignment({
         try {
             setLoading(true);
             const [userRolesResponse, rolesResponse] = await Promise.all([
-                request(`/api/admin/permissions/users/${userId}/roles`),
-                request('/api/admin/permissions/roles')
+                request(`/admin/permissions/users/${userId}/roles`),
+                request('/admin/permissions/roles')
             ]);
 
             if (userRolesResponse.success) {
@@ -98,7 +98,7 @@ export function UserRoleAssignment({
     // Handle role assignment
     const handleAssignRole = async (roleId: string, expiresAt?: string) => {
         try {
-            const response = await request(`/api/admin/permissions/users/${userId}/roles`, {
+            const response = await request(`/admin/permissions/users/${userId}/roles`, {
                 method: 'POST',
                 body: JSON.stringify({
                     roleId,
@@ -125,7 +125,7 @@ export function UserRoleAssignment({
         }
 
         try {
-            const response = await request(`/api/admin/permissions/users/${userId}/roles/${roleId}`, {
+            const response = await request(`/admin/permissions/users/${userId}/roles/${roleId}`, {
                 method: 'DELETE'
             });
 

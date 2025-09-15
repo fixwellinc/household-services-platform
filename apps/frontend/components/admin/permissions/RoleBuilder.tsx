@@ -63,8 +63,8 @@ export function RoleBuilder() {
         try {
             setLoading(true);
             const [rolesResponse, permissionsResponse] = await Promise.all([
-                request('/api/admin/permissions/roles'),
-                request('/api/admin/permissions')
+                request('/admin/permissions/roles'),
+                request('/admin/permissions')
             ]);
 
             if (rolesResponse.success) {
@@ -120,7 +120,7 @@ export function RoleBuilder() {
         }
 
         try {
-            const response = await request(`/api/admin/permissions/roles/${role.id}`, {
+            const response = await request(`/admin/permissions/roles/${role.id}`, {
                 method: 'DELETE'
             });
 
