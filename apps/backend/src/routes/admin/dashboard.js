@@ -54,7 +54,8 @@ router.get('/users', async (req, res) => {
       case 'active':
         const activeUsers = await prisma.user.count({
           where: {
-            lastLoginAt: {
+            isActive: true,
+            updatedAt: {
               gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // Last 30 days
             }
           }
@@ -168,11 +169,11 @@ router.get('/revenue', async (req, res) => {
             status: 'ACTIVE'
           },
           _sum: {
-            amount: true
+            nextPaymentAmount: true
           }
         });
 
-        const total = (totalRevenue._sum.totalAmount || 0) + (subscriptionRevenue._sum.amount || 0);
+        const total = (totalRevenue._sum.totalAmount || 0) + (subscriptionRevenue._sum.nextPaymentAmount || 0);
         result = { 
           value: total, 
           label: 'Total Revenue',
@@ -201,12 +202,12 @@ router.get('/revenue', async (req, res) => {
               createdAt: { gte: startDate }
             },
             _sum: {
-              amount: true
+              nextPaymentAmount: true
             }
           })
         ]);
 
-        const monthlyTotal = (monthlyBookings._sum.totalAmount || 0) + (monthlySubscriptions._sum.amount || 0);
+        const monthlyTotal = (monthlyBookings._sum.totalAmount || 0) + (monthlySubscriptions._sum.nextPaymentAmount || 0);
         result = { 
           value: monthlyTotal, 
           label: `Revenue (${period})`,
@@ -297,12 +298,13 @@ router.get('/alerts', async (req, res) => {
       });
     }
 
-    // Check for inactive users
+    // Check for inactive users (based on updatedAt since lastLoginAt doesn't exist)
     const inactiveUsers = await prisma.user.count({
       where: {
-        lastLoginAt: {
+        updatedAt: {
           lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // 30 days ago
-        }
+        },
+        isActive: true
       }
     });
 
@@ -311,8 +313,8 @@ router.get('/alerts', async (req, res) => {
         id: 'inactive-users',
         type: 'USER',
         severity: 'MEDIUM',
-        title: 'High Inactive User Count',
-        message: `${inactiveUsers} users haven't logged in for 30+ days`,
+        title: 'Potentially Inactive Users',
+        message: `${inactiveUsers} users haven't been updated in 30+ days`,
         timestamp: new Date().toISOString(),
         resolved: false
       });
