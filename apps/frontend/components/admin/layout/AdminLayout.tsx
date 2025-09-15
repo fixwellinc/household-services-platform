@@ -7,6 +7,7 @@ import { AdminHeader } from './AdminHeader';
 import { AdminBreadcrumb } from './AdminBreadcrumb';
 import { useAdminNavigation } from '../../../hooks/use-admin-navigation';
 import { useCurrentUser } from '../../../hooks/use-api';
+import { PermissionProvider } from '../../../hooks/use-permissions';
 import { KeyboardNavigationProvider } from '../../../contexts/KeyboardNavigationContext';
 
 interface AdminLayoutProps {
@@ -64,37 +65,39 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     }
 
     return (
-        <KeyboardNavigationProvider>
-            <div className="min-h-screen bg-gray-50">
-                {/* Mobile sidebar overlay */}
-                <AdminSidebar
-                    isOpen={sidebarOpen}
-                    onClose={() => setSidebarOpen(false)}
-                    navigationItems={navigationItems}
-                    activeTab={activeTab}
-                />
-
-                {/* Main content */}
-                <div className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}>
-                    <AdminHeader
-                        onMenuClick={() => setSidebarOpen(true)}
-                        user={userData.user}
+        <PermissionProvider userId={userData.user?.id}>
+            <KeyboardNavigationProvider>
+                <div className="min-h-screen bg-gray-50">
+                    {/* Mobile sidebar overlay */}
+                    <AdminSidebar
+                        isOpen={sidebarOpen}
+                        onClose={() => setSidebarOpen(false)}
+                        navigationItems={navigationItems}
+                        activeTab={activeTab}
                     />
 
-                    <main className="p-6">
-                        <div className="max-w-7xl mx-auto">
-                            <AdminBreadcrumb
-                                activeTab={activeTab}
-                                navigationItems={navigationItems}
-                            />
+                    {/* Main content */}
+                    <div className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}>
+                        <AdminHeader
+                            onMenuClick={() => setSidebarOpen(true)}
+                            user={userData.user}
+                        />
 
-                            <div className="bg-white rounded-lg shadow">
-                                {children}
+                        <main className="p-6">
+                            <div className="max-w-7xl mx-auto">
+                                <AdminBreadcrumb
+                                    activeTab={activeTab}
+                                    navigationItems={navigationItems}
+                                />
+
+                                <div className="bg-white rounded-lg shadow">
+                                    {children}
+                                </div>
                             </div>
-                        </div>
-                    </main>
+                        </main>
+                    </div>
                 </div>
-            </div>
-        </KeyboardNavigationProvider>
+            </KeyboardNavigationProvider>
+        </PermissionProvider>
     );
 }
