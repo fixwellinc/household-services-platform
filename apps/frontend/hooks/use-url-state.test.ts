@@ -3,15 +3,16 @@ import type { FilterState } from '../types/admin';
 
 // Mock Next.js router
 const mockPush = vi.fn();
+const mockReplace = vi.fn();
 const mockRouter = {
   push: mockPush,
-  pathname: '/admin/users',
-  query: {},
-  isReady: true
+  replace: mockReplace
 };
 
-vi.mock('next/router', () => ({
-  useRouter: () => mockRouter
+vi.mock('next/navigation', () => ({
+  useRouter: () => mockRouter,
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => '/admin/users'
 }));
 
 // Mock clipboard API

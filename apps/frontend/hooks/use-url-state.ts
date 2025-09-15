@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { FilterState } from '../types/admin';
 
 interface UseUrlStateOptions {
@@ -34,26 +34,30 @@ export function useUrlState(options: UseUrlStateOptions = {}): UseUrlStateReturn
   } = options;
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const [state, setState] = useState<FilterState>(defaultState);
   const [isLoading, setIsLoading] = useState(true);
   const [updateTimeout, setUpdateTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Parse URL parameters to filter state
-  const parseUrlToState = useCallback((query: Record<string, string | string[] | undefined>): FilterState => {
+  const parseUrlToState = useCallback((params: URLSearchParams): FilterState => {
     try {
       const parsedState: FilterState = { ...defaultState };
 
       // Parse query
-      if (query.q && typeof query.q === 'string') {
-        parsedState.query = query.q;
+      const q = params.get('q');
+      if (q) {
+        parsedState.query = q;
       }
 
       // Parse filters
-      if (query.filters && typeof query.filters === 'string') {
+      const filters = params.get('filters');
+      if (filters) {
         try {
-          const filters = JSON.parse(decodeURIComponent(query.filters));
-          if (typeof filters === 'object' && filters !== null) {
-            parsedState.filters = filters;
+          const parsedFilters = JSON.parse(decodeURIComponent(filters));
+          if (typeof parsedFilters === 'object' && parsedFilters !== null) {
+            parsedState.filters = parsedFilters;
           }
         } catch (error) {
           console.warn('Failed to parse filters from URL:', error);
@@ -61,24 +65,28 @@ export function useUrlState(options: UseUrlStateOptions = {}): UseUrlStateReturn
       }
 
       // Parse sorting
-      if (query.sort && typeof query.sort === 'string') {
-        parsedState.sorting.field = query.sort;
+      const sort = params.get('sort');
+      if (sort) {
+        parsedState.sorting.field = sort;
       }
-      if (query.sortDir && typeof query.sortDir === 'string') {
-        parsedState.sorting.direction = query.sortDir as 'asc' | 'desc';
+      const sortDir = params.get('sortDir');
+      if (sortDir) {
+        parsedState.sorting.direction = sortDir as 'asc' | 'desc';
       }
 
       // Parse pagination
-      if (query.page && typeof query.page === 'string') {
-        const page = parseInt(query.page, 10);
-        if (!isNaN(page) && page > 0) {
-          parsedState.pagination.page = page;
+      const page = params.get('page');
+      if (page) {
+        const pageNum = parseInt(page, 10);
+        if (!isNaN(pageNum) && pageNum > 0) {
+          parsedState.pagination.page = pageNum;
         }
       }
-      if (query.limit && typeof query.limit === 'string') {
-        const limit = parseInt(query.limit, 10);
-        if (!isNaN(limit) && limit > 0 && limit <= 1000) {
-          parsedState.pagination.limit = limit;
+      const limit = params.get('limit');
+      if (limit) {
+        const limitNum = parseInt(limit, 10);
+        if (!isNaN(limitNum) && limitNum > 0 && limitNum <= 1000) {
+          parsedState.pagination.limit = limitNum;
         }
       }
 
@@ -130,47 +138,41 @@ export function useUrlState(options: UseUrlStateOptions = {}): UseUrlStateReturn
 
     const timeout = setTimeout(() => {
       const params = stateToUrlParams(newState);
-      
-      // Build new query object
-      const newQuery = { ...router.query };
-      
+
+      // Build new URLSearchParams object
+      const newSearchParams = new URLSearchParams(searchParams);
+
       // Remove old filter-related params
-      delete newQuery.q;
-      delete newQuery.filters;
-      delete newQuery.sort;
-      delete newQuery.sortDir;
-      delete newQuery.page;
-      delete newQuery.limit;
-      
+      newSearchParams.delete('q');
+      newSearchParams.delete('filters');
+      newSearchParams.delete('sort');
+      newSearchParams.delete('sortDir');
+      newSearchParams.delete('page');
+      newSearchParams.delete('limit');
+
       // Add new params
-      Object.assign(newQuery, params);
+      Object.entries(params).forEach(([key, value]) => {
+        newSearchParams.set(key, value);
+      });
 
       // Update URL
-      router.push(
-        {
-          pathname: router.pathname,
-          query: newQuery
-        },
-        undefined,
-        { 
-          shallow: true,
-          scroll: false,
-          ...(replaceHistory && { replace: true })
-        }
-      );
+      const newUrl = `${pathname}?${newSearchParams.toString()}`;
+      if (replaceHistory) {
+        router.replace(newUrl, { scroll: false });
+      } else {
+        router.push(newUrl, { scroll: false });
+      }
     }, debounceMs);
 
     setUpdateTimeout(timeout);
-  }, [router, stateToUrlParams, updateTimeout, debounceMs, replaceHistory]);
+  }, [router, pathname, searchParams, stateToUrlParams, updateTimeout, debounceMs, replaceHistory]);
 
   // Initialize state from URL on mount and route changes
   useEffect(() => {
-    if (router.isReady) {
-      const urlState = parseUrlToState(router.query);
-      setState(urlState);
-      setIsLoading(false);
-    }
-  }, [router.isReady, router.query, parseUrlToState]);
+    const urlState = parseUrlToState(searchParams);
+    setState(urlState);
+    setIsLoading(false);
+  }, [searchParams, parseUrlToState]);
 
   // Update state and URL
   const handleSetState = useCallback((newState: FilterState) => {
