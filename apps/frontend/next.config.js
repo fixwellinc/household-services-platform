@@ -68,10 +68,14 @@ const nextConfig = {
     serverComponentsExternalPackages: ['@prisma/client'],
   },
   // Disable static optimization and force server-side rendering
-  staticPageGenerationTimeout: 120,
+  staticPageGenerationTimeout: 10,
   // Disable static exports to prevent build timeouts
   trailingSlash: false,
   skipTrailingSlashRedirect: true,
+  // Disable optimizations that can cause build timeouts
+  swcMinify: false,
+  poweredByHeader: false,
+  generateEtags: false,
   eslint: {
     ignoreDuringBuilds: true,
   },

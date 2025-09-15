@@ -25,6 +25,7 @@ const handle = nextApp.getRequestHandler();
 import('./apps/backend/src/app.js').then(({ app: backendApp }) => {
   // Start the unified server
   nextApp.prepare().then(() => {
+    console.log('Next.js application prepared successfully');
     const server = createServer(async (req, res) => {
       try {
         // Check if the request is for the API
@@ -57,6 +58,24 @@ import('./apps/backend/src/app.js').then(({ app: backendApp }) => {
       if (err) throw err;
       console.log(`> Ready on http://${hostname}:${port}`);
       console.log(`> API available at http://${hostname}:${port}/api`);
+    });
+  }).catch((nextError) => {
+    console.error('Failed to prepare Next.js application:', nextError);
+    console.log('Starting backend-only server...');
+
+    // Fallback: Start backend-only server if Next.js fails
+    const fallbackServer = createServer((req, res) => {
+      if (req.url.startsWith('/api')) {
+        backendApp(req, res);
+      } else {
+        res.statusCode = 503;
+        res.setHeader('Content-Type', 'text/html');
+        res.end('<h1>Service Temporarily Unavailable</h1><p>Frontend is loading...</p>');
+      }
+    });
+
+    fallbackServer.listen(port, () => {
+      console.log(`> Backend-only server ready on http://${hostname}:${port}`);
     });
   });
 }).catch((error) => {
