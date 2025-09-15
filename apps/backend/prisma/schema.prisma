@@ -69,6 +69,12 @@ model User {
   suspendedUsers    User[]     @relation("UserSuspensions")
   activatedByUser   User?      @relation("UserActivations", fields: [activatedBy], references: [id])
   activatedUsers    User[]     @relation("UserActivations")
+  
+  // Billing adjustment relations
+  createdBillingAdjustments   BillingAdjustment[] @relation("CreatedBillingAdjustments")
+  approvedBillingAdjustments  BillingAdjustment[] @relation("ApprovedBillingAdjustments")
+  rejectedBillingAdjustments  BillingAdjustment[] @relation("RejectedBillingAdjustments")
+  processedBillingAdjustments BillingAdjustment[] @relation("ProcessedBillingAdjustments")
 }
 
 model CustomerEmployeeAssignment {
@@ -115,6 +121,12 @@ model Subscription {
   subscriptionPauses       SubscriptionPause[]
   familyMembers            FamilyMember[]
   additionalProperties     AdditionalProperty[]
+  
+  // Billing adjustment relations
+  billingAdjustments       BillingAdjustment[]    @relation("SubscriptionBillingAdjustments")
+  creditTransactions       CreditTransaction[]    @relation("SubscriptionCreditTransactions")
+  subscriptionDiscounts    SubscriptionDiscount[] @relation("SubscriptionDiscounts")
+  pendingCharges           PendingCharge[]        @relation("SubscriptionPendingCharges")
 }
 
 model SubscriptionUsage {
@@ -512,4 +524,108 @@ model ImpersonationSession {
   @@index([adminId])
   @@index([targetUserId])
   @@index([isActive])
+}
+
+// Billing Adjustment Models
+model BillingAdjustment {
+  id               String    @id @default(cuid())
+  subscriptionId   String
+  type             String    // credit, debit, refund, discount
+  amount           Float
+  reason           String
+  description      String
+  effectiveDate    DateTime
+  status           String    @default("PENDING_APPROVAL") // PENDING_APPROVAL, APPROVED, REJECTED, PROCESSED, FAILED
+  requiresApproval Boolean   @default(true)
+  metadata         String?   // JSON string for additional data
+  
+  // Audit fields
+  createdBy        String
+  createdAt        DateTime  @default(now())
+  approvedBy       String?
+  approvedAt       DateTime?
+  approvalNotes    String?
+  rejectedBy       String?
+  rejectedAt       DateTime?
+  rejectionReason  String?
+  processedBy      String?
+  processedAt      DateTime?
+  errorMessage     String?
+  
+  // Relations
+  subscription     Subscription @relation("SubscriptionBillingAdjustments", fields: [subscriptionId], references: [id], onDelete: Cascade)
+  createdByUser    User         @relation("CreatedBillingAdjustments", fields: [createdBy], references: [id])
+  approvedByUser   User?        @relation("ApprovedBillingAdjustments", fields: [approvedBy], references: [id])
+  rejectedByUser   User?        @relation("RejectedBillingAdjustments", fields: [rejectedBy], references: [id])
+  processedByUser  User?        @relation("ProcessedBillingAdjustments", fields: [processedBy], references: [id])
+  
+  // Related records
+  creditTransactions    CreditTransaction[]
+  subscriptionDiscounts SubscriptionDiscount[]
+  pendingCharges        PendingCharge[]
+  
+  @@index([subscriptionId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+  @@index([requiresApproval])
+}
+
+model CreditTransaction {
+  id                   String    @id @default(cuid())
+  subscriptionId       String
+  type                 String    // CREDIT, DEBIT, REFUND
+  amount               Float
+  description          String
+  billingAdjustmentId  String?
+  createdAt            DateTime  @default(now())
+  
+  // Relations
+  subscription         Subscription      @relation("SubscriptionCreditTransactions", fields: [subscriptionId], references: [id], onDelete: Cascade)
+  billingAdjustment    BillingAdjustment? @relation(fields: [billingAdjustmentId], references: [id])
+  
+  @@index([subscriptionId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model SubscriptionDiscount {
+  id                   String    @id @default(cuid())
+  subscriptionId       String
+  amount               Float
+  type                 String    @default("FIXED_AMOUNT") // FIXED_AMOUNT, PERCENTAGE
+  description          String
+  code                 String?
+  expiresAt            DateTime?
+  billingAdjustmentId  String?
+  isActive             Boolean   @default(true)
+  createdAt            DateTime  @default(now())
+  
+  // Relations
+  subscription         Subscription      @relation("SubscriptionDiscounts", fields: [subscriptionId], references: [id], onDelete: Cascade)
+  billingAdjustment    BillingAdjustment? @relation(fields: [billingAdjustmentId], references: [id])
+  
+  @@index([subscriptionId])
+  @@index([isActive])
+  @@index([expiresAt])
+}
+
+model PendingCharge {
+  id                   String    @id @default(cuid())
+  subscriptionId       String
+  amount               Float
+  description          String
+  billingAdjustmentId  String?
+  status               String    @default("PENDING") // PENDING, PROCESSED, FAILED
+  stripePaymentIntentId String?
+  processedAt          DateTime?
+  createdAt            DateTime  @default(now())
+  
+  // Relations
+  subscription         Subscription      @relation("SubscriptionPendingCharges", fields: [subscriptionId], references: [id], onDelete: Cascade)
+  billingAdjustment    BillingAdjustment? @relation(fields: [billingAdjustmentId], references: [id])
+  
+  @@index([subscriptionId])
+  @@index([status])
+  @@index([createdAt])
 }

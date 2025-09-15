@@ -19,6 +19,7 @@ import { EnhancedDataTable } from '../EnhancedDataTable';
 import { SearchAndFilter } from '../search/SearchAndFilter';
 import { SubscriptionDetailsPanel } from './SubscriptionDetailsPanel';
 import { BillingAdjustmentModal } from './BillingAdjustmentModal';
+import { BillingAdjustmentTools } from './BillingAdjustmentTools';
 import { SubscriptionAnalyticsView } from './SubscriptionAnalyticsView';
 import { ChurnPredictionPanel } from './ChurnPredictionPanel';
 import { BulkOperationsToolbar } from '../BulkOperationsToolbar';
@@ -429,6 +430,7 @@ export function SubscriptionManagement() {
             <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList>
                     <TabsTrigger value="subscriptions" currentValue={activeTab} onValueChange={setActiveTab}>Subscriptions</TabsTrigger>
+                    <TabsTrigger value="billing-tools" currentValue={activeTab} onValueChange={setActiveTab}>Billing Tools</TabsTrigger>
                     <TabsTrigger value="analytics" currentValue={activeTab} onValueChange={setActiveTab}>Analytics</TabsTrigger>
                     <TabsTrigger value="churn-prediction" currentValue={activeTab} onValueChange={setActiveTab}>Churn Prediction</TabsTrigger>
                 </TabsList>
@@ -467,6 +469,10 @@ export function SubscriptionManagement() {
                         pageSize={pagination.limit}
                         enableBulkOperations={true}
                     />
+                </TabsContent>
+
+                <TabsContent value="billing-tools" currentValue={activeTab}>
+                    <BillingAdjustmentTools />
                 </TabsContent>
 
                 <TabsContent value="analytics" currentValue={activeTab}>

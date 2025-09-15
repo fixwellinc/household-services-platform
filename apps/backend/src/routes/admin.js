@@ -6,12 +6,16 @@ import queueService from '../services/queueService.js';
 import socketService from '../services/socketService.js';
 import searchService from '../services/searchService.js';
 import searchIndexService from '../services/searchIndexService.js';
+import billingAdjustmentRoutes from './admin/billingAdjustments.js';
 
 const router = express.Router();
 
 // Apply admin authentication to all routes
 router.use(authMiddleware);
 router.use(requireAdmin);
+
+// Mount billing adjustment routes
+router.use('/', billingAdjustmentRoutes);
 
 /**
  * GET /api/admin/dashboard/stats

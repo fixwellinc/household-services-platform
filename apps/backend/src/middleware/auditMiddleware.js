@@ -296,6 +296,16 @@ export const auditPresets = {
       roleId: req.params.roleId
     }),
     severity: 'medium'
+  }),
+
+  billingUpdate: auditMiddleware({
+    action: 'BILLING_ADJUSTMENT',
+    entityType: 'billing_adjustment',
+    getEntityId: (req) => req.params.subscriptionId || req.params.adjustmentId,
+    getChanges: (req) => ({
+      adjustmentData: req.body
+    }),
+    severity: 'high'
   })
 };
 
