@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
 import { AdminBreadcrumb } from './AdminBreadcrumb';
@@ -13,9 +14,10 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
+    const pathname = usePathname();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-    const { activeTab, navigationItems } = useAdminNavigation();
+    const { activeTab, navigationItems, setActiveTab } = useAdminNavigation();
     const { data: userData, isLoading } = useCurrentUser();
 
     // Load sidebar collapsed state
@@ -26,10 +28,18 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         }
     }, []);
 
+    // Sync active tab with current route
+    useEffect(() => {
+        const currentItem = navigationItems.find(item => item.path === pathname);
+        if (currentItem && currentItem.id !== activeTab) {
+            setActiveTab(currentItem.id);
+        }
+    }, [pathname, navigationItems, activeTab, setActiveTab]);
+
     // Close sidebar on mobile when route changes
     useEffect(() => {
         setSidebarOpen(false);
-    }, [activeTab]);
+    }, [pathname]);
 
     if (isLoading) {
         return (

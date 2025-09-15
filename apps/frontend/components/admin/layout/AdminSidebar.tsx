@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { X, LogOut, ChevronLeft, ChevronRight, Star, Clock, Search, Keyboard } from 'lucide-react';
 import { NavigationItem } from '../../../types/admin';
 import { useAdminNavigation } from '../../../hooks/use-admin-navigation';
@@ -13,14 +14,16 @@ interface AdminSidebarProps {
 }
 
 export function AdminSidebar({ isOpen, onClose, navigationItems, activeTab }: AdminSidebarProps) {
-  const { 
-    setActiveTab, 
-    toggleFavorite, 
-    getFavoriteItems, 
+  const router = useRouter();
+  const pathname = usePathname();
+  const {
+    setActiveTab,
+    toggleFavorite,
+    getFavoriteItems,
     getRecentItems,
-    navigationState 
+    navigationState
   } = useAdminNavigation();
-  
+
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showQuickAccess, setShowQuickAccess] = useState(false);
@@ -43,9 +46,13 @@ export function AdminSidebar({ isOpen, onClose, navigationItems, activeTab }: Ad
     window.location.href = '/login';
   };
 
-  const handleNavClick = (itemId: string) => {
+  const handleNavClick = (itemId: string, itemPath: string) => {
+    // Update internal state for tracking
     setActiveTab(itemId);
-    onClose(); // Close mobile sidebar
+    // Navigate to the actual route
+    router.push(itemPath);
+    // Close mobile sidebar
+    onClose();
   };
 
   const toggleCollapse = () => {
@@ -117,7 +124,7 @@ export function AdminSidebar({ isOpen, onClose, navigationItems, activeTab }: Ad
 interface SidebarContentProps {
   navigationItems: NavigationItem[];
   activeTab: string;
-  onNavClick: (itemId: string) => void;
+  onNavClick: (itemId: string, itemPath: string) => void;
   onLogout: () => void;
   showCloseButton: boolean;
   onClose?: () => void;
@@ -171,7 +178,7 @@ function SidebarContent({
       
       if (e.key === 'Enter' && keyboardNavIndex >= 0) {
         e.preventDefault();
-        onNavClick(navigationItems[keyboardNavIndex].id);
+        onNavClick(navigationItems[keyboardNavIndex].id, navigationItems[keyboardNavIndex].path);
       }
       
       if (e.key === 'Escape') {
@@ -258,7 +265,7 @@ function SidebarContent({
                     key={`fav-${item.id}`}
                     item={item}
                     isActive={activeTab === item.id}
-                    onClick={() => onNavClick(item.id)}
+                    onClick={() => onNavClick(item.id, item.path)}
                     onToggleFavorite={onToggleFavorite}
                     isCollapsed={false}
                     isCompact={true}
@@ -282,7 +289,7 @@ function SidebarContent({
                     key={`recent-${item.id}`}
                     item={item}
                     isActive={activeTab === item.id}
-                    onClick={() => onNavClick(item.id)}
+                    onClick={() => onNavClick(item.id, item.path)}
                     onToggleFavorite={onToggleFavorite}
                     isCollapsed={false}
                     isCompact={true}
