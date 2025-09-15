@@ -48,6 +48,7 @@ import performanceRoutes from './routes/performance.js';
 import securityRoutes from './routes/security.js';
 import healthRoutes from './routes/health.js';
 import adminRoutes from './routes/admin.js';
+import adminDashboardRoutes from './routes/admin/dashboard.js';
 import adminPermissionsRoutes from './routes/adminPermissions.js';
 import adminImpersonationRoutes from './routes/adminImpersonation.js';
 import adminUsersRoutes from './routes/adminUsers.js';
@@ -326,6 +327,7 @@ app.use('/api/security', checkDatabaseMiddleware, securityRoutes);
 app.use('/health', healthRoutes); // Health check endpoint (no database check needed)
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/admin', checkDatabaseMiddleware, adminRoutes);
+app.use('/api/admin/dashboard', checkDatabaseMiddleware, adminDashboardRoutes);
 app.use('/api/admin/users', checkDatabaseMiddleware, adminUsersRoutes);
 app.use('/api/admin/permissions', checkDatabaseMiddleware, adminPermissionsRoutes);
 app.use('/api/admin/impersonation', checkDatabaseMiddleware, adminImpersonationRoutes);
