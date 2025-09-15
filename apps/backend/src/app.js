@@ -366,18 +366,18 @@ app.post('/api/admin/emergency-create', async (req, res) => {
 
     // Create admin account
     const bcrypt = await import('bcryptjs');
-    const hashedPassword = await bcrypt.default.hash('admin123', 10);
+    const hashedPassword = await bcrypt.default.hash('FixwellAdmin2024!', 10);
     
     const adminUser = await prisma.user.create({
       data: {
-        email: 'admin@fixwell.com',
-        name: 'Admin User',
+        email: 'admin@fixwell.ca',
+        name: 'Fixwell Admin',
         password: hashedPassword,
         role: 'ADMIN',
         isActive: true,
-        phone: '+1-555-0000',
-        address: '123 Admin Street',
-        postalCode: 'V5H 1Z1'
+        phone: '+1-604-555-0001',
+        address: '123 Admin Street, Vancouver, BC',
+        postalCode: 'V6B 1A1'
       }
     });
 
@@ -386,7 +386,7 @@ app.post('/api/admin/emergency-create', async (req, res) => {
       message: 'Emergency admin account created successfully',
       admin: {
         email: adminUser.email,
-        password: 'admin123',
+        password: 'FixwellAdmin2024!',
         role: adminUser.role
       }
     });
