@@ -46,13 +46,28 @@ export function AdminSidebar({ isOpen, onClose, navigationItems, activeTab }: Ad
     window.location.href = '/login';
   };
 
-  const handleNavClick = (itemId: string, itemPath: string) => {
-    // Update internal state for tracking
-    setActiveTab(itemId);
-    // Navigate to the actual route
-    router.push(itemPath);
-    // Close mobile sidebar
-    onClose();
+  const handleNavClick = (itemId: string, itemPath?: string) => {
+    try {
+      // Update internal state for tracking
+      setActiveTab(itemId);
+
+      // Navigate to the actual route if path is provided
+      if (itemPath && typeof itemPath === 'string' && itemPath.startsWith('/')) {
+        router.push(itemPath);
+      } else {
+        console.error('Invalid navigation path for item:', itemId, 'path:', itemPath);
+        // Fallback to dashboard if path is invalid
+        router.push('/admin');
+      }
+
+      // Close mobile sidebar
+      onClose();
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback navigation
+      router.push('/admin');
+      onClose();
+    }
   };
 
   const toggleCollapse = () => {
@@ -124,7 +139,7 @@ export function AdminSidebar({ isOpen, onClose, navigationItems, activeTab }: Ad
 interface SidebarContentProps {
   navigationItems: NavigationItem[];
   activeTab: string;
-  onNavClick: (itemId: string, itemPath: string) => void;
+  onNavClick: (itemId: string, itemPath?: string) => void;
   onLogout: () => void;
   showCloseButton: boolean;
   onClose?: () => void;
@@ -178,7 +193,8 @@ function SidebarContent({
       
       if (e.key === 'Enter' && keyboardNavIndex >= 0) {
         e.preventDefault();
-        onNavClick(navigationItems[keyboardNavIndex].id, navigationItems[keyboardNavIndex].path);
+        const item = navigationItems[keyboardNavIndex];
+        onNavClick(item.id, item.path || '/admin');
       }
       
       if (e.key === 'Escape') {
@@ -265,7 +281,7 @@ function SidebarContent({
                     key={`fav-${item.id}`}
                     item={item}
                     isActive={activeTab === item.id}
-                    onClick={() => onNavClick(item.id, item.path)}
+                    onClick={() => onNavClick(item.id, item.path || '/admin')}
                     onToggleFavorite={onToggleFavorite}
                     isCollapsed={false}
                     isCompact={true}
@@ -289,7 +305,7 @@ function SidebarContent({
                     key={`recent-${item.id}`}
                     item={item}
                     isActive={activeTab === item.id}
-                    onClick={() => onNavClick(item.id, item.path)}
+                    onClick={() => onNavClick(item.id, item.path || '/admin')}
                     onToggleFavorite={onToggleFavorite}
                     isCollapsed={false}
                     isCompact={true}

@@ -1,4 +1,9 @@
+# *
 User-agent: *
 Allow: /
 
-Sitemap: https://fixwell-services-platform-production.up.railway.app/sitemap.xml 
+# Host
+Host: https://fixwell-services-platform-production.up.railway.app
+
+# Sitemaps
+Sitemap: https://fixwell-services-platform-production.up.railway.app/sitemap.xml
