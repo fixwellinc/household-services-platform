@@ -1,7 +1,24 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-            domains: ['localhost', 'fixwell-services-platform-production.up.railway.app'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'fixwell-services-platform-production.up.railway.app',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: 'fixwell.up.railway.app',
+      },
+      {
+        protocol: 'https',
+        hostname: 'roasted-key-production.up.railway.app',
+      }
+    ],
   },
   async headers() {
     return [
