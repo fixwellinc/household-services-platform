@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { perkType: string } }
+  { params }: { params: Promise<{ perkType: string }> }
 ) {
   try {
     // Get auth token from headers
@@ -12,7 +12,7 @@ export async function GET(
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const { perkType } = params;
+    const { perkType } = await params;
 
     // Forward request to backend
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';

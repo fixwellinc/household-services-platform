@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from 'next/server'
 // Get service by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
     
     // Get the authorization header from the request
     const authHeader = request.headers.get('authorization')
@@ -40,10 +40,10 @@ export async function GET(
 // Update service (admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
     const body = await request.json()
     
     // Get the authorization header from the request
@@ -79,10 +79,10 @@ export async function PUT(
 // Delete service (admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
     
     // Get the authorization header from the request
     const authHeader = request.headers.get('authorization')

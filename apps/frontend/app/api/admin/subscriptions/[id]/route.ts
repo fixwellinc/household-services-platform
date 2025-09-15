@@ -6,11 +6,12 @@ export const dynamic = 'force-dynamic'
 // Get subscription details (admin)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
-    const response = await fetch(`${backendUrl}/api/admin/subscriptions/${params.id}`, {
+    const response = await fetch(`${backendUrl}/api/admin/subscriptions/${id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -39,13 +40,14 @@ export async function GET(
 // Update subscription (admin)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
-    
+
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
-    const response = await fetch(`${backendUrl}/api/admin/subscriptions/${params.id}`, {
+    const response = await fetch(`${backendUrl}/api/admin/subscriptions/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

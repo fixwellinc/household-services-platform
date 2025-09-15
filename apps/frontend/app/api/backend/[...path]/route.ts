@@ -3,9 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 // This route will handle all backend API calls
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  const path = params.path.join('/');
+  const { path: pathArray } = await params;
+  const path = pathArray.join('/');
   
   try {
     const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
@@ -41,9 +42,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  const path = params.path.join('/');
+  const { path: pathArray } = await params;
+  const path = pathArray.join('/');
   const body = await request.json();
   
   try {
@@ -81,9 +83,10 @@ export async function POST(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  const path = params.path.join('/');
+  const { path: pathArray } = await params;
+  const path = pathArray.join('/');
   const body = await request.json();
   
   try {
@@ -121,9 +124,10 @@ export async function PUT(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  const path = params.path.join('/');
+  const { path: pathArray } = await params;
+  const path = pathArray.join('/');
   const body = await request.json();
   
   try {
@@ -161,9 +165,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  const path = params.path.join('/');
+  const { path: pathArray } = await params;
+  const path = pathArray.join('/');
   
   try {
     const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
