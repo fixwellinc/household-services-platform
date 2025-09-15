@@ -123,7 +123,7 @@ dist
 
 # Gatsby files
 .cache/
-public
+# public - commented out because we need to track public assets like logos and favicons
 
 # Storybook build outputs
 .out
