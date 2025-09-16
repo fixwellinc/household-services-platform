@@ -6,8 +6,7 @@ import bcrypt from 'bcryptjs';
 
 const router = express.Router();
 
-// Apply admin authentication to all routes
-router.use(authMiddleware);
+// Apply admin role check (auth already applied globally)
 router.use(requireAdmin);
 
 /**

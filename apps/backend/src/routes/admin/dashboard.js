@@ -21,8 +21,7 @@ function setCachedResult(key, data) {
   return data;
 }
 
-// Apply authentication middleware to all admin routes
-router.use(authMiddleware);
+// Apply admin role check (auth already applied globally)
 router.use(requireAdmin);
 
 // Users metrics endpoint
