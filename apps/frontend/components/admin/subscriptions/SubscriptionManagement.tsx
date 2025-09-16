@@ -16,7 +16,7 @@ import {
     BarChart3
 } from 'lucide-react';
 import { EnhancedDataTable } from '../EnhancedDataTable';
-import { SearchAndFilter } from '../search/SearchAndFilter';
+import { SimpleSearchAndFilter } from '../search/SimpleSearchAndFilter';
 import { SubscriptionDetailsPanel } from './SubscriptionDetailsPanel';
 import { BillingAdjustmentModal } from './BillingAdjustmentModal';
 import { BillingAdjustmentTools } from './BillingAdjustmentTools';
@@ -29,7 +29,8 @@ import { PermissionGuard } from '@/hooks/use-permissions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/shared';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AdminLoadingState, AdminStatsLoadingState, AdminTableLoadingState } from '../AdminLoadingState';
 
 interface Subscription {
     id: string;
@@ -107,26 +108,37 @@ export function SubscriptionManagement() {
     const fetchSubscriptions = async () => {
         try {
             setLoading(true);
-            const params = new URLSearchParams({
-                page: pagination.page.toString(),
-                limit: pagination.limit.toString(),
-                sortBy,
-                sortOrder,
-                ...filters
+            const params = new URLSearchParams();
+            
+            // Only add non-empty parameters
+            if (pagination.page) params.append('page', pagination.page.toString());
+            if (pagination.limit) params.append('limit', pagination.limit.toString());
+            if (sortBy) params.append('sortBy', sortBy);
+            if (sortOrder) params.append('sortOrder', sortOrder);
+            
+            // Add filters
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value && value.toString().trim()) {
+                    params.append(key, value.toString());
+                }
             });
 
-            const response = await request(`/admin/subscriptions?${params}`);
+            const response = await request(`/admin/subscriptions?${params.toString()}`);
 
             if (response.success) {
-                setSubscriptions(response.subscriptions);
+                setSubscriptions(response.subscriptions || []);
                 setPagination(prev => ({
                     ...prev,
                     ...response.pagination
                 }));
+            } else {
+                throw new Error(response.error || 'Failed to fetch subscriptions');
             }
         } catch (error) {
             console.error('Error fetching subscriptions:', error);
-            showError("Failed to fetch subscriptions");
+            showError(error instanceof Error ? error.message : "Failed to fetch subscriptions");
+            // Set empty state on error
+            setSubscriptions([]);
         } finally {
             setLoading(false);
         }
@@ -138,9 +150,35 @@ export function SubscriptionManagement() {
             const response = await request('/admin/subscriptions/analytics');
             if (response.success) {
                 setStats(response.stats);
+            } else {
+                console.warn('Failed to fetch subscription stats:', response.error);
+                // Set default stats on error
+                setStats({
+                    totalSubscriptions: 0,
+                    activeSubscriptions: 0,
+                    pausedSubscriptions: 0,
+                    cancelledSubscriptions: 0,
+                    totalRevenue: 0,
+                    monthlyRecurringRevenue: 0,
+                    averageLifetimeValue: 0,
+                    churnRate: 0,
+                    highRiskSubscriptions: 0
+                });
             }
         } catch (error) {
             console.error('Error fetching subscription stats:', error);
+            // Set default stats on error
+            setStats({
+                totalSubscriptions: 0,
+                activeSubscriptions: 0,
+                pausedSubscriptions: 0,
+                cancelledSubscriptions: 0,
+                totalRevenue: 0,
+                monthlyRecurringRevenue: 0,
+                averageLifetimeValue: 0,
+                churnRate: 0,
+                highRiskSubscriptions: 0
+            });
         }
     };
 
@@ -220,10 +258,10 @@ export function SubscriptionManagement() {
             key: 'user',
             label: 'Customer',
             sortable: true,
-            render: (user: any, subscription: Subscription) => (
+            render: (value: any, subscription: Subscription) => (
                 <div className="flex flex-col">
-                    <span className="font-medium">{user.email}</span>
-                    {user.name && <span className="text-sm text-gray-500">{user.name}</span>}
+                    <span className="font-medium">{subscription.user.email}</span>
+                    {subscription.user.name && <span className="text-sm text-gray-500">{subscription.user.name}</span>}
                 </div>
             )
         },
@@ -370,7 +408,7 @@ export function SubscriptionManagement() {
             </div>
 
             {/* Statistics Cards */}
-            {stats && (
+            {stats ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -424,20 +462,22 @@ export function SubscriptionManagement() {
                         </CardContent>
                     </Card>
                 </div>
+            ) : (
+                <AdminStatsLoadingState />
             )}
 
             {/* Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
                 <TabsList>
-                    <TabsTrigger value="subscriptions" currentValue={activeTab} onValueChange={setActiveTab}>Subscriptions</TabsTrigger>
-                    <TabsTrigger value="billing-tools" currentValue={activeTab} onValueChange={setActiveTab}>Billing Tools</TabsTrigger>
-                    <TabsTrigger value="analytics" currentValue={activeTab} onValueChange={setActiveTab}>Analytics</TabsTrigger>
-                    <TabsTrigger value="churn-prediction" currentValue={activeTab} onValueChange={setActiveTab}>Churn Prediction</TabsTrigger>
+                    <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
+                    <TabsTrigger value="billing-tools">Billing Tools</TabsTrigger>
+                    <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                    <TabsTrigger value="churn-prediction">Churn Prediction</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="subscriptions" currentValue={activeTab} className="space-y-4">
+                <TabsContent value="subscriptions" className="space-y-4">
                     {/* Search and Filters */}
-                    <SearchAndFilter
+                    <SimpleSearchAndFilter
                         entity="subscriptions"
                         onFiltersChange={setFilters}
                     />
@@ -459,27 +499,31 @@ export function SubscriptionManagement() {
                     )}
 
                     {/* Subscriptions Table */}
-                    <EnhancedDataTable
-                        title="Subscriptions"
-                        data={subscriptions}
-                        columns={columns}
-                        entityType="subscriptions"
-                        loading={loading}
-                        onRefresh={fetchSubscriptions}
-                        pageSize={pagination.limit}
-                        enableBulkOperations={true}
-                    />
+                    {loading && subscriptions.length === 0 ? (
+                        <AdminTableLoadingState rows={10} />
+                    ) : (
+                        <EnhancedDataTable
+                            title="Subscriptions"
+                            data={subscriptions}
+                            columns={columns}
+                            entityType="subscriptions"
+                            loading={loading}
+                            onRefresh={fetchSubscriptions}
+                            pageSize={pagination.limit}
+                            enableBulkOperations={true}
+                        />
+                    )}
                 </TabsContent>
 
-                <TabsContent value="billing-tools" currentValue={activeTab}>
+                <TabsContent value="billing-tools">
                     <BillingAdjustmentTools />
                 </TabsContent>
 
-                <TabsContent value="analytics" currentValue={activeTab}>
+                <TabsContent value="analytics">
                     <SubscriptionAnalyticsView />
                 </TabsContent>
 
-                <TabsContent value="churn-prediction" currentValue={activeTab}>
+                <TabsContent value="churn-prediction">
                     <ChurnPredictionPanel />
                 </TabsContent>
             </Tabs>

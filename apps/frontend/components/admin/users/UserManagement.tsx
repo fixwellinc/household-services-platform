@@ -16,7 +16,7 @@ import {
   Shield
 } from 'lucide-react';
 import { EnhancedDataTable } from '../EnhancedDataTable';
-import { SearchAndFilter } from '../search/SearchAndFilter';
+import { SimpleSearchAndFilter } from '../search/SimpleSearchAndFilter';
 import { UserDetailsPanel } from './UserDetailsPanel';
 import { UserForm } from './UserForm';
 import { BulkOperationsToolbar } from '../BulkOperationsToolbar';
@@ -29,6 +29,7 @@ import { useToast } from '@/hooks/use-toast';
 import { PermissionGuard } from '@/hooks/use-permissions';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { AdminLoadingState, AdminTableLoadingState } from '../AdminLoadingState';
 
 interface User {
   id: string;
@@ -93,26 +94,37 @@ export function UserManagement() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({
-        page: pagination.page.toString(),
-        limit: pagination.limit.toString(),
-        sortBy,
-        sortOrder,
-        ...filters
+      const params = new URLSearchParams();
+      
+      // Only add non-empty parameters
+      if (pagination.page) params.append('page', pagination.page.toString());
+      if (pagination.limit) params.append('limit', pagination.limit.toString());
+      if (sortBy) params.append('sortBy', sortBy);
+      if (sortOrder) params.append('sortOrder', sortOrder);
+      
+      // Add filters
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value && value.toString().trim()) {
+          params.append(key, value.toString());
+        }
       });
 
-      const response = await request(`/admin/users?${params}`);
+      const response = await request(`/admin/users?${params.toString()}`);
       
       if (response.success) {
-        setUsers(response.users);
+        setUsers(response.users || []);
         setPagination(prev => ({
           ...prev,
           ...response.pagination
         }));
+      } else {
+        throw new Error(response.error || 'Failed to fetch users');
       }
     } catch (error) {
       console.error('Error fetching users:', error);
-      showError("Failed to fetch users");
+      showError(error instanceof Error ? error.message : "Failed to fetch users");
+      // Set empty state on error
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -396,7 +408,7 @@ export function UserManagement() {
       </div>
 
       {/* Search and Filters */}
-      <SearchAndFilter
+      <SimpleSearchAndFilter
         entity="users"
         onFiltersChange={setFilters}
       />
@@ -417,16 +429,20 @@ export function UserManagement() {
       )}
 
       {/* Users Table */}
-      <EnhancedDataTable
-        title="Users"
-        data={users}
-        columns={columns}
-        entityType="users"
-        loading={loading}
-        onRefresh={fetchUsers}
-        pageSize={pagination.limit}
-        enableBulkOperations={true}
-      />
+      {loading && users.length === 0 ? (
+        <AdminTableLoadingState rows={10} />
+      ) : (
+        <EnhancedDataTable
+          title="Users"
+          data={users}
+          columns={columns}
+          entityType="users"
+          loading={loading}
+          onRefresh={fetchUsers}
+          pageSize={pagination.limit}
+          enableBulkOperations={true}
+        />
+      )}
 
       {/* User Details Panel */}
       {selectedUser && (

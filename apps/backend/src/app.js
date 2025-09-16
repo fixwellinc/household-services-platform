@@ -54,6 +54,7 @@ import adminImpersonationRoutes from './routes/adminImpersonation.js';
 import adminUsersRoutes from './routes/adminUsers.js';
 import bulkOperationsRoutes from './routes/bulkOperations.js';
 import adminSubscriptionAnalyticsRoutes from './routes/admin/subscriptionAnalytics.js';
+import adminSubscriptionsRoutes from './routes/admin/subscriptions.js';
 
 // Import middleware
 import { authMiddleware, requireAdmin } from './middleware/auth.js';
@@ -405,7 +406,8 @@ app.use('/api/admin/dashboard', checkDatabaseMiddleware, adminDashboardRoutes);
 app.use('/api/admin/users', checkDatabaseMiddleware, adminUsersRoutes);
 app.use('/api/admin/permissions', checkDatabaseMiddleware, adminPermissionsRoutes);
 app.use('/api/admin/impersonation', checkDatabaseMiddleware, adminImpersonationRoutes);
-app.use('/api/admin/subscriptions', checkDatabaseMiddleware, adminSubscriptionAnalyticsRoutes);
+app.use('/api/admin/subscriptions', checkDatabaseMiddleware, adminSubscriptionsRoutes);
+app.use('/api/admin/subscriptions/analytics', checkDatabaseMiddleware, adminSubscriptionAnalyticsRoutes);
 app.use('/api/bulk-operations', checkDatabaseMiddleware, bulkOperationsRoutes);
 
 function requireAdminLocal(req, res, next) {

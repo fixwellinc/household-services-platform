@@ -2,7 +2,12 @@
 
 import React from 'react';
 import { UserManagement } from '@/components/admin/users/UserManagement';
+import { AdminErrorBoundary } from '@/components/admin/AdminErrorBoundary';
 
 export default function AdminUsersPage() {
-  return <UserManagement />;
+  return (
+    <AdminErrorBoundary>
+      <UserManagement />
+    </AdminErrorBoundary>
+  );
 }
