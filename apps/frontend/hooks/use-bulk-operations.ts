@@ -58,7 +58,7 @@ export function useBulkOperations() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 },
                 body: JSON.stringify(params)
             });
@@ -88,7 +88,7 @@ export function useBulkOperations() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 },
                 body: JSON.stringify(params)
             });
@@ -108,7 +108,7 @@ export function useBulkOperations() {
             const response = await fetch(`/api/bulk-operations/${operationId}/cancel`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 }
             });
 
@@ -142,7 +142,7 @@ export function useBulkOperations() {
         try {
             const response = await fetch(`/api/bulk-operations/${operationId}/status`, {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 }
             });
 
@@ -214,7 +214,7 @@ export function useBulkOperations() {
         queryFn: async (): Promise<SupportedOperation[]> => {
             const response = await fetch('/api/bulk-operations/supported-operations', {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 }
             });
 
@@ -233,7 +233,7 @@ export function useBulkOperations() {
         queryFn: async (): Promise<BulkOperationStatus[]> => {
             const response = await fetch('/api/bulk-operations/active', {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 }
             });
 
@@ -271,7 +271,7 @@ export function useBulkOperations() {
         queryFn: async () => {
             const response = await fetch('/api/bulk-operations/history', {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 }
             });
 
