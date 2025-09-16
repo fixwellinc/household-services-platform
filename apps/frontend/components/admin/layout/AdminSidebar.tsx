@@ -202,7 +202,7 @@ function SidebarContent({
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b">
         {!isCollapsed && (
-          <h2 className="text-lg font-semibold text-gray-900">Admin Panel</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Dashboard</h2>
         )}
         
         <div className="flex items-center space-x-2">

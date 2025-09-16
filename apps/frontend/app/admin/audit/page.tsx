@@ -5,6 +5,6 @@ export default function AuditLogsPage() {
 }
 
 export const metadata = {
-  title: 'Audit Logs - Admin Panel',
+  title: 'Audit Logs - Dashboard',
   description: 'View and manage audit logs for administrative actions',
 };

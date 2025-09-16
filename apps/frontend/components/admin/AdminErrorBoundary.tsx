@@ -28,7 +28,7 @@ export class AdminErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Admin panel error:', error, errorInfo);
+    console.error('Dashboard error:', error, errorInfo);
   }
 
   handleRetry = () => {
@@ -51,7 +51,7 @@ export class AdminErrorBoundary extends React.Component<
               Something went wrong
             </h2>
             <p className="text-gray-600 mb-4">
-              An error occurred while loading this admin panel section. Please try again.
+              An error occurred while loading this section. Please try again.
             </p>
             {process.env.NODE_ENV === 'development' && this.state.error && (
               <details className="text-left bg-gray-100 p-3 rounded mb-4">

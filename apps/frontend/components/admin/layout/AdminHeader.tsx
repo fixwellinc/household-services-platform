@@ -39,7 +39,7 @@ export function AdminHeader({ onMenuClick, user }: AdminHeaderProps) {
 
         {/* Mobile title */}
         <div className="lg:hidden">
-          <h1 className="text-lg font-semibold text-gray-900">Admin Panel</h1>
+          <h1 className="text-lg font-semibold text-gray-900">Dashboard</h1>
         </div>
 
         {/* Right side actions */}
