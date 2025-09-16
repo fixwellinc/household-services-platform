@@ -13,13 +13,18 @@ export default function AdminLayoutWrapper({ children }: { children: React.React
         staleTime: 5 * 60 * 1000, // 5 minutes
         gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
         refetchOnWindowFocus: false,
+        refetchOnReconnect: true,
         retry: (failureCount, error: any) => {
-          // Don't retry on 4xx errors
+          // Don't retry on 4xx errors or rate limiting
           if (error?.status >= 400 && error?.status < 500) {
             return false;
           }
-          return failureCount < 3;
+          // Only retry once for server errors
+          return failureCount < 1;
         },
+      },
+      mutations: {
+        retry: 0, // Don't retry mutations to prevent duplicate operations
       },
     },
   }));

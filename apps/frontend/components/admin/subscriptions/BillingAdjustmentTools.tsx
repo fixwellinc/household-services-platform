@@ -21,6 +21,7 @@ import { EnhancedDataTable } from '../EnhancedDataTable';
 import { SearchAndFilter } from '../search/SearchAndFilter';
 import { BillingAdjustmentModal } from './BillingAdjustmentModal';
 import { BillingAdjustmentApproval } from './BillingAdjustmentApproval';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/hooks/use-api';
 import { useToast } from '@/hooks/use-toast';
 import { PermissionGuard } from '@/hooks/use-permissions';
@@ -71,12 +72,9 @@ interface BillingStats {
 }
 
 export function BillingAdjustmentTools() {
-    const [adjustments, setAdjustments] = useState<BillingAdjustment[]>([]);
-    const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [selectedSubscription, setSelectedSubscription] = useState<any>(null);
     const [filters, setFilters] = useState<any>({});
-    const [stats, setStats] = useState<BillingStats | null>(null);
     const [activeTab, setActiveTab] = useState('adjustments');
     const [pagination, setPagination] = useState({
         page: 1,
@@ -87,45 +85,59 @@ export function BillingAdjustmentTools() {
 
     const { request } = useApi();
     const { showSuccess, showError } = useToast();
+    const queryClient = useQueryClient();
 
-    // Fetch billing adjustments
-    const fetchAdjustments = async () => {
-        try {
-            setLoading(true);
+    // Query key for billing adjustments
+    const adjustmentsQueryKey = ['admin', 'billing-adjustments', { page: pagination.page, limit: pagination.limit, ...filters }];
+
+    // Fetch billing adjustments with TanStack Query
+    const { data: adjustmentsData, isLoading: loading, error: adjustmentsError } = useQuery({
+        queryKey: adjustmentsQueryKey,
+        queryFn: async () => {
             const params = new URLSearchParams({
                 page: pagination.page.toString(),
                 limit: pagination.limit.toString(),
                 ...filters
             });
+            return await request(`/admin/billing-adjustments?${params}`);
+        },
+        retry: false, // Prevent infinite retries
+        staleTime: 2 * 60 * 1000, // 2 minutes
+        refetchOnWindowFocus: false,
+    });
 
-            const response = await request(`/admin/billing-adjustments?${params}`);
+    // Fetch statistics with TanStack Query
+    const { data: statsData } = useQuery({
+        queryKey: ['admin', 'billing-adjustments', 'stats'],
+        queryFn: async () => {
+            return await request('/admin/billing-adjustments/stats');
+        },
+        retry: false, // Prevent infinite retries
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        refetchOnWindowFocus: false,
+    });
 
-            if (response.success) {
-                setAdjustments(response.adjustments);
-                setPagination(prev => ({
-                    ...prev,
-                    ...response.pagination
-                }));
-            }
-        } catch (error) {
-            console.error('Error fetching billing adjustments:', error);
+    // Extract data from query results
+    const adjustments = adjustmentsData?.adjustments || [];
+    const stats = statsData?.stats || null;
+
+    // Update pagination when data changes
+    useEffect(() => {
+        if (adjustmentsData?.pagination) {
+            setPagination(prev => ({
+                ...prev,
+                ...adjustmentsData.pagination
+            }));
+        }
+    }, [adjustmentsData]);
+
+    // Show error toast when adjustments query fails
+    useEffect(() => {
+        if (adjustmentsError) {
+            console.error('Error fetching billing adjustments:', adjustmentsError);
             showError("Failed to fetch billing adjustments");
-        } finally {
-            setLoading(false);
         }
-    };
-
-    // Fetch statistics
-    const fetchStats = async () => {
-        try {
-            const response = await request('/admin/billing-adjustments/stats');
-            if (response.success) {
-                setStats(response.stats);
-            }
-        } catch (error) {
-            console.error('Error fetching billing stats:', error);
-        }
-    };
+    }, [adjustmentsError, showError]);
 
     // Handle creating new adjustment
     const handleCreateAdjustment = (subscription: any) => {
@@ -159,13 +171,10 @@ export function BillingAdjustmentTools() {
         }
     };
 
-    useEffect(() => {
-        fetchAdjustments();
-    }, [filters, pagination.page, pagination.limit]);
-
-    useEffect(() => {
-        fetchStats();
-    }, []);
+    // Refresh function for child components
+    const handleRefresh = () => {
+        queryClient.invalidateQueries({ queryKey: ['admin', 'billing-adjustments'] });
+    };
 
     // Table columns configuration
     const columns = [
@@ -429,7 +438,7 @@ export function BillingAdjustmentTools() {
                         columns={columns}
                         entityType="billing-adjustments"
                         loading={loading}
-                        onRefresh={fetchAdjustments}
+                        onRefresh={handleRefresh}
                         pageSize={pagination.limit}
                         enableBulkOperations={false}
                     />
@@ -437,10 +446,7 @@ export function BillingAdjustmentTools() {
 
                 <TabsContent value="approvals" currentValue={activeTab}>
                     <BillingAdjustmentApproval
-                        onRefresh={() => {
-                            fetchAdjustments();
-                            fetchStats();
-                        }}
+                        onRefresh={handleRefresh}
                     />
                 </TabsContent>
             </Tabs>
@@ -456,8 +462,7 @@ export function BillingAdjustmentTools() {
                     onSuccess={() => {
                         setShowCreateModal(false);
                         setSelectedSubscription(null);
-                        fetchAdjustments();
-                        fetchStats();
+                        handleRefresh();
                     }}
                 />
             )}
