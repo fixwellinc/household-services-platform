@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useContext, createContext, ReactNode } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from './use-api';
 
 interface Permission {
@@ -44,38 +45,35 @@ interface PermissionProviderProps {
 }
 
 export function PermissionProvider({ children, userId }: PermissionProviderProps) {
-  const [permissions, setPermissions] = useState<string[]>([]);
-  const [userRoles, setUserRoles] = useState<UserRole[]>([]);
-  const [loading, setLoading] = useState(true);
-  
   const { request } = useApi();
+  const queryClient = useQueryClient();
 
-  const fetchPermissions = async () => {
-    if (!userId) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await request(`/api/admin/permissions/users/${userId}/roles`);
-      
-      if (response.success) {
-        setUserRoles(response.userRoles);
-        setPermissions(response.permissions);
+  // Use TanStack Query to fetch permissions
+  const { data: permissionsData, isLoading: loading, error } = useQuery({
+    queryKey: ['admin', 'permissions', 'users', userId, 'roles'],
+    queryFn: async () => {
+      if (!userId) {
+        return { success: true, userRoles: [], permissions: [] };
       }
-    } catch (error) {
-      console.error('Error fetching permissions:', error);
-      setPermissions([]);
-      setUserRoles([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+      // Fixed URL: removed /api prefix since useApi already adds /api
+      return await request(`/admin/permissions/users/${userId}/roles`);
+    },
+    enabled: !!userId,
+    retry: false, // Prevent infinite retries
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+  });
 
+  // Extract data from query results
+  const permissions = permissionsData?.permissions || [];
+  const userRoles = permissionsData?.userRoles || [];
+
+  // Show error in console but don't crash the app
   useEffect(() => {
-    fetchPermissions();
-  }, [userId]);
+    if (error) {
+      console.error('Error fetching permissions:', error);
+    }
+  }, [error]);
 
   const hasPermission = (permission: string): boolean => {
     return permissions.includes(permission);
@@ -93,7 +91,7 @@ export function PermissionProvider({ children, userId }: PermissionProviderProps
   };
 
   const refreshPermissions = async () => {
-    await fetchPermissions();
+    queryClient.invalidateQueries({ queryKey: ['admin', 'permissions', 'users', userId, 'roles'] });
   };
 
   const value: PermissionContextType = {
@@ -127,7 +125,8 @@ export function usePermissionCheck() {
 
   const checkPermission = async (userId: string, permission: string): Promise<boolean> => {
     try {
-      const response = await request(`/api/admin/permissions/users/${userId}/roles`);
+      // Fixed URL: removed /api prefix since useApi already adds /api
+      const response = await request(`/admin/permissions/users/${userId}/roles`);
       if (response.success) {
         return response.permissions.includes(permission);
       }
@@ -140,7 +139,8 @@ export function usePermissionCheck() {
 
   const checkAnyPermission = async (userId: string, permissions: string[]): Promise<boolean> => {
     try {
-      const response = await request(`/api/admin/permissions/users/${userId}/roles`);
+      // Fixed URL: removed /api prefix since useApi already adds /api
+      const response = await request(`/admin/permissions/users/${userId}/roles`);
       if (response.success) {
         return permissions.some(permission => response.permissions.includes(permission));
       }
