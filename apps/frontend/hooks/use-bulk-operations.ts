@@ -227,7 +227,7 @@ export function useBulkOperations() {
         }
     });
 
-    // Get active operations
+    // Get active operations - only poll when there are active operations
     const { data: remoteActiveOperations } = useQuery({
         queryKey: ['bulk-operations', 'active'],
         queryFn: async (): Promise<BulkOperationStatus[]> => {
@@ -244,7 +244,12 @@ export function useBulkOperations() {
             const data = await response.json();
             return data.operations;
         },
-        refetchInterval: 2000, // Refetch every 2 seconds
+        refetchInterval: (data) => {
+            // Only poll if there are active operations, and at a slower rate
+            const hasActiveOps = data && data.length > 0;
+            return hasActiveOps ? 5000 : false; // Poll every 5 seconds if active, otherwise don't poll
+        },
+        staleTime: 2000, // Consider data stale after 2 seconds
     });
 
     // Update local state when remote operations change
@@ -260,7 +265,7 @@ export function useBulkOperations() {
         }
     }, [remoteActiveOperations]);
 
-    // Get operation history
+    // Get operation history - only fetch when explicitly requested
     const getOperationHistory = useQuery({
         queryKey: ['bulk-operations', 'history'],
         queryFn: async () => {
@@ -275,7 +280,9 @@ export function useBulkOperations() {
             }
 
             return response.json();
-        }
+        },
+        enabled: false, // Don't auto-fetch, only when manually requested
+        staleTime: 10 * 60 * 1000, // Consider data fresh for 10 minutes
     });
 
     return {
