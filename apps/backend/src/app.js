@@ -300,6 +300,79 @@ app.post('/api/reset-rate-limit', async (req, res) => {
   }
 });
 
+// CRITICAL SAFETY: Emergency admin creation route (keep for production safety)
+// This MUST be before auth middleware to allow admin creation when no admin exists
+app.post('/api/admin/emergency-create', async (req, res) => {
+  if (!prisma) {
+    return res.status(503).json({ error: 'Database not available' });
+  }
+
+  try {
+    // Check if admin already exists
+    const existingAdmin = await prisma.user.findFirst({
+      where: { role: 'ADMIN' }
+    });
+
+    if (existingAdmin) {
+      return res.json({
+        message: 'Admin account already exists',
+        admin: { email: existingAdmin.email, role: existingAdmin.role }
+      });
+    }
+
+    // Create admin account
+    const bcrypt = await import('bcryptjs');
+    const hashedPassword = await bcrypt.default.hash('FixwellAdmin2024!', 10);
+
+    const adminUser = await prisma.user.create({
+      data: {
+        email: 'admin@fixwell.ca',
+        name: 'Fixwell Admin',
+        password: hashedPassword,
+        role: 'ADMIN',
+        isActive: true,
+        phone: '+1-604-555-0001',
+        address: '123 Admin Street, Vancouver, BC',
+        postalCode: 'V6B 1A1',
+        birthday: new Date('1990-01-01').toISOString(),
+        preferences: {
+          notifications: {
+            email: true,
+            sms: true,
+            push: true
+          },
+          dashboard: {
+            theme: 'light',
+            defaultView: 'overview'
+          }
+        }
+      }
+    });
+
+    // Log the admin creation for security
+    console.warn('⚠️  Emergency admin account created:', {
+      id: adminUser.id,
+      email: adminUser.email,
+      timestamp: new Date().toISOString()
+    });
+
+    res.json({
+      message: 'Emergency admin account created successfully',
+      admin: {
+        id: adminUser.id,
+        email: adminUser.email,
+        role: adminUser.role
+      }
+    });
+  } catch (error) {
+    console.error('❌ Emergency admin creation failed:', error);
+    res.status(500).json({
+      error: 'Failed to create emergency admin account',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 // Ensure admin routes have authenticated user context
 app.use('/api/admin', authMiddleware);
 
@@ -342,60 +415,7 @@ function requireAdminLocal(req, res, next) {
   next();
 }
 
-// Apply authentication middleware to all admin routes
-app.use('/api/admin', authMiddleware);
-
-// CRITICAL SAFETY: Emergency admin creation route (keep for production safety)
-app.post('/api/admin/emergency-create', async (req, res) => {
-  if (!prisma) {
-    return res.status(503).json({ error: 'Database not available' });
-  }
-  
-  try {
-    // Check if admin already exists
-    const existingAdmin = await prisma.user.findFirst({
-      where: { role: 'ADMIN' }
-    });
-
-    if (existingAdmin) {
-      return res.json({ 
-        message: 'Admin account already exists',
-        admin: { email: existingAdmin.email, role: existingAdmin.role }
-      });
-    }
-
-    // Create admin account
-    const bcrypt = await import('bcryptjs');
-    const hashedPassword = await bcrypt.default.hash('FixwellAdmin2024!', 10);
-    
-    const adminUser = await prisma.user.create({
-      data: {
-        email: 'admin@fixwell.ca',
-        name: 'Fixwell Admin',
-        password: hashedPassword,
-        role: 'ADMIN',
-        isActive: true,
-        phone: '+1-604-555-0001',
-        address: '123 Admin Street, Vancouver, BC',
-        postalCode: 'V6B 1A1'
-      }
-    });
-
-    res.json({ 
-      success: true,
-      message: 'Emergency admin account created successfully',
-      admin: {
-        email: adminUser.email,
-        password: 'FixwellAdmin2024!',
-        role: adminUser.role
-      }
-    });
-    
-  } catch (error) {
-    console.error('Error creating emergency admin account:', error);
-    res.status(500).json({ error: 'Failed to create emergency admin account' });
-  }
-});
+// Note: Emergency admin creation route is defined earlier, before auth middleware
 
 // Mount admin routes AFTER auth middleware
 app.use('/api/admin/notifications', notificationRoutes);
