@@ -243,33 +243,46 @@ export function UserManagement() {
       key: 'email',
       label: 'Email',
       sortable: true,
-      render: (user: User) => (
-        <div className="flex flex-col">
-          <span className="font-medium">{user.email}</span>
-          {user.name && <span className="text-sm text-gray-500">{user.name}</span>}
-        </div>
-      )
+      render: (email: string, user: User) => {
+        if (!user) {
+          return <span className="text-gray-400">No user data</span>;
+        }
+        return (
+          <div className="flex flex-col">
+            <span className="font-medium">{user.email}</span>
+            {user.name && <span className="text-sm text-gray-500">{user.name}</span>}
+          </div>
+        );
+      }
     },
     {
       key: 'role',
       label: 'Role',
       sortable: true,
-      render: (user: User) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          user.role === 'ADMIN' ? 'bg-red-100 text-red-800' :
-          user.role === 'EMPLOYEE' ? 'bg-blue-100 text-blue-800' :
-          user.role === 'SUSPENDED' ? 'bg-gray-100 text-gray-800' :
-          'bg-green-100 text-green-800'
-        }`}>
-          {user.role}
-        </span>
-      )
+      render: (role: string, user: User) => {
+        if (!user || !role) {
+          return <span className="text-gray-400">Unknown</span>;
+        }
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+            role === 'ADMIN' ? 'bg-red-100 text-red-800' :
+            role === 'EMPLOYEE' ? 'bg-blue-100 text-blue-800' :
+            role === 'SUSPENDED' ? 'bg-gray-100 text-gray-800' :
+            'bg-green-100 text-green-800'
+          }`}>
+            {role}
+          </span>
+        );
+      }
     },
     {
       key: 'subscription',
       label: 'Subscription',
-      render: (user: User) => (
-        user.subscription ? (
+      render: (subscription: any, user: User) => {
+        if (!user) {
+          return <span className="text-gray-400">No user data</span>;
+        }
+        return user.subscription ? (
           <div className="flex flex-col">
             <span className="text-sm font-medium">{user.subscription.tier}</span>
             <span className={`text-xs ${
@@ -280,24 +293,35 @@ export function UserManagement() {
           </div>
         ) : (
           <span className="text-gray-400">No subscription</span>
-        )
-      )
+        );
+      }
     },
     {
       key: 'phone',
       label: 'Phone',
-      render: (user: User) => user.phone || '-'
+      render: (phone: string, user: User) => phone || '-'
     },
     {
       key: 'createdAt',
       label: 'Created',
       sortable: true,
-      render: (user: User) => new Date(user.createdAt).toLocaleDateString()
+      render: (createdAt: string, user: User) => {
+        if (!createdAt) return '-';
+        try {
+          return new Date(createdAt).toLocaleDateString();
+        } catch {
+          return 'Invalid date';
+        }
+      }
     },
     {
       key: 'actions',
       label: 'Actions',
-      render: (user: User) => (
+      render: (value: any, user: User) => {
+        if (!user) {
+          return <span className="text-gray-400">-</span>;
+        }
+        return (
         <div className="flex items-center space-x-2">
           <PermissionGuard permission="users.view">
             <button
@@ -377,7 +401,8 @@ export function UserManagement() {
             </button>
           </PermissionGuard>
         </div>
-      )
+        );
+      }
     }
   ];
 
