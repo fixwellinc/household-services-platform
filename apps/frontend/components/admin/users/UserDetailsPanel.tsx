@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useApi } from '@/hooks/use-api';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { UserSuspensionWorkflow } from './UserSuspensionWorkflow';
 
 interface User {
@@ -76,22 +77,18 @@ export function UserDetailsPanel({ user, onClose, onEdit, onRefresh }: UserDetai
 
   const { request } = useApi();
   const { showSuccess, showError } = useToast();
+  const { user: currentUser } = useAuth();
 
   useEffect(() => {
     fetchUserDetails();
-    getCurrentUser();
   }, [user.id]);
 
-  const getCurrentUser = async () => {
-    try {
-      const response = await request('/auth/me');
-      if (response.success) {
-        setCurrentUserEmail(response.user.email);
-      }
-    } catch (error) {
-      console.error('Error fetching current user:', error);
+  // Set current user email from auth context
+  useEffect(() => {
+    if (currentUser?.email) {
+      setCurrentUserEmail(currentUser.email);
     }
-  };
+  }, [currentUser]);
 
   const handleSuspendUser = async (userId: string, reason: string) => {
     try {

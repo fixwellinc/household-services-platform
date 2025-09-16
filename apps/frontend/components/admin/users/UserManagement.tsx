@@ -27,6 +27,7 @@ import { UserSuspensionWorkflow } from './UserSuspensionWorkflow';
 import { useApi } from '@/hooks/use-api';
 import { useToast } from '@/hooks/use-toast';
 import { PermissionGuard } from '@/hooks/use-permissions';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 interface User {
@@ -79,21 +80,14 @@ export function UserManagement() {
 
   const { request } = useApi();
   const { showSuccess, showError } = useToast();
+  const { user: currentUser } = useAuth();
 
-  // Get current user info for self-modification protection
+  // Set current user email from auth context to prevent self-modification
   useEffect(() => {
-    const getCurrentUser = async () => {
-      try {
-        const response = await request('/auth/me');
-        if (response.success) {
-          setCurrentUserEmail(response.user.email);
-        }
-      } catch (error) {
-        console.error('Error fetching current user:', error);
-      }
-    };
-    getCurrentUser();
-  }, []);
+    if (currentUser?.email) {
+      setCurrentUserEmail(currentUser.email);
+    }
+  }, [currentUser]);
 
   // Fetch users with filters and pagination
   const fetchUsers = async () => {
