@@ -126,7 +126,20 @@ export function SubscriptionManagement() {
             const response = await request(`/admin/subscriptions?${params.toString()}`);
 
             if (response.success) {
-                setSubscriptions(response.subscriptions || []);
+                // Ensure all subscriptions have required properties
+                const safeSubscriptions = (response.subscriptions || []).map((sub: any) => ({
+                    ...sub,
+                    user: sub.user || { email: 'Unknown', name: null },
+                    tier: sub.tier || 'Unknown',
+                    status: sub.status || 'Unknown',
+                    paymentFrequency: sub.paymentFrequency || 'Unknown',
+                    lifetimeValue: sub.lifetimeValue || 0,
+                    churnRiskScore: sub.churnRiskScore || 0,
+                    availableCredits: sub.availableCredits || 0,
+                    createdAt: sub.createdAt || new Date().toISOString()
+                }));
+                
+                setSubscriptions(safeSubscriptions);
                 setPagination(prev => ({
                     ...prev,
                     ...response.pagination
@@ -258,12 +271,17 @@ export function SubscriptionManagement() {
             key: 'user',
             label: 'Customer',
             sortable: true,
-            render: (value: any, subscription: Subscription) => (
-                <div className="flex flex-col">
-                    <span className="font-medium">{subscription.user.email}</span>
-                    {subscription.user.name && <span className="text-sm text-gray-500">{subscription.user.name}</span>}
-                </div>
-            )
+            render: (value: any, subscription: Subscription) => {
+                if (!subscription || !subscription.user) {
+                    return <span className="text-gray-400">No customer data</span>;
+                }
+                return (
+                    <div className="flex flex-col">
+                        <span className="font-medium">{subscription.user.email}</span>
+                        {subscription.user.name && <span className="text-sm text-gray-500">{subscription.user.name}</span>}
+                    </div>
+                );
+            }
         },
         {
             key: 'tier',
@@ -283,114 +301,142 @@ export function SubscriptionManagement() {
             key: 'status',
             label: 'Status',
             sortable: true,
-            render: (status: string, subscription: Subscription) => (
-                <div className="flex flex-col">
-                    <Badge variant={
-                        status === 'ACTIVE' ? 'default' :
-                            status === 'PAUSED' ? 'secondary' :
-                                status === 'CANCELLED' ? 'destructive' :
-                                    'outline'
-                    }>
-                        {status}
-                    </Badge>
-                    {subscription.isPaused && (
-                        <span className="text-xs text-orange-600 mt-1">
-                            Paused until {subscription.pauseEndDate ? new Date(subscription.pauseEndDate).toLocaleDateString() : 'indefinite'}
-                        </span>
-                    )}
-                </div>
-            )
+            render: (status: string, subscription: Subscription) => {
+                if (!subscription) {
+                    return <Badge variant="outline">Unknown</Badge>;
+                }
+                return (
+                    <div className="flex flex-col">
+                        <Badge variant={
+                            status === 'ACTIVE' ? 'default' :
+                                status === 'PAUSED' ? 'secondary' :
+                                    status === 'CANCELLED' ? 'destructive' :
+                                        'outline'
+                        }>
+                            {status || 'Unknown'}
+                        </Badge>
+                        {subscription.isPaused && (
+                            <span className="text-xs text-orange-600 mt-1">
+                                Paused until {subscription.pauseEndDate ? new Date(subscription.pauseEndDate).toLocaleDateString() : 'indefinite'}
+                            </span>
+                        )}
+                    </div>
+                );
+            }
         },
         {
             key: 'paymentFrequency',
             label: 'Billing',
-            render: (frequency: string, subscription: Subscription) => (
-                <div className="flex flex-col">
-                    <span className="text-sm">{frequency}</span>
-                    {subscription.nextPaymentAmount && (
-                        <span className="text-xs text-gray-500">
-                            ${subscription.nextPaymentAmount.toFixed(2)}
-                        </span>
-                    )}
-                </div>
-            )
+            render: (frequency: string, subscription: Subscription) => {
+                if (!subscription) {
+                    return <span className="text-gray-400">-</span>;
+                }
+                return (
+                    <div className="flex flex-col">
+                        <span className="text-sm">{frequency || 'Unknown'}</span>
+                        {subscription.nextPaymentAmount && (
+                            <span className="text-xs text-gray-500">
+                                ${subscription.nextPaymentAmount.toFixed(2)}
+                            </span>
+                        )}
+                    </div>
+                );
+            }
         },
         {
             key: 'lifetimeValue',
             label: 'LTV',
             sortable: true,
             render: (ltv: number) => (
-                <span className="font-medium">${ltv.toFixed(2)}</span>
+                <span className="font-medium">${(ltv || 0).toFixed(2)}</span>
             )
         },
         {
             key: 'churnRiskScore',
             label: 'Churn Risk',
             sortable: true,
-            render: (score: number) => (
-                <div className="flex items-center space-x-2">
-                    <Badge variant={
-                        score >= 0.7 ? 'destructive' :
-                            score >= 0.4 ? 'secondary' :
-                                'default'
-                    }>
-                        {(score * 100).toFixed(0)}%
-                    </Badge>
-                    {score >= 0.7 && <AlertTriangle className="w-4 h-4 text-red-500" />}
-                </div>
-            )
+            render: (score: number) => {
+                const safeScore = score || 0;
+                return (
+                    <div className="flex items-center space-x-2">
+                        <Badge variant={
+                            safeScore >= 0.7 ? 'destructive' :
+                                safeScore >= 0.4 ? 'secondary' :
+                                    'default'
+                        }>
+                            {(safeScore * 100).toFixed(0)}%
+                        </Badge>
+                        {safeScore >= 0.7 && <AlertTriangle className="w-4 h-4 text-red-500" />}
+                    </div>
+                );
+            }
         },
         {
             key: 'availableCredits',
             label: 'Credits',
-            render: (credits: number) => (
-                <span className={credits > 0 ? 'text-green-600 font-medium' : 'text-gray-400'}>
-                    ${credits.toFixed(2)}
-                </span>
-            )
+            render: (credits: number) => {
+                const safeCredits = credits || 0;
+                return (
+                    <span className={safeCredits > 0 ? 'text-green-600 font-medium' : 'text-gray-400'}>
+                        ${safeCredits.toFixed(2)}
+                    </span>
+                );
+            }
         },
         {
             key: 'createdAt',
             label: 'Created',
             sortable: true,
-            render: (date: string) => new Date(date).toLocaleDateString()
+            render: (date: string) => {
+                if (!date) return '-';
+                try {
+                    return new Date(date).toLocaleDateString();
+                } catch {
+                    return 'Invalid date';
+                }
+            }
         },
         {
             key: 'actions',
             label: 'Actions',
-            render: (_: any, subscription: Subscription) => (
-                <div className="flex items-center space-x-2">
-                    <PermissionGuard permission="subscriptions.view">
-                        <button
-                            onClick={() => handleViewSubscription(subscription)}
-                            className="p-1 text-blue-600 hover:text-blue-800"
-                            title="View Details"
-                        >
-                            <Eye className="w-4 h-4" />
-                        </button>
-                    </PermissionGuard>
+            render: (_: any, subscription: Subscription) => {
+                if (!subscription) {
+                    return <span className="text-gray-400">-</span>;
+                }
+                return (
+                    <div className="flex items-center space-x-2">
+                        <PermissionGuard permission="subscriptions.view">
+                            <button
+                                onClick={() => handleViewSubscription(subscription)}
+                                className="p-1 text-blue-600 hover:text-blue-800"
+                                title="View Details"
+                            >
+                                <Eye className="w-4 h-4" />
+                            </button>
+                        </PermissionGuard>
 
-                    <PermissionGuard permission="subscriptions.billing">
-                        <button
-                            onClick={() => handleBillingAdjustment(subscription)}
-                            className="p-1 text-green-600 hover:text-green-800"
-                            title="Billing Adjustment"
-                        >
-                            <DollarSign className="w-4 h-4" />
-                        </button>
-                    </PermissionGuard>
+                        <PermissionGuard permission="subscriptions.billing">
+                            <button
+                                onClick={() => handleBillingAdjustment(subscription)}
+                                className="p-1 text-green-600 hover:text-green-800"
+                                title="Billing Adjustment"
+                            >
+                                <DollarSign className="w-4 h-4" />
+                            </button>
+                        </PermissionGuard>
 
-                    <PermissionGuard permission="subscriptions.update">
-                        <button
-                            onClick={() => handleViewSubscription(subscription)}
-                            className="p-1 text-purple-600 hover:text-purple-800"
-                            title="Modify Subscription"
-                        >
-                            <Edit className="w-4 h-4" />
-                        </button>
-                    </PermissionGuard>
-                </div>
-            )
+                        <PermissionGuard permission="subscriptions.update">
+                            <button
+                                onClick={() => handleViewSubscription(subscription)}
+                                className="p-1 text-purple-600 hover:text-purple-800"
+                                title="Modify Subscription"
+                            >
+                                <Edit className="w-4 h-4" />
+                            </button>
+                        </PermissionGuard>
+                    </div>
+                );
+            }
         }
     ];
 
