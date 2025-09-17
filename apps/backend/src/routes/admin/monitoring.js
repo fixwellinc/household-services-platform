@@ -124,7 +124,7 @@ router.get('/alerts', requireAdmin, async (req, res) => {
   }
 });
 
-router.post('/alerts/:alertId/acknowledge', requireAdmin, auditLog('alert.acknowledge'), async (req, res) => {
+router.post('/alerts/:alertId/acknowledge', requireAdmin, auditPresets.settingsUpdate, async (req, res) => {
   try {
     const { alertId } = req.params;
     const success = systemMonitoringService.acknowledgeAlert(alertId);
@@ -150,7 +150,7 @@ router.post('/alerts/:alertId/acknowledge', requireAdmin, auditLog('alert.acknow
   }
 });
 
-router.post('/alerts/:alertId/resolve', requireAdmin, auditLog('alert.resolve'), async (req, res) => {
+router.post('/alerts/:alertId/resolve', requireAdmin, auditPresets.settingsUpdate, async (req, res) => {
   try {
     const { alertId } = req.params;
     const success = systemMonitoringService.resolveAlert(alertId);
@@ -195,7 +195,7 @@ router.get('/config/thresholds', requireAdmin, async (req, res) => {
   }
 });
 
-router.put('/config/thresholds', requireAdmin, auditLog('system.configure'), async (req, res) => {
+router.put('/config/thresholds', requireAdmin, auditPresets.settingsUpdate, async (req, res) => {
   try {
     const { thresholds } = req.body;
     
@@ -224,7 +224,7 @@ router.put('/config/thresholds', requireAdmin, auditLog('system.configure'), asy
 });
 
 // System actions
-router.post('/actions/clear-cache', requireAdmin, auditLog('system.clear_cache'), async (req, res) => {
+router.post('/actions/clear-cache', requireAdmin, auditPresets.settingsUpdate, async (req, res) => {
   try {
     const { pattern } = req.body;
     
@@ -246,7 +246,7 @@ router.post('/actions/clear-cache', requireAdmin, auditLog('system.clear_cache')
   }
 });
 
-router.post('/actions/restart-service', requireAdmin, auditLog('system.restart_service'), async (req, res) => {
+router.post('/actions/restart-service', requireAdmin, auditPresets.settingsUpdate, async (req, res) => {
   try {
     const { serviceName } = req.body;
     
