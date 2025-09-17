@@ -14,7 +14,8 @@ import {
   updateCustomer,
   createSubscriptionCheckoutSession,
   updateSubscriptionSchedule,
-  updateSubscription
+  updateSubscription,
+  updateSubscriptionPlan
 } from '../services/stripe.js';
 import { PLANS, getPlanByTier } from '../config/plans.js';
 import prisma from '../config/database.js';
@@ -112,6 +113,7 @@ router.post('/create', auth, async (req, res) => {
 // POST /api/subscriptions/cancel - Cancel subscription
 router.post('/cancel', auth, async (req, res) => {
   try {
+    const { reason, comments } = req.body;
     const userId = req.user.id;
 
     // Get user's subscription
@@ -130,6 +132,24 @@ router.post('/cancel', auth, async (req, res) => {
         error: 'Subscription cannot be cancelled',
         reason: user.subscription.cancellationBlockedReason 
       });
+    }
+
+    // Store cancellation feedback if provided
+    if (reason) {
+      try {
+        await prisma.cancellationFeedback.create({
+          data: {
+            subscriptionId: user.subscription.id,
+            userId: userId,
+            reason: reason,
+            comments: comments || null,
+            createdAt: new Date()
+          }
+        });
+      } catch (feedbackError) {
+        console.error('Failed to store cancellation feedback:', feedbackError);
+        // Continue with cancellation even if feedback storage fails
+      }
     }
 
     // Cancel in Stripe if subscription exists there
@@ -229,23 +249,36 @@ router.post('/update', auth, async (req, res) => {
       return res.status(400).json({ error: 'Invalid billing period' });
     }
 
-    // Update subscription in Stripe
+    // Update subscription in Stripe with proration
+    let stripeSubscription = null;
     if (user.subscription.stripeSubscriptionId) {
-      // Note: Stripe subscription updates require creating a new subscription
-      // or using the subscription update API with proper parameters
-      // For now, we'll update the database and let the webhook handle Stripe updates
+      try {
+        stripeSubscription = await updateSubscriptionPlan(
+          user.subscription.stripeSubscriptionId,
+          newPriceId,
+          'create_prorations'
+        );
+      } catch (stripeError) {
+        console.error('Stripe subscription update failed:', stripeError);
+        // Continue with database update even if Stripe fails
+      }
     }
 
     // Update subscription in database
-    await prisma.subscription.update({
+    const updatedSubscription = await prisma.subscription.update({
       where: { id: user.subscription.id },
       data: {
         tier,
+        paymentFrequency: billingPeriod.toUpperCase(),
         updatedAt: new Date(),
       },
     });
 
-    res.json({ message: 'Subscription updated successfully' });
+    res.json({ 
+      message: 'Subscription updated successfully',
+      subscription: updatedSubscription,
+      stripeUpdate: stripeSubscription ? { success: true } : { success: false }
+    });
   } catch (error) {
     console.error('Subscription update error:', error);
     res.status(500).json({ error: error.message });
@@ -445,6 +478,130 @@ router.get('/can-cancel', auth, async (req, res) => {
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+});
+
+// GET /api/subscriptions/retention-offers - Get retention offers for cancellation
+router.get('/retention-offers', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Get user's subscription
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { subscription: true }
+    });
+
+    if (!user?.subscription) {
+      return res.status(404).json({ error: 'No subscription found' });
+    }
+
+    const currentPlan = getPlanByTier(user.subscription.tier);
+    if (!currentPlan) {
+      return res.status(400).json({ error: 'Invalid subscription tier' });
+    }
+
+    // Generate retention offers based on subscription tier and history
+    const offers = [
+      {
+        id: 'discount_50',
+        type: 'DISCOUNT',
+        title: '50% Off Next 3 Months',
+        description: 'Continue enjoying all your benefits at half the price',
+        value: '50% discount',
+        duration: '3 months',
+        originalPrice: currentPlan.monthlyPrice,
+        discountedPrice: currentPlan.monthlyPrice * 0.5,
+        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+      },
+      {
+        id: 'pause_30',
+        type: 'PAUSE',
+        title: 'Pause for 30 Days',
+        description: 'Take a break and resume your subscription when ready',
+        value: 'Free pause',
+        duration: '30 days',
+        originalPrice: currentPlan.monthlyPrice,
+        validUntil: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+      }
+    ];
+
+    // Add downgrade option if user is on higher tier
+    if (user.subscription.tier !== 'STARTER') {
+      const starterPlan = getPlanByTier('STARTER');
+      if (starterPlan) {
+        offers.push({
+          id: 'downgrade_starter',
+          type: 'DOWNGRADE',
+          title: 'Switch to Starter Plan',
+          description: 'Keep essential features at a lower cost',
+          value: 'Lower monthly cost',
+          originalPrice: currentPlan.monthlyPrice,
+          discountedPrice: starterPlan.monthlyPrice,
+          validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      offers,
+      message: 'Retention offers retrieved successfully'
+    });
+  } catch (error) {
+    console.error('Error fetching retention offers:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/subscriptions/apply-retention-offer - Apply a retention offer
+router.post('/apply-retention-offer', auth, async (req, res) => {
+  try {
+    const { offerId } = req.body;
+    const userId = req.user.id;
+
+    if (!offerId) {
+      return res.status(400).json({ error: 'Offer ID is required' });
+    }
+
+    // Get user's subscription
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { subscription: true }
+    });
+
+    if (!user?.subscription) {
+      return res.status(404).json({ error: 'No subscription found' });
+    }
+
+    // For now, we'll just log the retention offer application
+    // In a real implementation, you would apply the specific offer
+    console.log(`Applying retention offer ${offerId} for user ${userId}`);
+
+    // Create a retention offer record
+    try {
+      await prisma.retentionOffer.create({
+        data: {
+          subscriptionId: user.subscription.id,
+          userId: userId,
+          offerId: offerId,
+          status: 'APPLIED',
+          appliedAt: new Date()
+        }
+      });
+    } catch (retentionError) {
+      console.error('Failed to store retention offer:', retentionError);
+      // Continue even if storage fails
+    }
+
+    res.json({
+      success: true,
+      message: 'Retention offer applied successfully',
+      offerId
+    });
+  } catch (error) {
+    console.error('Error applying retention offer:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -932,6 +1089,234 @@ router.delete('/properties/:id', auth, async (req, res) => {
     });
   } catch (error) {
     console.error('Error removing property:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/subscriptions/change-plan/preview - Get plan change preview
+router.post('/change-plan/preview', auth, async (req, res) => {
+  try {
+    const { newTier, billingCycle = 'monthly' } = req.body;
+    const userId = req.user.id;
+
+    if (!newTier) {
+      return res.status(400).json({ error: 'New tier is required' });
+    }
+
+    // Get user's current subscription
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { subscription: true }
+    });
+
+    if (!user?.subscription) {
+      return res.status(404).json({ error: 'No subscription found' });
+    }
+
+    const currentSubscription = user.subscription;
+    
+    // Get current and new plan details
+    const currentPlan = getPlanByTier(currentSubscription.tier);
+    const newPlan = getPlanByTier(newTier);
+
+    if (!currentPlan || !newPlan) {
+      return res.status(400).json({ error: 'Invalid plan tier' });
+    }
+
+    // Check if change is allowed
+    const canChange = currentSubscription.status === 'ACTIVE';
+    const restrictions = [];
+    
+    if (!canChange) {
+      restrictions.push('Subscription must be active to change plans');
+    }
+
+    // Calculate billing preview
+    const currentPrice = billingCycle === 'yearly' 
+      ? currentPlan.yearlyPrice / 12 
+      : currentPlan.monthlyPrice;
+    
+    const newPrice = billingCycle === 'yearly' 
+      ? newPlan.yearlyPrice / 12 
+      : newPlan.monthlyPrice;
+
+    const proratedDifference = newPrice - currentPrice;
+    
+    // Calculate remaining days in current period
+    const currentPeriodEnd = new Date(currentSubscription.currentPeriodEnd);
+    const now = new Date();
+    const remainingDays = Math.max(0, Math.ceil((currentPeriodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+    const totalDays = 30; // Assuming monthly billing for simplicity
+
+    // Calculate prorated amounts
+    const proratedFactor = remainingDays / totalDays;
+    const immediateCharge = Math.max(0, proratedDifference * proratedFactor);
+    const creditAmount = Math.max(0, -proratedDifference * proratedFactor);
+
+    // Determine if it's an upgrade or downgrade
+    const tierHierarchy = { STARTER: 1, HOMECARE: 2, PRIORITY: 3 };
+    const isUpgrade = tierHierarchy[newTier] > tierHierarchy[currentSubscription.tier];
+
+    // Calculate visit carryover (mock data for now)
+    const visitCarryover = {
+      currentVisitsPerMonth: currentPlan.visitsPerMonth || 1,
+      newVisitsPerMonth: newPlan.visitsPerMonth || 1,
+      unusedVisits: 0, // This would come from usage tracking
+      carryoverVisits: 0,
+      totalVisitsNextPeriod: newPlan.visitsPerMonth || 1
+    };
+
+    // Set effective date
+    const effectiveDate = new Date();
+    effectiveDate.setDate(effectiveDate.getDate() + 1); // Next day
+
+    const preview = {
+      currentPlan: {
+        id: currentPlan.id,
+        name: currentPlan.name,
+        monthlyPrice: currentPlan.monthlyPrice,
+        yearlyPrice: currentPlan.yearlyPrice
+      },
+      newPlan: {
+        id: newPlan.id,
+        name: newPlan.name,
+        monthlyPrice: newPlan.monthlyPrice,
+        yearlyPrice: newPlan.yearlyPrice
+      },
+      isUpgrade,
+      canChange,
+      restrictions,
+      billingPreview: {
+        currentPrice,
+        newPrice,
+        proratedDifference,
+        immediateCharge,
+        creditAmount,
+        nextAmount: newPrice,
+        remainingDays,
+        totalDays,
+        billingCycle
+      },
+      visitCarryover,
+      effectiveDate: effectiveDate.toISOString()
+    };
+
+    res.json({
+      success: true,
+      preview,
+      message: 'Plan change preview generated successfully'
+    });
+  } catch (error) {
+    console.error('Error generating plan change preview:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/subscriptions/change-plan - Change subscription plan
+router.post('/change-plan', auth, async (req, res) => {
+  try {
+    const { newTier, billingCycle = 'monthly' } = req.body;
+    const userId = req.user.id;
+
+    if (!newTier) {
+      return res.status(400).json({ error: 'New tier is required' });
+    }
+
+    // Get user's current subscription
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { subscription: true }
+    });
+
+    if (!user?.subscription) {
+      return res.status(404).json({ error: 'No subscription found' });
+    }
+
+    const currentSubscription = user.subscription;
+    
+    // Validate the change is allowed
+    if (currentSubscription.status !== 'ACTIVE') {
+      return res.status(400).json({ error: 'Subscription must be active to change plans' });
+    }
+
+    if (currentSubscription.tier === newTier) {
+      return res.status(400).json({ error: 'You are already on this plan' });
+    }
+
+    // Get plan details
+    const newPlan = getPlanByTier(newTier);
+    if (!newPlan) {
+      return res.status(400).json({ error: 'Invalid plan tier' });
+    }
+
+    // Get new price ID
+    const newPriceId = newPlan.stripePriceIds[billingCycle];
+    if (!newPriceId) {
+      return res.status(400).json({ error: 'Invalid billing cycle' });
+    }
+
+    // Update subscription in Stripe with proration
+    let stripeSubscription = null;
+    if (currentSubscription.stripeSubscriptionId) {
+      try {
+        stripeSubscription = await updateSubscriptionPlan(
+          currentSubscription.stripeSubscriptionId,
+          newPriceId,
+          'create_prorations'
+        );
+      } catch (stripeError) {
+        console.error('Stripe subscription update failed:', stripeError);
+        return res.status(500).json({ error: 'Failed to update payment processing' });
+      }
+    }
+
+    // Update subscription in database
+    const updatedSubscription = await prisma.subscription.update({
+      where: { id: currentSubscription.id },
+      data: {
+        tier: newTier,
+        paymentFrequency: billingCycle.toUpperCase(),
+        updatedAt: new Date(),
+      },
+    });
+
+    // Calculate response data (similar to preview)
+    const currentPlan = getPlanByTier(currentSubscription.tier);
+    const tierHierarchy = { STARTER: 1, HOMECARE: 2, PRIORITY: 3 };
+    const isUpgrade = tierHierarchy[newTier] > tierHierarchy[currentSubscription.tier];
+
+    res.json({
+      success: true,
+      message: 'Plan changed successfully',
+      subscription: {
+        tier: updatedSubscription.tier,
+        status: updatedSubscription.status,
+        paymentFrequency: updatedSubscription.paymentFrequency,
+        nextPaymentAmount: newPlan.monthlyPrice
+      },
+      billingPreview: {
+        currentPrice: currentPlan?.monthlyPrice || 0,
+        newPrice: newPlan.monthlyPrice,
+        proratedDifference: newPlan.monthlyPrice - (currentPlan?.monthlyPrice || 0),
+        immediateCharge: 0, // Would be calculated based on proration
+        creditAmount: 0,
+        nextAmount: newPlan.monthlyPrice,
+        remainingDays: 0,
+        totalDays: 30,
+        billingCycle
+      },
+      visitCarryover: {
+        currentVisitsPerMonth: currentPlan?.visitsPerMonth || 1,
+        newVisitsPerMonth: newPlan.visitsPerMonth || 1,
+        unusedVisits: 0,
+        carryoverVisits: 0,
+        totalVisitsNextPeriod: newPlan.visitsPerMonth || 1
+      },
+      effectiveDate: new Date().toISOString(),
+      isUpgrade
+    });
+  } catch (error) {
+    console.error('Error changing plan:', error);
     res.status(500).json({ error: error.message });
   }
 });

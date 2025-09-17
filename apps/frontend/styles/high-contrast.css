@@ -1,0 +1,231 @@
+/* High Contrast Mode Styles */
+.high-contrast {
+  /* Background and text colors */
+  --bg-primary: #000000;
+  --bg-secondary: #ffffff;
+  --text-primary: #ffffff;
+  --text-secondary: #000000;
+  --border-color: #ffffff;
+  
+  /* Button colors */
+  --btn-primary-bg: #ffffff;
+  --btn-primary-text: #000000;
+  --btn-primary-border: #ffffff;
+  --btn-secondary-bg: #000000;
+  --btn-secondary-text: #ffffff;
+  --btn-secondary-border: #ffffff;
+  
+  /* Focus colors */
+  --focus-ring: #ffff00;
+  --focus-bg: #ffff00;
+  --focus-text: #000000;
+  
+  /* Status colors */
+  --success-bg: #00ff00;
+  --success-text: #000000;
+  --warning-bg: #ffff00;
+  --warning-text: #000000;
+  --error-bg: #ff0000;
+  --error-text: #ffffff;
+}
+
+/* Apply high contrast styles when class is present */
+.high-contrast * {
+  /* Force high contrast on all elements */
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Specific overrides for better readability */
+.high-contrast .bg-white,
+.high-contrast .bg-gray-50,
+.high-contrast .bg-gray-100,
+.high-contrast .bg-blue-50,
+.high-contrast .bg-green-50,
+.high-contrast .bg-purple-50,
+.high-contrast .bg-yellow-50 {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+}
+
+.high-contrast .text-gray-600,
+.high-contrast .text-gray-700,
+.high-contrast .text-gray-800,
+.high-contrast .text-gray-900 {
+  color: var(--text-secondary) !important;
+}
+
+/* Button styles */
+.high-contrast button,
+.high-contrast .btn {
+  background-color: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-text) !important;
+  border: 2px solid var(--btn-primary-border) !important;
+}
+
+.high-contrast button:hover,
+.high-contrast .btn:hover {
+  background-color: var(--btn-secondary-bg) !important;
+  color: var(--btn-secondary-text) !important;
+}
+
+/* Focus styles */
+.high-contrast *:focus,
+.high-contrast *:focus-visible {
+  outline: 3px solid var(--focus-ring) !important;
+  outline-offset: 2px !important;
+  background-color: var(--focus-bg) !important;
+  color: var(--focus-text) !important;
+}
+
+/* Form elements */
+.high-contrast input,
+.high-contrast textarea,
+.high-contrast select {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+  border: 2px solid var(--border-color) !important;
+}
+
+.high-contrast input:focus,
+.high-contrast textarea:focus,
+.high-contrast select:focus {
+  outline: 3px solid var(--focus-ring) !important;
+  outline-offset: 2px !important;
+}
+
+/* Links */
+.high-contrast a {
+  color: var(--text-primary) !important;
+  text-decoration: underline !important;
+}
+
+.high-contrast a:hover,
+.high-contrast a:focus {
+  background-color: var(--focus-bg) !important;
+  color: var(--focus-text) !important;
+}
+
+/* Status indicators */
+.high-contrast .bg-green-500,
+.high-contrast .bg-green-600,
+.high-contrast .text-green-600,
+.high-contrast .text-green-700 {
+  background-color: var(--success-bg) !important;
+  color: var(--success-text) !important;
+}
+
+.high-contrast .bg-yellow-500,
+.high-contrast .bg-yellow-600,
+.high-contrast .text-yellow-600,
+.high-contrast .text-yellow-700 {
+  background-color: var(--warning-bg) !important;
+  color: var(--warning-text) !important;
+}
+
+.high-contrast .bg-red-500,
+.high-contrast .bg-red-600,
+.high-contrast .text-red-600,
+.high-contrast .text-red-700 {
+  background-color: var(--error-bg) !important;
+  color: var(--error-text) !important;
+}
+
+/* Cards and containers */
+.high-contrast .shadow-sm,
+.high-contrast .shadow-md,
+.high-contrast .shadow-lg {
+  box-shadow: 0 0 0 2px var(--border-color) !important;
+}
+
+/* Remove gradients and complex backgrounds */
+.high-contrast .bg-gradient-to-r,
+.high-contrast .bg-gradient-to-l,
+.high-contrast .bg-gradient-to-t,
+.high-contrast .bg-gradient-to-b,
+.high-contrast .bg-gradient-to-br {
+  background: var(--bg-primary) !important;
+}
+
+/* Ensure icons are visible */
+.high-contrast svg {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+/* Progress bars */
+.high-contrast .bg-blue-600 {
+  background-color: var(--text-primary) !important;
+}
+
+.high-contrast .bg-gray-200 {
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+/* Badges and pills */
+.high-contrast .badge,
+.high-contrast .pill {
+  background-color: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-text) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+/* Tables */
+.high-contrast table {
+  border-collapse: collapse !important;
+}
+
+.high-contrast th,
+.high-contrast td {
+  border: 1px solid var(--border-color) !important;
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+}
+
+.high-contrast th {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Modals and overlays */
+.high-contrast .modal-backdrop,
+.high-contrast .overlay {
+  background-color: var(--bg-primary) !important;
+  opacity: 0.9 !important;
+}
+
+/* Disable animations and transitions in high contrast mode */
+.high-contrast *,
+.high-contrast *::before,
+.high-contrast *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Ensure text is always readable */
+.high-contrast * {
+  text-shadow: none !important;
+}
+
+/* Force borders on all interactive elements */
+.high-contrast button,
+.high-contrast input,
+.high-contrast textarea,
+.high-contrast select,
+.high-contrast a,
+.high-contrast [role="button"],
+.high-contrast [tabindex] {
+  border: 2px solid var(--border-color) !important;
+}
+
+/* Special handling for disabled elements */
+.high-contrast *:disabled,
+.high-contrast *.disabled {
+  opacity: 0.5 !important;
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+}

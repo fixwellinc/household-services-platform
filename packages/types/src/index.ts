@@ -153,4 +153,38 @@ export const BOOKING_STATUS = [
   'CANCELLED'
 ] as const;
 
-export type BookingStatus = typeof BOOKING_STATUS[number]; 
+export type BookingStatus = typeof BOOKING_STATUS[number];
+
+// Notification types
+export interface Notification {
+  id: string;
+  userId: string;
+  type: 'BILLING' | 'SERVICE' | 'ACCOUNT' | 'PROMOTION';
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  title: string;
+  message: string;
+  actionRequired: boolean;
+  actionUrl?: string;
+  actionText?: string;
+  isRead: boolean;
+  createdAt: string;
+  expiresAt?: string;
+}
+
+export const NOTIFICATION_TYPES = [
+  'BILLING',
+  'SERVICE', 
+  'ACCOUNT',
+  'PROMOTION'
+] as const;
+
+export type NotificationType = typeof NOTIFICATION_TYPES[number];
+
+export const NOTIFICATION_PRIORITIES = [
+  'LOW',
+  'MEDIUM',
+  'HIGH',
+  'URGENT'
+] as const;
+
+export type NotificationPriority = typeof NOTIFICATION_PRIORITIES[number]; 

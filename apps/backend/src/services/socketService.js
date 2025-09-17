@@ -172,6 +172,46 @@ class SocketService {
         }
       });
 
+      // Customer dashboard real-time updates
+      socket.on('customer:subscribe', (data) => {
+        if (socket.userId && (socket.userId === data.userId || socket.userRole === 'ADMIN')) {
+          const roomName = `customer-${data.userId}`;
+          socket.join(roomName);
+          socketLogger.info('Customer subscribed to real-time updates', { 
+            userId: socket.userId,
+            targetUserId: data.userId,
+            room: roomName
+          });
+
+          // Send initial data if available
+          this.sendInitialCustomerData(socket, data.userId);
+        }
+      });
+
+      socket.on('customer:unsubscribe', (data) => {
+        if (socket.userId && (socket.userId === data.userId || socket.userRole === 'ADMIN')) {
+          const roomName = `customer-${data.userId}`;
+          socket.leave(roomName);
+          socketLogger.info('Customer unsubscribed from real-time updates', { 
+            userId: socket.userId,
+            targetUserId: data.userId,
+            room: roomName
+          });
+        }
+      });
+
+      socket.on('customer:refresh', async (data) => {
+        if (socket.userId && (socket.userId === data.userId || socket.userRole === 'ADMIN')) {
+          socketLogger.info('Customer data refresh requested', { 
+            userId: socket.userId,
+            targetUserId: data.userId
+          });
+          
+          // Send fresh data
+          await this.sendInitialCustomerData(socket, data.userId);
+        }
+      });
+
       // Handle disconnection
       socket.on('disconnect', () => {
         socketLogger.info('Client disconnected', { 
@@ -268,6 +308,9 @@ class SocketService {
     // Also notify the specific user if they're connected
     if (subscriptionData.userId) {
       this.notifyUser(subscriptionData.userId, 'subscription-update', subscriptionData);
+      
+      // Send to customer dashboard room
+      this.notifyCustomerRoom(subscriptionData.userId, 'customer:subscription-update', subscriptionData);
     }
   }
 
@@ -307,6 +350,81 @@ class SocketService {
       };
     }
     return rooms;
+  }
+
+  // Customer-specific notification methods
+  notifyCustomerRoom(userId, event, data) {
+    const roomName = `customer-${userId}`;
+    this.io.to(roomName).emit(event, data);
+    socketLogger.info('Customer room notification sent', { 
+      userId, 
+      room: roomName, 
+      event, 
+      data 
+    });
+  }
+
+  notifyCustomerSubscriptionUpdate(userId, subscriptionData) {
+    this.notifyCustomerRoom(userId, 'customer:subscription-update', {
+      ...subscriptionData,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  notifyCustomerUsageUpdate(userId, usageData) {
+    this.notifyCustomerRoom(userId, 'customer:usage-update', {
+      ...usageData,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  notifyCustomerBillingEvent(userId, billingEvent) {
+    this.notifyCustomerRoom(userId, 'customer:billing-event', {
+      ...billingEvent,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  notifyCustomerPerkUpdate(userId, perkData) {
+    this.notifyCustomerRoom(userId, 'customer:perk-update', {
+      ...perkData,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  notifyCustomerNotification(userId, notification) {
+    this.notifyCustomerRoom(userId, 'customer:notification', {
+      ...notification,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Send initial customer data when they subscribe
+  async sendInitialCustomerData(socket, userId) {
+    try {
+      // This would typically fetch from database
+      // For now, we'll emit placeholder events to indicate the system is ready
+      socket.emit('customer:subscription-update', {
+        id: 'initial',
+        userId: userId,
+        status: 'ACTIVE',
+        message: 'Real-time updates connected',
+        timestamp: new Date().toISOString()
+      });
+
+      socket.emit('customer:usage-update', {
+        userId: userId,
+        message: 'Usage tracking connected',
+        timestamp: new Date().toISOString()
+      });
+
+      socketLogger.info('Initial customer data sent', { userId });
+    } catch (error) {
+      socketLogger.error('Failed to send initial customer data', { 
+        userId, 
+        error: error.message 
+      });
+    }
   }
 
   // Health check method

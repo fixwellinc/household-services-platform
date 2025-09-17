@@ -55,6 +55,7 @@ import adminUsersRoutes from './routes/adminUsers.js';
 import bulkOperationsRoutes from './routes/bulkOperations.js';
 import adminSubscriptionAnalyticsRoutes from './routes/admin/subscriptionAnalytics.js';
 import adminSubscriptionsRoutes from './routes/admin/subscriptions.js';
+import customerRoutes from './routes/customer.js';
 
 // Import middleware
 import { authMiddleware, requireAdmin } from './middleware/auth.js';
@@ -395,6 +396,7 @@ app.use('/api/docs', checkDatabaseMiddleware, docsRoutes);
 app.use('/api/chat', checkDatabaseMiddleware, chatRoutes);
 app.use('/api/plans', checkDatabaseMiddleware, plansRoutes);
 app.use('/api/subscriptions', checkDatabaseMiddleware, subscriptionRoutes);
+app.use('/api/customer', checkDatabaseMiddleware, customerRoutes);
 app.use('/api/rewards', checkDatabaseMiddleware, rewardsRoutes);
 app.use('/api/dashboard', checkDatabaseMiddleware, dashboardRoutes);
 app.use('/api/performance', checkDatabaseMiddleware, performanceRoutes);
@@ -870,6 +872,7 @@ app.get('/api/admin/analytics', requireAdmin, async (req, res) => {
     });
 
     // Enhanced subscription analytics
+    const analyticsService = new AnalyticsService();
     const churnRate = await analyticsService.calculateChurnRate({
       startDate: thirtyDaysAgo.toISOString(),
       endDate: now.toISOString()
@@ -1644,6 +1647,33 @@ app.use('/uploads', (req, res, next) => {
   res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 hours
   next();
 }, express.static(path.join(process.cwd(), 'uploads')));
+
+// Serve avatars directory with cache control and fallback
+app.use('/avatars', (req, res, next) => {
+  res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 hours
+  
+  // If the requested avatar doesn't exist, serve a default one
+  const avatarPath = path.join(process.cwd(), 'apps/backend/public/avatars', req.path);
+  const fs = require('fs');
+  
+  if (!fs.existsSync(avatarPath)) {
+    // Generate a simple SVG avatar based on the filename
+    const name = path.basename(req.path, path.extname(req.path));
+    const initial = name.charAt(0).toUpperCase();
+    const colors = ['#3B82F6', '#EF4444', '#10B981', '#8B5CF6', '#F59E0B', '#EC4899'];
+    const color = colors[name.length % colors.length];
+    
+    const svg = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="20" cy="20" r="20" fill="${color}"/>
+      <text x="20" y="26" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">${initial}</text>
+    </svg>`;
+    
+    res.setHeader('Content-Type', 'image/svg+xml');
+    return res.send(svg);
+  }
+  
+  next();
+}, express.static(path.join(process.cwd(), 'apps/backend/public/avatars')));
 
 // PATTERN: Error handling middleware last
 app.use(errorLogger);

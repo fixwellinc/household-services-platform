@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/shared'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLocation } from '@/contexts/LocationContext'
+import { useUserPlan } from '@/hooks/use-plans'
 import { useRouter } from 'next/navigation'
 import { 
   User, 
@@ -28,6 +29,7 @@ import { ThemeToggle, ThemeToggleCompact } from '@/components/ui/ThemeToggle'
 const Header: React.FC = () => {
   const { user, isLoading, logout, isHydrated } = useAuth();
   const { userLocation, isInBC, isLoading: locationLoading } = useLocation();
+  const { data: userPlanData, isLoading: planLoading } = useUserPlan();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -39,6 +41,18 @@ const Header: React.FC = () => {
     } catch (error) {
       console.error('Logout failed:', error);
     }
+  };
+
+  // Check if user has an active subscription
+  const isSubscribed = userPlanData?.success && userPlanData?.hasPlan && userPlanData?.subscription?.status === 'ACTIVE';
+  
+  // Determine dashboard URL based on user role and subscription status
+  const getDashboardUrl = () => {
+    if (user?.role === 'ADMIN') {
+      return '/admin';
+    }
+    // For customers, show customer dashboard only if subscribed, otherwise general dashboard
+    return isSubscribed ? '/customer-dashboard' : '/dashboard';
   };
 
 
@@ -206,12 +220,12 @@ const Header: React.FC = () => {
                   <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
                     {/* Dashboard for all users */}
                     <Link 
-                      href={user.role === 'ADMIN' ? '/admin' : '/dashboard/customer'}
+                      href={getDashboardUrl()}
                       className="flex items-center gap-3 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       <LayoutDashboard className="h-4 w-4" />
-                      Dashboard
+                      {user?.role === 'ADMIN' ? 'Admin Dashboard' : isSubscribed ? 'Customer Dashboard' : 'Dashboard'}
                     </Link>
                     <Link 
                       href="/profile"
@@ -350,12 +364,12 @@ const Header: React.FC = () => {
               {user && (
                 <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
                   <Link 
-                    href={user.role === 'ADMIN' ? '/admin' : '/dashboard/customer'}
+                    href={getDashboardUrl()}
                     className="flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <LayoutDashboard className="h-5 w-5" />
-                    Dashboard
+                    {user?.role === 'ADMIN' ? 'Admin Dashboard' : isSubscribed ? 'Customer Dashboard' : 'Dashboard'}
                   </Link>
                   <Link 
                     href="/profile"

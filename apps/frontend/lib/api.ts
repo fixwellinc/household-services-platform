@@ -510,7 +510,7 @@ export class ApiClient {
     effectiveDate: string;
     isUpgrade: boolean;
   }> => {
-    return this.request('/plans/user/change-plan', {
+    return this.request('/subscriptions/change-plan', {
       method: 'POST',
       body: JSON.stringify({ newTier, billingCycle }),
     });
@@ -557,7 +557,7 @@ export class ApiClient {
     };
     message: string;
   }> => {
-    return this.request('/plans/user/change-plan/preview', {
+    return this.request('/subscriptions/change-plan/preview', {
       method: 'POST',
       body: JSON.stringify({ newTier, billingCycle }),
     });
@@ -605,6 +605,119 @@ export class ApiClient {
     message: string;
   }> => {
     return this.request('/plans/admin/stats');
+  }
+
+  // Subscription endpoints
+  getCurrentSubscription = async (): Promise<{
+    subscription: {
+      id: string;
+      userId: string;
+      tier: string;
+      status: string;
+      paymentFrequency: string;
+      currentPeriodStart: string;
+      currentPeriodEnd: string;
+      nextPaymentAmount: number;
+      plan: {
+        id: string;
+        name: string;
+        description: string;
+        monthlyPrice: number;
+        yearlyPrice: number;
+        features: string[];
+      };
+      usage?: any;
+      stripeSubscription?: any;
+    } | null;
+  }> => {
+    return this.request('/subscriptions/current');
+  }
+
+  updateSubscription = async (data: {
+    tier: string;
+    billingPeriod?: 'monthly' | 'yearly';
+  }): Promise<{
+    message: string;
+  }> => {
+    return this.request('/subscriptions/update', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  cancelSubscription = async (): Promise<{
+    message: string;
+  }> => {
+    return this.request('/subscriptions/cancel', {
+      method: 'POST',
+    });
+  }
+
+  // Check if user can cancel subscription
+  canCancelSubscription = async (): Promise<{
+    canCancel: boolean;
+    reason?: string;
+    blockedAt?: string;
+  }> => {
+    return this.request('/subscriptions/can-cancel');
+  }
+
+  // Get retention offers for cancellation
+  getRetentionOffers = async (): Promise<{
+    success: boolean;
+    offers: Array<{
+      id: string;
+      type: 'DISCOUNT' | 'PAUSE' | 'DOWNGRADE';
+      title: string;
+      description: string;
+      value: string;
+      duration?: string;
+      originalPrice: number;
+      discountedPrice?: number;
+      validUntil: string;
+    }>;
+    message: string;
+  }> => {
+    return this.request('/subscriptions/retention-offers');
+  }
+
+  // Apply a retention offer
+  applyRetentionOffer = async (offerId: string): Promise<{
+    success: boolean;
+    message: string;
+    offerId: string;
+  }> => {
+    return this.request('/subscriptions/apply-retention-offer', {
+      method: 'POST',
+      body: JSON.stringify({ offerId }),
+    });
+  }
+
+  getSubscriptionPlans = async (): Promise<{
+    success: boolean;
+    plans: Array<{
+      id: string;
+      name: string;
+      description: string;
+      monthlyPrice: number;
+      yearlyPrice: number;
+      originalPrice: number;
+      stripePriceIds: {
+        monthly: string;
+        yearly: string;
+      };
+      features: string[];
+      savings: string;
+      color: string;
+      icon: string;
+      popular?: boolean;
+      visitFrequency: string;
+      timePerVisit: string;
+      visitsPerMonth: number;
+    }>;
+    message: string;
+  }> => {
+    return this.request('/subscriptions/plans');
   }
 
   // Dashboard endpoints

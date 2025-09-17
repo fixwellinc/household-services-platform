@@ -410,6 +410,7 @@ export const updateSubscriptionSchedule = async (subscriptionId, newPriceId, nex
 
 // Update subscription payment method or other details
 export const updateSubscription = async (subscriptionId, updates) => {
+  console.log('🔄 Updating subscription:', subscriptionId, updates);
   try {
     // For mock subscriptions, return a mock response
     if (subscriptionId.startsWith('sub_mock_')) {
@@ -417,15 +418,80 @@ export const updateSubscription = async (subscriptionId, updates) => {
       return {
         id: subscriptionId,
         ...updates,
-        status: 'active'
+        status: 'active',
+        current_period_start: Math.floor(Date.now() / 1000),
+        current_period_end: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60),
+        items: {
+          data: [{
+            id: `si_mock_${Date.now()}`,
+            price: updates.items?.[0]?.price || 'price_mock'
+          }]
+        }
       };
     }
 
     const subscription = await stripe.subscriptions.update(subscriptionId, updates);
+    console.log('✅ Subscription updated successfully');
     return subscription;
   } catch (error) {
     console.error('Error updating subscription:', error);
     throw new Error('Failed to update subscription');
+  }
+};
+
+// Update subscription with plan change and proration
+export const updateSubscriptionPlan = async (subscriptionId, newPriceId, prorationBehavior = 'create_prorations') => {
+  console.log('🔄 Updating subscription plan:', subscriptionId, 'to price:', newPriceId);
+  try {
+    // For mock subscriptions, return a mock response
+    if (subscriptionId.startsWith('sub_mock_')) {
+      console.log('🔧 Using mock subscription plan update for:', subscriptionId);
+      return {
+        id: subscriptionId,
+        status: 'active',
+        current_period_start: Math.floor(Date.now() / 1000),
+        current_period_end: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60),
+        items: {
+          data: [{
+            id: `si_mock_${Date.now()}`,
+            price: {
+              id: newPriceId,
+              unit_amount: 2199, // Mock price
+              currency: 'usd'
+            }
+          }]
+        },
+        latest_invoice: {
+          id: `in_mock_${Date.now()}`,
+          amount_paid: 0,
+          amount_due: 0
+        }
+      };
+    }
+
+    // First, get the current subscription to find the subscription item
+    const currentSubscription = await stripe.subscriptions.retrieve(subscriptionId);
+    
+    if (!currentSubscription.items.data.length) {
+      throw new Error('No subscription items found');
+    }
+
+    const subscriptionItemId = currentSubscription.items.data[0].id;
+
+    // Update the subscription with the new price
+    const subscription = await stripe.subscriptions.update(subscriptionId, {
+      items: [{
+        id: subscriptionItemId,
+        price: newPriceId,
+      }],
+      proration_behavior: prorationBehavior,
+    });
+
+    console.log('✅ Subscription plan updated successfully');
+    return subscription;
+  } catch (error) {
+    console.error('Error updating subscription plan:', error);
+    throw new Error('Failed to update subscription plan');
   }
 };
 
