@@ -7,6 +7,7 @@ import socketService from '../services/socketService.js';
 import searchService from '../services/searchService.js';
 import searchIndexService from '../services/searchIndexService.js';
 import billingAdjustmentRoutes from './admin/billingAdjustments.js';
+import monitoringRoutes from './admin/monitoring.js';
 
 const router = express.Router();
 
@@ -15,6 +16,9 @@ router.use(requireAdmin);
 
 // Mount billing adjustment routes
 router.use('/', billingAdjustmentRoutes);
+
+// Mount monitoring routes
+router.use('/monitoring', monitoringRoutes);
 
 /**
  * GET /api/admin/dashboard/stats

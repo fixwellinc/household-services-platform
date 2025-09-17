@@ -1671,6 +1671,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     console.log('🚀 Performance monitoring enabled');
+    
+    // Start automated alerting service
+    import('./services/alertingService.js').then(({ default: alertingService }) => {
+      alertingService.startMonitoring(30000); // Check every 30 seconds
+      console.log('🔔 Automated alerting service started');
+    }).catch(error => {
+      console.error('Failed to start alerting service:', error);
+    });
   });
 }
 

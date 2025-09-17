@@ -347,6 +347,37 @@ class CacheService {
     }
   }
 
+  // Cache management methods
+  async clearAll() {
+    const startTime = monitor.startTimer('cache_clear_all');
+    
+    try {
+      // This would need to be implemented in cacheUtils
+      // For now, we'll use the pattern method to clear everything
+      const clearedCount = cacheUtils.clearPattern('.*');
+      
+      monitor.endTimer('cache_clear_all', startTime, { clearedCount });
+      return clearedCount;
+    } catch (error) {
+      monitor.endTimer('cache_clear_all', startTime, { error: error.message });
+      throw error;
+    }
+  }
+
+  async clearPattern(pattern) {
+    const startTime = monitor.startTimer('cache_clear_pattern');
+    
+    try {
+      const clearedCount = cacheUtils.clearPattern(pattern);
+      
+      monitor.endTimer('cache_clear_pattern', startTime, { pattern, clearedCount });
+      return clearedCount;
+    } catch (error) {
+      monitor.endTimer('cache_clear_pattern', startTime, { error: error.message });
+      throw error;
+    }
+  }
+
   // Cache statistics
   getStats() {
     return {
