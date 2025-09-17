@@ -233,6 +233,75 @@ router.post('/user/select-plan', authMiddleware, async (req, res) => {
   }
 });
 
+// TEMPORARY: Create test subscription for development
+router.post('/user/create-test-subscription', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { tier = 'HOMECARE' } = req.body;
+    
+    // Check if user already has a subscription
+    const existingSubscription = await prisma.subscription.findUnique({
+      where: { userId }
+    });
+    
+    if (existingSubscription) {
+      // Update existing subscription to active
+      const updatedSubscription = await prisma.subscription.update({
+        where: { userId },
+        data: {
+          tier,
+          status: 'ACTIVE',
+          currentPeriodStart: new Date(),
+          currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+          updatedAt: new Date()
+        }
+      });
+      
+      return res.json({
+        success: true,
+        message: 'Test subscription updated successfully',
+        subscription: {
+          id: updatedSubscription.id,
+          tier: updatedSubscription.tier,
+          status: updatedSubscription.status,
+          currentPeriodStart: updatedSubscription.currentPeriodStart,
+          currentPeriodEnd: updatedSubscription.currentPeriodEnd
+        }
+      });
+    }
+    
+    // Create new test subscription
+    const newSubscription = await prisma.subscription.create({
+      data: {
+        userId,
+        tier,
+        status: 'ACTIVE',
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+        canCancel: true
+      }
+    });
+    
+    res.json({
+      success: true,
+      message: 'Test subscription created successfully',
+      subscription: {
+        id: newSubscription.id,
+        tier: newSubscription.tier,
+        status: newSubscription.status,
+        currentPeriodStart: newSubscription.currentPeriodStart,
+        currentPeriodEnd: newSubscription.currentPeriodEnd
+      }
+    });
+  } catch (error) {
+    console.error('Error creating test subscription:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create test subscription'
+    });
+  }
+});
+
 // TEMPORARY: Manually activate subscription for testing
 router.post('/user/activate-subscription', authMiddleware, async (req, res) => {
   try {
