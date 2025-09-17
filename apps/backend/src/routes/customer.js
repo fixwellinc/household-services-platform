@@ -1,15 +1,15 @@
 import express from 'express';
-import { authenticateToken } from '../middleware/auth.js';
+import { authMiddleware } from '../middleware/auth.js';
 import usageTrackingService from '../services/usageTrackingService.js';
 import socketService from '../services/socketService.js';
 
 const router = express.Router();
 
 // Track service usage (for testing real-time updates)
-router.post('/track-usage', authenticateToken, async (req, res) => {
+router.post('/track-usage', authMiddleware, async (req, res) => {
   try {
     const { serviceType, subscriptionTier = 'HOMECARE' } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     const usageUpdate = await usageTrackingService.trackServiceUsage(
       userId, 
@@ -32,10 +32,10 @@ router.post('/track-usage', authenticateToken, async (req, res) => {
 });
 
 // Track discount usage (for testing real-time updates)
-router.post('/track-discount', authenticateToken, async (req, res) => {
+router.post('/track-discount', authMiddleware, async (req, res) => {
   try {
     const { discountAmount, subscriptionTier = 'HOMECARE' } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     const usageUpdate = await usageTrackingService.trackDiscountUsage(
       userId, 
@@ -58,10 +58,10 @@ router.post('/track-discount', authenticateToken, async (req, res) => {
 });
 
 // Simulate subscription status change (for testing real-time updates)
-router.post('/simulate-subscription-update', authenticateToken, async (req, res) => {
+router.post('/simulate-subscription-update', authMiddleware, async (req, res) => {
   try {
     const { status, tier, message } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     const subscriptionUpdate = {
       id: `sub_${userId}`,
@@ -113,10 +113,10 @@ router.post('/simulate-subscription-update', authenticateToken, async (req, res)
 });
 
 // Simulate billing event (for testing real-time updates)
-router.post('/simulate-billing-event', authenticateToken, async (req, res) => {
+router.post('/simulate-billing-event', authMiddleware, async (req, res) => {
   try {
     const { type, amount, message } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     const billingEvent = {
       userId,
@@ -146,10 +146,10 @@ router.post('/simulate-billing-event', authenticateToken, async (req, res) => {
 });
 
 // Simulate usage for testing
-router.post('/simulate-usage', authenticateToken, async (req, res) => {
+router.post('/simulate-usage', authMiddleware, async (req, res) => {
   try {
     const { subscriptionTier = 'HOMECARE' } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     // Run simulation in background
     usageTrackingService.simulateUsage(userId, subscriptionTier);
@@ -169,9 +169,9 @@ router.post('/simulate-usage', authenticateToken, async (req, res) => {
 });
 
 // Get current usage data
-router.get('/usage', authenticateToken, async (req, res) => {
+router.get('/usage', authMiddleware, async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const usage = usageTrackingService.getUserUsage(userId);
     const limits = usageTrackingService.getLimitsForTier('HOMECARE'); // Default tier
     const warnings = usageTrackingService.checkUsageWarnings(usage, 'HOMECARE');
@@ -194,9 +194,9 @@ router.get('/usage', authenticateToken, async (req, res) => {
 });
 
 // Reset usage for testing
-router.post('/reset-usage', authenticateToken, async (req, res) => {
+router.post('/reset-usage', authMiddleware, async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     usageTrackingService.resetUsageForPeriod(userId);
 
     res.json({
