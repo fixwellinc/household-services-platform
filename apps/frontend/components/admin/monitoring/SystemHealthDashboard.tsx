@@ -71,16 +71,31 @@ export default function SystemHealthDashboard() {
   const fetchHealthData = async () => {
     try {
       setRefreshing(true);
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        console.error('No authentication token found');
+        return;
+      }
+      
       const response = await fetch('/api/admin/monitoring/health', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
+      
+      if (response.status === 401) {
+        console.error('Authentication failed - user may not be logged in as admin');
+        // Could redirect to login or show error message
+        return;
+      }
       
       if (response.ok) {
         const result = await response.json();
         setHealthData(result.data);
         setLastRefresh(new Date());
+      } else {
+        console.error('Failed to fetch health data:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Error fetching health data:', error);
@@ -222,6 +237,19 @@ export default function SystemHealthDashboard() {
   };
 
   if (!healthData) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <XCircle className="h-8 w-8 text-red-400 mx-auto mb-4" />
+            <p className="text-gray-600">Authentication required</p>
+            <p className="text-sm text-gray-500">Please log in as an admin to access system monitoring</p>
+          </div>
+        </div>
+      );
+    }
+    
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">

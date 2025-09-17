@@ -7,6 +7,23 @@ import { auditPresets } from '../../middleware/auditMiddleware.js';
 
 const router = express.Router();
 
+// Basic monitoring service health check (no auth required)
+router.get('/ping', async (req, res) => {
+  try {
+    res.json({
+      success: true,
+      message: 'Monitoring service is running',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Monitoring service error',
+      message: error.message
+    });
+  }
+});
+
 // Get comprehensive system health metrics
 router.get('/health', requireAdmin, async (req, res) => {
   try {
