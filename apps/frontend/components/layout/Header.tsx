@@ -213,25 +213,14 @@ const Header: React.FC = () => {
                       <LayoutDashboard className="h-4 w-4" />
                       Dashboard
                     </Link>
-                    {user.role === 'ADMIN' ? (
-                      <Link 
-                        href="/profile"
-                        className="flex items-center gap-3 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        <User className="h-4 w-4" />
-                        Admin Panel
-                      </Link>
-                    ) : (
-                      <Link 
-                        href="/profile"
-                        className="flex items-center gap-3 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        <User className="h-4 w-4" />
-                        Profile
-                      </Link>
-                    )}
+                    <Link 
+                      href="/profile"
+                      className="flex items-center gap-3 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      <User className="h-4 w-4" />
+                      Profile
+                    </Link>
                     <Link 
                       href="/settings"
                       className="flex items-center gap-3 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
@@ -374,7 +363,7 @@ const Header: React.FC = () => {
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <User className="h-5 w-5" />
-                    {user.role === 'ADMIN' ? 'Admin Panel' : 'Profile'}
+                    Profile
                   </Link>
                   <Link 
                     href="/settings"

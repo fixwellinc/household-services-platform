@@ -20,7 +20,7 @@ export function AdminBreadcrumb({ activeTab, navigationItems }: AdminBreadcrumbP
 
   // Build breadcrumb path
   const breadcrumbPath = [
-    { name: 'Admin', icon: Home, href: '/admin' },
+    { name: 'Dashboard', icon: Home, href: '/admin' },
     { name: activeItem.name, icon: activeItem.icon }
   ];
 

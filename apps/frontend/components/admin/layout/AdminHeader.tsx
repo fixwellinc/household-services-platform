@@ -34,7 +34,7 @@ export function AdminHeader({ onMenuClick, user }: AdminHeaderProps) {
 
         {/* Desktop title */}
         <div className="hidden lg:block">
-          <h1 className="text-lg font-semibold text-gray-900">Admin Dashboard</h1>
+          <h1 className="text-lg font-semibold text-gray-900">Dashboard</h1>
         </div>
 
         {/* Mobile title */}

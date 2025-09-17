@@ -4,7 +4,7 @@ import searchIndexService from './searchIndexService.js';
 const prisma = new PrismaClient();
 
 /**
- * Global search service for admin panel
+ * Global search service for dashboard
  * Provides entity-specific search capabilities with indexing and suggestions
  */
 class SearchService {

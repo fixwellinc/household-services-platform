@@ -34,7 +34,7 @@ async function getSmtpSettings() {
     
     // Check if required SMTP settings are configured
     if (!map.emailHost || !map.emailUser || !map.emailPassword) {
-      throw new Error('SMTP settings not configured. Please configure email settings in the admin panel.');
+      throw new Error('SMTP settings not configured. Please configure email settings in the dashboard.');
     }
     
     return {
@@ -50,7 +50,7 @@ async function getSmtpSettings() {
     };
   } catch (error) {
     console.error('Failed to get SMTP settings:', error);
-    throw new Error('Email service not configured. Please configure SMTP settings in the admin panel.');
+    throw new Error('Email service not configured. Please configure SMTP settings in the dashboard.');
   }
 }
 
