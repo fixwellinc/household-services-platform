@@ -3,12 +3,12 @@ import { requireAdmin } from '../../middleware/auth.js';
 import systemMonitoringService from '../../services/systemMonitoringService.js';
 import maintenanceService from '../../services/maintenanceService.js';
 import alertingService from '../../services/alertingService.js';
-import { auditLog } from '../../middleware/auditMiddleware.js';
+import { auditPresets } from '../../middleware/auditMiddleware.js';
 
 const router = express.Router();
 
 // Get comprehensive system health metrics
-router.get('/health', requireAdmin, auditLog('system.monitor'), async (req, res) => {
+router.get('/health', requireAdmin, async (req, res) => {
   try {
     const health = await systemMonitoringService.getSystemHealth();
     
@@ -311,7 +311,7 @@ router.get('/maintenance/cache/stats', requireAdmin, async (req, res) => {
   }
 });
 
-router.post('/maintenance/cache/clear', requireAdmin, auditLog('maintenance.cache_clear'), async (req, res) => {
+router.post('/maintenance/cache/clear', requireAdmin, auditPresets.settingsUpdate, async (req, res) => {
   try {
     const { pattern } = req.body;
     const result = await maintenanceService.clearCache(pattern);
@@ -348,7 +348,7 @@ router.get('/maintenance/database/stats', requireAdmin, async (req, res) => {
   }
 });
 
-router.post('/maintenance/database/analyze', requireAdmin, auditLog('maintenance.db_analyze'), async (req, res) => {
+router.post('/maintenance/database/analyze', requireAdmin, auditPresets.settingsUpdate, async (req, res) => {
   try {
     const result = await maintenanceService.analyzeDatabaseTables();
     
@@ -366,7 +366,7 @@ router.post('/maintenance/database/analyze', requireAdmin, auditLog('maintenance
   }
 });
 
-router.post('/maintenance/database/rebuild-indexes', requireAdmin, auditLog('maintenance.rebuild_indexes'), async (req, res) => {
+router.post('/maintenance/database/rebuild-indexes', requireAdmin, auditPresets.settingsUpdate, async (req, res) => {
   try {
     const result = await maintenanceService.rebuildIndexes();
     
@@ -429,7 +429,7 @@ router.post('/maintenance/logs/search', requireAdmin, async (req, res) => {
   }
 });
 
-router.post('/maintenance/logs/export', requireAdmin, auditLog('maintenance.export_logs'), async (req, res) => {
+router.post('/maintenance/logs/export', requireAdmin, auditPresets.settingsUpdate, async (req, res) => {
   try {
     const { format = 'json', ...options } = req.body;
     const result = await maintenanceService.exportLogs({ format, ...options });
@@ -454,7 +454,7 @@ router.post('/maintenance/logs/export', requireAdmin, auditLog('maintenance.expo
   }
 });
 
-router.post('/maintenance/logs/rotate', requireAdmin, auditLog('maintenance.rotate_logs'), async (req, res) => {
+router.post('/maintenance/logs/rotate', requireAdmin, auditPresets.settingsUpdate, async (req, res) => {
   try {
     const result = await maintenanceService.rotateLogs();
     
@@ -472,7 +472,7 @@ router.post('/maintenance/logs/rotate', requireAdmin, auditLog('maintenance.rota
   }
 });
 
-router.post('/maintenance/tasks/:taskId/run', requireAdmin, auditLog('maintenance.run_task'), async (req, res) => {
+router.post('/maintenance/tasks/:taskId/run', requireAdmin, auditPresets.settingsUpdate, async (req, res) => {
   try {
     const { taskId } = req.params;
     const { options = {} } = req.body;
@@ -512,7 +512,7 @@ router.get('/alerting/rules', requireAdmin, async (req, res) => {
   }
 });
 
-router.post('/alerting/rules', requireAdmin, auditLog('alerting.create_rule'), async (req, res) => {
+router.post('/alerting/rules', requireAdmin, auditPresets.settingsUpdate, async (req, res) => {
   try {
     const rule = {
       id: `rule_${Date.now()}`,
@@ -535,7 +535,7 @@ router.post('/alerting/rules', requireAdmin, auditLog('alerting.create_rule'), a
   }
 });
 
-router.put('/alerting/rules/:ruleId', requireAdmin, auditLog('alerting.update_rule'), async (req, res) => {
+router.put('/alerting/rules/:ruleId', requireAdmin, auditPresets.settingsUpdate, async (req, res) => {
   try {
     const { ruleId } = req.params;
     const success = alertingService.updateAlertRule(ruleId, req.body);
@@ -561,7 +561,7 @@ router.put('/alerting/rules/:ruleId', requireAdmin, auditLog('alerting.update_ru
   }
 });
 
-router.delete('/alerting/rules/:ruleId', requireAdmin, auditLog('alerting.delete_rule'), async (req, res) => {
+router.delete('/alerting/rules/:ruleId', requireAdmin, auditPresets.settingsUpdate, async (req, res) => {
   try {
     const { ruleId } = req.params;
     const success = alertingService.deleteAlertRule(ruleId);
@@ -630,7 +630,7 @@ router.get('/alerting/stats', requireAdmin, async (req, res) => {
   }
 });
 
-router.post('/alerting/start', requireAdmin, auditLog('alerting.start_monitoring'), async (req, res) => {
+router.post('/alerting/start', requireAdmin, auditPresets.settingsUpdate, async (req, res) => {
   try {
     const { intervalMs = 30000 } = req.body;
     alertingService.startMonitoring(intervalMs);
@@ -649,7 +649,7 @@ router.post('/alerting/start', requireAdmin, auditLog('alerting.start_monitoring
   }
 });
 
-router.post('/alerting/stop', requireAdmin, auditLog('alerting.stop_monitoring'), async (req, res) => {
+router.post('/alerting/stop', requireAdmin, auditPresets.settingsUpdate, async (req, res) => {
   try {
     alertingService.stopMonitoring();
     
