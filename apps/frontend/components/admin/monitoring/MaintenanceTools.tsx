@@ -188,7 +188,7 @@ export default function MaintenanceTools() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         },
         body: JSON.stringify({ pattern })
       });
@@ -212,7 +212,7 @@ export default function MaintenanceTools() {
       const response = await fetch('/api/performance/database/analyze', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
 

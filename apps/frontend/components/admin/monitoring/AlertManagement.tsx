@@ -108,13 +108,13 @@ export default function AlertManagement() {
             // Fetch alert rules, alerts, and stats
             const [rulesResponse, alertsResponse, statsResponse] = await Promise.all([
                 fetch('/api/admin/monitoring/alerting/rules', {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
                 }),
                 fetch('/api/admin/monitoring/alerting/alerts', {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
                 }),
                 fetch('/api/admin/monitoring/alerting/stats', {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
                 })
             ]);
 
@@ -145,7 +145,7 @@ export default function AlertManagement() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 },
                 body: JSON.stringify(ruleForm)
             });
@@ -168,7 +168,7 @@ export default function AlertManagement() {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 },
                 body: JSON.stringify(ruleForm)
             });
@@ -191,7 +191,7 @@ export default function AlertManagement() {
             const response = await fetch(`/api/admin/monitoring/alerting/rules/${ruleId}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 }
             });
 
@@ -209,7 +209,7 @@ export default function AlertManagement() {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 },
                 body: JSON.stringify({ enabled })
             });
@@ -227,7 +227,7 @@ export default function AlertManagement() {
             const response = await fetch(`/api/admin/monitoring/alerts/${alertId}/acknowledge`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 }
             });
 
@@ -244,7 +244,7 @@ export default function AlertManagement() {
             const response = await fetch(`/api/admin/monitoring/alerts/${alertId}/resolve`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 }
             });
 

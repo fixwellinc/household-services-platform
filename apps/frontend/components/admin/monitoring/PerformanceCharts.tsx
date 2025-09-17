@@ -44,7 +44,7 @@ export default function PerformanceCharts() {
             setLoading(true);
             const response = await fetch(`/api/admin/monitoring/metrics/history?metric=${metric}&period=${period}`, {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 }
             });
 
@@ -68,7 +68,7 @@ export default function PerformanceCharts() {
         try {
             const response = await fetch('/api/admin/monitoring/metrics/realtime?metrics=cpu,memory,responseTime,cache', {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 }
             });
 

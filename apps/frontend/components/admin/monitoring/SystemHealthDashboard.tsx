@@ -71,7 +71,13 @@ export default function SystemHealthDashboard() {
   const fetchHealthData = async () => {
     try {
       setRefreshing(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
+      
+      console.log('Debug - Token check:', {
+        hasToken: !!token,
+        tokenLength: token?.length,
+        tokenStart: token?.substring(0, 20) + '...'
+      });
       
       if (!token) {
         console.error('No authentication token found');
@@ -84,9 +90,16 @@ export default function SystemHealthDashboard() {
         }
       });
       
+      console.log('Debug - Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+      
       if (response.status === 401) {
         console.error('Authentication failed - user may not be logged in as admin');
-        // Could redirect to login or show error message
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
         return;
       }
       
@@ -96,6 +109,8 @@ export default function SystemHealthDashboard() {
         setLastRefresh(new Date());
       } else {
         console.error('Failed to fetch health data:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
       }
     } catch (error) {
       console.error('Error fetching health data:', error);
@@ -153,7 +168,7 @@ export default function SystemHealthDashboard() {
       const response = await fetch(`/api/admin/monitoring/alerts/${alertId}/acknowledge`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
       
@@ -175,7 +190,7 @@ export default function SystemHealthDashboard() {
       const response = await fetch(`/api/admin/monitoring/alerts/${alertId}/resolve`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
       
@@ -237,7 +252,7 @@ export default function SystemHealthDashboard() {
   };
 
   if (!healthData) {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     if (!token) {
       return (
         <div className="flex items-center justify-center h-64">
