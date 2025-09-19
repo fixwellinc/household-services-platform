@@ -100,7 +100,7 @@ function getDashboardForRole(role: string | undefined): string {
     case 'ADMIN':
       return '/admin';
     case 'CUSTOMER':
-      return '/dashboard/customer';
+      return '/customer-dashboard';
     default:
       return '/login';
   }

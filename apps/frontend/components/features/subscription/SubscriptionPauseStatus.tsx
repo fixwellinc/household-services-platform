@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/shared';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/shared';
 import { Badge } from '@/components/ui/shared';
 import { toast } from 'sonner';
+import { useDashboardRouting } from '@/hooks/use-dashboard-routing';
 import {
     Pause,
     Play,
@@ -51,6 +52,9 @@ export default function SubscriptionPauseStatus({
     const [loading, setLoading] = useState(true);
     const [resuming, setResuming] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
+    
+    // Enhanced routing for payment links
+    const dashboardRouting = useDashboardRouting();
 
     useEffect(() => {
         fetchPauseStatus();
@@ -197,7 +201,7 @@ export default function SubscriptionPauseStatus({
                                     asChild
                                     className="w-full bg-red-600 hover:bg-red-700"
                                 >
-                                    <a href="/dashboard/subscription/payment">
+                                    <a href={`${dashboardRouting.getDashboardUrl()}/subscription/payment`}>
                                         <CreditCard className="h-4 w-4 mr-2" />
                                         Update Payment Method
                                     </a>
@@ -224,7 +228,7 @@ export default function SubscriptionPauseStatus({
                                 asChild
                                 className="w-full bg-green-600 hover:bg-green-700"
                             >
-                                <a href="/dashboard/subscription/payment">
+                                <a href={`${dashboardRouting.getDashboardUrl()}/subscription/payment`}>
                                     <CreditCard className="h-4 w-4 mr-2" />
                                     Reactivate Subscription
                                 </a>

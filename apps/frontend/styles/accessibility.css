@@ -1,0 +1,237 @@
+/* Accessibility Styles */
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sr-only:focus,
+.sr-only:active {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Focus indicators for keyboard navigation */
+.keyboard-navigation *:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.keyboard-navigation button:focus,
+.keyboard-navigation [role="button"]:focus {
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #3b82f6;
+}
+
+/* High contrast mode support */
+.high-contrast {
+  --tw-bg-opacity: 1;
+  --tw-text-opacity: 1;
+}
+
+.high-contrast * {
+  border-color: currentColor !important;
+}
+
+.high-contrast button {
+  border: 2px solid currentColor !important;
+}
+
+/* Reduced motion preferences */
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Enhanced focus styles for interactive elements */
+button:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Skip links */
+.skip-links a {
+  transform: translateY(-100%);
+}
+
+.skip-links a:focus {
+  transform: translateY(0);
+}
+
+/* Touch target sizing for mobile accessibility */
+@media (max-width: 768px) {
+  button,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Color contrast improvements */
+.text-contrast-high {
+  color: #000000;
+}
+
+.bg-contrast-high {
+  background-color: #ffffff;
+}
+
+/* Animation states for screen readers */
+[aria-hidden="true"] {
+  speak: none;
+}
+
+[aria-live] {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Loading states accessibility */
+.loading-spinner[aria-hidden="false"] {
+  speak: spell-out;
+}
+
+/* Form validation styles */
+[aria-invalid="true"] {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 1px #dc2626;
+}
+
+[role="alert"] {
+  font-weight: 600;
+}
+
+/* Menu and navigation accessibility */
+[role="menu"] {
+  outline: none;
+}
+
+[role="menuitem"]:focus {
+  background-color: #3b82f6;
+  color: white;
+}
+
+/* Modal and dialog accessibility */
+[role="dialog"] {
+  outline: none;
+}
+
+[role="dialog"]:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+}
+
+/* Table accessibility improvements */
+table caption {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+th[scope] {
+  font-weight: 600;
+}
+
+/* Link accessibility */
+a:not([class]) {
+  text-decoration: underline;
+  text-decoration-skip-ink: auto;
+}
+
+a:focus {
+  outline-offset: 2px;
+}
+
+/* Button accessibility improvements */
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Progress indicators */
+[role="progressbar"] {
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+[role="progressbar"]::after {
+  content: attr(aria-valuenow) "% complete";
+  position: absolute;
+  left: -10000px;
+}
+
+/* Status indicators */
+[role="status"] {
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+}
+
+/* Error states */
+.error-state {
+  border-color: #dc2626;
+  background-color: #fef2f2;
+  color: #991b1b;
+}
+
+/* Success states */
+.success-state {
+  border-color: #059669;
+  background-color: #f0fdf4;
+  color: #065f46;
+}
+
+/* Warning states */
+.warning-state {
+  border-color: #d97706;
+  background-color: #fffbeb;
+  color: #92400e;
+}
+
+/* Responsive text sizing for accessibility */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Print accessibility */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+  }
+}

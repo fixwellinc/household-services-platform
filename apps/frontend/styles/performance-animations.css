@@ -1,0 +1,408 @@
+/* Performance-Optimized Animations */
+/* Uses only transform and opacity for hardware acceleration */
+
+/* ===== HARDWARE-ACCELERATED KEYFRAMES ===== */
+
+@keyframes fade-in-hw {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up-hw {
+  from {
+    opacity: 0;
+    transform: translateZ(0) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateZ(0) translateY(0);
+  }
+}
+
+@keyframes slide-down-hw {
+  from {
+    opacity: 0;
+    transform: translateZ(0) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateZ(0) translateY(0);
+  }
+}
+
+@keyframes slide-left-hw {
+  from {
+    opacity: 0;
+    transform: translateZ(0) translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateZ(0) translateX(0);
+  }
+}
+
+@keyframes slide-right-hw {
+  from {
+    opacity: 0;
+    transform: translateZ(0) translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateZ(0) translateX(0);
+  }
+}
+
+@keyframes scale-in-hw {
+  from {
+    opacity: 0;
+    transform: translateZ(0) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateZ(0) scale(1);
+  }
+}
+
+@keyframes bounce-in-hw {
+  0% {
+    opacity: 0;
+    transform: translateZ(0) scale(0.8);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateZ(0) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateZ(0) scale(1);
+  }
+}
+
+@keyframes pulse-hw {
+  0%, 100% {
+    transform: translateZ(0) scale(1);
+  }
+  50% {
+    transform: translateZ(0) scale(1.05);
+  }
+}
+
+@keyframes shimmer-hw {
+  0% {
+    transform: translateZ(0) translateX(-100%);
+  }
+  100% {
+    transform: translateZ(0) translateX(100%);
+  }
+}
+
+@keyframes spin-hw {
+  from {
+    transform: translateZ(0) rotate(0deg);
+  }
+  to {
+    transform: translateZ(0) rotate(360deg);
+  }
+}
+
+/* ===== PERFORMANCE-OPTIMIZED ANIMATION CLASSES ===== */
+
+.animate-fade-in-hw {
+  animation: fade-in-hw 0.3s ease-out forwards;
+}
+
+.animate-slide-up-hw {
+  animation: slide-up-hw 0.6s ease-out forwards;
+}
+
+.animate-slide-down-hw {
+  animation: slide-down-hw 0.6s ease-out forwards;
+}
+
+.animate-slide-left-hw {
+  animation: slide-left-hw 0.6s ease-out forwards;
+}
+
+.animate-slide-right-hw {
+  animation: slide-right-hw 0.6s ease-out forwards;
+}
+
+.animate-scale-in-hw {
+  animation: scale-in-hw 0.4s ease-out forwards;
+}
+
+.animate-bounce-in-hw {
+  animation: bounce-in-hw 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.animate-pulse-hw {
+  animation: pulse-hw 2s ease-in-out infinite;
+}
+
+.animate-shimmer-hw {
+  animation: shimmer-hw 2s linear infinite;
+}
+
+.animate-spin-hw {
+  animation: spin-hw 1s linear infinite;
+}
+
+/* ===== STAGGERED ANIMATION UTILITIES ===== */
+
+.stagger-children > * {
+  opacity: 0;
+  transform: translateZ(0) translateY(20px);
+  transition: all 0.6s ease-out;
+}
+
+.stagger-children.animate > *:nth-child(1) {
+  transition-delay: 0ms;
+}
+
+.stagger-children.animate > *:nth-child(2) {
+  transition-delay: 100ms;
+}
+
+.stagger-children.animate > *:nth-child(3) {
+  transition-delay: 200ms;
+}
+
+.stagger-children.animate > *:nth-child(4) {
+  transition-delay: 300ms;
+}
+
+.stagger-children.animate > *:nth-child(5) {
+  transition-delay: 400ms;
+}
+
+.stagger-children.animate > *:nth-child(6) {
+  transition-delay: 500ms;
+}
+
+.stagger-children.animate > * {
+  opacity: 1;
+  transform: translateZ(0) translateY(0);
+}
+
+/* ===== HARDWARE ACCELERATION UTILITIES ===== */
+
+.hw-accelerated {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+.hw-accelerated-hover {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  transition: transform 0.2s ease-out;
+}
+
+.hw-accelerated-hover:hover {
+  transform: translateZ(0) translateY(-2px);
+}
+
+/* ===== PERFORMANCE MONITORING CLASSES ===== */
+
+.performance-monitor {
+  position: relative;
+}
+
+.performance-monitor::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 4px;
+  background: #10b981;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+}
+
+.performance-monitor.good-performance::after {
+  opacity: 1;
+  background: #10b981;
+}
+
+.performance-monitor.poor-performance::after {
+  opacity: 1;
+  background: #ef4444;
+}
+
+/* ===== LOADING STATES WITH HARDWARE ACCELERATION ===== */
+
+.loading-skeleton-hw {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-hw 2s linear infinite;
+  border-radius: 0.5rem;
+}
+
+.loading-spinner-hw {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin-hw 1s linear infinite;
+}
+
+.loading-dots-hw {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.loading-dots-hw span {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: currentColor;
+  border-radius: 50%;
+  animation: pulse-hw 1.4s ease-in-out infinite both;
+}
+
+.loading-dots-hw span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-dots-hw span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+/* ===== REDUCED MOTION SUPPORT ===== */
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-hw,
+  .animate-slide-up-hw,
+  .animate-slide-down-hw,
+  .animate-slide-left-hw,
+  .animate-slide-right-hw,
+  .animate-scale-in-hw,
+  .animate-bounce-in-hw {
+    animation: fade-in-hw 0.01s ease-out forwards;
+  }
+
+  .animate-pulse-hw,
+  .animate-shimmer-hw,
+  .animate-spin-hw {
+    animation: none;
+  }
+
+  .stagger-children > * {
+    transition: opacity 0.01s ease-out;
+    transform: none;
+  }
+
+  .hw-accelerated-hover {
+    transition: none;
+  }
+
+  .hw-accelerated-hover:hover {
+    transform: none;
+  }
+
+  .loading-skeleton-hw {
+    animation: none;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .loading-spinner-hw {
+    animation: none;
+    border-top-color: transparent;
+  }
+
+  .loading-dots-hw span {
+    animation: none;
+  }
+}
+
+/* ===== HIGH CONTRAST MODE SUPPORT ===== */
+
+@media (prefers-contrast: high) {
+  .loading-skeleton-hw {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid currentColor;
+  }
+
+  .loading-spinner-hw {
+    border-width: 3px;
+  }
+
+  .performance-monitor::after {
+    width: 6px;
+    height: 6px;
+    border: 1px solid currentColor;
+  }
+}
+
+/* ===== MOBILE OPTIMIZATIONS ===== */
+
+@media (max-width: 768px) {
+  .animate-slide-up-hw,
+  .animate-slide-down-hw {
+    animation-duration: 0.4s;
+  }
+
+  .animate-slide-left-hw,
+  .animate-slide-right-hw {
+    animation-duration: 0.4s;
+  }
+
+  .stagger-children > * {
+    transition-duration: 0.4s;
+  }
+
+  .stagger-children.animate > *:nth-child(n) {
+    transition-delay: calc(var(--stagger-index, 0) * 50ms);
+  }
+}
+
+/* ===== PERFORMANCE CLASSES FOR DIFFERENT DEVICE CAPABILITIES ===== */
+
+.performance-minimal .animate-bounce-in-hw {
+  animation: fade-in-hw 0.2s ease-out forwards;
+}
+
+.performance-minimal .animate-pulse-hw,
+.performance-minimal .animate-shimmer-hw {
+  animation: none;
+}
+
+.performance-standard .animate-bounce-in-hw {
+  animation: scale-in-hw 0.4s ease-out forwards;
+}
+
+.performance-enhanced .animate-bounce-in-hw {
+  animation: bounce-in-hw 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+/* ===== INTERSECTION OBSERVER ANIMATION TRIGGERS ===== */
+
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateZ(0) translateY(20px);
+  transition: all 0.6s ease-out;
+}
+
+.animate-on-scroll.in-view {
+  opacity: 1;
+  transform: translateZ(0) translateY(0);
+}
+
+.animate-on-scroll.stagger-1 { transition-delay: 0ms; }
+.animate-on-scroll.stagger-2 { transition-delay: 100ms; }
+.animate-on-scroll.stagger-3 { transition-delay: 200ms; }
+.animate-on-scroll.stagger-4 { transition-delay: 300ms; }
+.animate-on-scroll.stagger-5 { transition-delay: 400ms; }
+.animate-on-scroll.stagger-6 { transition-delay: 500ms; }

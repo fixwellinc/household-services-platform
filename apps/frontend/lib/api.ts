@@ -764,7 +764,7 @@ export class ApiClient {
       category: string;
     }>;
   }> => {
-    return this.request('/dashboard/customer');
+    return this.request('/customer-dashboard');
   }
 }
 

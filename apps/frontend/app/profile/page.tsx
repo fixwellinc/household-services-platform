@@ -236,7 +236,7 @@ export default function ProfilePage() {
                 Manage your personal information and account settings
               </p>
             </div>
-            <Link href="/dashboard/customer">
+            <Link href="/customer-dashboard">
               <Button variant="outline">
                 Back to Dashboard
               </Button>

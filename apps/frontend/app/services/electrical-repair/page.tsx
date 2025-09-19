@@ -30,7 +30,7 @@ export default function ElectricalRepairPage() {
 
   const handleBookNow = () => {
     // Navigate to book service page
-    router.push('/dashboard/customer/book-service');
+    router.push('/service-request');
   };
 
   const handleRequestQuote = () => {

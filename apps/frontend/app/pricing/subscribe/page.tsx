@@ -39,7 +39,7 @@ function SubscribeContent() {
             </p>
             <div className="space-y-3">
               <Button 
-                onClick={() => router.push('/dashboard/customer')}
+                onClick={() => router.push('/customer-dashboard')}
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600"
               >
                 Go to Dashboard

@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useCurrentUser } from '@/hooks/use-api';
-import { useUserPlan } from '@/hooks/use-plans';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscriptionStatus } from '@/hooks/use-subscription-status';
+import { useDashboardRouting } from '@/hooks/use-dashboard-routing';
 import { useCustomerRealtime } from '@/hooks/use-customer-realtime';
+import { DashboardRouteGuard } from '@/components/dashboard/DashboardRouteGuard';
+import { FullPageLoader } from '@/components/customer/loading/LoadingStates';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/shared';
 import { Badge, Button } from '@/components/ui/shared';
 import { 
@@ -48,11 +51,28 @@ import { ScreenReaderOnly } from '@/components/customer/accessibility/Accessibil
 import AccessibilityInit from '@/components/customer/accessibility/AccessibilityInit';
 
 export default function CustomerDashboardPage() {
-  const { data: userData, isLoading } = useCurrentUser();
-  const { data: userPlanData, isLoading: planLoading } = useUserPlan();
-  const { isAuthenticated } = useAuth();
-  const user = userData?.user;
+  const { user, isLoading: authLoading } = useAuth();
+  const subscriptionStatus = useSubscriptionStatus();
+  const dashboardRouting = useDashboardRouting();
+  const router = useRouter();
   
+  // Access control: Redirect non-customer users or users without subscription history
+  useEffect(() => {
+    if (!authLoading && user && !subscriptionStatus.isLoading) {
+      // Admin users should be redirected to admin dashboard
+      if (user.role === 'ADMIN') {
+        router.push('/admin');
+        return;
+      }
+
+      // Customer users without subscription history should be redirected to general dashboard
+      if (user.role === 'CUSTOMER' && !subscriptionStatus.shouldShowCustomerDashboard) {
+        dashboardRouting.navigateToRoute('/dashboard', true);
+        return;
+      }
+    }
+  }, [authLoading, user, subscriptionStatus, dashboardRouting, router]);
+
   // Real-time updates
   const {
     subscription: realtimeSubscription,
@@ -113,41 +133,50 @@ export default function CustomerDashboardPage() {
   // Merge real-time notifications with local ones
   const notifications = [...realtimeNotifications, ...localNotifications];
 
-  if (isLoading || planLoading) {
+  // Show loading while determining access
+  if (authLoading || subscriptionStatus.isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Loading dashboard...</span>
-      </div>
+      <FullPageLoader 
+        message="Loading customer dashboard..."
+        submessage="Verifying your subscription access..."
+      />
     );
   }
 
-  // Check if user is authenticated
-  if (!user) {
+  // Show loading while redirecting
+  if (
+    (user?.role === 'ADMIN') ||
+    (user?.role === 'CUSTOMER' && !subscriptionStatus.shouldShowCustomerDashboard)
+  ) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-md mx-auto text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-          <p className="text-gray-600 mb-8">
-            Please sign in to access your customer dashboard.
-          </p>
-          <div className="space-y-4">
-            <Link href="/login">
-              <Button className="w-full">Sign In</Button>
-            </Link>
-            <Link href="/register">
-              <Button variant="outline" className="w-full">Create Account</Button>
-            </Link>
+      <FullPageLoader 
+        message="Redirecting..."
+        submessage="Taking you to the appropriate dashboard..."
+      />
+    );
+  }
+
+  // Error handling for subscription status
+  if (subscriptionStatus.error) {
+    return (
+      <DashboardRouteGuard requiredRole="CUSTOMER">
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-md mx-auto text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Dashboard Error</h1>
+            <p className="text-gray-600 mb-8">
+              We encountered an issue loading your subscription information. Please try again.
+            </p>
+            <button 
+              onClick={() => subscriptionStatus.refetch()}
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+            >
+              Try Again
+            </button>
           </div>
         </div>
-      </div>
+      </DashboardRouteGuard>
     );
   }
-
-  // Check if user has an active subscription
-  const isSubscribed = userPlanData?.success && userPlanData?.hasPlan && userPlanData?.subscription?.status === 'ACTIVE';
-  const subscription = userPlanData?.subscription;
-  const plan = userPlanData?.plan;
 
   // Handlers for subscription management
   const handlePlanChange = () => {
@@ -272,8 +301,9 @@ export default function CustomerDashboardPage() {
       return realtimeSubscription;
     }
     
-    // Fall back to API data
-    if (subscription && plan) {
+    // Fall back to enhanced subscription status data
+    if (subscriptionStatus.subscription && subscriptionStatus.plan) {
+      const { subscription, plan } = subscriptionStatus;
       return {
         id: subscription.id || '',
         tier: subscription.tier as 'STARTER' | 'HOMECARE' | 'PRIORITY',
@@ -294,123 +324,65 @@ export default function CustomerDashboardPage() {
     return null;
   })();
 
-  // Redirect non-subscribers to subscription required page
-  if (!isSubscribed) {
+  // This should not happen due to access control above, but handle edge case
+  if (!subscriptionStatus.shouldShowCustomerDashboard) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto text-center">
-          <div className="mb-8">
-            <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Shield className="h-12 w-12 text-blue-600" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Subscription Required</h1>
-            <p className="text-gray-600 mb-8">
-              The customer dashboard is exclusively available to active subscribers. 
-              Choose a subscription plan to access your personalized dashboard with subscription management, 
-              perks tracking, and exclusive services.
-            </p>
-          </div>
-
-          {/* Subscription Status Info */}
-          <div className="mb-8">
-            <Card className="border-0 shadow-lg">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Current Account Status</h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Account Type:</span>
-                      <Badge variant="outline" className="bg-gray-50">Free Account</Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Subscription Status:</span>
-                      <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-                        No Active Subscription
-                      </Badge>
-                    </div>
-                    {subscription?.status === 'CANCELLED' && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600">Previous Subscription:</span>
-                        <span className="text-gray-500">Cancelled</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* What You'll Get */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">What You'll Get with a Subscription</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-              <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-gray-900">Subscription Management</h3>
-                  <p className="text-sm text-gray-600">View and manage your subscription details, billing, and plan changes</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-4 bg-green-50 rounded-lg">
-                <Gift className="h-5 w-5 text-green-600 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-gray-900">Exclusive Perks</h3>
-                  <p className="text-sm text-gray-600">Track your perks usage and access subscriber-only benefits</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-4 bg-purple-50 rounded-lg">
-                <Zap className="h-5 w-5 text-purple-600 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-gray-900">Priority Services</h3>
-                  <p className="text-sm text-gray-600">Access premium services and priority booking options</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-4 bg-yellow-50 rounded-lg">
-                <BarChart3 className="h-5 w-5 text-yellow-600 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-gray-900">Usage Analytics</h3>
-                  <p className="text-sm text-gray-600">Track your service usage and savings with detailed analytics</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="space-y-4">
-            <Link href="/pricing">
-              <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 text-lg">
-                <Star className="h-5 w-5 mr-2" />
-                Choose Your Subscription Plan
-              </Button>
-            </Link>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Link href="/services" className="flex-1">
-                <Button variant="outline" className="w-full">
-                  <Zap className="h-4 w-4 mr-2" />
-                  Browse Services
-                </Button>
-              </Link>
-              <Link href="/dashboard" className="flex-1">
-                <Button variant="outline" className="w-full">
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  General Dashboard
-                </Button>
-              </Link>
-            </div>
-            <div className="pt-4 border-t">
-              <p className="text-sm text-gray-500">
-                Already have a subscription? 
-                <Link href="/contact" className="text-blue-600 hover:text-blue-800 ml-1">
-                  Contact support
-                </Link> if you're having trouble accessing your account.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <FullPageLoader 
+        message="Redirecting..."
+        submessage="Taking you to the appropriate dashboard..."
+      />
     );
   }
 
+  return (
+    <DashboardRouteGuard requiredRole="CUSTOMER">
+      <CustomerDashboardContent 
+        user={user}
+        subscriptionStatus={subscriptionStatus}
+        transformedSubscription={transformedSubscription}
+        realtimeUsage={realtimeUsage}
+        socketConnected={socketConnected}
+        lastUpdated={lastUpdated}
+        refreshData={refreshData}
+        notifications={notifications}
+        handleMarkAsRead={handleMarkAsRead}
+        handleMarkAllAsRead={handleMarkAllAsRead}
+        handleDeleteNotification={handleDeleteNotification}
+        handlePlanChange={handlePlanChange}
+        handleCancelSubscription={handleCancelSubscription}
+        showPlanChangeWorkflow={showPlanChangeWorkflow}
+        showCancellationModal={showCancellationModal}
+        setShowPlanChangeWorkflow={setShowPlanChangeWorkflow}
+        setShowCancellationModal={setShowCancellationModal}
+        handlePlanChanged={handlePlanChanged}
+        handleCancellationComplete={handleCancellationComplete}
+      />
+    </DashboardRouteGuard>
+  );
+}
+
+// Separate component for the actual dashboard content
+function CustomerDashboardContent({
+  user,
+  subscriptionStatus,
+  transformedSubscription,
+  realtimeUsage,
+  socketConnected,
+  lastUpdated,
+  refreshData,
+  notifications,
+  handleMarkAsRead,
+  handleMarkAllAsRead,
+  handleDeleteNotification,
+  handlePlanChange,
+  handleCancelSubscription,
+  showPlanChangeWorkflow,
+  showCancellationModal,
+  setShowPlanChangeWorkflow,
+  setShowCancellationModal,
+  handlePlanChanged,
+  handleCancellationComplete
+}: any) {
   return (
     <ResponsiveLayout>
       {/* Initialize accessibility features */}

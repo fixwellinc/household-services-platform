@@ -199,10 +199,12 @@ export function useMultipleLoadingStates() {
     setLoadingStates(prev => ({
       ...prev,
       [key]: {
-        isLoading: false,
-        progress: undefined,
-        message: undefined,
-        error: null,
+        ...{
+          isLoading: false,
+          progress: undefined,
+          message: undefined,
+          error: null
+        },
         ...prev[key],
         ...state
       }
@@ -280,7 +282,11 @@ export function useSequentialLoading(steps: string[]) {
   }, []);
 
   const nextStep = useCallback(() => {
-    setCompletedSteps(prev => new Set([...prev, currentStep]));
+    setCompletedSteps(prev => {
+      const newSet = new Set(prev);
+      newSet.add(currentStep);
+      return newSet;
+    });
     
     if (currentStep < steps.length - 1) {
       setCurrentStep(prev => prev + 1);

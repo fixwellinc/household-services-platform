@@ -29,7 +29,7 @@ export default function HVACMaintenancePage() {
   const [showQuoteModal, setShowQuoteModal] = useState(false);
 
   const handleBookNow = () => {
-    router.push('/dashboard/customer/book-service');
+    router.push('/service-request');
   };
 
   const handleRequestQuote = () => {

@@ -3,6 +3,7 @@
 import React from 'react';
 import { Notification } from '@fixwell/types';
 import { AlertTriangle, CreditCard, CheckCircle, Clock, ExternalLink, RefreshCw } from 'lucide-react';
+import { useDashboardRouting } from '@/hooks/use-dashboard-routing';
 
 interface BillingNotificationsProps {
   notifications: Notification[];
@@ -20,6 +21,7 @@ const BillingNotifications: React.FC<BillingNotificationsProps> = ({
   onContactSupport
 }) => {
   const billingNotifications = notifications.filter(n => n.type === 'BILLING');
+  const dashboardRouting = useDashboardRouting();
 
   const getNotificationIcon = (notification: Notification) => {
     if (notification.message.toLowerCase().includes('payment failed') || 
@@ -87,7 +89,7 @@ const BillingNotifications: React.FC<BillingNotificationsProps> = ({
       actions.push(
         <button
           key="details"
-          onClick={() => window.location.href = '/customer-dashboard'}
+          onClick={() => window.location.href = dashboardRouting.getDashboardUrl()}
           className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 text-sm rounded hover:bg-green-200 transition-colors"
         >
           <CheckCircle className="w-3 h-3" />

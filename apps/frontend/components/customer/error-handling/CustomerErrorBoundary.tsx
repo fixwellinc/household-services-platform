@@ -4,6 +4,23 @@ import React from 'react';
 import { Button } from '@/components/ui/shared';
 import { AlertTriangle, RefreshCw, Home, HelpCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/shared';
+import { useDashboardRouting } from '@/hooks/use-dashboard-routing';
+
+// Helper component for dashboard navigation within class component
+const DashboardNavigationButton: React.FC = () => {
+  const dashboardRouting = useDashboardRouting();
+  
+  return (
+    <Button 
+      onClick={() => window.location.href = dashboardRouting.getDashboardUrl()}
+      variant="outline"
+      className="border-red-300 text-red-700 hover:bg-red-100"
+    >
+      <Home className="h-4 w-4 mr-2" />
+      Go to Dashboard
+    </Button>
+  );
+};
 
 interface CustomerErrorBoundaryState {
   hasError: boolean;
@@ -160,14 +177,7 @@ class CustomerErrorBoundary extends React.Component<CustomerErrorBoundaryProps, 
                 Refresh Page
               </Button>
               
-              <Button 
-                onClick={() => window.location.href = '/dashboard'}
-                variant="outline"
-                className="border-red-300 text-red-700 hover:bg-red-100"
-              >
-                <Home className="h-4 w-4 mr-2" />
-                Go to Dashboard
-              </Button>
+              <DashboardNavigationButton />
             </div>
 
             {!canRetry && (

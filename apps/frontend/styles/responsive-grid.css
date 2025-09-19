@@ -1,0 +1,643 @@
+/* ===== RESPONSIVE GRID AND LAYOUT SYSTEM ===== */
+
+/* Container Query Support */
+@supports (container-type: inline-size) {
+  .container-query {
+    container-type: inline-size;
+  }
+
+  .container-query-normal {
+    container-type: normal;
+  }
+
+  .container-query-size {
+    container-type: size;
+  }
+}
+
+/* Advanced CSS Grid Layouts */
+.grid-responsive {
+  display: grid;
+  gap: var(--spacing-fluid-md);
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+}
+
+.grid-responsive-sm {
+  display: grid;
+  gap: var(--spacing-fluid-sm);
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+}
+
+.grid-responsive-lg {
+  display: grid;
+  gap: var(--spacing-fluid-lg);
+  grid-template-columns: repeat(auto-fit, minmax(min(350px, 100%), 1fr));
+}
+
+/* Adaptive Grid with Breakpoint-Specific Columns */
+.grid-adaptive {
+  display: grid;
+  gap: var(--spacing-fluid-md);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .grid-adaptive {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-adaptive {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .grid-adaptive {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Service Cards Grid */
+.grid-services {
+  display: grid;
+  gap: var(--spacing-fluid-lg);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .grid-services {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-services {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Hero Layout Grid */
+.grid-hero {
+  display: grid;
+  gap: var(--spacing-fluid-xl);
+  grid-template-columns: 1fr;
+  align-items: center;
+  min-height: 60vh;
+}
+
+@media (min-width: 1024px) {
+  .grid-hero {
+    grid-template-columns: 1fr 1fr;
+    min-height: 70vh;
+  }
+}
+
+/* Testimonials Grid */
+.grid-testimonials {
+  display: grid;
+  gap: var(--spacing-fluid-md);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .grid-testimonials {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .grid-testimonials {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Pricing Grid */
+.grid-pricing {
+  display: grid;
+  gap: var(--spacing-fluid-lg);
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+
+@media (min-width: 768px) {
+  .grid-pricing {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-pricing {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Feature Grid */
+.grid-features {
+  display: grid;
+  gap: var(--spacing-fluid-xl);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .grid-features {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Dashboard Grid */
+.grid-dashboard {
+  display: grid;
+  gap: var(--spacing-fluid-lg);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .grid-dashboard {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-dashboard {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1536px) {
+  .grid-dashboard {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Container Queries for Component-Level Responsiveness */
+@container (min-width: 300px) {
+  .card-container-responsive {
+    padding: var(--spacing-md);
+  }
+  
+  .card-container-responsive .card-title {
+    font-size: var(--font-size-lg);
+  }
+}
+
+@container (min-width: 400px) {
+  .card-container-responsive {
+    padding: var(--spacing-lg);
+  }
+  
+  .card-container-responsive .card-title {
+    font-size: var(--font-size-xl);
+  }
+  
+  .card-container-responsive .card-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+  }
+}
+
+@container (min-width: 500px) {
+  .card-container-responsive {
+    padding: var(--spacing-xl);
+  }
+  
+  .card-container-responsive .card-content {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--spacing-md);
+    align-items: center;
+  }
+}
+
+/* Service Card Container Queries */
+@container (min-width: 280px) {
+  .service-card-container {
+    .service-card-icon {
+      width: 3rem;
+      height: 3rem;
+    }
+    
+    .service-card-title {
+      font-size: var(--font-size-lg);
+    }
+  }
+}
+
+@container (min-width: 350px) {
+  .service-card-container {
+    .service-card-icon {
+      width: 4rem;
+      height: 4rem;
+    }
+    
+    .service-card-title {
+      font-size: var(--font-size-xl);
+    }
+    
+    .service-card-description {
+      display: block;
+    }
+    
+    .service-card-pricing {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+}
+
+@container (min-width: 450px) {
+  .service-card-container {
+    .service-card-content {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: var(--spacing-md);
+      align-items: start;
+    }
+    
+    .service-card-features {
+      display: block;
+    }
+  }
+}
+
+/* Flexible Spacing System */
+.spacing-responsive {
+  padding: var(--spacing-fluid-md);
+  margin-bottom: var(--spacing-fluid-lg);
+}
+
+.spacing-responsive-sm {
+  padding: var(--spacing-fluid-sm);
+  margin-bottom: var(--spacing-fluid-md);
+}
+
+.spacing-responsive-lg {
+  padding: var(--spacing-fluid-lg);
+  margin-bottom: var(--spacing-fluid-xl);
+}
+
+/* Section Spacing */
+.section-spacing {
+  padding-top: var(--spacing-fluid-3xl);
+  padding-bottom: var(--spacing-fluid-3xl);
+}
+
+.section-spacing-sm {
+  padding-top: var(--spacing-fluid-2xl);
+  padding-bottom: var(--spacing-fluid-2xl);
+}
+
+.section-spacing-lg {
+  padding-top: clamp(6rem, 5rem + 5vw, 8rem);
+  padding-bottom: clamp(6rem, 5rem + 5vw, 8rem);
+}
+
+/* Visual Hierarchy Maintenance */
+.hierarchy-spacing > * + * {
+  margin-top: var(--spacing-fluid-md);
+}
+
+.hierarchy-spacing-sm > * + * {
+  margin-top: var(--spacing-fluid-sm);
+}
+
+.hierarchy-spacing-lg > * + * {
+  margin-top: var(--spacing-fluid-lg);
+}
+
+/* Responsive Typography Scaling */
+.text-responsive-display {
+  font-size: clamp(2.5rem, 2rem + 2.5vw, 4rem);
+  line-height: var(--line-height-tight);
+  font-weight: 700;
+}
+
+.text-responsive-heading {
+  font-size: clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem);
+  line-height: var(--line-height-tight);
+  font-weight: 600;
+}
+
+.text-responsive-subheading {
+  font-size: clamp(1.25rem, 1.125rem + 0.625vw, 1.75rem);
+  line-height: var(--line-height-snug);
+  font-weight: 500;
+}
+
+.text-responsive-body {
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  line-height: var(--line-height-relaxed);
+}
+
+/* Breakpoint Transition Smoothness */
+.smooth-breakpoint {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.smooth-breakpoint-fast {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.smooth-breakpoint-slow {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Layout Integrity Classes */
+.layout-stable {
+  min-height: 0;
+  min-width: 0;
+}
+
+.layout-stable img,
+.layout-stable video {
+  max-width: 100%;
+  height: auto;
+}
+
+.layout-stable iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+/* Advanced Grid Areas */
+.grid-layout-main {
+  display: grid;
+  gap: var(--spacing-fluid-lg);
+  grid-template-areas: 
+    "header"
+    "main"
+    "sidebar"
+    "footer";
+  grid-template-rows: auto 1fr auto auto;
+  min-height: 100vh;
+}
+
+@media (min-width: 1024px) {
+  .grid-layout-main {
+    grid-template-areas: 
+      "header header"
+      "main sidebar"
+      "footer footer";
+    grid-template-columns: 1fr 300px;
+    grid-template-rows: auto 1fr auto;
+  }
+}
+
+.grid-area-header { grid-area: header; }
+.grid-area-main { grid-area: main; }
+.grid-area-sidebar { grid-area: sidebar; }
+.grid-area-footer { grid-area: footer; }
+
+/* Responsive Image Grid */
+.grid-images {
+  display: grid;
+  gap: var(--spacing-fluid-sm);
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+}
+
+.grid-images img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+}
+
+@media (min-width: 768px) {
+  .grid-images img {
+    height: 250px;
+  }
+}
+
+/* Masonry-like Grid */
+.grid-masonry {
+  display: grid;
+  gap: var(--spacing-fluid-md);
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  grid-auto-rows: masonry;
+}
+
+/* Fallback for browsers without masonry support */
+@supports not (grid-auto-rows: masonry) {
+  .grid-masonry {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-fluid-md);
+  }
+  
+  .grid-masonry > * {
+    flex: 1 1 300px;
+    max-width: 100%;
+  }
+}
+
+/* Responsive Navigation Grid */
+.nav-grid {
+  display: grid;
+  gap: var(--spacing-sm);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .nav-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+}
+
+/* Form Grid Layout */
+.form-grid {
+  display: grid;
+  gap: var(--spacing-fluid-md);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .form-grid .form-field-full {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Stats Grid */
+.grid-stats {
+  display: grid;
+  gap: var(--spacing-fluid-lg);
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  text-align: center;
+}
+
+/* CTA Section Grid */
+.grid-cta {
+  display: grid;
+  gap: var(--spacing-fluid-xl);
+  grid-template-columns: 1fr;
+  align-items: center;
+  text-align: center;
+}
+
+@media (min-width: 1024px) {
+  .grid-cta {
+    grid-template-columns: 2fr 1fr;
+    text-align: left;
+  }
+}
+
+/* Responsive Utilities */
+.responsive-show-mobile {
+  display: block;
+}
+
+.responsive-show-tablet {
+  display: none;
+}
+
+.responsive-show-desktop {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .responsive-show-mobile {
+    display: none;
+  }
+  
+  .responsive-show-tablet {
+    display: block;
+  }
+}
+
+@media (min-width: 1024px) {
+  .responsive-show-tablet {
+    display: none;
+  }
+  
+  .responsive-show-desktop {
+    display: block;
+  }
+}
+
+/* Responsive Flexbox Utilities */
+.flex-responsive {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-fluid-md);
+}
+
+@media (min-width: 768px) {
+  .flex-responsive {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.flex-responsive-reverse {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--spacing-fluid-md);
+}
+
+@media (min-width: 768px) {
+  .flex-responsive-reverse {
+    flex-direction: row-reverse;
+    align-items: center;
+  }
+}
+
+/* Container Size Utilities */
+.container-xs {
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--spacing-fluid-md);
+  padding-right: var(--spacing-fluid-md);
+}
+
+.container-sm {
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--spacing-fluid-md);
+  padding-right: var(--spacing-fluid-md);
+}
+
+.container-md {
+  max-width: 768px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--spacing-fluid-md);
+  padding-right: var(--spacing-fluid-md);
+}
+
+.container-lg {
+  max-width: 1024px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--spacing-fluid-md);
+  padding-right: var(--spacing-fluid-md);
+}
+
+.container-xl {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--spacing-fluid-md);
+  padding-right: var(--spacing-fluid-md);
+}
+
+.container-2xl {
+  max-width: 1536px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--spacing-fluid-md);
+  padding-right: var(--spacing-fluid-md);
+}
+
+/* Responsive Aspect Ratios */
+.aspect-responsive {
+  aspect-ratio: 1 / 1;
+}
+
+@media (min-width: 768px) {
+  .aspect-responsive {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+@media (min-width: 1024px) {
+  .aspect-responsive {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .grid-responsive,
+  .grid-adaptive,
+  .grid-services,
+  .grid-testimonials,
+  .grid-pricing,
+  .grid-features,
+  .grid-dashboard {
+    display: block !important;
+  }
+  
+  .grid-responsive > *,
+  .grid-adaptive > *,
+  .grid-services > *,
+  .grid-testimonials > *,
+  .grid-pricing > *,
+  .grid-features > *,
+  .grid-dashboard > * {
+    margin-bottom: 1rem;
+    break-inside: avoid;
+  }
+  
+  .responsive-show-mobile,
+  .responsive-show-tablet,
+  .responsive-show-desktop {
+    display: block !important;
+  }
+}

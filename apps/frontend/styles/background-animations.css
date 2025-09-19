@@ -1,0 +1,483 @@
+/* Enhanced Background Animation System */
+
+/* ===== GRADIENT MESH ANIMATIONS ===== */
+
+@keyframes mesh-float-1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -30px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+@keyframes mesh-float-2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translate(-40px, -20px) scale(1.2) rotate(180deg);
+  }
+}
+
+@keyframes mesh-float-3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(20px, 30px) scale(1.1);
+  }
+  75% {
+    transform: translate(-30px, -10px) scale(0.8);
+  }
+}
+
+.mesh-orb-1 {
+  animation: mesh-float-1 8s ease-in-out infinite;
+}
+
+.mesh-orb-2 {
+  animation: mesh-float-2 12s ease-in-out infinite;
+}
+
+.mesh-orb-3 {
+  animation: mesh-float-3 10s ease-in-out infinite;
+}
+
+/* ===== PARTICLE ANIMATIONS ===== */
+
+@keyframes particle-drift {
+  0% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) translateX(50px);
+    opacity: 0;
+  }
+}
+
+@keyframes particle-pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes particle-orbit {
+  0% {
+    transform: rotate(0deg) translateX(50px) rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg) translateX(50px) rotate(-360deg);
+  }
+}
+
+.particle-drift {
+  animation: particle-drift 6s linear infinite;
+}
+
+.particle-pulse {
+  animation: particle-pulse 3s ease-in-out infinite;
+}
+
+.particle-orbit {
+  animation: particle-orbit 15s linear infinite;
+}
+
+/* ===== GEOMETRIC PATTERN ANIMATIONS ===== */
+
+@keyframes geometric-rotate {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes geometric-morph {
+  0%, 100% {
+    border-radius: 0%;
+    transform: rotate(0deg);
+  }
+  25% {
+    border-radius: 25%;
+    transform: rotate(90deg);
+  }
+  50% {
+    border-radius: 50%;
+    transform: rotate(180deg);
+  }
+  75% {
+    border-radius: 25%;
+    transform: rotate(270deg);
+  }
+}
+
+@keyframes geometric-pulse-border {
+  0%, 100% {
+    border-width: 1px;
+    opacity: 0.3;
+  }
+  50% {
+    border-width: 3px;
+    opacity: 0.8;
+  }
+}
+
+.geometric-rotate {
+  animation: geometric-rotate 20s linear infinite;
+}
+
+.geometric-morph {
+  animation: geometric-morph 8s ease-in-out infinite;
+}
+
+.geometric-pulse-border {
+  animation: geometric-pulse-border 4s ease-in-out infinite;
+}
+
+/* ===== ENHANCED GRADIENT BACKGROUNDS ===== */
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes gradient-wave {
+  0%, 100% {
+    background-position: 0% 0%;
+  }
+  25% {
+    background-position: 100% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+}
+
+.gradient-animated {
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease-in-out infinite;
+}
+
+.gradient-wave {
+  background-size: 400% 400%;
+  animation: gradient-wave 12s ease-in-out infinite;
+}
+
+/* ===== RESPONSIVE ANIMATIONS ===== */
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .mesh-orb-1,
+  .mesh-orb-2,
+  .mesh-orb-3 {
+    animation-duration: 12s; /* Slower animations on mobile */
+  }
+  
+  .particle-drift {
+    animation-duration: 8s;
+  }
+  
+  .geometric-rotate {
+    animation-duration: 30s;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .mesh-orb-1 {
+    animation-duration: 10s;
+  }
+  
+  .mesh-orb-2 {
+    animation-duration: 14s;
+  }
+  
+  .mesh-orb-3 {
+    animation-duration: 12s;
+  }
+}
+
+/* Desktop enhancements */
+@media (min-width: 1025px) {
+  .mesh-orb-enhanced {
+    animation: mesh-float-1 8s ease-in-out infinite,
+               particle-pulse 4s ease-in-out infinite;
+  }
+  
+  .particle-enhanced {
+    animation: particle-drift 6s linear infinite,
+               particle-pulse 3s ease-in-out infinite;
+  }
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+
+/* Hardware acceleration for smooth animations */
+.background-animated {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .mesh-orb-1,
+  .mesh-orb-2,
+  .mesh-orb-3,
+  .particle-drift,
+  .particle-pulse,
+  .particle-orbit,
+  .geometric-rotate,
+  .geometric-morph,
+  .geometric-pulse-border,
+  .gradient-animated,
+  .gradient-wave {
+    animation: none;
+  }
+  
+  /* Provide static alternatives */
+  .mesh-orb-1,
+  .mesh-orb-2,
+  .mesh-orb-3 {
+    opacity: 0.6;
+  }
+  
+  .particle-drift,
+  .particle-pulse {
+    opacity: 0.4;
+  }
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+  .mesh-orb-1,
+  .mesh-orb-2,
+  .mesh-orb-3 {
+    opacity: 0.8;
+    filter: contrast(1.5);
+  }
+  
+  .particle-drift,
+  .particle-pulse {
+    opacity: 0.9;
+    filter: contrast(2);
+  }
+}
+
+/* ===== UTILITY CLASSES ===== */
+
+.bg-mesh-enhanced {
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+}
+
+.bg-mesh-dark {
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.15) 0%, transparent 50%);
+}
+
+.particle-field {
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+}
+
+.geometric-grid {
+  background-image: 
+    linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* ===== PREMIUM VISUAL ELEMENTS ANIMATIONS ===== */
+
+/* Geometric pattern animations */
+@keyframes geometric-float {
+  0%, 100% {
+    transform: translate(var(--x, 0%), var(--y, 0%)) rotate(var(--rotation, 0deg)) scale(var(--scale, 1));
+  }
+  25% {
+    transform: translate(calc(var(--x, 0%) + 5%), calc(var(--y, 0%) - 3%)) rotate(calc(var(--rotation, 0deg) + 90deg)) scale(calc(var(--scale, 1) * 1.1));
+  }
+  50% {
+    transform: translate(calc(var(--x, 0%) - 3%), calc(var(--y, 0%) + 5%)) rotate(calc(var(--rotation, 0deg) + 180deg)) scale(var(--scale, 1));
+  }
+  75% {
+    transform: translate(calc(var(--x, 0%) + 2%), calc(var(--y, 0%) - 2%)) rotate(calc(var(--rotation, 0deg) + 270deg)) scale(calc(var(--scale, 1) * 0.9));
+  }
+}
+
+/* Texture overlay animations */
+@keyframes texture-drift {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(2px, -1px);
+  }
+  50% {
+    transform: translate(-1px, 2px);
+  }
+  75% {
+    transform: translate(1px, 1px);
+  }
+}
+
+@keyframes texture-pulse {
+  0%, 100% {
+    opacity: var(--base-opacity, 0.03);
+  }
+  50% {
+    opacity: calc(var(--base-opacity, 0.03) * 1.5);
+  }
+}
+
+/* Interactive background animations */
+@keyframes glow-pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes ripple-expand {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes particle-float {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) translateX(20px) rotate(180deg);
+    opacity: 0;
+  }
+}
+
+/* Premium gradient animations */
+@keyframes premium-gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 100% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+}
+
+@keyframes premium-mesh-flow {
+  0%, 100% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
+  33% {
+    transform: translate(20px, -15px) scale(1.1) rotate(120deg);
+  }
+  66% {
+    transform: translate(-15px, 20px) scale(0.9) rotate(240deg);
+  }
+}
+
+/* Utility animation classes */
+.animate-texture-drift {
+  animation: texture-drift 8s ease-in-out infinite;
+}
+
+.animate-texture-pulse {
+  animation: texture-pulse 4s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.animate-ripple-expand {
+  animation: ripple-expand 1s ease-out forwards;
+}
+
+.animate-particle-float {
+  animation: particle-float 4s linear infinite;
+}
+
+.animate-premium-gradient {
+  background-size: 400% 400%;
+  animation: premium-gradient-shift 8s ease-in-out infinite;
+}
+
+.animate-premium-mesh {
+  animation: premium-mesh-flow 12s ease-in-out infinite;
+}
+
+/* ===== ANIMATION PERFORMANCE MONITORING ===== */
+
+.performance-monitor {
+  /* Monitor frame rate and adjust complexity */
+  animation-play-state: running;
+}
+
+@media (max-device-width: 768px) and (orientation: portrait) {
+  .performance-monitor {
+    /* Reduce animation complexity on mobile portrait */
+    animation-duration: calc(var(--animation-duration, 1s) * 1.5);
+  }
+}
+
+/* Battery level considerations */
+@media (battery: low) {
+  .performance-monitor {
+    animation-play-state: paused;
+  }
+}

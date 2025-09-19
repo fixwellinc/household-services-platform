@@ -1,4 +1,4 @@
-import HomePageClient from '@/components/HomePageClient';
+import ModernizedHomePageClient from '@/components/ModernizedHomePageClient';
 
 export const metadata = {
   title: 'Fixwell Services | Home',
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function HomePage() {
-  return <HomePageClient />;
+  return <ModernizedHomePageClient />;
 } 

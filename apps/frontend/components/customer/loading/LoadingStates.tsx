@@ -204,7 +204,8 @@ export function AsyncOperationStatus({
     idle: {
       icon: Clock,
       color: 'text-gray-600',
-      defaultMessage: 'Ready'
+      defaultMessage: 'Ready',
+      animate: false
     },
     loading: {
       icon: Loader2,
@@ -215,12 +216,14 @@ export function AsyncOperationStatus({
     success: {
       icon: CheckCircle,
       color: 'text-green-600',
-      defaultMessage: 'Completed'
+      defaultMessage: 'Completed',
+      animate: false
     },
     error: {
       icon: AlertCircle,
       color: 'text-red-600',
-      defaultMessage: 'Error occurred'
+      defaultMessage: 'Error occurred',
+      animate: false
     }
   };
 

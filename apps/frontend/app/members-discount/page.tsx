@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserPlan } from '@/hooks/use-plans';
+import { useSubscriptionStatus } from '@/hooks/use-subscription-status';
 import { Button } from '@/components/ui/shared';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/shared';
 import { Badge } from '@/components/ui/shared';
@@ -63,7 +64,8 @@ export default function MembersDiscountPage() {
   const [showAllBusinesses, setShowAllBusinesses] = useState(false);
 
   const isLoading = authLoading || planLoading;
-  const isMember = userPlanData?.success && userPlanData?.hasPlan && userPlanData?.subscription?.status === 'ACTIVE';
+  const subscriptionStatus = useSubscriptionStatus();
+  const isMember = subscriptionStatus.canAccessPremiumFeatures;
   const subscription = userPlanData?.subscription;
   const plan = userPlanData?.plan;
 

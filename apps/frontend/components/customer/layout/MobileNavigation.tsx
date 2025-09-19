@@ -17,6 +17,8 @@ import {
 import Link from 'next/link';
 import { Badge } from '@/components/ui/shared';
 import { cn } from '@/lib/utils';
+import { useDashboardRouting } from '@/hooks/use-dashboard-routing';
+import { useDashboardTransitions } from '@/components/dashboard/DashboardTransitions';
 
 interface MobileNavigationProps {
   isConnected?: boolean;
@@ -40,11 +42,17 @@ export default function MobileNavigation({
   onLogout 
 }: MobileNavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const dashboardRouting = useDashboardRouting();
+  const { navigateWithTransition, canNavigate } = useDashboardTransitions();
+
+  // Get dynamic dashboard URL from routing hook
+  const dashboardUrl = dashboardRouting.getDashboardUrl();
+  const isDashboardLoading = dashboardRouting.isLoading || !canNavigate;
 
   const navigationItems: NavigationItem[] = [
     {
-      label: 'Dashboard',
-      href: '/customer-dashboard',
+      label: isDashboardLoading ? 'Dashboard...' : 'Dashboard',
+      href: dashboardUrl,
       icon: BarChart3,
     },
     {
@@ -54,7 +62,7 @@ export default function MobileNavigation({
     },
     {
       label: 'Perks & Benefits',
-      href: '/customer-dashboard#perks',
+      href: `${dashboardUrl}#perks`,
       icon: Gift,
     },
     {
@@ -64,7 +72,7 @@ export default function MobileNavigation({
     },
     {
       label: 'Notifications',
-      href: '/customer-dashboard#notifications',
+      href: `${dashboardUrl}#notifications`,
       icon: Bell,
       badge: notificationCount > 0 ? notificationCount : undefined,
     },
@@ -86,6 +94,20 @@ export default function MobileNavigation({
 
   const closeMenu = () => {
     setIsMenuOpen(false);
+  };
+
+  // Handle dashboard navigation with enhanced routing
+  const handleDashboardNavigation = async (item: NavigationItem) => {
+    if (item.label.includes('Dashboard') && !isDashboardLoading) {
+      try {
+        await navigateWithTransition(dashboardUrl, true);
+        closeMenu();
+      } catch (error) {
+        console.error('Dashboard navigation failed:', error);
+        // Fallback to direct navigation
+        window.location.href = dashboardUrl;
+      }
+    }
   };
 
   const getTierColor = (tier: string) => {
@@ -200,21 +222,43 @@ export default function MobileNavigation({
               <ul className="space-y-2">
                 {navigationItems.map((item) => {
                   const Icon = item.icon;
+                  const isDashboard = item.label.includes('Dashboard');
+                  const isDisabled = isDashboard && isDashboardLoading;
+                  
                   return (
                     <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        onClick={closeMenu}
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors group"
-                      >
-                        <Icon className="h-5 w-5 text-gray-500 group-hover:text-gray-700" />
-                        <span className="flex-1 font-medium">{item.label}</span>
-                        {item.badge && (
-                          <Badge className="bg-red-500 text-white text-xs px-2 py-1 min-w-[20px] h-5 flex items-center justify-center">
-                            {item.badge}
-                          </Badge>
-                        )}
-                      </Link>
+                      {isDashboard ? (
+                        <button
+                          onClick={() => handleDashboardNavigation(item)}
+                          disabled={isDisabled}
+                          className={cn(
+                            "flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors group w-full text-left",
+                            isDisabled && "opacity-50 cursor-not-allowed"
+                          )}
+                        >
+                          <Icon className="h-5 w-5 text-gray-500 group-hover:text-gray-700" />
+                          <span className="flex-1 font-medium">{item.label}</span>
+                          {item.badge && (
+                            <Badge className="bg-red-500 text-white text-xs px-2 py-1 min-w-[20px] h-5 flex items-center justify-center">
+                              {item.badge}
+                            </Badge>
+                          )}
+                        </button>
+                      ) : (
+                        <Link
+                          href={item.href}
+                          onClick={closeMenu}
+                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors group"
+                        >
+                          <Icon className="h-5 w-5 text-gray-500 group-hover:text-gray-700" />
+                          <span className="flex-1 font-medium">{item.label}</span>
+                          {item.badge && (
+                            <Badge className="bg-red-500 text-white text-xs px-2 py-1 min-w-[20px] h-5 flex items-center justify-center">
+                              {item.badge}
+                            </Badge>
+                          )}
+                        </Link>
+                      )}
                     </li>
                   );
                 })}

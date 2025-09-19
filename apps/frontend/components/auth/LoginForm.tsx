@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/shared';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDashboardRouting } from '@/hooks/use-dashboard-routing';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
@@ -13,6 +14,7 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading } = useAuth();
   const searchParams = useSearchParams();
+  const dashboardRouting = useDashboardRouting();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,8 +35,9 @@ export default function LoginForm() {
         const decodedUrl = decodeURIComponent(redirectUrl);
         window.location.href = decodedUrl;
       } else {
-        // Default redirect to dashboard
-        window.location.href = '/dashboard';
+        // Use enhanced routing to determine correct dashboard
+        const dashboardUrl = dashboardRouting.getDashboardUrl();
+        window.location.href = dashboardUrl;
       }
     } catch (error) {
       console.error('Login error:', error);
