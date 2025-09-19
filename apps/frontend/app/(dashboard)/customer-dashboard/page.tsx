@@ -44,7 +44,7 @@ import {
 } from '@/components/customer/layout/ResponsiveLayout';
 import MobileNavigation from '@/components/customer/layout/MobileNavigation';
 import { 
-  SkipNavigation, 
+  SkipLink, 
   HighContrastToggle 
 } from '@/components/customer/accessibility/AccessibilityComponents';
 import { ScreenReaderOnly } from '@/components/customer/accessibility/AccessibilityComponents';
@@ -389,14 +389,10 @@ function CustomerDashboardContent({
       <AccessibilityInit />
       
       {/* Skip Navigation Links */}
-      <SkipNavigation
-        links={[
-          { href: '#main-content', label: 'Skip to main content' },
-          { href: '#subscription-overview', label: 'Skip to subscription overview' },
-          { href: '#perks-benefits', label: 'Skip to perks and benefits' },
-          { href: '#available-services', label: 'Skip to available services' },
-        ]}
-      />
+      <SkipLink href="#main-content">Skip to main content</SkipLink>
+      <SkipLink href="#subscription-overview">Skip to subscription overview</SkipLink>
+      <SkipLink href="#perks-benefits">Skip to perks and benefits</SkipLink>
+      <SkipLink href="#available-services">Skip to available services</SkipLink>
 
       {/* Mobile Navigation */}
       <MobileNavigation
