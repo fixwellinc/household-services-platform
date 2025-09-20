@@ -8,6 +8,8 @@ import searchService from '../services/searchService.js';
 import searchIndexService from '../services/searchIndexService.js';
 import billingAdjustmentRoutes from './admin/billingAdjustments.js';
 import monitoringRoutes from './admin/monitoring.js';
+import exportRoutes from './admin/exports.js';
+import reportRoutes from './admin/reports.js';
 
 const router = express.Router();
 
@@ -19,6 +21,12 @@ router.use('/', billingAdjustmentRoutes);
 
 // Mount monitoring routes
 router.use('/monitoring', monitoringRoutes);
+
+// Mount export routes
+router.use('/exports', exportRoutes);
+
+// Mount report routes
+router.use('/reports', reportRoutes);
 
 /**
  * GET /api/admin/dashboard/stats

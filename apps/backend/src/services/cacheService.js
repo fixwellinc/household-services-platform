@@ -1,390 +1,360 @@
-import { cacheUtils, cacheKeys, monitor } from '../config/performance.js';
-import prisma from '../config/database.js';
+/**
+ * Redis caching service for performance optimization
+ */
+
+import Redis from 'ioredis';
+import { logger } from '../utils/logger.js';
 
 class CacheService {
   constructor() {
-    this.defaultTTL = 600; // 10 minutes
-    this.shortTTL = 300; // 5 minutes
-    this.longTTL = 1800; // 30 minutes
+    this.redis = null;
+    this.isConnected = false;
+    this.defaultTTL = 300; // 5 minutes default TTL
+    this.init();
   }
 
-  // Subscription caching
-  async getSubscription(userId) {
-    const key = cacheKeys.subscription(userId);
-    return cacheUtils.get(key) || await this.refreshSubscriptionCache(userId);
-  }
-
-  async refreshSubscriptionCache(userId) {
-    const startTime = monitor.startTimer('cache_refresh_subscription');
-    
+  async init() {
     try {
-      const subscription = await prisma.subscription.findUnique({
-        where: { userId },
-        include: {
-          paymentFrequencies: {
-            orderBy: { createdAt: 'desc' },
-            take: 1
-          },
-          subscriptionPauses: {
-            where: { status: 'ACTIVE' },
-            orderBy: { startDate: 'desc' },
-            take: 1
-          },
-          additionalProperties: true,
-          user: {
-            select: {
-              id: true,
-              email: true,
-              name: true,
-              notifications: true
-            }
-          }
-        }
+      const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+      
+      this.redis = new Redis(redisUrl, {
+        retryDelayOnFailover: 100,
+        maxRetriesPerRequest: 3,
+        lazyConnect: true,
+        keepAlive: 30000,
+        connectTimeout: 10000,
+        commandTimeout: 5000,
       });
 
-      if (subscription) {
-        const key = cacheKeys.subscription(userId);
-        cacheUtils.set(key, subscription, this.defaultTTL);
-      }
+      this.redis.on('connect', () => {
+        this.isConnected = true;
+        logger.info('Redis cache connected successfully');
+      });
 
-      monitor.endTimer('cache_refresh_subscription', startTime, { userId, found: !!subscription });
-      return subscription;
+      this.redis.on('error', (error) => {
+        this.isConnected = false;
+        logger.error('Redis cache connection error:', error);
+      });
+
+      this.redis.on('close', () => {
+        this.isConnected = false;
+        logger.warn('Redis cache connection closed');
+      });
+
+      await this.redis.connect();
     } catch (error) {
-      monitor.endTimer('cache_refresh_subscription', startTime, { userId, error: error.message });
-      throw error;
+      logger.error('Failed to initialize Redis cache:', error);
+      this.isConnected = false;
     }
   }
 
-  async invalidateSubscriptionCache(userId) {
-    const key = cacheKeys.subscription(userId);
-    cacheUtils.del(key);
-    
-    // Also invalidate related caches
-    cacheUtils.del(cacheKeys.subscriptionAnalytics(userId));
-    cacheUtils.del(cacheKeys.rewardCredits(userId));
-    cacheUtils.del(cacheKeys.churnRisk(userId));
-  }
-
-  // Payment frequency options caching
-  async getPaymentFrequencyOptions(tier) {
-    const key = cacheKeys.paymentFrequencyOptions(tier);
-    let options = cacheUtils.get(key);
-    
-    if (!options) {
-      const startTime = monitor.startTimer('cache_refresh_payment_options');
-      
-      // Calculate payment options based on tier
-      options = this.calculatePaymentFrequencyOptions(tier);
-      cacheUtils.set(key, options, this.longTTL); // Cache for 30 minutes
-      
-      monitor.endTimer('cache_refresh_payment_options', startTime, { tier });
+  /**
+   * Get value from cache
+   */
+  async get(key) {
+    if (!this.isConnected) {
+      logger.warn('Cache not available, skipping get operation');
+      return null;
     }
-    
-    return options;
+
+    try {
+      const value = await this.redis.get(this.formatKey(key));
+      return value ? JSON.parse(value) : null;
+    } catch (error) {
+      logger.error('Cache get error:', error);
+      return null;
+    }
   }
 
-  calculatePaymentFrequencyOptions(tier) {
-    const basePrices = {
-      'STARTER': 19.99,
-      'HOMECARE': 29.99,
-      'PREMIUM': 49.99
-    };
+  /**
+   * Set value in cache with TTL
+   */
+  async set(key, value, ttl = this.defaultTTL) {
+    if (!this.isConnected) {
+      logger.warn('Cache not available, skipping set operation');
+      return false;
+    }
 
-    const basePrice = basePrices[tier] || 29.99;
-    
-    return {
-      MONTHLY: {
-        frequency: 'MONTHLY',
-        amount: basePrice,
-        discount: 0,
-        savings: 0,
-        label: 'Monthly',
-        description: 'Billed monthly'
-      },
-      YEARLY: {
-        frequency: 'YEARLY',
-        amount: basePrice * 12 * 0.9, // 10% discount
-        discount: 0.1,
-        savings: basePrice * 12 * 0.1,
-        label: 'Yearly',
-        description: 'Billed yearly (10% savings)'
+    try {
+      const serializedValue = JSON.stringify(value);
+      await this.redis.setex(this.formatKey(key), ttl, serializedValue);
+      return true;
+    } catch (error) {
+      logger.error('Cache set error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Delete value from cache
+   */
+  async del(key) {
+    if (!this.isConnected) {
+      return false;
+    }
+
+    try {
+      await this.redis.del(this.formatKey(key));
+      return true;
+    } catch (error) {
+      logger.error('Cache delete error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Delete multiple keys matching pattern
+   */
+  async delPattern(pattern) {
+    if (!this.isConnected) {
+      return false;
+    }
+
+    try {
+      const keys = await this.redis.keys(this.formatKey(pattern));
+      if (keys.length > 0) {
+        await this.redis.del(...keys);
       }
-    };
-  }
-
-  // Reward credits caching
-  async getRewardCredits(userId) {
-    const key = cacheKeys.rewardCredits(userId);
-    let credits = cacheUtils.get(key);
-    
-    if (!credits) {
-      const startTime = monitor.startTimer('cache_refresh_reward_credits');
-      
-      credits = await prisma.rewardCredit.findMany({
-        where: { 
-          userId,
-          usedAt: null,
-          OR: [
-            { expiresAt: null },
-            { expiresAt: { gt: new Date() } }
-          ]
-        },
-        orderBy: { earnedAt: 'asc' }
-      });
-      
-      cacheUtils.set(key, credits, this.shortTTL); // Cache for 5 minutes
-      monitor.endTimer('cache_refresh_reward_credits', startTime, { userId, count: credits.length });
-    }
-    
-    return credits;
-  }
-
-  async invalidateRewardCreditsCache(userId) {
-    const key = cacheKeys.rewardCredits(userId);
-    cacheUtils.del(key);
-  }
-
-  // Additional properties caching
-  async getAdditionalProperties(subscriptionId) {
-    const key = cacheKeys.additionalProperties(subscriptionId);
-    let properties = cacheUtils.get(key);
-    
-    if (!properties) {
-      const startTime = monitor.startTimer('cache_refresh_additional_properties');
-      
-      properties = await prisma.additionalProperty.findMany({
-        where: { subscriptionId },
-        orderBy: { addedAt: 'desc' }
-      });
-      
-      cacheUtils.set(key, properties, this.defaultTTL);
-      monitor.endTimer('cache_refresh_additional_properties', startTime, { subscriptionId, count: properties.length });
-    }
-    
-    return properties;
-  }
-
-  async invalidateAdditionalPropertiesCache(subscriptionId) {
-    const key = cacheKeys.additionalProperties(subscriptionId);
-    cacheUtils.del(key);
-  }
-
-  // Analytics caching
-  async getAnalyticsMetrics(type, period = '30d') {
-    const key = cacheKeys.analyticsMetrics(type, period);
-    let metrics = cacheUtils.get(key);
-    
-    if (!metrics) {
-      const startTime = monitor.startTimer('cache_refresh_analytics');
-      
-      metrics = await this.calculateAnalyticsMetrics(type, period);
-      cacheUtils.set(key, metrics, this.longTTL); // Cache for 30 minutes
-      
-      monitor.endTimer('cache_refresh_analytics', startTime, { type, period });
-    }
-    
-    return metrics;
-  }
-
-  async calculateAnalyticsMetrics(type, period) {
-    const periodDays = parseInt(period.replace('d', ''));
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - periodDays);
-
-    switch (type) {
-      case 'subscription_growth':
-        return await prisma.subscription.groupBy({
-          by: ['tier', 'status'],
-          where: {
-            createdAt: { gte: startDate }
-          },
-          _count: true
-        });
-
-      case 'payment_frequency_distribution':
-        return await prisma.subscription.groupBy({
-          by: ['paymentFrequency'],
-          where: {
-            status: 'ACTIVE',
-            createdAt: { gte: startDate }
-          },
-          _count: true,
-          _avg: {
-            lifetimeValue: true
-          }
-        });
-
-      case 'churn_analysis':
-        return await prisma.subscription.groupBy({
-          by: ['tier'],
-          where: {
-            updatedAt: { gte: startDate },
-            status: { in: ['CANCELLED', 'SUSPENDED'] }
-          },
-          _count: true
-        });
-
-      default:
-        return {};
+      return true;
+    } catch (error) {
+      logger.error('Cache pattern delete error:', error);
+      return false;
     }
   }
 
-  // Churn risk caching
-  async getChurnRisk(userId) {
-    const key = cacheKeys.churnRisk(userId);
-    let risk = cacheUtils.get(key);
-    
-    if (!risk) {
-      const startTime = monitor.startTimer('cache_refresh_churn_risk');
+  /**
+   * Check if key exists in cache
+   */
+  async exists(key) {
+    if (!this.isConnected) {
+      return false;
+    }
+
+    try {
+      const result = await this.redis.exists(this.formatKey(key));
+      return result === 1;
+    } catch (error) {
+      logger.error('Cache exists error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Increment counter in cache
+   */
+  async incr(key, ttl = this.defaultTTL) {
+    if (!this.isConnected) {
+      return 0;
+    }
+
+    try {
+      const formattedKey = this.formatKey(key);
+      const value = await this.redis.incr(formattedKey);
       
-      const subscription = await this.getSubscription(userId);
-      if (subscription) {
-        risk = {
-          score: subscription.churnRiskScore || 0,
-          factors: await this.calculateChurnFactors(subscription),
-          lastUpdated: new Date()
-        };
-        
-        cacheUtils.set(key, risk, this.defaultTTL);
+      // Set TTL only if this is the first increment
+      if (value === 1) {
+        await this.redis.expire(formattedKey, ttl);
       }
       
-      monitor.endTimer('cache_refresh_churn_risk', startTime, { userId, score: risk?.score });
+      return value;
+    } catch (error) {
+      logger.error('Cache increment error:', error);
+      return 0;
     }
-    
-    return risk;
   }
 
-  async calculateChurnFactors(subscription) {
-    const factors = [];
-    
-    // Payment failures
-    if (subscription.isPaused) {
-      factors.push({ factor: 'payment_issues', weight: 0.3, description: 'Recent payment failures' });
+  /**
+   * Get multiple values from cache
+   */
+  async mget(keys) {
+    if (!this.isConnected || !keys.length) {
+      return {};
     }
-    
-    // Low engagement (placeholder - would need usage data)
-    const daysSinceCreated = Math.floor((new Date() - subscription.createdAt) / (1000 * 60 * 60 * 24));
-    if (daysSinceCreated > 90) {
-      factors.push({ factor: 'long_term_customer', weight: -0.1, description: 'Long-term customer' });
-    }
-    
-    // Multiple properties (positive indicator)
-    if (subscription.additionalProperties?.length > 0) {
-      factors.push({ factor: 'multiple_properties', weight: -0.2, description: 'Multiple properties' });
-    }
-    
-    return factors;
-  }
 
-  // User notification preferences caching
-  async getUserNotificationPreferences(userId) {
-    const key = cacheKeys.userNotificationPreferences(userId);
-    let preferences = cacheUtils.get(key);
-    
-    if (!preferences) {
-      const startTime = monitor.startTimer('cache_refresh_notification_prefs');
+    try {
+      const formattedKeys = keys.map(key => this.formatKey(key));
+      const values = await this.redis.mget(...formattedKeys);
       
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { notifications: true }
+      const result = {};
+      keys.forEach((key, index) => {
+        result[key] = values[index] ? JSON.parse(values[index]) : null;
       });
       
-      preferences = user?.notifications || {
-        email: true,
-        sms: false,
-        paymentReminders: true,
-        serviceReminders: true,
-        promotions: false
+      return result;
+    } catch (error) {
+      logger.error('Cache mget error:', error);
+      return {};
+    }
+  }
+
+  /**
+   * Set multiple values in cache
+   */
+  async mset(keyValuePairs, ttl = this.defaultTTL) {
+    if (!this.isConnected || !keyValuePairs.length) {
+      return false;
+    }
+
+    try {
+      const pipeline = this.redis.pipeline();
+      
+      keyValuePairs.forEach(({ key, value }) => {
+        const formattedKey = this.formatKey(key);
+        const serializedValue = JSON.stringify(value);
+        pipeline.setex(formattedKey, ttl, serializedValue);
+      });
+      
+      await pipeline.exec();
+      return true;
+    } catch (error) {
+      logger.error('Cache mset error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Cache with automatic refresh
+   */
+  async getOrSet(key, fetchFunction, ttl = this.defaultTTL) {
+    try {
+      // Try to get from cache first
+      let value = await this.get(key);
+      
+      if (value !== null) {
+        return value;
+      }
+
+      // If not in cache, fetch the data
+      value = await fetchFunction();
+      
+      // Store in cache for next time
+      await this.set(key, value, ttl);
+      
+      return value;
+    } catch (error) {
+      logger.error('Cache getOrSet error:', error);
+      // If cache fails, still try to fetch the data
+      return await fetchFunction();
+    }
+  }
+
+  /**
+   * Invalidate cache patterns for specific entities
+   */
+  async invalidateEntity(entityType, entityId = '*') {
+    const patterns = [
+      `${entityType}:${entityId}`,
+      `${entityType}:list:*`,
+      `${entityType}:count:*`,
+      `dashboard:*`,
+      `analytics:*`
+    ];
+
+    for (const pattern of patterns) {
+      await this.delPattern(pattern);
+    }
+  }
+
+  /**
+   * Get cache statistics
+   */
+  async getStats() {
+    if (!this.isConnected) {
+      return { connected: false };
+    }
+
+    try {
+      const info = await this.redis.info('memory');
+      const keyspace = await this.redis.info('keyspace');
+      
+      return {
+        connected: true,
+        memory: this.parseRedisInfo(info),
+        keyspace: this.parseRedisInfo(keyspace)
       };
-      
-      cacheUtils.set(key, preferences, this.longTTL);
-      monitor.endTimer('cache_refresh_notification_prefs', startTime, { userId });
-    }
-    
-    return preferences;
-  }
-
-  async invalidateUserNotificationPreferencesCache(userId) {
-    const key = cacheKeys.userNotificationPreferences(userId);
-    cacheUtils.del(key);
-  }
-
-  // Bulk cache operations
-  async warmupCache(userIds) {
-    const startTime = monitor.startTimer('cache_warmup');
-    
-    try {
-      const promises = userIds.map(async (userId) => {
-        await Promise.all([
-          this.refreshSubscriptionCache(userId),
-          this.getRewardCredits(userId),
-          this.getUserNotificationPreferences(userId)
-        ]);
-      });
-      
-      await Promise.all(promises);
-      monitor.endTimer('cache_warmup', startTime, { userCount: userIds.length });
     } catch (error) {
-      monitor.endTimer('cache_warmup', startTime, { userCount: userIds.length, error: error.message });
-      throw error;
+      logger.error('Cache stats error:', error);
+      return { connected: false, error: error.message };
     }
   }
 
-  // Cache maintenance
-  async clearExpiredEntries() {
-    const startTime = monitor.startTimer('cache_maintenance');
-    
+  /**
+   * Clear all cache (use with caution)
+   */
+  async flush() {
+    if (!this.isConnected) {
+      return false;
+    }
+
     try {
-      // Clear analytics caches older than 1 hour
-      const analyticsPattern = 'analytics:.*';
-      const clearedCount = cacheUtils.clearPattern(analyticsPattern);
-      
-      monitor.endTimer('cache_maintenance', startTime, { clearedCount });
-      return clearedCount;
+      await this.redis.flushdb();
+      logger.info('Cache flushed successfully');
+      return true;
     } catch (error) {
-      monitor.endTimer('cache_maintenance', startTime, { error: error.message });
-      throw error;
+      logger.error('Cache flush error:', error);
+      return false;
     }
   }
 
-  // Cache management methods
-  async clearAll() {
-    const startTime = monitor.startTimer('cache_clear_all');
-    
-    try {
-      // This would need to be implemented in cacheUtils
-      // For now, we'll use the pattern method to clear everything
-      const clearedCount = cacheUtils.clearPattern('.*');
-      
-      monitor.endTimer('cache_clear_all', startTime, { clearedCount });
-      return clearedCount;
-    } catch (error) {
-      monitor.endTimer('cache_clear_all', startTime, { error: error.message });
-      throw error;
-    }
+  /**
+   * Format cache key with prefix
+   */
+  formatKey(key) {
+    const prefix = process.env.CACHE_PREFIX || 'fixwell';
+    return `${prefix}:${key}`;
   }
 
-  async clearPattern(pattern) {
-    const startTime = monitor.startTimer('cache_clear_pattern');
-    
-    try {
-      const clearedCount = cacheUtils.clearPattern(pattern);
-      
-      monitor.endTimer('cache_clear_pattern', startTime, { pattern, clearedCount });
-      return clearedCount;
-    } catch (error) {
-      monitor.endTimer('cache_clear_pattern', startTime, { error: error.message });
-      throw error;
-    }
+  /**
+   * Parse Redis info string into object
+   */
+  parseRedisInfo(infoString) {
+    const info = {};
+    infoString.split('\r\n').forEach(line => {
+      if (line && !line.startsWith('#')) {
+        const [key, value] = line.split(':');
+        if (key && value) {
+          info[key] = isNaN(value) ? value : Number(value);
+        }
+      }
+    });
+    return info;
   }
 
-  // Cache statistics
-  getStats() {
-    return {
-      cache: cacheUtils.getStats(),
-      performance: monitor.getMetrics()
-    };
+  /**
+   * Close Redis connection
+   */
+  async close() {
+    if (this.redis) {
+      await this.redis.quit();
+      this.isConnected = false;
+      logger.info('Redis cache connection closed');
+    }
   }
 }
 
-export default new CacheService();
+// Create singleton instance
+const cacheService = new CacheService();
+
+export { cacheService };
+
+// Cache key generators for different entities
+export const cacheKeys = {
+  user: (id) => `user:${id}`,
+  userList: (filters) => `user:list:${JSON.stringify(filters)}`,
+  userCount: (filters) => `user:count:${JSON.stringify(filters)}`,
+  
+  subscription: (id) => `subscription:${id}`,
+  subscriptionList: (filters) => `subscription:list:${JSON.stringify(filters)}`,
+  subscriptionAnalytics: () => 'subscription:analytics',
+  
+  dashboard: (type) => `dashboard:${type}`,
+  dashboardMetrics: () => 'dashboard:metrics',
+  
+  audit: (filters) => `audit:${JSON.stringify(filters)}`,
+  
+  monitoring: (type) => `monitoring:${type}`,
+  
+  communication: (type, id) => `communication:${type}:${id}`,
+  
+  report: (type, params) => `report:${type}:${JSON.stringify(params)}`
+};

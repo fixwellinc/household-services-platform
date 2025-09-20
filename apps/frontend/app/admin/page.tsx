@@ -1,7 +1,15 @@
 "use client";
 
-import { AdminDashboard } from '@/components/admin/AdminDashboard';
+import { AdminDashboard } from '@/lib/performance/lazy-components';
+import { DashboardLazyWrapper } from '@/components/admin/layout/LazyLoadWrapper';
+import { usePerformanceMonitoring } from '@/hooks/usePerformanceMonitoring';
 
 export default function AdminPage() {
-  return <AdminDashboard />;
+  const { trackInteraction } = usePerformanceMonitoring('AdminPage');
+
+  return (
+    <DashboardLazyWrapper>
+      <AdminDashboard />
+    </DashboardLazyWrapper>
+  );
 }

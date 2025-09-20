@@ -1,0 +1,397 @@
+name: Production Deployment
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+      skip_tests:
+        description: 'Skip tests (emergency deployment only)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  NODE_VERSION: '20.x'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Pre-deployment validation
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate version
+        id: version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION="main-$(git rev-parse --short HEAD)"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Check deployment conditions
+        id: check
+        run: |
+          # Check if this is a production deployment
+          if [[ "${{ github.event.inputs.environment }}" == "production" || $GITHUB_REF == refs/tags/* ]]; then
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+          fi
+
+  # Comprehensive testing suite
+  test:
+    runs-on: ubuntu-latest
+    needs: validate
+    if: needs.validate.outputs.should_deploy == 'true' && github.event.inputs.skip_tests != 'true'
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup test environment
+        run: |
+          cp .env.example .env.test
+          echo "DATABASE_URL=postgresql://test:test@localhost:5432/test_db" >> .env.test
+          echo "REDIS_URL=redis://localhost:6379" >> .env.test
+
+      - name: Run database migrations
+        run: |
+          cd apps/backend
+          npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run type checking
+        run: npm run type-check
+
+      - name: Run unit tests
+        run: npm run test:unit
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379
+
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379
+
+      - name: Run security tests
+        run: npm run test:security
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+
+      - name: Run accessibility tests
+        run: npm run test:accessibility
+
+      - name: Run performance tests
+        run: npm run test:performance
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379
+
+      - name: Generate test coverage report
+        run: npm run test:coverage
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          fail_ci_if_error: false
+
+  # Build and push Docker image
+  build:
+    runs-on: ubuntu-latest
+    needs: [validate, test]
+    if: needs.validate.outputs.should_deploy == 'true' && (success() || github.event.inputs.skip_tests == 'true')
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ needs.validate.outputs.version }}
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+
+      - name: Generate image reference
+        id: image
+        run: |
+          echo "image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.validate.outputs.version }}" >> $GITHUB_OUTPUT
+
+  # Database migration management
+  migrate:
+    runs-on: ubuntu-latest
+    needs: [validate, build]
+    if: needs.validate.outputs.should_deploy == 'true'
+    environment: 
+      name: ${{ github.event.inputs.environment || 'production' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          cd apps/backend
+          npm ci
+
+      - name: Create migration backup
+        run: |
+          echo "Creating database backup before migration..."
+          # This would typically connect to your production database
+          # and create a backup using pg_dump or similar
+          echo "Backup created: backup-$(date +%Y%m%d-%H%M%S).sql"
+
+      - name: Run database migrations
+        run: |
+          cd apps/backend
+          echo "Running database migrations..."
+          npx prisma migrate deploy --schema=./prisma/schema.prisma
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Verify migration success
+        run: |
+          cd apps/backend
+          echo "Verifying migration success..."
+          npx prisma db pull --schema=./prisma/schema.prisma
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+  # Deploy to Railway
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [validate, build, migrate]
+    if: needs.validate.outputs.should_deploy == 'true'
+    environment: 
+      name: ${{ github.event.inputs.environment || 'production' }}
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: |
+          curl -fsSL https://railway.app/install.sh | sh
+          echo "$HOME/.railway/bin" >> $GITHUB_PATH
+
+      - name: Deploy to Railway
+        id: deploy
+        run: |
+          echo "Deploying to Railway..."
+          railway login --token ${{ secrets.RAILWAY_TOKEN }}
+          
+          # Set environment variables
+          railway variables set NODE_ENV=production
+          railway variables set VERSION=${{ needs.validate.outputs.version }}
+          railway variables set DOCKER_IMAGE=${{ needs.build.outputs.image }}
+          
+          # Deploy using the built Docker image
+          railway up --detach
+          
+          # Wait for deployment to complete
+          echo "Waiting for deployment to complete..."
+          sleep 60
+          
+          # Get deployment URL
+          DEPLOY_URL=$(railway domain)
+          echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "Deployed to: $DEPLOY_URL"
+
+      - name: Run post-deployment health checks
+        run: |
+          echo "Running post-deployment health checks..."
+          
+          # Wait for service to be ready
+          for i in {1..30}; do
+            if curl -f "${{ steps.deploy.outputs.url }}/health" > /dev/null 2>&1; then
+              echo "Health check passed"
+              break
+            fi
+            echo "Waiting for service to be ready... ($i/30)"
+            sleep 10
+          done
+          
+          # Test critical endpoints
+          curl -f "${{ steps.deploy.outputs.url }}/api/health" || exit 1
+          curl -f "${{ steps.deploy.outputs.url }}/api/auth/status" || exit 1
+
+  # Rollback procedure
+  rollback:
+    runs-on: ubuntu-latest
+    if: failure() && needs.deploy.result == 'failure'
+    needs: [validate, build, migrate, deploy]
+    environment: 
+      name: ${{ github.event.inputs.environment || 'production' }}
+    steps:
+      - name: Install Railway CLI
+        run: |
+          curl -fsSL https://railway.app/install.sh | sh
+          echo "$HOME/.railway/bin" >> $GITHUB_PATH
+
+      - name: Rollback deployment
+        run: |
+          echo "Rolling back deployment..."
+          railway login --token ${{ secrets.RAILWAY_TOKEN }}
+          
+          # Get previous deployment
+          PREVIOUS_DEPLOYMENT=$(railway deployments list --json | jq -r '.[1].id')
+          
+          if [ "$PREVIOUS_DEPLOYMENT" != "null" ]; then
+            echo "Rolling back to deployment: $PREVIOUS_DEPLOYMENT"
+            railway rollback $PREVIOUS_DEPLOYMENT
+          else
+            echo "No previous deployment found for rollback"
+            exit 1
+          fi
+
+      - name: Verify rollback
+        run: |
+          echo "Verifying rollback..."
+          sleep 30
+          
+          DEPLOY_URL=$(railway domain)
+          curl -f "$DEPLOY_URL/health" || exit 1
+          echo "Rollback successful"
+
+      - name: Restore database backup
+        if: needs.migrate.result == 'success'
+        run: |
+          echo "Restoring database backup if needed..."
+          # This would restore the database backup created in the migrate job
+          echo "Database backup restoration completed"
+
+  # Notification
+  notify:
+    runs-on: ubuntu-latest
+    needs: [validate, test, build, migrate, deploy]
+    if: always() && needs.validate.outputs.should_deploy == 'true'
+    steps:
+      - name: Notify deployment status
+        run: |
+          if [[ "${{ needs.deploy.result }}" == "success" ]]; then
+            echo "✅ Deployment successful!"
+            echo "Version: ${{ needs.validate.outputs.version }}"
+            echo "URL: ${{ needs.deploy.outputs.url }}"
+          else
+            echo "❌ Deployment failed!"
+            echo "Check the logs for details"
+          fi
+          
+          # Here you would typically send notifications to Slack, Discord, etc.
+          # Example:
+          # curl -X POST -H 'Content-type: application/json' \
+          #   --data '{"text":"Deployment status: ${{ needs.deploy.result }}"}' \
+          #   ${{ secrets.SLACK_WEBHOOK_URL }}

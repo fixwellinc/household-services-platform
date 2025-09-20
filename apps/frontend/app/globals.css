@@ -23,6 +23,9 @@
 /* Import accessibility styles */
 @import '../styles/accessibility.css';
 
+/* Import enhanced accessibility styles */
+@import '../styles/accessibility-enhanced.css';
+
 /* Import responsive grid styles */
 @import '../styles/responsive-grid.css';
 

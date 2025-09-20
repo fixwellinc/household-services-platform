@@ -15,8 +15,12 @@ import {
   Users,
   DollarSign,
   Mail,
-  Clock
+  Clock,
+  Database,
+  Settings,
+  Shield
 } from 'lucide-react';
+import Link from 'next/link';
 
 interface Report {
   id: string;
@@ -118,10 +122,32 @@ export default function ReportsPage() {
             Generate and download business reports and analytics
           </p>
         </div>
-        <Button>
-          <FileText className="h-4 w-4 mr-2" />
-          Create Custom Report
-        </Button>
+        <div className="flex space-x-3">
+          <Link href="/admin/reports/exports">
+            <Button variant="outline">
+              <Database className="h-4 w-4 mr-2" />
+              Data Export
+            </Button>
+          </Link>
+          <Link href="/admin/reports/templates">
+            <Button variant="outline">
+              <FileText className="h-4 w-4 mr-2" />
+              Report Templates
+            </Button>
+          </Link>
+          <Link href="/admin/reports/schedules">
+            <Button variant="outline">
+              <Settings className="h-4 w-4 mr-2" />
+              Scheduled Reports
+            </Button>
+          </Link>
+          <Link href="/admin/reports/security">
+            <Button>
+              <Shield className="h-4 w-4 mr-2" />
+              Security & Audit
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Quick Stats */}
