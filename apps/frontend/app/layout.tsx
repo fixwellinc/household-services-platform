@@ -1,5 +1,6 @@
 import './globals.css'
 import { JetBrains_Mono } from 'next/font/google'
+import { Suspense } from 'react'
 import Providers from '@/components/Providers'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
@@ -120,14 +121,18 @@ export default function RootLayout({
         <ErrorBoundary>
           <Providers>
             <div className="flex min-h-screen flex-col">
-              <Header />
+              <Suspense fallback={<div className="h-16 bg-white border-b border-gray-200 animate-pulse"></div>}>
+                <Header />
+              </Suspense>
               <BCLocationBanner />
               <main className="flex-1">
                 {children}
               </main>
               <Footer />
             </div>
-            <ChatWidget />
+            <Suspense fallback={null}>
+              <ChatWidget />
+            </Suspense>
             <Toaster position="top-right" richColors />
           </Providers>
         </ErrorBoundary>
