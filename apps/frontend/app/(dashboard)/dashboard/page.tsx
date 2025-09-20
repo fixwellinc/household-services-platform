@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 
 export const dynamic = 'force-dynamic';
 import { useRouter } from 'next/navigation';
@@ -28,6 +28,19 @@ import {
 import Link from 'next/link';
 
 export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <FullPageLoader 
+        message="Loading dashboard..."
+        submessage="Determining the best dashboard for your account..."
+      />
+    }>
+      <DashboardPageContent />
+    </Suspense>
+  );
+}
+
+function DashboardPageContent() {
   const { user, isLoading: authLoading } = useAuth();
   const dashboardRouting = useDashboardRouting();
   const router = useRouter();

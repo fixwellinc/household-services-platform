@@ -73,7 +73,7 @@ const nextConfig = {
   output: 'standalone',
   // Disable static generation for all pages to avoid useSearchParams issues
   experimental: {
-    missingSuspenseWithCSRBailout: false,
+    // missingSuspenseWithCSRBailout is no longer needed in Next.js 15
   },
   // Enable SWC minifier (removing deprecated swcMinify option)
   compiler: {
