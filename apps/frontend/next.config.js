@@ -65,12 +65,16 @@ const nextConfig = {
   },
   // Configure for production deployment
   // Disable static optimization and force server-side rendering
-  staticPageGenerationTimeout: 10,
+  staticPageGenerationTimeout: 60,
   // Disable static exports to prevent build timeouts
   trailingSlash: false,
   skipTrailingSlashRedirect: true,
   // Force dynamic rendering for problematic pages
   output: 'standalone',
+  // Disable static generation for all pages to avoid useSearchParams issues
+  experimental: {
+    missingSuspenseWithCSRBailout: false,
+  },
   // Enable SWC minifier (removing deprecated swcMinify option)
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
