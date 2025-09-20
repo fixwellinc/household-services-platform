@@ -1,4 +1,4 @@
-import auditService from '../services/auditService.js';
+import { auditService } from '../services/auditService.js';
 
 /**
  * Middleware to automatically log admin actions
