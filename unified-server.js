@@ -17,7 +17,8 @@ const nextApp = next({
   dev, 
   hostname, 
   port,
-  dir: path.join(__dirname, 'apps/frontend')
+  dir: path.join(__dirname, 'apps/frontend'),
+  customServer: true
 });
 const handle = nextApp.getRequestHandler();
 
@@ -26,6 +27,8 @@ import('./apps/backend/src/app.js').then(({ app: backendApp }) => {
   // Start the unified server
   nextApp.prepare().then(() => {
     console.log('Next.js application prepared successfully');
+    console.log('Next.js build directory:', path.join(__dirname, 'apps/frontend/.next'));
+    console.log('Next.js dev mode:', dev);
     const server = createServer(async (req, res) => {
       try {
         // Check if the request is for the API

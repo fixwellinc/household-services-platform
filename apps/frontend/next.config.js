@@ -69,8 +69,7 @@ const nextConfig = {
   // Disable static exports to prevent build timeouts
   trailingSlash: false,
   skipTrailingSlashRedirect: true,
-  // Force dynamic rendering for problematic pages
-  output: 'standalone',
+  // Remove standalone output for custom server compatibility
   // Disable static generation for all pages to avoid useSearchParams issues
   experimental: {
     // missingSuspenseWithCSRBailout is no longer needed in Next.js 15
