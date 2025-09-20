@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Blog & Resources | Fixwell Services',
   description: 'Tips, guides, and resources for fixwell management, cleaning, repairs, and more.',
