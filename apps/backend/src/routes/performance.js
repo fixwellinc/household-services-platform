@@ -1,6 +1,6 @@
 import express from 'express';
 import { monitor, memoryMonitor } from '../config/performance.js';
-import cacheService from '../services/cacheService.js';
+import { cacheService } from '../services/cacheService.js';
 import { concurrencyManager } from '../middleware/concurrency.js';
 import { requireAdmin } from '../middleware/auth.js';
 import prisma from '../config/database.js';
