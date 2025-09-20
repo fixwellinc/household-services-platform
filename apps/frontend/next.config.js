@@ -64,7 +64,6 @@ const nextConfig = {
     ];
   },
   // Configure for production deployment
-  serverExternalPackages: ['@prisma/client'],
   // Disable static optimization and force server-side rendering
   staticPageGenerationTimeout: 10,
   // Disable static exports to prevent build timeouts
