@@ -137,10 +137,10 @@ export default function ModernServiceCard({
       className={cn(
         'group relative overflow-hidden transition-all duration-500 transform border-0 shadow-lg',
         // Glassmorphism base
-        'backdrop-blur-md bg-white/70 border border-white/20',
+        'backdrop-blur-sm bg-white/80 border border-white/20',
         // Enhanced hover effects with 3D transforms
         'hover:-translate-y-3 hover:rotate-x-2 hover:shadow-2xl hover:shadow-blue-500/20',
-        'hover:scale-[1.02] hover:backdrop-blur-lg',
+        'hover:scale-[1.02]',
         // Variant-specific styles
         variantStyles.card,
         isHovered && 'ring-2 ring-blue-500/30 ring-offset-4',
@@ -160,8 +160,7 @@ export default function ModernServiceCard({
       {/* Glassmorphism Background Overlay */}
       <div className={cn(
         'absolute inset-0 transition-all duration-500',
-        variantStyles.background,
-        isHovered && 'backdrop-blur-lg'
+        variantStyles.background
       )} />
       
       {/* Featured Badge */}
@@ -322,7 +321,7 @@ export default function ModernServiceCard({
                   'overflow-hidden transition-all duration-300 ease-in-out',
                   isExpanded ? 'max-h-96 opacity-100 mt-3' : 'max-h-0 opacity-0'
                 )}>
-                  <div className="space-y-2 p-3 bg-slate-50/50 rounded-lg backdrop-blur-sm">
+                  <div className="space-y-2 p-3 bg-slate-50/80 rounded-lg">
                     {service.features.map((feature, index) => (
                       <div key={index} className="flex items-center gap-2 text-sm text-gray-700">
                         <CheckCircle className="h-3 w-3 text-emerald-500 flex-shrink-0" />
@@ -362,7 +361,7 @@ export default function ModernServiceCard({
 
         {/* Popularity Indicator */}
         {service.popularity === 'high' && (
-          <div className="flex items-center gap-2 mb-4 p-2 bg-orange-50/80 rounded-lg backdrop-blur-sm">
+          <div className="flex items-center gap-2 mb-4 p-2 bg-orange-50/90 rounded-lg">
             <Users className="h-4 w-4 text-orange-600" />
             <span className="text-sm text-orange-700 font-medium">High Demand Service</span>
           </div>
@@ -373,7 +372,7 @@ export default function ModernServiceCard({
           {onBook && (
             <Button 
               className={cn(
-                'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transition-all duration-300 transform hover:scale-105 shadow-lg backdrop-blur-sm',
+                'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transition-all duration-300 transform hover:scale-105 shadow-lg',
                 'hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-1 active:scale-95 active:translate-y-0',
                 'relative overflow-hidden group/button',
                 isCompact ? 'w-full text-sm py-2' : 'flex-1'
@@ -390,7 +389,7 @@ export default function ModernServiceCard({
             <Button 
               variant="outline" 
               className={cn(
-                'flex-1 border-2 border-white/30 bg-white/20 hover:bg-white/40 backdrop-blur-sm transition-all duration-300',
+                'flex-1 border-2 border-white/30 bg-white/30 hover:bg-white/50 transition-all duration-300',
                 'hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-1 transform active:scale-95 active:translate-y-0',
                 'relative overflow-hidden group/button'
               )}
@@ -407,7 +406,7 @@ export default function ModernServiceCard({
 
       {/* Enhanced Glassmorphism Hover Overlay with Glow */}
       <div className={cn(
-        'absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none backdrop-blur-[1px]'
+        'absolute inset-0 bg-gradient-to-br from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none'
       )} />
       
       {/* Animated Border Glow */}

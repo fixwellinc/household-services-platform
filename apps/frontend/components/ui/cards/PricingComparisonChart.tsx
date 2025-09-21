@@ -43,7 +43,7 @@ export function PricingComparisonChart({
   const getAnimationDelay = (index: number) => animated ? `${index * 150}ms` : '0ms';
 
   return (
-    <div className={cn('space-y-4 p-4 bg-gradient-to-br from-emerald-50/80 to-teal-50/80 rounded-lg backdrop-blur-sm border border-emerald-200/30', className)}>
+    <div className={cn('space-y-4 p-4 bg-gradient-to-br from-emerald-50/90 to-teal-50/90 rounded-lg border border-emerald-200/30', className)}>
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <TrendingDown className="h-4 w-4 text-emerald-600" />
