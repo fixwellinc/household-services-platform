@@ -3,7 +3,7 @@ import { exportService } from '../../services/exportService.js';
 import { exportJobProcessor } from '../../services/exportJobProcessor.js';
 import { exportSecurityService } from '../../services/exportSecurityService.js';
 import queueService from '../../services/queueService.js';
-import { authenticateToken, requireRole } from '../../middleware/auth.js';
+import authMiddleware, { requireRole } from '../../middleware/auth.js';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 
@@ -21,7 +21,7 @@ const exportRateLimit = rateLimit({
 });
 
 // Apply authentication and admin role requirement to all routes
-router.use(authenticateToken);
+router.use(authMiddleware);
 router.use(requireRole(['ADMIN']));
 
 /**

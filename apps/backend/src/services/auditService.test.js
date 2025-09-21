@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { PrismaClient } from '@prisma/client';
-import auditService from './auditService.js';
+import { auditService } from './auditService.js';
 
 const prisma = new PrismaClient();
 

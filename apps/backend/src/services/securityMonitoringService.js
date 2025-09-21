@@ -3,10 +3,10 @@
  * Comprehensive security monitoring and audit log analysis
  */
 
-const winston = require('winston');
-const fs = require('fs').promises;
-const path = require('path');
-const crypto = require('crypto');
+import winston from 'winston';
+import { promises as fs } from 'fs';
+import path from 'path';
+import crypto from 'crypto';
 
 class SecurityMonitoringService {
     constructor() {
@@ -867,4 +867,4 @@ class SecurityMonitoringService {
     }
 }
 
-module.exports = SecurityMonitoringService;
+export default SecurityMonitoringService;

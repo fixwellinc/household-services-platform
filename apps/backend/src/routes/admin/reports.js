@@ -1,7 +1,7 @@
 import express from 'express';
 import { reportingService } from '../../services/reportingService.js';
 import { exportService } from '../../services/exportService.js';
-import { authenticateToken, requireRole } from '../../middleware/auth.js';
+import authMiddleware, { requireRole } from '../../middleware/auth.js';
 import rateLimit from 'express-rate-limit';
 
 const router = express.Router();
@@ -18,7 +18,7 @@ const reportRateLimit = rateLimit({
 });
 
 // Apply authentication and admin role requirement to all routes
-router.use(authenticateToken);
+router.use(authMiddleware);
 router.use(requireRole(['ADMIN']));
 
 /**

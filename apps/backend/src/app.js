@@ -20,7 +20,7 @@ import path from 'path';
 // Import services
 import socketService from './services/socketService.js';
 import queueService from './services/queueService.js';
-import auditService from './services/auditService.js';
+import { auditService } from './services/auditService.js';
 
 // Import routes
 import authRoutes from './routes/auth.js';

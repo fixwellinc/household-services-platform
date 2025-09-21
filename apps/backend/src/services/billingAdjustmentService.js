@@ -1,6 +1,6 @@
 import prisma from '../config/database.js';
 import { refundPayment } from './stripe.js';
-import auditService from './auditService.js';
+import { auditService } from './auditService.js';
 
 class BillingAdjustmentService {
   /**

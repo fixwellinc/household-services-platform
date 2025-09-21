@@ -1,7 +1,7 @@
 import express from 'express';
 import { authMiddleware, requireAdmin } from '../middleware/auth.js';
 import { auditPresets } from '../middleware/auditMiddleware.js';
-import auditService from '../services/auditService.js';
+import { auditService } from '../services/auditService.js';
 import queueService from '../services/queueService.js';
 import socketService from '../services/socketService.js';
 import searchService from '../services/searchService.js';

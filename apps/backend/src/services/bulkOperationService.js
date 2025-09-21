@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import auditService from './auditService.js';
+import { auditService } from './auditService.js';
 import queueService from './queueService.js';
 import { v4 as uuidv4 } from 'uuid';
 

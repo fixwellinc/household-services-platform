@@ -258,6 +258,33 @@ class AuditService {
             query
         };
     }
+
+    /**
+     * Log an action (alias for logEvent for backward compatibility)
+     */
+    async logAction(actionData) {
+        // Map the action data format to event format
+        const event = {
+            userId: actionData.adminId || actionData.userId,
+            userEmail: actionData.userEmail,
+            action: actionData.action,
+            resource: actionData.entityType || actionData.resource,
+            resourceId: actionData.entityId || actionData.resourceId,
+            details: {
+                changes: actionData.changes,
+                metadata: actionData.metadata,
+                severity: actionData.severity,
+                ...actionData.details
+            },
+            ipAddress: actionData.ipAddress,
+            userAgent: actionData.userAgent,
+            sessionId: actionData.sessionId,
+            success: actionData.success !== false,
+            errorMessage: actionData.errorMessage
+        };
+
+        return this.logEvent(event);
+    }
 }
 
 // Create singleton instance

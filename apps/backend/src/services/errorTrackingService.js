@@ -3,9 +3,9 @@
  * Comprehensive error tracking, analysis, and alerting
  */
 
-const winston = require('winston');
-const fs = require('fs').promises;
-const path = require('path');
+import winston from 'winston';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 class ErrorTrackingService {
     constructor() {
@@ -690,4 +690,4 @@ class ErrorTrackingService {
     }
 }
 
-module.exports = ErrorTrackingService;
+export default ErrorTrackingService;

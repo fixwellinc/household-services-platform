@@ -3,11 +3,11 @@
  * Comprehensive monitoring and alerting for production environment
  */
 
-const winston = require('winston');
-const os = require('os');
-const fs = require('fs').promises;
-const path = require('path');
-const { performance } = require('perf_hooks');
+import winston from 'winston';
+import os from 'os';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { performance } from 'perf_hooks';
 
 class ProductionMonitoringService {
     constructor() {
@@ -602,4 +602,4 @@ class ProductionMonitoringService {
     }
 }
 
-module.exports = ProductionMonitoringService;
+export default ProductionMonitoringService;

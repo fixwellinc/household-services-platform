@@ -3,11 +3,11 @@
  * API endpoints for production monitoring and alerting
  */
 
-const express = require('express');
-const { requireAuth, requireRole } = require('../../middleware/auth');
-const ProductionMonitoringService = require('../../services/productionMonitoringService');
-const ErrorTrackingService = require('../../services/errorTrackingService');
-const SecurityMonitoringService = require('../../services/securityMonitoringService');
+import express from 'express';
+import authMiddleware, { requireRole } from '../../middleware/auth.js';
+import ProductionMonitoringService from '../../services/productionMonitoringService.js';
+import ErrorTrackingService from '../../services/errorTrackingService.js';
+import SecurityMonitoringService from '../../services/securityMonitoringService.js';
 
 const router = express.Router();
 
@@ -17,7 +17,7 @@ const errorTracking = new ErrorTrackingService();
 const securityMonitoring = new SecurityMonitoringService();
 
 // Middleware to ensure admin access
-router.use(requireAuth);
+router.use(authMiddleware);
 router.use(requireRole(['ADMIN']));
 
 // Health and status endpoints
@@ -488,4 +488,4 @@ function convertToCSV(data) {
     return lines.join('\n');
 }
 
-module.exports = router;
+export default router;
