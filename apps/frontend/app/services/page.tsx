@@ -368,7 +368,7 @@ export default function ServicesPage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 size="lg" 
-                className="w-full sm:w-auto bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg"
+                className="w-full sm:w-auto bg-white dark:bg-gray-100 text-gray-900 dark:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-200 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                 onClick={() => {
                   if (!isAuthenticated) {
                     if (!userLocation || !isInBC) {
@@ -388,7 +388,7 @@ export default function ServicesPage() {
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="w-full sm:w-auto bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 border-2 border-white dark:border-gray-800 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium"
+                className="w-full sm:w-auto bg-transparent border-2 border-white dark:border-gray-200 text-white dark:text-gray-200 hover:bg-white dark:hover:bg-gray-200 hover:text-gray-900 dark:hover:text-gray-900 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
                 onClick={() => {
                   setSelectedService({ id: 'custom', name: 'Custom Service' });
                   setShowQuoteModal(true);
