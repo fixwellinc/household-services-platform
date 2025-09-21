@@ -439,6 +439,7 @@ export class ApiClient {
     success: boolean;
     hasPlan: boolean;
     subscription?: {
+      id: string;
       tier: string;
       status: string;
       currentPeriodStart: string;
@@ -464,7 +465,7 @@ export class ApiClient {
     };
     message: string;
   }> => {
-    return this.request('/plans/user/current');
+    return this.request('/subscriptions/current');
   }
 
   selectPlan = async (tier: string, billingCycle: 'monthly' | 'yearly'): Promise<{

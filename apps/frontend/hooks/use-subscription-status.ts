@@ -139,7 +139,7 @@ export function useSubscriptionStatus(): UseSubscriptionStatusResult {
   });
 
   // Determine subscription status based on API response
-  const determineSubscriptionStatus = (planData: any): SubscriptionStatus => {
+  const determineSubscriptionStatus = (apiResponse: any): SubscriptionStatus => {
     // Default status for users with no subscription data
     const defaultStatus: SubscriptionStatus = {
       hasSubscriptionHistory: false,
@@ -149,17 +149,13 @@ export function useSubscriptionStatus(): UseSubscriptionStatusResult {
       canAccessPremiumFeatures: false,
     };
 
-    // If no plan data or unsuccessful response, return default
-    if (!planData?.success) {
+    // If no API response or subscription is null, return default
+    if (!apiResponse || !apiResponse.subscription) {
       return defaultStatus;
     }
 
-    // If user has no plan, return default with promotion
-    if (!planData.hasPlan || !planData.subscription) {
-      return defaultStatus;
-    }
-
-    const { subscription, plan } = planData;
+    const subscription = apiResponse.subscription;
+    const plan = subscription.plan;
     const subscriptionStatus = subscription.status?.toUpperCase() as SubscriptionStatusType;
 
     // Determine if user has subscription history (any subscription record exists)
