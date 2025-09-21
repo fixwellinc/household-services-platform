@@ -347,6 +347,38 @@ router.get('/export', async (req, res) => {
 });
 
 /**
+ * Report performance metrics (POST endpoint for frontend)
+ */
+router.post('/', async (req, res) => {
+  try {
+    const { metric, value, timestamp, metadata } = req.body;
+    
+    // Log the performance metric
+    logger.info('Performance metric reported', {
+      metric,
+      value,
+      timestamp: timestamp || Date.now(),
+      metadata,
+      reportedBy: req.user?.id
+    });
+    
+    // You could store this in a database or send to monitoring service
+    // For now, just acknowledge receipt
+    res.json({
+      success: true,
+      message: 'Performance metric recorded',
+      timestamp: Date.now()
+    });
+  } catch (error) {
+    logger.error('Failed to record performance metric:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to record performance metric'
+    });
+  }
+});
+
+/**
  * Get health check
  */
 router.get('/health', async (req, res) => {

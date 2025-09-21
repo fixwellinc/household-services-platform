@@ -31,9 +31,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
     // Sync active tab with current route
     useEffect(() => {
-        const currentItem = navigationItems.find(item => item.path === pathname);
-        if (currentItem && currentItem.id !== activeTab) {
-            setActiveTab(currentItem.id);
+        if (navigationItems && navigationItems.length > 0) {
+            const currentItem = navigationItems.find(item => item.path === pathname);
+            if (currentItem && currentItem.id !== activeTab) {
+                setActiveTab(currentItem.id);
+            }
         }
     }, [pathname, navigationItems, activeTab, setActiveTab]);
 

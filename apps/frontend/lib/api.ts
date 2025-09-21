@@ -75,13 +75,13 @@ export class ApiClient {
     options: RequestInit = {}
   ): Promise<T> => {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     // API request logging (development only)
     if (process.env.NODE_ENV === 'development') {
       console.log('API request to:', url);
       console.log('Request method:', options.method || 'GET');
     }
-    
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
@@ -107,7 +107,7 @@ export class ApiClient {
         credentials: 'include',
         ...options,
       };
-      
+
       // Ensure method is not overridden by spread
       if (options.method) {
         fetchOptions.method = options.method;
@@ -122,12 +122,12 @@ export class ApiClient {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        
+
         // Only log errors in development or if they're not authentication-related
         if (process.env.NODE_ENV === 'development' || response.status !== 401) {
           console.error('API error response:', errorData);
         }
-        
+
         // Provide more specific error messages
         if (response.status === 401) {
           throw new Error('Authentication required. Please log in to continue.');
@@ -228,7 +228,7 @@ export class ApiClient {
         }
       });
     }
-    
+
     const queryString = searchParams.toString();
     const endpoint = queryString ? `/services?${queryString}` : '/services';
     return this.request<{ services: Service[] }>(endpoint);
@@ -288,7 +288,7 @@ export class ApiClient {
         }
       });
     }
-    
+
     const queryString = searchParams.toString();
     const endpoint = queryString ? `/bookings?${queryString}` : '/bookings';
     return this.request<{ bookings: Booking[] }>(endpoint);
@@ -738,11 +738,11 @@ export class ApiClient {
         maxServicesPerMonth: number;
       };
     } | null;
-      statistics: {
-    totalBookings: number;
-    upcomingBookings: number;
-    completedBookings: number;
-  };
+    statistics: {
+      totalBookings: number;
+      upcomingBookings: number;
+      completedBookings: number;
+    };
     usageStats: {
       perksUsed: number;
       totalPerks: number;

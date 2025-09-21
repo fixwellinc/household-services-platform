@@ -12,6 +12,12 @@ interface AdminBreadcrumbProps {
 
 export function AdminBreadcrumb({ activeTab, navigationItems }: AdminBreadcrumbProps) {
   const { getRecentItems, getFavoriteItems } = useAdminNavigation();
+  
+  // Safety check for navigationItems
+  if (!navigationItems || navigationItems.length === 0) {
+    return null;
+  }
+  
   const activeItem = navigationItems.find(item => item.id === activeTab);
   const recentItems = getRecentItems();
   const favoriteItems = getFavoriteItems();
