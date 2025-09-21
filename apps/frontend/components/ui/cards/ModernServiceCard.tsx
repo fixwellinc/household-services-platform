@@ -91,13 +91,13 @@ export default function ModernServiceCard({
   const getComplexityColor = (complexity: string) => {
     switch (complexity) {
       case 'EASY':
-        return 'bg-emerald-100/80 text-emerald-700 border-emerald-200/50';
+        return 'bg-emerald-100/80 dark:bg-emerald-800/30 text-emerald-700 dark:text-emerald-300 border-emerald-200/50 dark:border-emerald-600/50';
       case 'MEDIUM':
-        return 'bg-amber-100/80 text-amber-700 border-amber-200/50';
+        return 'bg-amber-100/80 dark:bg-amber-800/30 text-amber-700 dark:text-amber-300 border-amber-200/50 dark:border-amber-600/50';
       case 'HARD':
-        return 'bg-rose-100/80 text-rose-700 border-rose-200/50';
+        return 'bg-rose-100/80 dark:bg-rose-800/30 text-rose-700 dark:text-rose-300 border-rose-200/50 dark:border-rose-600/50';
       default:
-        return 'bg-slate-100/80 text-slate-700 border-slate-200/50';
+        return 'bg-slate-100/80 dark:bg-slate-700/30 text-slate-700 dark:text-slate-300 border-slate-200/50 dark:border-slate-600/50';
     }
   };
 
@@ -106,23 +106,23 @@ export default function ModernServiceCard({
       case 'featured':
         return {
           card: 'ring-2 ring-gradient-to-r from-blue-500 to-purple-500 ring-offset-2 scale-105 z-10',
-          background: 'bg-gradient-to-br from-blue-50/90 via-white/95 to-purple-50/90',
-          header: 'bg-gradient-to-br from-blue-100/80 to-purple-100/80',
+          background: 'bg-gradient-to-br from-blue-50/90 via-white/95 to-purple-50/90 dark:from-blue-900/30 dark:via-gray-800/95 dark:to-purple-900/30',
+          header: 'bg-gradient-to-br from-blue-100/80 to-purple-100/80 dark:from-blue-800/30 dark:to-purple-800/30',
           badge: 'bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0'
         };
       case 'compact':
         return {
           card: '',
-          background: 'bg-white/80',
-          header: 'bg-gradient-to-br from-slate-50/80 to-slate-100/80',
-          badge: 'bg-slate-100/80 text-slate-700 border-slate-200/50'
+          background: 'bg-white/80 dark:bg-gray-800/80',
+          header: 'bg-gradient-to-br from-slate-50/80 to-slate-100/80 dark:from-slate-700/30 dark:to-slate-600/30',
+          badge: 'bg-slate-100/80 dark:bg-slate-700/80 text-slate-700 dark:text-slate-300 border-slate-200/50 dark:border-slate-600/50'
         };
       default:
         return {
           card: '',
-          background: 'bg-white/80',
-          header: 'bg-gradient-to-br from-blue-50/80 to-purple-50/80',
-          badge: 'bg-blue-50/80 text-blue-700 border-blue-200/50'
+          background: 'bg-white/80 dark:bg-gray-800/80',
+          header: 'bg-gradient-to-br from-blue-50/80 to-purple-50/80 dark:from-blue-800/30 dark:to-purple-800/30',
+          badge: 'bg-blue-50/80 dark:bg-blue-800/30 text-blue-700 dark:text-blue-300 border-blue-200/50 dark:border-blue-600/50'
         };
     }
   };
@@ -136,14 +136,14 @@ export default function ModernServiceCard({
       ref={cardRef}
       className={cn(
         'group relative overflow-hidden transition-all duration-500 transform border-0 shadow-lg',
-        // Glassmorphism base
-        'backdrop-blur-sm bg-white/80 border border-white/20',
+        // Glassmorphism base with dark mode support
+        'backdrop-blur-sm bg-white/80 dark:bg-gray-800/80 border border-white/20 dark:border-gray-700/30',
         // Enhanced hover effects with 3D transforms
-        'hover:-translate-y-3 hover:rotate-x-2 hover:shadow-2xl hover:shadow-blue-500/20',
+        'hover:-translate-y-3 hover:rotate-x-2 hover:shadow-2xl hover:shadow-blue-500/20 dark:hover:shadow-blue-400/20',
         'hover:scale-[1.02]',
         // Variant-specific styles
         variantStyles.card,
-        isHovered && 'ring-2 ring-blue-500/30 ring-offset-4',
+        isHovered && 'ring-2 ring-blue-500/30 dark:ring-blue-400/30 ring-offset-4',
         // Perspective for 3D effects
         'perspective-1000',
         className
@@ -198,7 +198,7 @@ export default function ModernServiceCard({
               'hover:shadow-xl hover:-translate-y-1',
               isLiked 
                 ? 'bg-red-500/90 text-white hover:bg-red-600/90 shadow-red-500/30' 
-                : 'bg-white/80 text-gray-600 hover:bg-white/90 hover:text-red-500 hover:shadow-red-500/20'
+                : 'bg-white/80 dark:bg-gray-700/80 text-gray-600 dark:text-gray-300 hover:bg-white/90 dark:hover:bg-gray-600/90 hover:text-red-500 hover:shadow-red-500/20'
             )}
             style={{
               transitionDelay: isHovered ? '100ms' : '0ms'
@@ -213,7 +213,7 @@ export default function ModernServiceCard({
             <button
               onClick={() => onView(service.id)}
               className={cn(
-                'p-2 rounded-full bg-white/80 text-gray-600 hover:bg-white/90 hover:text-blue-600 shadow-lg transition-all duration-300 backdrop-blur-sm',
+                'p-2 rounded-full bg-white/80 dark:bg-gray-700/80 text-gray-600 dark:text-gray-300 hover:bg-white/90 dark:hover:bg-gray-600/90 hover:text-blue-600 dark:hover:text-blue-400 shadow-lg transition-all duration-300 backdrop-blur-sm',
                 'transform hover:scale-110 active:scale-95 hover:shadow-xl hover:-translate-y-1 hover:shadow-blue-500/20'
               )}
               style={{
@@ -227,11 +227,11 @@ export default function ModernServiceCard({
 
         {/* Rating Badge */}
         {service.rating && (
-          <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1 shadow-lg">
+          <div className="absolute bottom-4 left-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1 shadow-lg">
             <Star className="h-3 w-3 text-yellow-500 fill-current" />
-            <span className="text-sm font-medium text-gray-900">{service.rating}</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{service.rating}</span>
             {service.reviewCount && (
-              <span className="text-xs text-gray-600">({service.reviewCount})</span>
+              <span className="text-xs text-gray-600 dark:text-gray-300">({service.reviewCount})</span>
             )}
           </div>
         )}
@@ -241,15 +241,15 @@ export default function ModernServiceCard({
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className={cn(
-              'group-hover:text-blue-600 transition-colors duration-300 flex items-center gap-2',
+              'text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300 flex items-center gap-2',
               isCompact ? 'text-lg' : 'text-xl'
             )}>
               {service.name}
               {isHovered && <Sparkles className="h-4 w-4 text-yellow-500 animate-pulse" />}
-              {isFeatured && <TrendingUp className="h-4 w-4 text-purple-600" />}
+              {isFeatured && <TrendingUp className="h-4 w-4 text-purple-600 dark:text-purple-400" />}
             </CardTitle>
             <CardDescription className={cn(
-              'mt-2 text-gray-600',
+              'mt-2 text-gray-600 dark:text-gray-300',
               isCompact ? 'text-sm line-clamp-1' : 'line-clamp-2'
             )}>
               {service.description}
@@ -267,14 +267,14 @@ export default function ModernServiceCard({
       <CardContent className={cn('pt-0 relative z-10', isCompact && 'space-y-3')}>
         <div className="flex items-center justify-between mb-4">
           <span className={cn(
-            'font-bold text-blue-600',
+            'font-bold text-blue-600 dark:text-blue-400',
             isCompact ? 'text-2xl' : 'text-3xl'
           )}>
             {formatPrice(service.basePrice)}
           </span>
           <div className="flex items-center gap-2">
             {service.estimatedTime && (
-              <Badge variant="secondary" className="bg-slate-100/80 text-slate-700 text-xs">
+              <Badge variant="secondary" className="bg-slate-100/80 dark:bg-slate-700/80 text-slate-700 dark:text-slate-300 text-xs">
                 {service.estimatedTime}
               </Badge>
             )}
@@ -287,15 +287,15 @@ export default function ModernServiceCard({
         {/* Service Features - Progressive Disclosure */}
         {!isCompact && (
           <div className="space-y-2 mb-6">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
               <Shield className="h-4 w-4 text-emerald-500" />
               <span className="font-medium">Professional Service</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
               <Clock className="h-4 w-4 text-blue-500" />
               <span>Quick Response Time</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
               <MapPin className="h-4 w-4 text-purple-500" />
               <span>Local Professionals</span>
             </div>
@@ -305,7 +305,7 @@ export default function ModernServiceCard({
               <div className="mt-4">
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 transition-colors duration-200"
+                  className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200"
                 >
                   <span className="font-medium">
                     {isExpanded ? 'Hide Details' : 'Show Details'}
@@ -321,9 +321,9 @@ export default function ModernServiceCard({
                   'overflow-hidden transition-all duration-300 ease-in-out',
                   isExpanded ? 'max-h-96 opacity-100 mt-3' : 'max-h-0 opacity-0'
                 )}>
-                  <div className="space-y-2 p-3 bg-slate-50/80 rounded-lg">
+                  <div className="space-y-2 p-3 bg-slate-50/80 dark:bg-slate-700/30 rounded-lg">
                     {service.features.map((feature, index) => (
-                      <div key={index} className="flex items-center gap-2 text-sm text-gray-700">
+                      <div key={index} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                         <CheckCircle className="h-3 w-3 text-emerald-500 flex-shrink-0" />
                         <span>{feature}</span>
                       </div>
@@ -340,7 +340,7 @@ export default function ModernServiceCard({
           <div className="mb-4">
             <button
               onClick={() => setShowComparison(!showComparison)}
-              className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 transition-colors duration-200 mb-3"
+              className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200 mb-3"
             >
               <BarChart3 className="h-4 w-4" />
               <span className="font-medium">
@@ -361,9 +361,9 @@ export default function ModernServiceCard({
 
         {/* Popularity Indicator */}
         {service.popularity === 'high' && (
-          <div className="flex items-center gap-2 mb-4 p-2 bg-orange-50/90 rounded-lg">
-            <Users className="h-4 w-4 text-orange-600" />
-            <span className="text-sm text-orange-700 font-medium">High Demand Service</span>
+          <div className="flex items-center gap-2 mb-4 p-2 bg-orange-50/90 dark:bg-orange-900/30 rounded-lg">
+            <Users className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+            <span className="text-sm text-orange-700 dark:text-orange-300 font-medium">High Demand Service</span>
           </div>
         )}
 
@@ -389,9 +389,9 @@ export default function ModernServiceCard({
             <Button 
               variant="outline" 
               className={cn(
-                'flex-1 border-2 border-white/30 bg-white/30 hover:bg-white/50 transition-all duration-300',
-                'hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-1 transform active:scale-95 active:translate-y-0',
-                'relative overflow-hidden group/button'
+                'flex-1 border-2 border-white/30 dark:border-gray-600/30 bg-white/30 dark:bg-gray-700/30 hover:bg-white/50 dark:hover:bg-gray-600/50 transition-all duration-300',
+                'hover:border-blue-500/50 dark:hover:border-blue-400/50 hover:shadow-lg hover:shadow-blue-500/20 dark:hover:shadow-blue-400/20 hover:-translate-y-1 transform active:scale-95 active:translate-y-0',
+                'relative overflow-hidden group/button text-gray-900 dark:text-gray-100'
               )}
               onClick={() => onView(service.id)}
             >
