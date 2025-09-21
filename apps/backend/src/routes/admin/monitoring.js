@@ -8,6 +8,7 @@ import authMiddleware, { requireRole } from '../../middleware/auth.js';
 import ProductionMonitoringService from '../../services/productionMonitoringService.js';
 import ErrorTrackingService from '../../services/errorTrackingService.js';
 import SecurityMonitoringService from '../../services/securityMonitoringService.js';
+import performanceRoutes from './performance.js';
 
 const router = express.Router();
 
@@ -19,6 +20,9 @@ const securityMonitoring = new SecurityMonitoringService();
 // Middleware to ensure admin access
 router.use(authMiddleware);
 router.use(requireRole(['ADMIN']));
+
+// Mount performance routes
+router.use('/performance', performanceRoutes);
 
 // Health and status endpoints
 router.get('/health', async (req, res) => {

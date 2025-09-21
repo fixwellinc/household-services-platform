@@ -285,6 +285,28 @@ class AuditService {
 
         return this.logEvent(event);
     }
+
+    /**
+     * Get audit logs with filtering (alias for getLogs)
+     */
+    getAuditLogs(filters = {}) {
+        return this.getLogs(filters);
+    }
+
+    /**
+     * Export audit logs
+     */
+    exportAuditLogs(filters = {}, format = 'json') {
+        return this.exportLogs(filters, format);
+    }
+
+    /**
+     * Get audit statistics (alias for getStatistics)
+     */
+    getAuditStats(filters = {}) {
+        const timeframe = filters.startDate && filters.endDate ? 'custom' : '24h';
+        return this.getStatistics(timeframe);
+    }
 }
 
 // Create singleton instance
