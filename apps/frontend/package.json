@@ -15,7 +15,11 @@
     "type-check": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
-    "postbuild": "next-sitemap"
+    "postbuild": "next-sitemap",
+    "dev:safe": "NODE_ENV=development next dev --turbo=false",
+    "dev:debug": "NODE_ENV=development DEBUG=* next dev",
+    "build:debug": "NODE_ENV=production next build --debug",
+    "start:safe": "NODE_ENV=production next start"
   },
   "dependencies": {
     "@fixwell/types": "file:../../packages/types",
