@@ -85,19 +85,17 @@ const nextConfig = {
       },
     ];
   },
-  // Configure for production deployment stability
-  output: 'standalone',
+  // Configure for production deployment stability with custom server
+  // Note: Using custom unified server, so not using standalone output
   staticPageGenerationTimeout: 120,
   trailingSlash: false,
   skipTrailingSlashRedirect: true,
   
-  // Minimal experimental features for stability
+  // Experimental features for stability
   experimental: {
     // Only keep essential optimizations
+    serverComponentsExternalPackages: ['sharp'],
   },
-  
-  // Server external packages for sharp
-  serverExternalPackages: ['sharp'],
   
   // Build optimizations
   compiler: {
