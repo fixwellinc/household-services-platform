@@ -85,28 +85,61 @@ const nextConfig = {
       },
     ];
   },
-  // Configure for production deployment
-  // Disable static optimization and force server-side rendering
-  staticPageGenerationTimeout: 60,
-  // Disable static exports to prevent build timeouts
+  // Configure for production deployment stability
+  output: 'standalone',
+  staticPageGenerationTimeout: 120,
   trailingSlash: false,
   skipTrailingSlashRedirect: true,
-  // Remove standalone output for custom server compatibility
-  // Disable static generation for all pages to avoid useSearchParams issues
+  
+  // Memory and performance optimizations
   experimental: {
-    // missingSuspenseWithCSRBailout is no longer needed in Next.js 15
+    optimizeCss: true,
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
-  // Enable SWC minifier (removing deprecated swcMinify option)
+  
+  // Build optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
+  
+  // Stability settings
   poweredByHeader: false,
   generateEtags: false,
+  compress: true,
+  
+  // Error handling
   eslint: {
     ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
+  },
+  
+  // Webpack optimizations for stability
+  webpack: (config, { isServer }) => {
+    // Memory optimization
+    config.optimization.splitChunks = {
+      chunks: 'all',
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+        },
+      },
+    };
+    
+    // Reduce memory usage
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
+    
+    return config;
   },
 }
 

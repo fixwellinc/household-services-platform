@@ -39,14 +39,15 @@ COPY . .
 WORKDIR /app/apps/backend
 RUN npx prisma generate
 
-# Build frontend (without Prisma dependencies)
+# Build frontend with stability fixes
 WORKDIR /app/apps/frontend
-# Increase Node.js memory limit and build timeout for complex app
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+# Set memory and build optimizations
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 ENV NEXT_TELEMETRY_DISABLED=1
-# Skip problematic static generation and build in production mode
-ENV NEXT_BUILD_CACHE_DISABLED=1
-RUN npm run build -- --no-lint || { echo "Frontend build failed, trying without optimizations..."; npm run build -- --no-lint --no-check || echo "Build completed with warnings"; }
+ENV DISABLE_ESLINT_PLUGIN=true
+ENV SKIP_ENV_VALIDATION=true
+# Run stability fixes and build
+RUN npm run prebuild && npm run build
 
 # Create missing font manifest if it doesn't exist
 RUN mkdir -p .next/server && \
