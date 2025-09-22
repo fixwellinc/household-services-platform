@@ -7,6 +7,7 @@
     "dev": "next dev",
     "prebuild": "node stability-fix.js && node build-fix.js",
     "build": "next build",
+    "build:safe": "NEXT_BUILD_CACHE_DISABLED=1 next build --no-lint",
     "postinstall": "echo 'Frontend postinstall complete'",
     "start": "next start",
     "lint": "next lint",

@@ -6,6 +6,9 @@ const path = require('path');
 
 console.log('🔧 Running deployment stability fixes...');
 
+// 0. Load polyfills first
+require('./polyfills');
+
 // 1. Memory optimization
 process.env.NODE_OPTIONS = '--max-old-space-size=2048';
 

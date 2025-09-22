@@ -91,10 +91,14 @@ const nextConfig = {
   trailingSlash: false,
   skipTrailingSlashRedirect: true,
   
-  // Memory and performance optimizations
+  // Memory and performance optimizations (disabled problematic features)
   experimental: {
-    optimizeCss: true,
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    // Disable optimizeCss as it can cause build issues in Next.js 15
+    // optimizeCss: true,
+    // Keep package imports optimization for specific packages
+    optimizePackageImports: ['lucide-react'],
+    // Add server components optimization
+    serverComponentsExternalPackages: ['sharp'],
   },
   
   // Build optimizations
@@ -115,29 +119,74 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   
-  // Webpack optimizations for stability
+  // Webpack optimizations for stability and Next.js 15 compatibility
   webpack: (config, { isServer }) => {
-    // Memory optimization
-    config.optimization.splitChunks = {
-      chunks: 'all',
-      cacheGroups: {
-        vendor: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          chunks: 'all',
-        },
-      },
-    };
-    
-    // Reduce memory usage
-    if (!isServer) {
+    // Fix for "self is not defined" error in Next.js 15
+    if (isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
         net: false,
         tls: false,
+        crypto: false,
+        stream: false,
+        url: false,
+        zlib: false,
+        http: false,
+        https: false,
+        assert: false,
+        os: false,
+        path: false,
+      };
+      
+      // Define global variables for server-side rendering
+      config.plugins.push(
+        new config.webpack.DefinePlugin({
+          'global.self': 'global',
+          'global.window': '{}',
+          'global.document': '{}',
+          'global.navigator': '{}',
+          'global.location': '{}',
+        })
+      );
+    } else {
+      // Client-side fallbacks
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+        stream: false,
+        url: false,
+        zlib: false,
+        http: false,
+        https: false,
+        assert: false,
+        os: false,
+        path: false,
       };
     }
+    
+    // Memory optimization with safer chunk splitting
+    config.optimization.splitChunks = {
+      chunks: 'all',
+      minSize: 20000,
+      maxSize: 244000,
+      cacheGroups: {
+        default: {
+          minChunks: 2,
+          priority: -20,
+          reuseExistingChunk: true,
+        },
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          priority: -10,
+          chunks: 'all',
+        },
+      },
+    };
     
     return config;
   },
