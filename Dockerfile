@@ -47,8 +47,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV DISABLE_ESLINT_PLUGIN=true
 ENV SKIP_ENV_VALIDATION=true
 ENV NEXT_BUILD_CACHE_DISABLED=1
-# Run stability fixes and safe build
-RUN npm run prebuild && (npm run build || npm run build:safe)
+# Run stability fixes and progressive build attempts
+RUN npm run prebuild && (npm run build || npm run build:simple || npm run build:minimal)
 
 # Create missing font manifest if it doesn't exist
 RUN mkdir -p .next/server && \
