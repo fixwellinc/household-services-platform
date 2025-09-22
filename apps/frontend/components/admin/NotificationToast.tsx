@@ -231,8 +231,16 @@ export const toast = {
 
 export function ToastContainer() {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure component only renders on client to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
+    if (!mounted) return;
+
     toastListeners.push(setToasts);
     return () => {
       const index = toastListeners.indexOf(setToasts);
@@ -240,7 +248,12 @@ export function ToastContainer() {
         toastListeners.splice(index, 1);
       }
     };
-  }, []);
+  }, [mounted]);
+
+  // Don't render anything until mounted on client
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className="fixed top-4 right-4 z-50 space-y-2">

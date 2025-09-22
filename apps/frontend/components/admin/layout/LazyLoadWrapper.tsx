@@ -3,8 +3,8 @@
  */
 
 import React, { Suspense } from 'react';
-import { AdminLoadingState } from '../AdminLoadingState';
-import { AdminErrorBoundary } from '../AdminErrorBoundary';
+import { LoadingSpinner } from '../LoadingSpinner';
+import { AdminErrorBoundary } from '../ErrorBoundary';
 
 interface LazyLoadWrapperProps {
   children: React.ReactNode;
@@ -19,7 +19,7 @@ export const LazyLoadWrapper: React.FC<LazyLoadWrapperProps> = ({
   errorFallback,
   className = ''
 }) => {
-  const defaultFallback = fallback || <AdminLoadingState />;
+  const defaultFallback = fallback || <LoadingSpinner size="md" text="Loading..." />;
   
   return (
     <div className={className}>
