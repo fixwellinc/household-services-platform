@@ -1,5 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Fix for missing buildId and deploymentId errors
+  generateBuildId: async () => {
+    return process.env.RAILWAY_GIT_COMMIT_SHA || 
+           process.env.VERCEL_GIT_COMMIT_SHA || 
+           process.env.GITHUB_SHA ||
+           'build-' + Date.now();
+  },
   images: {
     remotePatterns: [
       {

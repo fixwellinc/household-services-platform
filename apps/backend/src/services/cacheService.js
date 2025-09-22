@@ -10,10 +10,20 @@ class CacheService {
     this.redis = null;
     this.isConnected = false;
     this.defaultTTL = 300; // 5 minutes default TTL
+    // Fallback in-memory cache when Redis is not available
+    this.memoryCache = new Map();
     this.init();
   }
 
   async init() {
+    // Skip Redis initialization if DISABLE_REDIS is set or in production without Redis URL
+    if (process.env.DISABLE_REDIS === 'true' || 
+        (process.env.NODE_ENV === 'production' && !process.env.REDIS_URL)) {
+      logger.info('Redis cache disabled - running without cache');
+      this.isConnected = false;
+      return;
+    }
+
     try {
       const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
       
@@ -53,7 +63,14 @@ class CacheService {
    */
   async get(key) {
     if (!this.isConnected) {
-      logger.warn('Cache not available, skipping get operation');
+      // Use in-memory cache as fallback
+      const cacheEntry = this.memoryCache.get(this.formatKey(key));
+      if (cacheEntry && cacheEntry.expires > Date.now()) {
+        return cacheEntry.value;
+      }
+      if (cacheEntry) {
+        this.memoryCache.delete(this.formatKey(key));
+      }
       return null;
     }
 
@@ -71,8 +88,12 @@ class CacheService {
    */
   async set(key, value, ttl = this.defaultTTL) {
     if (!this.isConnected) {
-      logger.warn('Cache not available, skipping set operation');
-      return false;
+      // Use in-memory cache as fallback
+      const expires = Date.now() + (ttl * 1000);
+      this.memoryCache.set(this.formatKey(key), { value, expires });
+      // Clean up expired entries periodically
+      this.cleanupMemoryCache();
+      return true;
     }
 
     try {
@@ -321,6 +342,18 @@ class CacheService {
   }
 
   /**
+   * Clean up expired entries from memory cache
+   */
+  cleanupMemoryCache() {
+    const now = Date.now();
+    for (const [key, entry] of this.memoryCache.entries()) {
+      if (entry.expires <= now) {
+        this.memoryCache.delete(key);
+      }
+    }
+  }
+
+  /**
    * Close Redis connection
    */
   async close() {
@@ -329,6 +362,8 @@ class CacheService {
       this.isConnected = false;
       logger.info('Redis cache connection closed');
     }
+    // Clear memory cache
+    this.memoryCache.clear();
   }
 }
 

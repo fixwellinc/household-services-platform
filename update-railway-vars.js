@@ -6,7 +6,8 @@ import { execSync } from 'child_process';
 const variables = {
   'STRIPE_STARTER_MONTHLY_PRICE_ID': 'price_1RsbQzJZZWUMDx2PpqdZA4dL',
   'STRIPE_HOMECARE_MONTHLY_PRICE_ID': 'price_1RsbR3JZZWUMDx2Plp2jY5oc', 
-  'STRIPE_PRIORITY_MONTHLY_PRICE_ID': 'price_1RsbRAJZZWUMDx2PspPQjVtL'
+  'STRIPE_PRIORITY_MONTHLY_PRICE_ID': 'price_1RsbRAJZZWUMDx2PspPQjVtL',
+  'DISABLE_REDIS': 'true'
 };
 
 console.log('🚀 Updating Railway environment variables with correct Stripe price IDs...\n');

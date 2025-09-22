@@ -48,6 +48,7 @@ import performanceRoutes from './routes/performance.js';
 import securityRoutes from './routes/security.js';
 import healthRoutes from './routes/health.js';
 import adminRoutes from './routes/admin.js';
+import appointmentRoutes from './routes/appointments.js';
 import adminDashboardRoutes from './routes/admin/dashboard.js';
 import adminPermissionsRoutes from './routes/adminPermissions.js';
 import adminImpersonationRoutes from './routes/adminImpersonation.js';
@@ -411,6 +412,7 @@ app.use('/api/admin/impersonation', checkDatabaseMiddleware, adminImpersonationR
 app.use('/api/admin/subscriptions', checkDatabaseMiddleware, adminSubscriptionsRoutes);
 app.use('/api/admin/subscriptions/analytics', checkDatabaseMiddleware, adminSubscriptionAnalyticsRoutes);
 app.use('/api/bulk-operations', checkDatabaseMiddleware, bulkOperationsRoutes);
+app.use('/api/appointments', checkDatabaseMiddleware, appointmentRoutes);
 
 function requireAdminLocal(req, res, next) {
   if (!req.user || req.user.role !== 'ADMIN') {
