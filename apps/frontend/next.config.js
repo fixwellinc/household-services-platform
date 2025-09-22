@@ -2,10 +2,25 @@
 const nextConfig = {
   // Fix for missing buildId and deploymentId errors
   generateBuildId: async () => {
-    return process.env.RAILWAY_GIT_COMMIT_SHA || 
-           process.env.VERCEL_GIT_COMMIT_SHA || 
-           process.env.GITHUB_SHA ||
-           'build-' + Date.now();
+    const buildId = process.env.NEXT_BUILD_ID ||
+                   process.env.RAILWAY_GIT_COMMIT_SHA || 
+                   process.env.VERCEL_GIT_COMMIT_SHA || 
+                   process.env.GITHUB_SHA ||
+                   process.env.RAILWAY_DEPLOYMENT_ID ||
+                   'build-' + Date.now();
+    console.log('🔧 Generated buildId:', buildId);
+    return buildId;
+  },
+  // Additional fix for deployment context
+  env: {
+    NEXT_BUILD_ID: process.env.NEXT_BUILD_ID,
+    NEXT_DEPLOYMENT_ID: process.env.NEXT_DEPLOYMENT_ID,
+    RAILWAY_DEPLOYMENT_ID: process.env.RAILWAY_DEPLOYMENT_ID,
+    RAILWAY_GIT_COMMIT_SHA: process.env.RAILWAY_GIT_COMMIT_SHA,
+  },
+  // Force build ID to be available at runtime
+  publicRuntimeConfig: {
+    buildId: process.env.NEXT_BUILD_ID || 'runtime-' + Date.now(),
   },
   images: {
     remotePatterns: [

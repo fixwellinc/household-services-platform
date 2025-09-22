@@ -5,6 +5,7 @@
   "description": "Frontend for Fixwell Services Subscription Platform (Next.js 14)",
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node build-fix.js",
     "build": "next build",
     "postinstall": "echo 'Frontend postinstall complete'",
     "start": "next start",
