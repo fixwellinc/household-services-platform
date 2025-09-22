@@ -619,4 +619,71 @@ class PerformanceMonitoringService {
 // Create singleton instance
 const performanceMonitoringService = new PerformanceMonitoringService();
 
-export { performanceMonitoringService };
+export { performanceMonitoringService 
+  // Check for performance alerts
+  checkAlerts() {
+    try {
+      const currentMetrics = this.getCurrentMetrics();
+      
+      // Check memory usage
+      if (currentMetrics.memory && currentMetrics.memory.heapUsed > 400 * 1024 * 1024) { // 400MB
+        console.warn('⚠️  High memory usage detected:', Math.round(currentMetrics.memory.heapUsed / 1024 / 1024) + 'MB');
+        
+        // Force garbage collection if available
+        if (global.gc) {
+          global.gc();
+          console.log('🧹 Forced garbage collection');
+        }
+      }
+      
+      // Check response times
+      if (currentMetrics.responseTime && currentMetrics.responseTime.average > 2000) { // 2 seconds
+        console.warn('⚠️  Slow response times detected:', currentMetrics.responseTime.average + 'ms');
+      }
+      
+      // Check error rates
+      if (currentMetrics.errors && currentMetrics.errors.rate > 0.05) { // 5% error rate
+        console.warn('⚠️  High error rate detected:', (currentMetrics.errors.rate * 100).toFixed(2) + '%');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error in checkAlerts:', error.message);
+    }
+  }
+
+  // Get current metrics snapshot
+  getCurrentMetrics() {
+    try {
+      const memoryUsage = process.memoryUsage();
+      
+      return {
+        memory: {
+          heapUsed: memoryUsage.heapUsed,
+          heapTotal: memoryUsage.heapTotal,
+          rss: memoryUsage.rss
+        },
+        uptime: process.uptime(),
+        timestamp: Date.now()
+      };
+    } catch (error) {
+      console.error('❌ Error getting current metrics:', error.message);
+      return {};
+    }
+  }
+
+  // Clean old metrics to prevent memory leaks
+  cleanOldMetrics() {
+    try {
+      // This is a placeholder - implement based on your metrics storage
+      console.log('🧹 Cleaning old metrics...');
+      
+      // Force garbage collection if available
+      if (global.gc) {
+        global.gc();
+      }
+    } catch (error) {
+      console.error('❌ Error cleaning old metrics:', error.message);
+    }
+  }
+
+};
