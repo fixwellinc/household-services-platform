@@ -608,15 +608,6 @@ class PerformanceMonitoringService {
   }
 
   /**
-   * Stop monitoring
-   */
-  stop() {
-    // Clear all intervals (would need to track interval IDs)
-    logger.info('Performance monitoring stopped');
-  }
-}
-
-  /**
    * Check for performance alerts
    */
   checkAlerts() {
@@ -669,6 +660,14 @@ class PerformanceMonitoringService {
       console.error('❌ Error getting current metrics:', error.message);
       return {};
     }
+  }
+
+  /**
+   * Stop monitoring
+   */
+  stop() {
+    // Clear all intervals (would need to track interval IDs)
+    logger.info('Performance monitoring stopped');
   }
 }
 
