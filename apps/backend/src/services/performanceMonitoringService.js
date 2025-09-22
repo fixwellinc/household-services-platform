@@ -616,11 +616,9 @@ class PerformanceMonitoringService {
   }
 }
 
-// Create singleton instance
-const performanceMonitoringService = new PerformanceMonitoringService();
-
-export { performanceMonitoringService 
-  // Check for performance alerts
+  /**
+   * Check for performance alerts
+   */
   checkAlerts() {
     try {
       const currentMetrics = this.getCurrentMetrics();
@@ -651,7 +649,9 @@ export { performanceMonitoringService
     }
   }
 
-  // Get current metrics snapshot
+  /**
+   * Get current metrics snapshot
+   */
   getCurrentMetrics() {
     try {
       const memoryUsage = process.memoryUsage();
@@ -670,20 +670,9 @@ export { performanceMonitoringService
       return {};
     }
   }
+}
 
-  // Clean old metrics to prevent memory leaks
-  cleanOldMetrics() {
-    try {
-      // This is a placeholder - implement based on your metrics storage
-      console.log('🧹 Cleaning old metrics...');
-      
-      // Force garbage collection if available
-      if (global.gc) {
-        global.gc();
-      }
-    } catch (error) {
-      console.error('❌ Error cleaning old metrics:', error.message);
-    }
-  }
+// Create singleton instance
+const performanceMonitoringService = new PerformanceMonitoringService();
 
-};
+export { performanceMonitoringService };
