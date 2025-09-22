@@ -19,6 +19,7 @@ import path from 'path';
 
 // Import services
 import socketService from './services/socketService.js';
+import appointmentSocketService from './services/appointmentSocketService.js';
 import queueService from './services/queueService.js';
 import { auditService } from './services/auditService.js';
 
@@ -49,6 +50,7 @@ import securityRoutes from './routes/security.js';
 import healthRoutes from './routes/health.js';
 import adminRoutes from './routes/admin.js';
 import appointmentRoutes from './routes/appointments.js';
+import advancedSchedulingRoutes from './routes/advancedScheduling.js';
 import adminDashboardRoutes from './routes/admin/dashboard.js';
 import adminPermissionsRoutes from './routes/adminPermissions.js';
 import adminImpersonationRoutes from './routes/adminImpersonation.js';
@@ -57,6 +59,7 @@ import bulkOperationsRoutes from './routes/bulkOperations.js';
 import adminSubscriptionAnalyticsRoutes from './routes/admin/subscriptionAnalytics.js';
 import adminSubscriptionsRoutes from './routes/admin/subscriptions.js';
 import customerRoutes from './routes/customer.js';
+import notificationPreferencesRoutes from './routes/notificationPreferences.js';
 
 // Import middleware
 import { authMiddleware, requireAdmin } from './middleware/auth.js';
@@ -105,6 +108,7 @@ const io = new SocketIOServer(server, {
 
 // Initialize enhanced Socket.IO service
 socketService.initialize(io);
+appointmentSocketService.initialize(io);
 
 // Make io available to routes
 app.set('io', io);
@@ -413,6 +417,8 @@ app.use('/api/admin/subscriptions', checkDatabaseMiddleware, adminSubscriptionsR
 app.use('/api/admin/subscriptions/analytics', checkDatabaseMiddleware, adminSubscriptionAnalyticsRoutes);
 app.use('/api/bulk-operations', checkDatabaseMiddleware, bulkOperationsRoutes);
 app.use('/api/appointments', checkDatabaseMiddleware, appointmentRoutes);
+app.use('/api/advanced-scheduling', checkDatabaseMiddleware, advancedSchedulingRoutes);
+app.use('/api/notifications', checkDatabaseMiddleware, notificationPreferencesRoutes);
 
 function requireAdminLocal(req, res, next) {
   if (!req.user || req.user.role !== 'ADMIN') {

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Reminder - Fixwell Services</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .header-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #374151;
+        }
+        
+        .reminder-message {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .reminder-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+        
+        .countdown {
+            background: #fee2e2;
+            border: 2px solid #f87171;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        
+        .countdown-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #dc2626;
+            margin-bottom: 5px;
+        }
+        
+        .countdown-subtitle {
+            color: #991b1b;
+            font-size: 14px;
+        }
+        
+        .appointment-details {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #374151;
+            min-width: 120px;
+        }
+        
+        .detail-value {
+            color: #6b7280;
+            text-align: right;
+            flex: 1;
+        }
+        
+        .preparation-checklist {
+            background: #eff6ff;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        
+        .checklist-title {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 15px;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            color: #374151;
+        }
+        
+        .checklist-icon {
+            color: #3b82f6;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .contact-info {
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        
+        .contact-title {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 15px;
+        }
+        
+        .contact-details {
+            color: #6b7280;
+        }
+        
+        .footer {
+            background: #f3f4f6;
+            padding: 30px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .footer-logo {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 600px) {
+            .email-container {
+                margin: 0;
+                box-shadow: none;
+            }
+            
+            .content, .header, .footer {
+                padding: 20px;
+            }
+            
+            .detail-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .detail-value {
+                text-align: left;
+                margin-top: 5px;
+            }
+            
+            .countdown-text {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="logo">Fixwell Services</div>
+            <div class="header-subtitle">Appointment Reminder</div>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">Hi {{customerName}},</div>
+            
+            <div class="reminder-message">
+                <div class="reminder-title">⏰ Friendly Reminder</div>
+                <p>This is a reminder about your upcoming house visit appointment with Fixwell Services.</p>
+            </div>
+            
+            <div class="countdown">
+                <div class="countdown-text">Tomorrow</div>
+                <div class="countdown-subtitle">Your appointment is in less than 24 hours</div>
+            </div>
+            
+            <div class="appointment-details">
+                <div class="detail-row">
+                    <span class="detail-label">Service Type:</span>
+                    <span class="detail-value">{{serviceType}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Date:</span>
+                    <span class="detail-value">{{appointmentDate}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Time:</span>
+                    <span class="detail-value">{{appointmentTime}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Duration:</span>
+                    <span class="detail-value">{{duration}} minutes</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Address:</span>
+                    <span class="detail-value">{{propertyAddress}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Confirmation #:</span>
+                    <span class="detail-value">{{confirmationNumber}}</span>
+                </div>
+            </div>
+            
+            <div class="preparation-checklist">
+                <div class="checklist-title">📋 Preparation Checklist</div>
+                <div class="checklist-item">
+                    <span class="checklist-icon">✓</span>
+                    <span>Ensure someone will be available at the scheduled time</span>
+                </div>
+                <div class="checklist-item">
+                    <span class="checklist-icon">✓</span>
+                    <span>Clear access to areas that need attention</span>
+                </div>
+                <div class="checklist-item">
+                    <span class="checklist-icon">✓</span>
+                    <span>Have your phone available - we'll call 30 minutes before arrival</span>
+                </div>
+                <div class="checklist-item">
+                    <span class="checklist-icon">✓</span>
+                    <span>Prepare any questions or additional concerns you'd like to discuss</span>
+                </div>
+            </div>
+            
+            {{#notes}}
+            <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <strong>Your Original Notes:</strong> {{notes}}
+            </div>
+            {{/notes}}
+            
+            <div class="contact-info">
+                <div class="contact-title">Need to Reschedule or Have Questions?</div>
+                <div class="contact-details">
+                    📞 Phone: (555) 123-4567<br>
+                    📧 Email: support@fixwell.ca<br>
+                    🌐 Website: fixwell-services.com
+                </div>
+            </div>
+            
+            <p style="margin-top: 30px; color: #6b7280;">
+                We're looking forward to serving you tomorrow. Thank you for choosing Fixwell Services!
+            </p>
+        </div>
+        
+        <div class="footer">
+            <div class="footer-logo">Fixwell Services</div>
+            <div>Making homes better, one fix at a time</div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,5 +1,11 @@
 import prisma from '../config/database.js';
 import availabilityService from './availabilityService.js';
+import serviceTypeService from './serviceTypeService.js';
+import advancedSchedulingService from './advancedSchedulingService.js';
+import appointmentSocketService from './appointmentSocketService.js';
+import notificationDeliveryService from './notificationDeliveryService.js';
+import appointmentCacheService from './appointmentCacheService.js';
+import appointmentPerformanceService from './appointmentPerformanceService.js';
 
 class AppointmentService {
   /**
@@ -8,12 +14,14 @@ class AppointmentService {
    * @returns {Promise<Object>} The created appointment
    */
   async createAppointment(appointmentData) {
+    const timer = appointmentPerformanceService.monitorAppointmentOperation('creation', 'new');
+    
     try {
       const {
         customerId,
-        serviceType,
+        serviceTypeId,
         scheduledDate,
-        duration = 60,
+        duration, // Will be overridden by service type default
         customerName,
         customerEmail,
         customerPhone,
@@ -23,6 +31,15 @@ class AppointmentService {
 
       // Validate required fields
       this._validateAppointmentData(appointmentData);
+
+      // Get service type details and validate
+      const serviceType = await serviceTypeService.getServiceTypeById(serviceTypeId);
+      if (!serviceType || !serviceType.isActive) {
+        throw new Error('Invalid or inactive service type');
+      }
+
+      // Use service type default duration
+      const actualDuration = serviceType.duration;
 
       // Parse scheduled date
       const appointmentDate = new Date(scheduledDate);
@@ -35,58 +52,64 @@ class AppointmentService {
         throw new Error('Appointment must be scheduled for a future date and time');
       }
 
+      // Validate advance booking time limits
+      const advanceValidation = await serviceTypeService.validateAdvanceBookingTime(serviceTypeId, appointmentDate);
+      if (!advanceValidation.isValid) {
+        throw new Error(advanceValidation.message);
+      }
+
       // Extract time components for availability checking
       const dayOfWeek = appointmentDate.getDay();
       const startTime = this._formatTimeFromDate(appointmentDate);
       
-      // Check if the time slot is available
-      const isAvailable = await availabilityService.isSlotAvailable(
-        appointmentDate,
-        startTime,
-        duration,
-        serviceType
-      );
-
-      if (!isAvailable) {
-        throw new Error('The selected time slot is not available');
+      // Check if service type allows booking on this day
+      const isAllowedOnDay = await serviceTypeService.isBookingAllowedOnDay(serviceTypeId, dayOfWeek);
+      if (!isAllowedOnDay) {
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        throw new Error(`${serviceType.displayName} is not available on ${dayNames[dayOfWeek]}`);
       }
 
-      // Check for booking conflicts
-      await this._checkBookingConflicts(appointmentDate, duration);
+      // Use advanced scheduling validation
+      const validationResult = await advancedSchedulingService.validateAdvancedBooking({
+        serviceTypeId,
+        scheduledDate: appointmentDate,
+        duration: actualDuration,
+        customerId
+      });
+
+      if (!validationResult.isValid) {
+        const primaryConflict = validationResult.conflicts[0];
+        let errorMessage = primaryConflict.message;
+        
+        // Add suggestions if available
+        if (validationResult.suggestions.length > 0) {
+          const suggestion = validationResult.suggestions[0];
+          if (suggestion.date) {
+            errorMessage += ` Suggested alternative: ${suggestion.dayName || suggestion.date.toDateString()}`;
+          } else if (suggestion.time) {
+            errorMessage += ` Suggested alternative time: ${suggestion.time}`;
+          }
+        }
+        
+        throw new Error(errorMessage);
+      }
 
       // Create the appointment
       const appointment = await prisma.appointment.create({
         data: {
           customerId,
-          serviceType,
+          serviceTypeId,
           scheduledDate: appointmentDate,
-          duration,
+          duration: actualDuration,
           customerName,
           customerEmail,
           customerPhone: customerPhone || null,
           propertyAddress,
           notes: notes || null,
-          status: 'PENDING'
-        }
-      });
-
-      return appointment;
-    } catch (error) {
-      console.error('Error creating appointment:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get appointment by ID
-   * @param {string} id - The appointment ID
-   * @returns {Promise<Object|null>} The appointment or null
-   */
-  async getAppointmentById(id) {
-    try {
-      const appointment = await prisma.appointment.findUnique({
-        where: { id },
+          status: serviceType.requiresApproval ? 'PENDING' : 'CONFIRMED'
+        },
         include: {
+          serviceType: true,
           customer: {
             select: {
               id: true,
@@ -98,9 +121,77 @@ class AppointmentService {
         }
       });
 
+      // Emit real-time notification for new booking
+      try {
+        appointmentSocketService.notifyNewBooking(appointment);
+        appointmentSocketService.notifyAvailabilityUpdate(appointmentDate, serviceTypeId, 'slot_booked');
+      } catch (socketError) {
+        console.warn('Failed to emit socket notification for new booking:', socketError.message);
+      }
+
+      // Send appointment confirmation notification
+      try {
+        await notificationDeliveryService.sendAppointmentNotification(
+          appointment,
+          'appointment_confirmation'
+        );
+      } catch (notificationError) {
+        console.warn('Failed to send appointment confirmation notification:', notificationError.message);
+      }
+
+      // Invalidate availability cache for the appointment date
+      appointmentCacheService.invalidateAvailability(appointmentDate, serviceTypeId);
+      
+      timer.end(true, { appointmentId: appointment.id, serviceTypeId });
+      return appointment;
+    } catch (error) {
+      console.error('Error creating appointment:', error);
+      timer.end(false, { error: error.message });
+      throw error;
+    }
+  }
+
+  /**
+   * Get appointment by ID
+   * @param {string} id - The appointment ID
+   * @returns {Promise<Object|null>} The appointment or null
+   */
+  async getAppointmentById(id) {
+    const timer = appointmentPerformanceService.monitorAppointmentOperation('get', id);
+    
+    try {
+      // Check cache first
+      const cached = appointmentCacheService.getAppointment(id);
+      if (cached) {
+        timer.end(true, { cacheHit: true });
+        return cached;
+      }
+
+      const appointment = await prisma.appointment.findUnique({
+        where: { id },
+        include: {
+          serviceType: true,
+          customer: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true
+            }
+          }
+        }
+      });
+
+      // Cache the result if found
+      if (appointment) {
+        appointmentCacheService.setAppointment(id, appointment);
+      }
+      
+      timer.end(true, { cacheHit: false, found: !!appointment });
       return appointment;
     } catch (error) {
       console.error('Error getting appointment by ID:', error);
+      timer.end(false, { cacheHit: false, error: error.message });
       throw error;
     }
   }
@@ -115,7 +206,7 @@ class AppointmentService {
       const {
         customerId,
         status,
-        serviceType,
+        serviceTypeId,
         startDate,
         endDate,
         page = 1,
@@ -135,8 +226,8 @@ class AppointmentService {
         where.status = status;
       }
       
-      if (serviceType) {
-        where.serviceType = serviceType;
+      if (serviceTypeId) {
+        where.serviceTypeId = serviceTypeId;
       }
       
       if (startDate || endDate) {
@@ -157,6 +248,7 @@ class AppointmentService {
         prisma.appointment.findMany({
           where,
           include: {
+            serviceType: true,
             customer: {
               select: {
                 id: true,
@@ -206,32 +298,69 @@ class AppointmentService {
       }
 
       // Validate update data
-      if (updateData.scheduledDate || updateData.duration) {
+      if (updateData.scheduledDate || updateData.serviceTypeId) {
         const newScheduledDate = updateData.scheduledDate 
           ? new Date(updateData.scheduledDate)
           : existingAppointment.scheduledDate;
-        const newDuration = updateData.duration || existingAppointment.duration;
+        const newServiceTypeId = updateData.serviceTypeId || existingAppointment.serviceTypeId;
+
+        // Get service type details
+        const serviceType = await serviceTypeService.getServiceTypeById(newServiceTypeId);
+        if (!serviceType || !serviceType.isActive) {
+          throw new Error('Invalid or inactive service type');
+        }
+
+        const newDuration = serviceType.duration;
 
         // Check if new time is in the future
         if (newScheduledDate <= new Date()) {
           throw new Error('Appointment must be scheduled for a future date and time');
         }
 
-        // Check availability for new time slot
-        const startTime = this._formatTimeFromDate(newScheduledDate);
-        const isAvailable = await availabilityService.isSlotAvailable(
-          newScheduledDate,
-          startTime,
-          newDuration,
-          updateData.serviceType || existingAppointment.serviceType
-        );
-
-        if (!isAvailable) {
-          throw new Error('The selected time slot is not available');
+        // Validate advance booking time limits
+        const advanceValidation = await serviceTypeService.validateAdvanceBookingTime(newServiceTypeId, newScheduledDate);
+        if (!advanceValidation.isValid) {
+          throw new Error(advanceValidation.message);
         }
 
-        // Check for conflicts (excluding current appointment)
-        await this._checkBookingConflicts(newScheduledDate, newDuration, id);
+        // Check if service type allows booking on this day
+        const dayOfWeek = newScheduledDate.getDay();
+        const isAllowedOnDay = await serviceTypeService.isBookingAllowedOnDay(newServiceTypeId, dayOfWeek);
+        if (!isAllowedOnDay) {
+          const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+          throw new Error(`${serviceType.displayName} is not available on ${dayNames[dayOfWeek]}`);
+        }
+
+        // Use advanced scheduling validation (excluding current appointment)
+        const validationResult = await advancedSchedulingService.validateAdvancedBooking({
+          serviceTypeId: newServiceTypeId,
+          scheduledDate: newScheduledDate,
+          duration: newDuration,
+          customerId: existingAppointment.customerId,
+          excludeAppointmentId: id
+        });
+
+        if (!validationResult.isValid) {
+          const primaryConflict = validationResult.conflicts[0];
+          let errorMessage = primaryConflict.message;
+          
+          // Add suggestions if available
+          if (validationResult.suggestions.length > 0) {
+            const suggestion = validationResult.suggestions[0];
+            if (suggestion.date) {
+              errorMessage += ` Suggested alternative: ${suggestion.dayName || suggestion.date.toDateString()}`;
+            } else if (suggestion.time) {
+              errorMessage += ` Suggested alternative time: ${suggestion.time}`;
+            }
+          }
+          
+          throw new Error(errorMessage);
+        }
+
+        // Update duration if service type changed
+        if (updateData.serviceTypeId && updateData.serviceTypeId !== existingAppointment.serviceTypeId) {
+          updateData.duration = newDuration;
+        }
       }
 
       // Validate status transitions
@@ -247,6 +376,7 @@ class AppointmentService {
           updatedAt: new Date()
         },
         include: {
+          serviceType: true,
           customer: {
             select: {
               id: true,
@@ -257,6 +387,27 @@ class AppointmentService {
           }
         }
       });
+
+      // Emit real-time notifications for appointment updates
+      try {
+        // Status change notification
+        if (updateData.status && updateData.status !== existingAppointment.status) {
+          appointmentSocketService.notifyStatusChange(updatedAppointment, existingAppointment.status);
+        }
+
+        // Reschedule notification
+        if (updateData.scheduledDate && updateData.scheduledDate !== existingAppointment.scheduledDate) {
+          appointmentSocketService.notifyReschedule(updatedAppointment, existingAppointment.scheduledDate);
+        }
+
+        // Availability updates for date changes
+        if (updateData.scheduledDate && updateData.scheduledDate !== existingAppointment.scheduledDate) {
+          appointmentSocketService.notifyAvailabilityUpdate(existingAppointment.scheduledDate, existingAppointment.serviceTypeId, 'slot_freed');
+          appointmentSocketService.notifyAvailabilityUpdate(new Date(updateData.scheduledDate), updateData.serviceTypeId || existingAppointment.serviceTypeId, 'slot_booked');
+        }
+      } catch (socketError) {
+        console.warn('Failed to emit socket notification for appointment update:', socketError.message);
+      }
 
       return updatedAppointment;
     } catch (error) {
@@ -294,6 +445,7 @@ class AppointmentService {
           updatedAt: new Date()
         },
         include: {
+          serviceType: true,
           customer: {
             select: {
               id: true,
@@ -304,6 +456,24 @@ class AppointmentService {
           }
         }
       });
+
+      // Emit real-time notification for cancellation
+      try {
+        appointmentSocketService.notifyCancellation(updatedAppointment, reason);
+      } catch (socketError) {
+        console.warn('Failed to emit socket notification for appointment cancellation:', socketError.message);
+      }
+
+      // Send appointment cancellation notification
+      try {
+        await notificationDeliveryService.sendAppointmentNotification(
+          updatedAppointment,
+          'appointment_cancellation',
+          { reason }
+        );
+      } catch (notificationError) {
+        console.warn('Failed to send appointment cancellation notification:', notificationError.message);
+      }
 
       return updatedAppointment;
     } catch (error) {
@@ -335,6 +505,7 @@ class AppointmentService {
           updatedAt: new Date()
         },
         include: {
+          serviceType: true,
           customer: {
             select: {
               id: true,
@@ -345,6 +516,24 @@ class AppointmentService {
           }
         }
       });
+
+      // Emit real-time notification for confirmation
+      try {
+        appointmentSocketService.notifyConfirmation(updatedAppointment);
+      } catch (socketError) {
+        console.warn('Failed to emit socket notification for appointment confirmation:', socketError.message);
+      }
+
+      // Send appointment status change notification
+      try {
+        await notificationDeliveryService.sendAppointmentNotification(
+          updatedAppointment,
+          'appointment_status_change',
+          { previousStatus: 'PENDING', newStatus: 'CONFIRMED' }
+        );
+      } catch (notificationError) {
+        console.warn('Failed to send appointment status change notification:', notificationError.message);
+      }
 
       return updatedAppointment;
     } catch (error) {
@@ -378,6 +567,7 @@ class AppointmentService {
           updatedAt: new Date()
         },
         include: {
+          serviceType: true,
           customer: {
             select: {
               id: true,
@@ -388,6 +578,13 @@ class AppointmentService {
           }
         }
       });
+
+      // Emit real-time notification for completion
+      try {
+        appointmentSocketService.notifyCompletion(updatedAppointment);
+      } catch (socketError) {
+        console.warn('Failed to emit socket notification for appointment completion:', socketError.message);
+      }
 
       return updatedAppointment;
     } catch (error) {
@@ -421,6 +618,7 @@ class AppointmentService {
           }
         },
         include: {
+          serviceType: true,
           customer: {
             select: {
               id: true,
@@ -465,6 +663,7 @@ class AppointmentService {
         },
         take: limit,
         include: {
+          serviceType: true,
           customer: {
             select: {
               id: true,
@@ -557,7 +756,7 @@ class AppointmentService {
    */
   async getAppointmentStats(filters = {}) {
     try {
-      const { startDate, endDate, serviceType } = filters;
+      const { startDate, endDate, serviceTypeId } = filters;
       
       const where = {};
       
@@ -567,8 +766,8 @@ class AppointmentService {
         if (endDate) where.scheduledDate.lte = new Date(endDate);
       }
       
-      if (serviceType) {
-        where.serviceType = serviceType;
+      if (serviceTypeId) {
+        where.serviceTypeId = serviceTypeId;
       }
 
       const [
@@ -607,7 +806,7 @@ class AppointmentService {
    * @param {Object} appointmentData - The appointment data to validate
    */
   _validateAppointmentData(appointmentData) {
-    const required = ['customerId', 'serviceType', 'scheduledDate', 'customerName', 'customerEmail', 'propertyAddress'];
+    const required = ['customerId', 'serviceTypeId', 'scheduledDate', 'customerName', 'customerEmail', 'propertyAddress'];
     
     for (const field of required) {
       if (!appointmentData[field]) {

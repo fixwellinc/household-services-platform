@@ -1,4 +1,7 @@
 import prisma from '../config/database.js';
+import serviceTypeService from './serviceTypeService.js';
+import appointmentCacheService from './appointmentCacheService.js';
+import appointmentPerformanceService from './appointmentPerformanceService.js';
 
 class AvailabilityService {
   /**
@@ -8,7 +11,7 @@ class AvailabilityService {
    */
   async createAvailabilityRule(ruleData) {
     try {
-      const { dayOfWeek, isAvailable, startTime, endTime, serviceType, bufferMinutes, maxBookingsPerDay } = ruleData;
+      const { dayOfWeek, isAvailable, startTime, endTime, serviceTypeId, bufferMinutes, maxBookingsPerDay } = ruleData;
 
       // Validate day of week
       if (dayOfWeek < 0 || dayOfWeek > 6) {
@@ -26,8 +29,16 @@ class AvailabilityService {
         throw new Error('Start time must be before end time');
       }
 
+      // Validate service type if provided
+      if (serviceTypeId) {
+        const serviceType = await serviceTypeService.getServiceTypeById(serviceTypeId);
+        if (!serviceType) {
+          throw new Error('Invalid service type ID');
+        }
+      }
+
       // Check for existing rule conflicts
-      await this._checkRuleConflicts(dayOfWeek, serviceType, startTime, endTime);
+      await this._checkRuleConflicts(dayOfWeek, serviceTypeId, startTime, endTime);
 
       const rule = await prisma.availabilityRule.create({
         data: {
@@ -35,9 +46,12 @@ class AvailabilityService {
           isAvailable,
           startTime,
           endTime,
-          serviceType: serviceType || null,
+          serviceTypeId: serviceTypeId || null,
           bufferMinutes: bufferMinutes || 30,
           maxBookingsPerDay: maxBookingsPerDay || 8
+        },
+        include: {
+          serviceType: true
         }
       });
 
@@ -61,8 +75,8 @@ class AvailabilityService {
         where.dayOfWeek = filters.dayOfWeek;
       }
       
-      if (filters.serviceType !== undefined) {
-        where.serviceType = filters.serviceType;
+      if (filters.serviceTypeId !== undefined) {
+        where.serviceTypeId = filters.serviceTypeId;
       }
       
       if (filters.isAvailable !== undefined) {
@@ -71,6 +85,9 @@ class AvailabilityService {
 
       const rules = await prisma.availabilityRule.findMany({
         where,
+        include: {
+          serviceType: true
+        },
         orderBy: [
           { dayOfWeek: 'asc' },
           { startTime: 'asc' }
@@ -137,16 +154,19 @@ class AvailabilityService {
 
       // Check for conflicts if key fields are being updated
       const dayOfWeek = updateData.dayOfWeek !== undefined ? updateData.dayOfWeek : existingRule.dayOfWeek;
-      const serviceType = updateData.serviceType !== undefined ? updateData.serviceType : existingRule.serviceType;
+      const serviceTypeId = updateData.serviceTypeId !== undefined ? updateData.serviceTypeId : existingRule.serviceTypeId;
       
-      if (updateData.dayOfWeek !== undefined || updateData.serviceType !== undefined || 
+      if (updateData.dayOfWeek !== undefined || updateData.serviceTypeId !== undefined || 
           updateData.startTime || updateData.endTime) {
-        await this._checkRuleConflicts(dayOfWeek, serviceType, startTime, endTime, id);
+        await this._checkRuleConflicts(dayOfWeek, serviceTypeId, startTime, endTime, id);
       }
 
       const updatedRule = await prisma.availabilityRule.update({
         where: { id },
-        data: updateData
+        data: updateData,
+        include: {
+          serviceType: true
+        }
       });
 
       return updatedRule;
@@ -182,13 +202,21 @@ class AvailabilityService {
   /**
    * Get availability rules for a specific day
    * @param {number} dayOfWeek - Day of week (0-6)
-   * @param {string} serviceType - Optional service type filter
+   * @param {string} serviceTypeId - Optional service type ID filter
    * @returns {Promise<Array>} Array of availability rules for the day
    */
-  async getAvailabilityForDay(dayOfWeek, serviceType = null) {
+  async getAvailabilityForDay(dayOfWeek, serviceTypeId = null) {
     try {
       if (dayOfWeek < 0 || dayOfWeek > 6) {
         throw new Error('Day of week must be between 0 (Sunday) and 6 (Saturday)');
+      }
+
+      // First check if the service type allows booking on this day
+      if (serviceTypeId) {
+        const serviceType = await serviceTypeService.getServiceTypeById(serviceTypeId);
+        if (!serviceType || !serviceType.allowedDays.includes(dayOfWeek)) {
+          return []; // Service type doesn't allow booking on this day
+        }
       }
 
       const where = {
@@ -196,26 +224,29 @@ class AvailabilityService {
         isAvailable: true
       };
 
-      // Get both general rules (serviceType is null) and service-specific rules
+      // Get both general rules (serviceTypeId is null) and service-specific rules
       const rules = await prisma.availabilityRule.findMany({
         where: {
           ...where,
           OR: [
-            { serviceType: null },
-            { serviceType: serviceType }
+            { serviceTypeId: null },
+            { serviceTypeId: serviceTypeId }
           ]
+        },
+        include: {
+          serviceType: true
         },
         orderBy: { startTime: 'asc' }
       });
 
       // If service-specific rules exist, they override general rules
-      const serviceSpecificRules = rules.filter(rule => rule.serviceType === serviceType);
+      const serviceSpecificRules = rules.filter(rule => rule.serviceTypeId === serviceTypeId);
       if (serviceSpecificRules.length > 0) {
         return serviceSpecificRules;
       }
 
       // Return general rules if no service-specific rules exist
-      return rules.filter(rule => rule.serviceType === null);
+      return rules.filter(rule => rule.serviceTypeId === null);
     } catch (error) {
       console.error('Error getting availability for day:', error);
       throw error;
@@ -227,12 +258,12 @@ class AvailabilityService {
    * @param {number} dayOfWeek - Day of week (0-6)
    * @param {string} startTime - Start time in HH:MM format
    * @param {string} endTime - End time in HH:MM format
-   * @param {string} serviceType - Optional service type
+   * @param {string} serviceTypeId - Optional service type ID
    * @returns {Promise<boolean>} True if the time slot is available
    */
-  async isTimeSlotAvailable(dayOfWeek, startTime, endTime, serviceType = null) {
+  async isTimeSlotAvailable(dayOfWeek, startTime, endTime, serviceTypeId = null) {
     try {
-      const rules = await this.getAvailabilityForDay(dayOfWeek, serviceType);
+      const rules = await this.getAvailabilityForDay(dayOfWeek, serviceTypeId);
       
       if (rules.length === 0) {
         return false; // No availability rules for this day
@@ -285,38 +316,88 @@ class AvailabilityService {
   /**
    * Calculate available time slots for a specific date
    * @param {Date} date - The date to calculate slots for
-   * @param {string} serviceType - Optional service type filter
-   * @param {number} duration - Duration in minutes for each slot
+   * @param {string} serviceTypeId - Optional service type ID filter
+   * @param {number} duration - Duration in minutes for each slot (will be overridden by service type default)
    * @returns {Promise<Array>} Array of available time slots
    */
-  async calculateAvailableSlots(date, serviceType = null, duration = 60) {
+  async calculateAvailableSlots(date, serviceTypeId = null, duration = 60) {
+    // Start performance monitoring
+    const timer = appointmentPerformanceService.monitorAvailabilityCalculation(date, serviceTypeId);
+    
     try {
+      // Check cache first
+      const cached = appointmentCacheService.getAvailability(date, serviceTypeId, duration);
+      if (cached) {
+        timer.end(true, { cacheHit: true });
+        return cached;
+      }
+
       const dayOfWeek = date.getDay();
       const dateString = date.toISOString().split('T')[0]; // YYYY-MM-DD format
 
+      // Get service type specific duration and buffer time
+      let actualDuration = duration;
+      let bufferMinutes = 30;
+      
+      if (serviceTypeId) {
+        const serviceType = await serviceTypeService.getServiceTypeById(serviceTypeId);
+        if (!serviceType || !serviceType.isActive) {
+          return [];
+        }
+        
+        // Check if booking is allowed on this day
+        if (!serviceType.allowedDays.includes(dayOfWeek)) {
+          return [];
+        }
+        
+        // Check advance booking time limits
+        const advanceValidation = await serviceTypeService.validateAdvanceBookingTime(serviceTypeId, date);
+        if (!advanceValidation.isValid) {
+          return [];
+        }
+        
+        actualDuration = serviceType.duration;
+        bufferMinutes = serviceType.bufferMinutes;
+        
+        // Check for exclusive service conflicts
+        if (serviceType.isExclusive && serviceType.exclusiveDays.includes(dayOfWeek)) {
+          const conflicts = await serviceTypeService.getExclusiveServiceConflicts(serviceTypeId, date);
+          if (conflicts.length > 0) {
+            return [];
+          }
+        }
+      }
+
       // Get availability rules for the day
-      const rules = await this.getAvailabilityForDay(dayOfWeek, serviceType);
+      const rules = await this.getAvailabilityForDay(dayOfWeek, serviceTypeId);
       
       if (rules.length === 0) {
         return []; // No availability rules for this day
       }
 
       // Get existing appointments for the date
-      const existingAppointments = await this._getAppointmentsForDate(dateString);
+      const existingAppointments = await this._getAppointmentsForDate(dateString, serviceTypeId);
 
       const availableSlots = [];
 
       for (const rule of rules) {
         if (!rule.isAvailable) continue;
 
-        const slots = this._generateSlotsForRule(rule, duration, existingAppointments, dateString);
+        const slots = this._generateSlotsForRule(rule, actualDuration, existingAppointments, dateString, bufferMinutes);
         availableSlots.push(...slots);
       }
 
       // Sort slots by time and remove duplicates
-      return this._sortAndDeduplicateSlots(availableSlots);
+      const slots = this._sortAndDeduplicateSlots(availableSlots);
+      
+      // Cache the result
+      appointmentCacheService.setAvailability(date, serviceTypeId, duration, slots);
+      
+      timer.end(true, { cacheHit: false, slotsCount: slots.length });
+      return slots;
     } catch (error) {
       console.error('Error calculating available slots:', error);
+      timer.end(false, { cacheHit: false, error: error.message });
       throw error;
     }
   }
@@ -325,18 +406,18 @@ class AvailabilityService {
    * Calculate available slots for a date range
    * @param {Date} startDate - Start date of the range
    * @param {Date} endDate - End date of the range
-   * @param {string} serviceType - Optional service type filter
+   * @param {string} serviceTypeId - Optional service type ID filter
    * @param {number} duration - Duration in minutes for each slot
    * @returns {Promise<Object>} Object with dates as keys and available slots as values
    */
-  async calculateAvailableSlotsForRange(startDate, endDate, serviceType = null, duration = 60) {
+  async calculateAvailableSlotsForRange(startDate, endDate, serviceTypeId = null, duration = 60) {
     try {
       const result = {};
       const currentDate = new Date(startDate);
 
       while (currentDate <= endDate) {
         const dateString = currentDate.toISOString().split('T')[0];
-        const slots = await this.calculateAvailableSlots(currentDate, serviceType, duration);
+        const slots = await this.calculateAvailableSlots(currentDate, serviceTypeId, duration);
         result[dateString] = slots;
         
         // Move to next day
@@ -355,34 +436,74 @@ class AvailabilityService {
    * @param {Date} date - The date to check
    * @param {string} startTime - Start time in HH:MM format
    * @param {number} duration - Duration in minutes
-   * @param {string} serviceType - Optional service type
+   * @param {string} serviceTypeId - Optional service type ID
    * @returns {Promise<boolean>} True if the slot is available
    */
-  async isSlotAvailable(date, startTime, duration, serviceType = null) {
+  async isSlotAvailable(date, startTime, duration, serviceTypeId = null) {
     try {
       const dayOfWeek = date.getDay();
       const endTime = this._addMinutesToTime(startTime, duration);
       const dateString = date.toISOString().split('T')[0];
 
+      // Check service type specific validations
+      if (serviceTypeId) {
+        const serviceType = await serviceTypeService.getServiceTypeById(serviceTypeId);
+        if (!serviceType || !serviceType.isActive) {
+          return false;
+        }
+
+        // Check if booking is allowed on this day
+        if (!serviceType.allowedDays.includes(dayOfWeek)) {
+          return false;
+        }
+
+        // Check advance booking time limits
+        const advanceValidation = await serviceTypeService.validateAdvanceBookingTime(serviceTypeId, date);
+        if (!advanceValidation.isValid) {
+          return false;
+        }
+
+        // Check for exclusive service conflicts
+        if (serviceType.isExclusive && serviceType.exclusiveDays.includes(dayOfWeek)) {
+          const conflicts = await serviceTypeService.getExclusiveServiceConflicts(serviceTypeId, date);
+          if (conflicts.length > 0) {
+            return false;
+          }
+        }
+      }
+
       // Check if the time slot falls within availability rules
-      const isWithinRules = await this.isTimeSlotAvailable(dayOfWeek, startTime, endTime, serviceType);
+      const isWithinRules = await this.isTimeSlotAvailable(dayOfWeek, startTime, endTime, serviceTypeId);
       if (!isWithinRules) {
         return false;
       }
 
       // Check for conflicts with existing appointments
-      const existingAppointments = await this._getAppointmentsForDate(dateString);
+      const existingAppointments = await this._getAppointmentsForDate(dateString, serviceTypeId);
       const hasConflict = this._checkAppointmentConflicts(startTime, endTime, existingAppointments);
       
       if (hasConflict) {
         return false;
       }
 
-      // Check daily booking limits
-      const rules = await this.getAvailabilityForDay(dayOfWeek, serviceType);
-      const maxBookings = Math.max(...rules.map(rule => rule.maxBookingsPerDay));
+      // Check daily booking limits (service-specific or general)
+      let maxBookings = 8; // Default
+      if (serviceTypeId) {
+        const serviceType = await serviceTypeService.getServiceTypeById(serviceTypeId);
+        maxBookings = serviceType.maxBookingsPerDay;
+      } else {
+        const rules = await this.getAvailabilityForDay(dayOfWeek, serviceTypeId);
+        if (rules.length > 0) {
+          maxBookings = Math.max(...rules.map(rule => rule.maxBookingsPerDay));
+        }
+      }
       
-      if (existingAppointments.length >= maxBookings) {
+      // Count appointments for this service type (or all if no service type specified)
+      const serviceTypeAppointments = serviceTypeId 
+        ? existingAppointments.filter(apt => apt.serviceTypeId === serviceTypeId)
+        : existingAppointments;
+        
+      if (serviceTypeAppointments.length >= maxBookings) {
         return false;
       }
 
@@ -398,11 +519,11 @@ class AvailabilityService {
    * @param {Date} fromDate - Starting date to search from
    * @param {string} fromTime - Starting time to search from (HH:MM)
    * @param {number} duration - Duration in minutes
-   * @param {string} serviceType - Optional service type
+   * @param {string} serviceTypeId - Optional service type ID
    * @param {number} maxDaysToSearch - Maximum days to search ahead (default: 30)
    * @returns {Promise<Object|null>} Next available slot or null if none found
    */
-  async getNextAvailableSlot(fromDate, fromTime = '00:00', duration = 60, serviceType = null, maxDaysToSearch = 30) {
+  async getNextAvailableSlot(fromDate, fromTime = '00:00', duration = 60, serviceTypeId = null, maxDaysToSearch = 30) {
     try {
       const searchEndDate = new Date(fromDate);
       searchEndDate.setDate(searchEndDate.getDate() + maxDaysToSearch);
@@ -410,7 +531,7 @@ class AvailabilityService {
       const currentDate = new Date(fromDate);
       
       while (currentDate <= searchEndDate) {
-        const slots = await this.calculateAvailableSlots(currentDate, serviceType, duration);
+        const slots = await this.calculateAvailableSlots(currentDate, serviceTypeId, duration);
         
         // Filter slots that are after the specified time (only for the first day)
         const filteredSlots = currentDate.toDateString() === fromDate.toDateString() 
@@ -438,13 +559,22 @@ class AvailabilityService {
 
   /**
    * Calculate buffer time requirements for a service type
-   * @param {string} serviceType - The service type
+   * @param {string} serviceTypeId - The service type ID
    * @param {number} dayOfWeek - Day of week (0-6)
    * @returns {Promise<number>} Buffer time in minutes
    */
-  async getBufferTimeForService(serviceType, dayOfWeek) {
+  async getBufferTimeForService(serviceTypeId, dayOfWeek) {
     try {
-      const rules = await this.getAvailabilityForDay(dayOfWeek, serviceType);
+      // First check service type specific buffer time
+      if (serviceTypeId) {
+        const serviceType = await serviceTypeService.getServiceTypeById(serviceTypeId);
+        if (serviceType) {
+          return serviceType.bufferMinutes;
+        }
+      }
+
+      // Fall back to availability rules
+      const rules = await this.getAvailabilityForDay(dayOfWeek, serviceTypeId);
       
       if (rules.length === 0) {
         return 30; // Default buffer time
@@ -463,27 +593,34 @@ class AvailabilityService {
   /**
    * Get existing appointments for a specific date
    * @param {string} dateString - Date in YYYY-MM-DD format
+   * @param {string} serviceTypeId - Optional service type ID filter
    * @returns {Promise<Array>} Array of appointments
    */
-  async _getAppointmentsForDate(dateString) {
+  async _getAppointmentsForDate(dateString, serviceTypeId = null) {
     try {
       const startOfDay = new Date(`${dateString}T00:00:00.000Z`);
       const endOfDay = new Date(`${dateString}T23:59:59.999Z`);
 
-      const appointments = await prisma.appointment.findMany({
-        where: {
-          scheduledDate: {
-            gte: startOfDay,
-            lte: endOfDay
-          },
-          status: {
-            in: ['PENDING', 'CONFIRMED'] // Only consider active appointments
-          }
+      const where = {
+        scheduledDate: {
+          gte: startOfDay,
+          lte: endOfDay
         },
+        status: {
+          in: ['PENDING', 'CONFIRMED'] // Only consider active appointments
+        }
+      };
+
+      if (serviceTypeId) {
+        where.serviceTypeId = serviceTypeId;
+      }
+
+      const appointments = await prisma.appointment.findMany({
+        where,
         select: {
           scheduledDate: true,
           duration: true,
-          serviceType: true
+          serviceTypeId: true
         }
       });
 
@@ -491,7 +628,7 @@ class AvailabilityService {
         startTime: this._formatTimeFromDate(apt.scheduledDate),
         endTime: this._addMinutesToTime(this._formatTimeFromDate(apt.scheduledDate), apt.duration),
         duration: apt.duration,
-        serviceType: apt.serviceType
+        serviceTypeId: apt.serviceTypeId
       }));
     } catch (error) {
       console.error('Error getting appointments for date:', error);
@@ -505,13 +642,14 @@ class AvailabilityService {
    * @param {number} duration - Slot duration in minutes
    * @param {Array} existingAppointments - Existing appointments for the day
    * @param {string} dateString - Date string in YYYY-MM-DD format
+   * @param {number} serviceBufferMinutes - Service-specific buffer time (optional)
    * @returns {Array} Array of available time slots
    */
-  _generateSlotsForRule(rule, duration, existingAppointments, dateString) {
+  _generateSlotsForRule(rule, duration, existingAppointments, dateString, serviceBufferMinutes = null) {
     const slots = [];
     const startMinutes = this._timeToMinutes(rule.startTime);
     const endMinutes = this._timeToMinutes(rule.endTime);
-    const bufferMinutes = rule.bufferMinutes || 30;
+    const bufferMinutes = serviceBufferMinutes || rule.bufferMinutes || 30;
 
     let currentMinutes = startMinutes;
 
@@ -633,15 +771,15 @@ class AvailabilityService {
   /**
    * Check for rule conflicts when creating or updating rules
    * @param {number} dayOfWeek - Day of week
-   * @param {string} serviceType - Service type (can be null)
+   * @param {string} serviceTypeId - Service type ID (can be null)
    * @param {string} startTime - Start time
    * @param {string} endTime - End time
    * @param {string} excludeId - Rule ID to exclude from conflict check (for updates)
    */
-  async _checkRuleConflicts(dayOfWeek, serviceType, startTime, endTime, excludeId = null) {
+  async _checkRuleConflicts(dayOfWeek, serviceTypeId, startTime, endTime, excludeId = null) {
     const where = {
       dayOfWeek,
-      serviceType: serviceType || null
+      serviceTypeId: serviceTypeId || null
     };
 
     if (excludeId) {
@@ -649,13 +787,17 @@ class AvailabilityService {
     }
 
     const existingRules = await prisma.availabilityRule.findMany({
-      where
+      where,
+      include: {
+        serviceType: true
+      }
     });
 
     for (const rule of existingRules) {
       // Check for time overlap
       if (this._timesOverlap(startTime, endTime, rule.startTime, rule.endTime)) {
-        throw new Error(`Time slot conflicts with existing rule: ${rule.startTime}-${rule.endTime}`);
+        const serviceTypeName = rule.serviceType ? rule.serviceType.displayName : 'General';
+        throw new Error(`Time slot conflicts with existing rule for ${serviceTypeName}: ${rule.startTime}-${rule.endTime}`);
       }
     }
   }

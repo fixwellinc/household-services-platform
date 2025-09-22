@@ -78,6 +78,8 @@ model User {
   
   // Appointment booking relations
   customerAppointments        Appointment[]       @relation("CustomerAppointments")
+  notificationPreferences     NotificationPreference? @relation("UserNotificationPreferences")
+  notificationDeliveries      NotificationDelivery[] @relation("UserNotificationDeliveries")
 }
 
 model CustomerEmployeeAssignment {
@@ -635,42 +637,82 @@ model PendingCharge {
 
 // Appointment Booking Calendar Models
 model Appointment {
-  id                String    @id @default(cuid())
+  id                String      @id @default(cuid())
   customerId        String
-  serviceType       String
+  serviceTypeId     String
   scheduledDate     DateTime
-  duration          Int       // minutes
-  status            String    @default("PENDING") // PENDING, CONFIRMED, CANCELLED, COMPLETED
+  duration          Int         // minutes
+  status            String      @default("PENDING") // PENDING, CONFIRMED, CANCELLED, COMPLETED
   customerName      String
   customerEmail     String
   customerPhone     String?
   propertyAddress   String
   notes             String?
-  calendarEventId   String?   // External calendar event ID
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  calendarEventId   String?     // External calendar event ID
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
   
   // Relations
-  customer          User?     @relation("CustomerAppointments", fields: [customerId], references: [id])
+  customer          User?       @relation("CustomerAppointments", fields: [customerId], references: [id])
+  serviceType       ServiceType @relation("ServiceTypeAppointments", fields: [serviceTypeId], references: [id])
+  notifications     NotificationDelivery[] @relation("AppointmentNotifications")
   
   @@index([scheduledDate])
   @@index([status])
   @@index([customerId])
+  @@index([serviceTypeId])
+  @@index([scheduledDate, status])
+  @@index([scheduledDate, serviceTypeId])
+  @@index([customerEmail])
+  @@index([createdAt, status])
+}
+
+model ServiceType {
+  id                    String    @id @default(cuid())
+  name                  String    @unique
+  displayName           String
+  description           String?
+  duration              Int       // Default duration in minutes
+  bufferMinutes         Int       @default(30) // Buffer time after appointment
+  isActive              Boolean   @default(true)
+  color                 String?   // Hex color for calendar display
+  maxBookingsPerDay     Int       @default(8)
+  requiresApproval      Boolean   @default(false)
+  isExclusive           Boolean   @default(false) // If true, no other appointments on same day
+  exclusiveDays         Int[]     @default([]) // Days of week (0-6) where this service is exclusive
+  allowedDays           Int[]     @default([0,1,2,3,4,5,6]) // Days of week when service is available
+  minAdvanceHours       Int       @default(24) // Minimum hours in advance for booking
+  maxAdvanceDays        Int       @default(30) // Maximum days in advance for booking
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  // Relations
+  appointments          Appointment[] @relation("ServiceTypeAppointments")
+  availabilityRules     AvailabilityRule[] @relation("ServiceTypeAvailabilityRules")
+  
+  @@index([name])
+  @@index([isActive])
 }
 
 model AvailabilityRule {
-  id                String    @id @default(cuid())
-  dayOfWeek         Int       // 0-6 (Sunday-Saturday)
-  isAvailable       Boolean   @default(true)
-  startTime         String    // HH:MM format
-  endTime           String    // HH:MM format
-  serviceType       String?   // Optional service-specific availability
-  bufferMinutes     Int       @default(30)
-  maxBookingsPerDay Int       @default(8)
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  id                String      @id @default(cuid())
+  dayOfWeek         Int         // 0-6 (Sunday-Saturday)
+  isAvailable       Boolean     @default(true)
+  startTime         String      // HH:MM format
+  endTime           String      // HH:MM format
+  serviceTypeId     String?     // Optional service-specific availability
+  bufferMinutes     Int         @default(30)
+  maxBookingsPerDay Int         @default(8)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
   
-  @@unique([dayOfWeek, serviceType])
+  // Relations
+  serviceType       ServiceType? @relation("ServiceTypeAvailabilityRules", fields: [serviceTypeId], references: [id])
+  
+  @@unique([dayOfWeek, serviceTypeId])
+  @@index([dayOfWeek])
+  @@index([isAvailable])
+  @@index([serviceTypeId])
 }
 
 model CalendarSync {
@@ -684,4 +726,87 @@ model CalendarSync {
   syncErrors        String?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+}
+
+// Notification Preference Models
+model NotificationPreference {
+  id                    String    @id @default(cuid())
+  userId                String    @unique
+  emailEnabled          Boolean   @default(true)
+  smsEnabled            Boolean   @default(false)
+  pushEnabled           Boolean   @default(true)
+  
+  // Appointment-specific preferences
+  appointmentConfirmation Boolean @default(true)
+  appointmentReminder     Boolean @default(true)
+  appointmentCancellation Boolean @default(true)
+  appointmentReschedule   Boolean @default(true)
+  appointmentStatusChange Boolean @default(true)
+  
+  // Admin notification preferences
+  newBookingAlert         Boolean @default(true)
+  urgentAppointmentAlert  Boolean @default(true)
+  dailyAppointmentSummary Boolean @default(true)
+  
+  // Delivery preferences
+  reminderHoursBefore     Int     @default(24) // Hours before appointment to send reminder
+  maxRetryAttempts        Int     @default(3)
+  retryIntervalMinutes    Int     @default(30)
+  
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  
+  // Relations
+  user                    User     @relation("UserNotificationPreferences", fields: [userId], references: [id])
+  
+  @@index([userId])
+}
+
+model NotificationDelivery {
+  id                String    @id @default(cuid())
+  userId            String
+  appointmentId     String?
+  type              String    // "email", "sms", "push"
+  channel           String    // "appointment_confirmation", "appointment_reminder", etc.
+  recipient         String    // email address or phone number
+  subject           String?
+  content           String
+  status            String    @default("PENDING") // PENDING, SENT, FAILED, RETRY
+  attempts          Int       @default(0)
+  maxAttempts       Int       @default(3)
+  lastAttemptAt     DateTime?
+  sentAt            DateTime?
+  failureReason     String?
+  metadata          Json?     // Additional data like template variables
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relations
+  user              User?     @relation("UserNotificationDeliveries", fields: [userId], references: [id])
+  appointment       Appointment? @relation("AppointmentNotifications", fields: [appointmentId], references: [id])
+  
+  @@index([userId])
+  @@index([appointmentId])
+  @@index([status])
+  @@index([type])
+  @@index([channel])
+  @@index([createdAt])
+}
+
+model NotificationTemplate {
+  id                String    @id @default(cuid())
+  name              String    @unique
+  type              String    // "email", "sms", "push"
+  channel           String    // "appointment_confirmation", "appointment_reminder", etc.
+  subject           String?   // For email templates
+  content           String    // Template content with placeholders
+  variables         Json?     // Available template variables
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  @@index([name])
+  @@index([type])
+  @@index([channel])
+  @@index([isActive])
 }

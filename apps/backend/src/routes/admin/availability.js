@@ -5,6 +5,12 @@ import { ValidationError } from '../../middleware/error.js';
 import availabilityService from '../../services/availabilityService.js';
 import appointmentService from '../../services/appointmentService.js';
 import rateLimit from 'express-rate-limit';
+import {
+  adminConfigLimiter,
+  sanitizeAppointmentInput,
+  auditAdminConfigChanges,
+  logFailedAuth
+} from '../../middleware/appointmentSecurity.js';
 
 const router = express.Router();
 
@@ -22,6 +28,7 @@ const adminRateLimit = rateLimit({
 // Apply admin authentication and rate limiting to all routes
 router.use(adminRateLimit);
 router.use(requireAdmin);
+router.use(logFailedAuth);
 
 // Validation schemas for availability rules
 const availabilityValidationSchemas = {
@@ -159,8 +166,10 @@ router.get('/', async (req, res, next) => {
 
 // PUT /api/admin/availability - Update availability rules
 router.put('/',
-  sanitize,
+  adminConfigLimiter,
+  sanitizeAppointmentInput,
   validateAvailability('availabilityUpdate'),
+  auditAdminConfigChanges('UPDATE_AVAILABILITY_RULES', 'availability_rules'),
   async (req, res, next) => {
     try {
       const { rules } = req.validatedData;
@@ -299,7 +308,9 @@ router.get('/appointments/stats', async (req, res, next) => {
 
 // PUT /api/admin/appointments/:id - Update appointment
 router.put('/appointments/:id',
-  sanitize,
+  adminConfigLimiter,
+  sanitizeAppointmentInput,
+  auditAdminConfigChanges('UPDATE_APPOINTMENT', 'appointment'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -362,7 +373,10 @@ router.put('/appointments/:id',
 );
 
 // POST /api/admin/appointments/:id/confirm - Confirm appointment
-router.post('/appointments/:id/confirm', async (req, res, next) => {
+router.post('/appointments/:id/confirm',
+  adminConfigLimiter,
+  auditAdminConfigChanges('CONFIRM_APPOINTMENT', 'appointment'),
+  async (req, res, next) => {
   try {
     const { id } = req.params;
     
@@ -403,7 +417,9 @@ router.post('/appointments/:id/confirm', async (req, res, next) => {
 
 // POST /api/admin/appointments/:id/cancel - Cancel appointment
 router.post('/appointments/:id/cancel',
-  sanitize,
+  adminConfigLimiter,
+  sanitizeAppointmentInput,
+  auditAdminConfigChanges('CANCEL_APPOINTMENT', 'appointment'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -448,7 +464,9 @@ router.post('/appointments/:id/cancel',
 
 // POST /api/admin/appointments/:id/complete - Complete appointment
 router.post('/appointments/:id/complete',
-  sanitize,
+  adminConfigLimiter,
+  sanitizeAppointmentInput,
+  auditAdminConfigChanges('COMPLETE_APPOINTMENT', 'appointment'),
   async (req, res, next) => {
     try {
       const { id } = req.params;

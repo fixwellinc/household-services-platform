@@ -5,6 +5,16 @@ import { authMiddleware, requireCustomer, requireCustomerOrAdmin } from '../midd
 import { validate, sanitize } from '../middleware/validation.js';
 import { ValidationError } from '../middleware/error.js';
 import rateLimit from 'express-rate-limit';
+import {
+  appointmentBookingLimiter,
+  availabilityCheckLimiter,
+  adminConfigLimiter,
+  sanitizeAppointmentInput,
+  auditAdminConfigChanges,
+  validateAppointmentSecurity,
+  checkSuspiciousActivity,
+  logFailedAuth
+} from '../middleware/appointmentSecurity.js';
 
 const router = express.Router();
 
@@ -143,8 +153,9 @@ const validateAppointment = (schemaName) => {
 
 // GET /api/appointments/availability - Check available time slots
 router.get('/availability', 
-  availabilityRateLimit,
-  sanitize,
+  availabilityCheckLimiter,
+  checkSuspiciousActivity,
+  sanitizeAppointmentInput,
   validateAppointment('availability'),
   async (req, res, next) => {
     try {
@@ -183,8 +194,10 @@ router.get('/availability',
 
 // POST /api/appointments/book - Create a new appointment booking
 router.post('/book',
-  bookingRateLimit,
-  sanitize,
+  appointmentBookingLimiter,
+  checkSuspiciousActivity,
+  sanitizeAppointmentInput,
+  validateAppointmentSecurity,
   validateAppointment('booking'),
   async (req, res, next) => {
     try {
@@ -326,7 +339,10 @@ router.get('/:id',
 // PUT /api/appointments/:id - Update appointment (admin only for now)
 router.put('/:id',
   authMiddleware,
-  sanitize,
+  logFailedAuth,
+  adminConfigLimiter,
+  sanitizeAppointmentInput,
+  auditAdminConfigChanges('UPDATE_APPOINTMENT', 'appointment'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -389,6 +405,9 @@ router.put('/:id',
 // POST /api/appointments/:id/confirm - Confirm appointment (admin only)
 router.post('/:id/confirm',
   authMiddleware,
+  logFailedAuth,
+  adminConfigLimiter,
+  auditAdminConfigChanges('CONFIRM_APPOINTMENT', 'appointment'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -433,7 +452,9 @@ router.post('/:id/confirm',
 // POST /api/appointments/:id/cancel - Cancel appointment
 router.post('/:id/cancel',
   authMiddleware,
-  sanitize,
+  logFailedAuth,
+  sanitizeAppointmentInput,
+  auditAdminConfigChanges('CANCEL_APPOINTMENT', 'appointment'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -489,7 +510,10 @@ router.post('/:id/cancel',
 // POST /api/appointments/:id/complete - Complete appointment (admin only)
 router.post('/:id/complete',
   authMiddleware,
-  sanitize,
+  logFailedAuth,
+  adminConfigLimiter,
+  sanitizeAppointmentInput,
+  auditAdminConfigChanges('COMPLETE_APPOINTMENT', 'appointment'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
