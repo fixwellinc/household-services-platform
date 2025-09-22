@@ -1,7 +1,7 @@
 import express from 'express';
 import advancedSchedulingService from '../services/advancedSchedulingService.js';
 import serviceTypeService from '../services/serviceTypeService.js';
-import { authenticateToken } from '../middleware/auth.js';
+import { authMiddleware } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -9,7 +9,7 @@ const router = express.Router();
  * Validate a booking request against advanced scheduling rules
  * POST /api/advanced-scheduling/validate
  */
-router.post('/validate', authenticateToken, async (req, res) => {
+router.post('/validate', authMiddleware, async (req, res) => {
   try {
     const {
       serviceTypeId,
@@ -85,7 +85,7 @@ router.post('/validate', authenticateToken, async (req, res) => {
  * Get alternative booking suggestions
  * POST /api/advanced-scheduling/alternatives
  */
-router.post('/alternatives', authenticateToken, async (req, res) => {
+router.post('/alternatives', authMiddleware, async (req, res) => {
   try {
     const {
       serviceTypeId,
@@ -167,7 +167,7 @@ router.post('/alternatives', authenticateToken, async (req, res) => {
  * Check daily booking limits for a service type
  * GET /api/advanced-scheduling/daily-limits/:serviceTypeId/:date
  */
-router.get('/daily-limits/:serviceTypeId/:date', authenticateToken, async (req, res) => {
+router.get('/daily-limits/:serviceTypeId/:date', authMiddleware, async (req, res) => {
   try {
     const { serviceTypeId, date } = req.params;
 
@@ -222,7 +222,7 @@ router.get('/daily-limits/:serviceTypeId/:date', authenticateToken, async (req, 
  * Get service type scheduling configuration
  * GET /api/advanced-scheduling/service-types/:id/config
  */
-router.get('/service-types/:id/config', authenticateToken, async (req, res) => {
+router.get('/service-types/:id/config', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -275,7 +275,7 @@ router.get('/service-types/:id/config', authenticateToken, async (req, res) => {
  * Get all active service types with their scheduling configurations
  * GET /api/advanced-scheduling/service-types
  */
-router.get('/service-types', authenticateToken, async (req, res) => {
+router.get('/service-types', authMiddleware, async (req, res) => {
   try {
     const serviceTypes = await serviceTypeService.getServiceTypes();
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
