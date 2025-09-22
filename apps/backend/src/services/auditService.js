@@ -290,7 +290,40 @@ class AuditService {
      * Get audit logs with filtering (alias for getLogs)
      */
     getAuditLogs(filters = {}) {
-        return this.getLogs(filters);
+        const result = this.getLogs(filters);
+
+        // Transform the logs to match the expected frontend format
+        const transformedLogs = result.logs.map(log => ({
+            id: log.id,
+            adminId: log.userId,
+            action: log.action,
+            entityType: log.resource,
+            entityId: log.resourceId,
+            changes: log.details?.changes || {},
+            metadata: {
+                ipAddress: log.ipAddress,
+                userAgent: log.userAgent,
+                timestamp: new Date(log.timestamp),
+                sessionId: log.sessionId
+            },
+            severity: log.details?.severity || 'low',
+            createdAt: new Date(log.timestamp),
+            admin: {
+                id: log.userId,
+                email: log.userEmail,
+                name: log.userEmail?.split('@')[0] // Simple name extraction
+            }
+        }));
+
+        return {
+            auditLogs: transformedLogs,
+            pagination: {
+                page: result.page,
+                limit: result.limit,
+                totalCount: result.total,
+                totalPages: result.totalPages
+            }
+        };
     }
 
     /**
@@ -304,8 +337,69 @@ class AuditService {
      * Get audit statistics (alias for getStatistics)
      */
     getAuditStats(filters = {}) {
-        const timeframe = filters.startDate && filters.endDate ? 'custom' : '24h';
-        return this.getStatistics(timeframe);
+        let logs = Array.from(this.auditLogs.values());
+
+        // Apply date filters if provided
+        if (filters.startDate) {
+            const startDate = new Date(filters.startDate);
+            logs = logs.filter(log => new Date(log.timestamp) >= startDate);
+        }
+
+        if (filters.endDate) {
+            const endDate = new Date(filters.endDate);
+            logs = logs.filter(log => new Date(log.timestamp) <= endDate);
+        }
+
+        // Calculate statistics in the expected format
+        const actionsByType = {};
+        const actionsBySeverity = {};
+        const adminCounts = {};
+
+        logs.forEach(log => {
+            // Count actions by type
+            if (!actionsByType[log.action]) {
+                actionsByType[log.action] = 0;
+            }
+            actionsByType[log.action]++;
+
+            // Count actions by severity
+            const severity = log.details?.severity || 'low';
+            if (!actionsBySeverity[severity]) {
+                actionsBySeverity[severity] = 0;
+            }
+            actionsBySeverity[severity]++;
+
+            // Count actions by admin
+            if (log.userId) {
+                if (!adminCounts[log.userId]) {
+                    adminCounts[log.userId] = 0;
+                }
+                adminCounts[log.userId]++;
+            }
+        });
+
+        return {
+            totalActions: logs.length,
+            actionsByType: Object.entries(actionsByType).map(([action, count]) => ({
+                action,
+                _count: { action: count }
+            })),
+            actionsBySeverity: Object.entries(actionsBySeverity).map(([severity, count]) => ({
+                severity,
+                _count: { severity: count }
+            })),
+            topAdmins: Object.entries(adminCounts)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 10)
+                .map(([adminId, count]) => ({
+                    adminId,
+                    _count: { adminId: count }
+                })),
+            dateRange: {
+                startDate: filters.startDate ? new Date(filters.startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+                endDate: filters.endDate ? new Date(filters.endDate) : new Date()
+            }
+        };
     }
 }
 

@@ -63,9 +63,259 @@ router.get('/dashboard/stats', async (req, res) => {
     res.json({ success: true, stats });
   } catch (error) {
     console.error('Error fetching dashboard stats:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to fetch dashboard statistics' 
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch dashboard statistics'
+    });
+  }
+});
+
+/**
+ * GET /api/admin/dashboard/users
+ * Get user metrics for dashboard widgets
+ */
+router.get('/dashboard/users', async (req, res) => {
+  try {
+    // Mock user data - in real implementation, fetch from database
+    const userData = {
+      count: 1250,
+      previousCount: 1180,
+      trend: 'up',
+      growth: 5.93,
+      newToday: 12,
+      activeToday: 876,
+      target: 1500
+    };
+
+    res.json(userData);
+  } catch (error) {
+    console.error('Error fetching user metrics:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch user metrics'
+    });
+  }
+});
+
+/**
+ * GET /api/admin/dashboard/revenue
+ * Get revenue metrics for dashboard widgets
+ */
+router.get('/dashboard/revenue', async (req, res) => {
+  try {
+    // Mock revenue data - in real implementation, calculate from database
+    const revenueData = {
+      total: 45600,
+      previousTotal: 40800,
+      trend: 'up',
+      growth: 11.76,
+      todayRevenue: 1280,
+      monthlyRecurring: 38900,
+      target: 50000
+    };
+
+    res.json(revenueData);
+  } catch (error) {
+    console.error('Error fetching revenue metrics:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch revenue metrics'
+    });
+  }
+});
+
+/**
+ * GET /api/admin/dashboard/bookings
+ * Get booking metrics for dashboard widgets
+ */
+router.get('/dashboard/bookings', async (req, res) => {
+  try {
+    // Mock booking data - in real implementation, fetch from database
+    const bookingData = {
+      activeCount: 89,
+      previousActiveCount: 76,
+      trend: 'up',
+      pendingCount: 23,
+      completedToday: 15,
+      cancelledToday: 3
+    };
+
+    res.json(bookingData);
+  } catch (error) {
+    console.error('Error fetching booking metrics:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch booking metrics'
+    });
+  }
+});
+
+/**
+ * GET /api/admin/dashboard/alerts
+ * Get system alerts for dashboard widgets
+ */
+router.get('/dashboard/alerts', async (req, res) => {
+  try {
+    // Mock alert data - in real implementation, fetch from monitoring system
+    const alertData = {
+      alerts: [
+        {
+          id: 'alert-1',
+          message: 'Database connection slow',
+          severity: 'medium',
+          timestamp: new Date(Date.now() - 2 * 60 * 1000), // 2 minutes ago
+          acknowledged: false
+        },
+        {
+          id: 'alert-2',
+          message: 'High memory usage detected',
+          severity: 'high',
+          timestamp: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
+          acknowledged: false
+        },
+        {
+          id: 'alert-3',
+          message: 'Queue processing delayed',
+          severity: 'low',
+          timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+          acknowledged: true
+        }
+      ]
+    };
+
+    res.json(alertData);
+  } catch (error) {
+    console.error('Error fetching system alerts:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch system alerts'
+    });
+  }
+});
+
+/**
+ * GET /api/admin/dashboard/subscriptions
+ * Get subscription data for dashboard widgets
+ */
+router.get('/dashboard/subscriptions', async (req, res) => {
+  try {
+    const { metric = 'table' } = req.query;
+
+    if (metric === 'chart') {
+      // Return chart data for subscription trends
+      const chartData = [
+        { date: '2024-01-01', count: 450, plan: 'basic' },
+        { date: '2024-01-02', count: 465, plan: 'basic' },
+        { date: '2024-01-03', count: 478, plan: 'basic' },
+        { date: '2024-01-04', count: 485, plan: 'basic' },
+        { date: '2024-01-05', count: 490, plan: 'basic' }
+      ];
+      res.json({ chartData });
+    } else {
+      // Return table data for subscription list
+      const subscriptions = [
+        ['John Smith', 'Premium', 'Active', '2024-01-15', '$99.99'],
+        ['Jane Doe', 'Basic', 'Active', '2024-01-14', '$29.99'],
+        ['Bob Johnson', 'Pro', 'Paused', '2024-01-13', '$59.99'],
+        ['Alice Brown', 'Premium', 'Active', '2024-01-12', '$99.99'],
+        ['Charlie Wilson', 'Basic', 'Active', '2024-01-11', '$29.99']
+      ];
+
+      const subscriptionData = {
+        headers: ['Customer', 'Plan', 'Status', 'Created', 'Revenue'],
+        subscriptions,
+        totalCount: 1250
+      };
+
+      res.json(subscriptionData);
+    }
+  } catch (error) {
+    console.error('Error fetching subscription data:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch subscription data'
+    });
+  }
+});
+
+/**
+ * GET /api/admin/dashboard/layouts
+ * Get saved dashboard layouts
+ */
+router.get('/dashboard/layouts', async (req, res) => {
+  try {
+    const { userId } = req.query;
+
+    // Mock layout data - in real implementation, fetch from database
+    const layouts = [
+      {
+        id: 'default-admin',
+        name: 'Admin Dashboard',
+        widgets: [],
+        gridSize: { columns: 12, rows: 8 },
+        isDefault: true,
+        userId: userId || 'admin',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+
+    res.json({ success: true, layouts });
+  } catch (error) {
+    console.error('Error fetching dashboard layouts:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch dashboard layouts'
+    });
+  }
+});
+
+/**
+ * POST /api/admin/dashboard/layouts
+ * Save a new dashboard layout
+ */
+router.post('/dashboard/layouts', async (req, res) => {
+  try {
+    const layout = req.body;
+
+    // Mock save operation - in real implementation, save to database
+    const savedLayout = {
+      ...layout,
+      id: layout.id || `layout-${Date.now()}`,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    res.json({ success: true, layout: savedLayout });
+  } catch (error) {
+    console.error('Error saving dashboard layout:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to save dashboard layout'
+    });
+  }
+});
+
+/**
+ * PUT /api/admin/dashboard/layouts
+ * Update an existing dashboard layout
+ */
+router.put('/dashboard/layouts', async (req, res) => {
+  try {
+    const layout = req.body;
+
+    // Mock update operation - in real implementation, update in database
+    const updatedLayout = {
+      ...layout,
+      updatedAt: new Date()
+    };
+
+    res.json({ success: true, layout: updatedLayout });
+  } catch (error) {
+    console.error('Error updating dashboard layout:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update dashboard layout'
     });
   }
 });

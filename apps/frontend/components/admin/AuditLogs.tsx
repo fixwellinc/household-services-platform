@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useAuditLogs, useAuditLogStats } from '@/hooks/use-audit-logs';
 import { AuditLog, AuditLogFilters } from '@/types/admin';
+import { toast } from './NotificationToast';
 
 const AuditLogs: React.FC = () => {
   const {
@@ -39,8 +40,13 @@ const AuditLogs: React.FC = () => {
 
   const handleFilterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateFilters(filterForm);
-    setShowFilters(false);
+    try {
+      updateFilters(filterForm);
+      setShowFilters(false);
+    } catch (error) {
+      console.error('Error applying filters:', error);
+      // Keep the filter panel open on error
+    }
   };
 
   const handleClearFilters = () => {
@@ -109,15 +115,31 @@ const AuditLogs: React.FC = () => {
           </button>
           
           <button
-            onClick={() => exportAuditLogs('csv')}
+            onClick={async () => {
+              try {
+                await exportAuditLogs('csv');
+                toast.success('Export Successful', 'CSV file has been downloaded successfully.');
+              } catch (error) {
+                console.error('Failed to export CSV:', error);
+                toast.error('Export Failed', 'Failed to export CSV file. Please try again.');
+              }
+            }}
             className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
           >
             <Download className="h-4 w-4" />
             <span>Export CSV</span>
           </button>
-          
+
           <button
-            onClick={() => exportAuditLogs('json')}
+            onClick={async () => {
+              try {
+                await exportAuditLogs('json');
+                toast.success('Export Successful', 'JSON file has been downloaded successfully.');
+              } catch (error) {
+                console.error('Failed to export JSON:', error);
+                toast.error('Export Failed', 'Failed to export JSON file. Please try again.');
+              }
+            }}
             className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
           >
             <Download className="h-4 w-4" />
@@ -284,11 +306,22 @@ const AuditLogs: React.FC = () => {
       {/* Error Message */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex">
-            <AlertTriangle className="h-5 w-5 text-red-400" />
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">Error</h3>
+          <div className="flex items-start">
+            <AlertTriangle className="h-5 w-5 text-red-400 mt-0.5" />
+            <div className="ml-3 flex-1">
+              <h3 className="text-sm font-medium text-red-800">Error Loading Audit Logs</h3>
               <p className="text-sm text-red-700 mt-1">{error}</p>
+              <div className="mt-3">
+                <button
+                  onClick={() => {
+                    refresh();
+                  }}
+                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Try Again
+                </button>
+              </div>
             </div>
           </div>
         </div>
