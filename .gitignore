@@ -232,5 +232,9 @@ auto-generated/
 # Misc
 *.tgz
 *.tar.gz
-.pnp.* 
+.pnp.*
+
+# PostgreSQL portable installation (downloaded for database fixes)
+postgresql-portable/
+postgresql-portable.zip 
 
