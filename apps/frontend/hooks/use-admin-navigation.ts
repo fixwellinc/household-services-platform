@@ -1,18 +1,19 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { 
-  Home, 
-  BarChart3, 
-  Users, 
-  DollarSign, 
-  Mail, 
-  MessageSquare, 
-  Smartphone, 
+import {
+  Home,
+  BarChart3,
+  Users,
+  DollarSign,
+  Mail,
+  MessageSquare,
+  Smartphone,
   Settings,
   FileText,
   Activity,
-  Shield
+  Shield,
+  Calendar
 } from 'lucide-react';
 import { NavigationItem, NavigationState, AdminPreferences } from '../types/admin';
 
@@ -23,11 +24,17 @@ const defaultNavigationItems: NavigationItem[] = [
     icon: Home,
     path: '/admin'
   },
-  { 
-    id: 'analytics', 
-    name: 'Analytics', 
+  {
+    id: 'analytics',
+    name: 'Analytics',
     icon: BarChart3,
     path: '/admin/analytics'
+  },
+  {
+    id: 'appointments',
+    name: 'Appointments',
+    icon: Calendar,
+    path: '/admin/appointments'
   },
   { 
     id: 'users', 
