@@ -421,7 +421,6 @@ export function UserManagement() {
             <p className="text-gray-600">Manage user accounts, roles, and permissions</p>
           </div>
         </div>
-        <PermissionGuard permission="users.create">
           <button
             onClick={handleCreateUser}
             className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -429,7 +428,6 @@ export function UserManagement() {
             <Plus className="w-4 h-4" />
             <span>Add User</span>
           </button>
-        </PermissionGuard>
       </div>
 
       {/* Search and Filters */}
