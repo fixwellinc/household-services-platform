@@ -1,5 +1,5 @@
 import express from 'express';
-import { requireAuth, requireRole } from '../middleware/auth.js';
+import { authMiddleware, requireRole } from '../middleware/auth.js';
 import { validate, sanitize } from '../middleware/validation.js';
 import { ValidationError } from '../middleware/error.js';
 import salesmanService from '../services/salesmanService.js';
@@ -22,7 +22,7 @@ const salesmanRateLimit = rateLimit({
 
 // Apply rate limiting and authentication to all routes
 router.use(salesmanRateLimit);
-router.use(requireAuth);
+router.use(authMiddleware);
 
 // Validation schemas
 const salesmanValidationSchemas = {

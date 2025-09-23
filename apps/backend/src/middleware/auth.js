@@ -86,6 +86,7 @@ export const requireRole = (roles) => {
 export const requireCustomer = requireRole(['CUSTOMER']);
 export const requireAdmin = requireRole(['ADMIN']);
 export const requireTechnician = requireRole(['TECHNICIAN']);
+export const requireSalesman = requireRole(['SALESMAN']);
 export const requireCustomerOrAdmin = requireRole(['CUSTOMER', 'ADMIN']);
 export const requireTechnicianOrAdmin = requireRole(['TECHNICIAN', 'ADMIN']);
 
