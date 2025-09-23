@@ -14,6 +14,8 @@ export interface User {
 
 export enum UserRole {
   CUSTOMER = 'CUSTOMER',
+  EMPLOYEE = 'EMPLOYEE',
+  SALESMAN = 'SALESMAN',
   ADMIN = 'ADMIN'
 }
 
@@ -213,4 +215,233 @@ export interface CreateQuoteRequest {
 export interface QuoteReplyRequest {
   adminReply: string;
   adminReplyPrice?: number;
+}
+
+// Salesman Employee System Types
+export interface SalesmanProfile {
+  id: string;
+  userId: string;
+  referralCode: string;
+  displayName: string;
+  personalMessage?: string;
+  commissionRate: number;
+  commissionType: CommissionType;
+  commissionTier: CommissionTier;
+  territoryPostalCodes: string[];
+  territoryRegions: string[];
+  monthlyTarget: number;
+  quarterlyTarget: number;
+  yearlyTarget: number;
+  status: SalesmanStatus;
+  startDate: Date;
+  endDate?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export enum CommissionType {
+  PERCENTAGE = 'PERCENTAGE',
+  FIXED = 'FIXED'
+}
+
+export enum CommissionTier {
+  BRONZE = 'BRONZE',
+  SILVER = 'SILVER',
+  GOLD = 'GOLD',
+  PLATINUM = 'PLATINUM'
+}
+
+export enum SalesmanStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  SUSPENDED = 'SUSPENDED'
+}
+
+export interface CustomerReferral {
+  id: string;
+  customerId: string;
+  salesmanId: string;
+  referralCode: string;
+  referralSource: ReferralSource;
+  referralDate: Date;
+  conversionDate?: Date;
+  subscriptionId?: string;
+  commissionEarned: number;
+  status: ReferralStatus;
+  metadata?: any;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export enum ReferralSource {
+  DIRECT_LINK = 'DIRECT_LINK',
+  MANUAL_ENTRY = 'MANUAL_ENTRY',
+  PHONE = 'PHONE',
+  EMAIL = 'EMAIL',
+  SOCIAL = 'SOCIAL'
+}
+
+export enum ReferralStatus {
+  PENDING = 'PENDING',
+  CONVERTED = 'CONVERTED',
+  CANCELLED = 'CANCELLED'
+}
+
+export interface CommissionTransaction {
+  id: string;
+  salesmanId: string;
+  customerId: string;
+  referralId: string;
+  transactionType: CommissionTransactionType;
+  amount: number;
+  currency: string;
+  periodStart?: Date;
+  periodEnd?: Date;
+  status: CommissionTransactionStatus;
+  paymentDate?: Date;
+  metadata?: any;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export enum CommissionTransactionType {
+  SIGNUP = 'SIGNUP',
+  MONTHLY = 'MONTHLY',
+  QUARTERLY = 'QUARTERLY',
+  YEARLY = 'YEARLY',
+  BONUS = 'BONUS'
+}
+
+export enum CommissionTransactionStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  PAID = 'PAID',
+  CANCELLED = 'CANCELLED'
+}
+
+// Salesman Dashboard Types
+export interface SalesmanDashboard {
+  overview: SalesmanOverview;
+  customers: CustomerSummary[];
+  performance: SalesmanPerformance;
+}
+
+export interface SalesmanOverview {
+  totalReferrals: number;
+  activeCustomers: number;
+  monthlyAcquisitions: number;
+  totalCommission: number;
+  performanceRating: PerformanceRating;
+}
+
+export enum PerformanceRating {
+  POOR = 'POOR',
+  AVERAGE = 'AVERAGE',
+  GOOD = 'GOOD',
+  EXCELLENT = 'EXCELLENT'
+}
+
+export interface CustomerSummary {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  status: CustomerStatus;
+  subscriptionTier?: SubscriptionTier;
+  joinDate: Date;
+  lastActivity: Date;
+  totalValue: number;
+  commissionEarned: number;
+  nextPaymentDate?: Date;
+  riskScore?: number;
+}
+
+export enum CustomerStatus {
+  PROSPECT = 'PROSPECT',
+  ACTIVE = 'ACTIVE',
+  PAUSED = 'PAUSED',
+  CANCELLED = 'CANCELLED'
+}
+
+export interface SalesmanPerformance {
+  acquisitionMetrics: AcquisitionMetrics;
+  revenueMetrics: RevenueMetrics;
+  performanceMetrics: PerformanceMetrics;
+}
+
+export interface AcquisitionMetrics {
+  totalReferrals: number;
+  conversionRate: number;
+  averageTimeToConversion: number;
+  topReferralSources: ReferralSourceStats[];
+}
+
+export interface ReferralSourceStats {
+  source: string;
+  count: number;
+  conversionRate: number;
+}
+
+export interface RevenueMetrics {
+  totalCommissionEarned: number;
+  monthlyRecurringRevenue: number;
+  averageCustomerValue: number;
+  customerLifetimeValue: number;
+}
+
+export interface PerformanceMetrics {
+  targetProgress: TargetProgress;
+  ranking: SalesmanRanking;
+}
+
+export interface TargetProgress {
+  monthly: TargetMetric;
+  quarterly: TargetMetric;
+  yearly: TargetMetric;
+}
+
+export interface TargetMetric {
+  achieved: number;
+  target: number;
+  percentage: number;
+}
+
+export interface SalesmanRanking {
+  position: number;
+  totalSalesmen: number;
+  percentile: number;
+}
+
+// API Request Types
+export interface CreateSalesmanRequest {
+  userId: string;
+  displayName: string;
+  personalMessage?: string;
+  commissionRate: number;
+  commissionType: CommissionType;
+  commissionTier: CommissionTier;
+  territoryPostalCodes?: string[];
+  territoryRegions?: string[];
+  monthlyTarget?: number;
+  quarterlyTarget?: number;
+  yearlyTarget?: number;
+}
+
+export interface UpdateSalesmanRequest {
+  displayName?: string;
+  personalMessage?: string;
+  commissionRate?: number;
+  commissionType?: CommissionType;
+  commissionTier?: CommissionTier;
+  territoryPostalCodes?: string[];
+  territoryRegions?: string[];
+  monthlyTarget?: number;
+  quarterlyTarget?: number;
+  yearlyTarget?: number;
+  status?: SalesmanStatus;
+}
+
+export interface RegisterWithReferralRequest extends RegisterRequest {
+  referralCode?: string;
+  referralSource?: ReferralSource;
 } 

@@ -80,6 +80,18 @@ model User {
   customerAppointments        Appointment[]       @relation("CustomerAppointments")
   notificationPreferences     NotificationPreference? @relation("UserNotificationPreferences")
   notificationDeliveries      NotificationDelivery[] @relation("UserNotificationDeliveries")
+
+  // Salesman referral relations
+  salesmanProfile             SalesmanProfile?    @relation("UserSalesmanProfile")
+  customerReferral            CustomerReferral?   @relation("CustomerReferralRecord")
+  commissionTransactions      CommissionTransaction[] @relation("SalesmanCommissions")
+
+  // Referral tracking fields
+  referredByCode              String?
+  referralSource              String?
+  referralDate                DateTime?
+
+  @@index([referredByCode])
 }
 
 model CustomerEmployeeAssignment {
@@ -132,6 +144,9 @@ model Subscription {
   creditTransactions       CreditTransaction[]    @relation("SubscriptionCreditTransactions")
   subscriptionDiscounts    SubscriptionDiscount[] @relation("SubscriptionDiscounts")
   pendingCharges           PendingCharge[]        @relation("SubscriptionPendingCharges")
+
+  // Salesman referral relations
+  customerReferrals        CustomerReferral[]     @relation("SubscriptionReferrals")
 }
 
 model SubscriptionUsage {
@@ -809,4 +824,90 @@ model NotificationTemplate {
   @@index([type])
   @@index([channel])
   @@index([isActive])
+}
+
+// Salesman Employee System Models
+model SalesmanProfile {
+  id                  String    @id @default(cuid())
+  userId              String    @unique
+  referralCode        String    @unique
+  displayName         String
+  personalMessage     String?
+  commissionRate      Float     @default(0.00)
+  commissionType      String    @default("PERCENTAGE") // PERCENTAGE, FIXED
+  commissionTier      String    @default("BRONZE") // BRONZE, SILVER, GOLD, PLATINUM
+  territoryPostalCodes String[] @default([])
+  territoryRegions    String[]  @default([])
+  monthlyTarget       Int       @default(0)
+  quarterlyTarget     Int       @default(0)
+  yearlyTarget        Int       @default(0)
+  status              String    @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED
+  startDate           DateTime  @default(now())
+  endDate             DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Relations
+  user                User                    @relation("UserSalesmanProfile", fields: [userId], references: [id], onDelete: Cascade)
+  customerReferrals   CustomerReferral[]      @relation("SalesmanCustomerReferrals")
+  commissionTransactions CommissionTransaction[] @relation("SalesmanCommissionTransactions")
+
+  @@index([referralCode])
+  @@index([userId])
+  @@index([status])
+}
+
+model CustomerReferral {
+  id              String    @id @default(cuid())
+  customerId      String    @unique
+  salesmanId      String
+  referralCode    String
+  referralSource  String    @default("DIRECT_LINK") // DIRECT_LINK, MANUAL_ENTRY, PHONE, EMAIL, SOCIAL
+  referralDate    DateTime  @default(now())
+  conversionDate  DateTime?
+  subscriptionId  String?
+  commissionEarned Float    @default(0.00)
+  status          String    @default("PENDING") // PENDING, CONVERTED, CANCELLED
+  metadata        Json?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  customer        User              @relation("CustomerReferralRecord", fields: [customerId], references: [id], onDelete: Cascade)
+  salesman        SalesmanProfile   @relation("SalesmanCustomerReferrals", fields: [salesmanId], references: [id], onDelete: Cascade)
+  subscription    Subscription?     @relation("SubscriptionReferrals", fields: [subscriptionId], references: [id], onDelete: SetNull)
+  commissionTransactions CommissionTransaction[] @relation("ReferralCommissionTransactions")
+
+  @@index([customerId])
+  @@index([salesmanId])
+  @@index([referralCode])
+  @@index([status])
+  @@index([referralDate])
+}
+
+model CommissionTransaction {
+  id              String    @id @default(cuid())
+  salesmanId      String
+  customerId      String
+  referralId      String
+  transactionType String    // SIGNUP, MONTHLY, QUARTERLY, YEARLY, BONUS
+  amount          Float
+  currency        String    @default("USD")
+  periodStart     DateTime?
+  periodEnd       DateTime?
+  status          String    @default("PENDING") // PENDING, APPROVED, PAID, CANCELLED
+  paymentDate     DateTime?
+  metadata        Json?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  salesman        SalesmanProfile   @relation("SalesmanCommissionTransactions", fields: [salesmanId], references: [id], onDelete: Cascade)
+  customer        User              @relation("SalesmanCommissions", fields: [customerId], references: [id], onDelete: Cascade)
+  referral        CustomerReferral  @relation("ReferralCommissionTransactions", fields: [referralId], references: [id], onDelete: Cascade)
+
+  @@index([salesmanId])
+  @@index([status])
+  @@index([periodStart, periodEnd])
+  @@index([createdAt])
 }

@@ -1,0 +1,535 @@
+import express from 'express';
+import { requireAdmin } from '../../middleware/auth.js';
+import { validate, sanitize } from '../../middleware/validation.js';
+import { ValidationError } from '../../middleware/error.js';
+import salesmanService from '../../services/salesmanService.js';
+import referralService from '../../services/referralService.js';
+import rateLimit from 'express-rate-limit';
+import {
+  adminConfigLimiter,
+  auditAdminConfigChanges,
+  logFailedAuth
+} from '../../middleware/appointmentSecurity.js';
+
+const router = express.Router();
+
+// Rate limiting for admin endpoints
+const adminRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 admin requests per windowMs
+  message: {
+    error: 'Too many admin requests, please try again later'
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Apply admin authentication and rate limiting to all routes
+router.use(adminRateLimit);
+router.use(requireAdmin);
+router.use(logFailedAuth);
+
+// Validation schemas for salesman management
+const salesmanValidationSchemas = {
+  createSalesman: {
+    userId: (value) => {
+      if (!value || typeof value !== 'string') {
+        throw new ValidationError('User ID is required and must be a string');
+      }
+      return value.trim();
+    },
+    displayName: (value) => {
+      if (!value || typeof value !== 'string') {
+        throw new ValidationError('Display name is required');
+      }
+      if (value.length < 2 || value.length > 100) {
+        throw new ValidationError('Display name must be between 2 and 100 characters');
+      }
+      return value.trim();
+    },
+    personalMessage: (value) => {
+      if (value && typeof value !== 'string') {
+        throw new ValidationError('Personal message must be a string');
+      }
+      if (value && value.length > 500) {
+        throw new ValidationError('Personal message must be less than 500 characters');
+      }
+      return value?.trim();
+    },
+    commissionRate: (value) => {
+      if (value === undefined) return 5.0; // Default
+      const rate = parseFloat(value);
+      if (isNaN(rate) || rate < 0 || rate > 100) {
+        throw new ValidationError('Commission rate must be between 0 and 100');
+      }
+      return rate;
+    },
+    commissionType: (value) => {
+      if (value && !['PERCENTAGE', 'FIXED'].includes(value)) {
+        throw new ValidationError('Commission type must be PERCENTAGE or FIXED');
+      }
+      return value || 'PERCENTAGE';
+    },
+    commissionTier: (value) => {
+      if (value && !['BRONZE', 'SILVER', 'GOLD', 'PLATINUM'].includes(value)) {
+        throw new ValidationError('Commission tier must be BRONZE, SILVER, GOLD, or PLATINUM');
+      }
+      return value || 'BRONZE';
+    },
+    monthlyTarget: (value) => {
+      if (value === undefined) return 0;
+      const target = parseInt(value);
+      if (isNaN(target) || target < 0) {
+        throw new ValidationError('Monthly target must be a non-negative number');
+      }
+      return target;
+    },
+    customReferralCode: (value) => {
+      if (value && typeof value !== 'string') {
+        throw new ValidationError('Custom referral code must be a string');
+      }
+      if (value && !salesmanService.isValidReferralCode(value)) {
+        throw new ValidationError('Invalid referral code format (4-12 alphanumeric characters)');
+      }
+      return value?.toUpperCase();
+    }
+  },
+  updateSalesman: {
+    displayName: (value) => {
+      if (value && typeof value !== 'string') {
+        throw new ValidationError('Display name must be a string');
+      }
+      if (value && (value.length < 2 || value.length > 100)) {
+        throw new ValidationError('Display name must be between 2 and 100 characters');
+      }
+      return value?.trim();
+    },
+    personalMessage: (value) => {
+      if (value && typeof value !== 'string') {
+        throw new ValidationError('Personal message must be a string');
+      }
+      if (value && value.length > 500) {
+        throw new ValidationError('Personal message must be less than 500 characters');
+      }
+      return value?.trim();
+    },
+    commissionRate: (value) => {
+      if (value === undefined) return undefined;
+      const rate = parseFloat(value);
+      if (isNaN(rate) || rate < 0 || rate > 100) {
+        throw new ValidationError('Commission rate must be between 0 and 100');
+      }
+      return rate;
+    },
+    commissionType: (value) => {
+      if (value && !['PERCENTAGE', 'FIXED'].includes(value)) {
+        throw new ValidationError('Commission type must be PERCENTAGE or FIXED');
+      }
+      return value;
+    },
+    commissionTier: (value) => {
+      if (value && !['BRONZE', 'SILVER', 'GOLD', 'PLATINUM'].includes(value)) {
+        throw new ValidationError('Commission tier must be BRONZE, SILVER, GOLD, or PLATINUM');
+      }
+      return value;
+    },
+    status: (value) => {
+      if (value && !['ACTIVE', 'INACTIVE', 'SUSPENDED'].includes(value)) {
+        throw new ValidationError('Status must be ACTIVE, INACTIVE, or SUSPENDED');
+      }
+      return value;
+    },
+    monthlyTarget: (value) => {
+      if (value === undefined) return undefined;
+      const target = parseInt(value);
+      if (isNaN(target) || target < 0) {
+        throw new ValidationError('Monthly target must be a non-negative number');
+      }
+      return target;
+    }
+  }
+};
+
+// Custom validation middleware for salesmen
+const validateSalesmanAdmin = (schemaName) => {
+  return (req, res, next) => {
+    try {
+      const schema = salesmanValidationSchemas[schemaName];
+      if (!schema) {
+        throw new ValidationError(`Validation schema '${schemaName}' not found`);
+      }
+
+      const validatedData = {};
+
+      Object.keys(schema).forEach(field => {
+        const value = req.body[field];
+        if (value !== undefined) {
+          validatedData[field] = schema[field](value);
+        }
+      });
+
+      req.validatedData = validatedData;
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+};
+
+// GET /api/admin/salesmen - Get all salesmen
+router.get('/', async (req, res, next) => {
+  try {
+    const {
+      status,
+      search,
+      page = 1,
+      limit = 20,
+      sortBy = 'createdAt',
+      sortOrder = 'desc'
+    } = req.query;
+
+    const result = await salesmanService.getSalesmen({
+      status,
+      search,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      sortBy,
+      sortOrder
+    });
+
+    res.json({
+      success: true,
+      data: result.salesmen,
+      pagination: result.pagination
+    });
+  } catch (error) {
+    console.error('Error getting salesmen:', error);
+    next(error);
+  }
+});
+
+// POST /api/admin/salesmen - Create new salesman
+router.post('/',
+  adminConfigLimiter,
+  sanitize,
+  validateSalesmanAdmin('createSalesman'),
+  auditAdminConfigChanges('CREATE_SALESMAN', 'salesman'),
+  async (req, res, next) => {
+    try {
+      const salesmanData = req.validatedData;
+
+      const newSalesman = await salesmanService.createSalesman(salesmanData);
+
+      res.status(201).json({
+        success: true,
+        message: 'Salesman created successfully',
+        data: newSalesman
+      });
+    } catch (error) {
+      console.error('Error creating salesman:', error);
+
+      if (error.message.includes('User not found')) {
+        return res.status(404).json({
+          error: 'User not found',
+          message: error.message
+        });
+      }
+
+      if (error.message.includes('already has a salesman profile') ||
+          error.message.includes('already exists')) {
+        return res.status(409).json({
+          error: 'Conflict',
+          message: error.message
+        });
+      }
+
+      next(error);
+    }
+  }
+);
+
+// GET /api/admin/salesmen/:id - Get specific salesman
+router.get('/:id', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const salesman = await salesmanService.getSalesmanByUserId(id);
+
+    if (!salesman) {
+      return res.status(404).json({
+        error: 'Salesman not found',
+        message: 'No salesman profile found for this ID'
+      });
+    }
+
+    // Get additional details
+    const [dashboard, referralStats] = await Promise.all([
+      salesmanService.getSalesmanDashboard(salesman.id),
+      referralService.getReferralStats(salesman.id)
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        profile: salesman,
+        dashboard,
+        referralStats
+      }
+    });
+  } catch (error) {
+    console.error('Error getting salesman:', error);
+    next(error);
+  }
+});
+
+// PUT /api/admin/salesmen/:id - Update salesman
+router.put('/:id',
+  adminConfigLimiter,
+  sanitize,
+  validateSalesmanAdmin('updateSalesman'),
+  auditAdminConfigChanges('UPDATE_SALESMAN', 'salesman'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      if (Object.keys(req.validatedData).length === 0) {
+        return res.status(400).json({
+          error: 'No valid fields to update',
+          message: 'Please provide at least one field to update'
+        });
+      }
+
+      const updatedSalesman = await salesmanService.updateSalesman(id, req.validatedData);
+
+      res.json({
+        success: true,
+        message: 'Salesman updated successfully',
+        data: updatedSalesman
+      });
+    } catch (error) {
+      console.error('Error updating salesman:', error);
+
+      if (error.message.includes('not found')) {
+        return res.status(404).json({
+          error: 'Salesman not found',
+          message: error.message
+        });
+      }
+
+      next(error);
+    }
+  }
+);
+
+// DELETE /api/admin/salesmen/:id - Delete salesman
+router.delete('/:id',
+  adminConfigLimiter,
+  auditAdminConfigChanges('DELETE_SALESMAN', 'salesman'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      const result = await salesmanService.deleteSalesman(id);
+
+      res.json({
+        success: true,
+        message: result.message
+      });
+    } catch (error) {
+      console.error('Error deleting salesman:', error);
+
+      if (error.message.includes('not found')) {
+        return res.status(404).json({
+          error: 'Salesman not found',
+          message: error.message
+        });
+      }
+
+      if (error.message.includes('active customer referrals')) {
+        return res.status(409).json({
+          error: 'Cannot delete',
+          message: error.message
+        });
+      }
+
+      next(error);
+    }
+  }
+);
+
+// POST /api/admin/salesmen/:id/activate - Activate salesman
+router.post('/:id/activate',
+  adminConfigLimiter,
+  auditAdminConfigChanges('ACTIVATE_SALESMAN', 'salesman'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      const updatedSalesman = await salesmanService.updateSalesman(id, {
+        status: 'ACTIVE'
+      });
+
+      res.json({
+        success: true,
+        message: 'Salesman activated successfully',
+        data: updatedSalesman
+      });
+    } catch (error) {
+      console.error('Error activating salesman:', error);
+
+      if (error.message.includes('not found')) {
+        return res.status(404).json({
+          error: 'Salesman not found',
+          message: error.message
+        });
+      }
+
+      next(error);
+    }
+  }
+);
+
+// POST /api/admin/salesmen/:id/suspend - Suspend salesman
+router.post('/:id/suspend',
+  adminConfigLimiter,
+  auditAdminConfigChanges('SUSPEND_SALESMAN', 'salesman'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { reason } = req.body;
+
+      const updatedSalesman = await salesmanService.updateSalesman(id, {
+        status: 'SUSPENDED'
+      });
+
+      res.json({
+        success: true,
+        message: 'Salesman suspended successfully',
+        data: updatedSalesman
+      });
+    } catch (error) {
+      console.error('Error suspending salesman:', error);
+
+      if (error.message.includes('not found')) {
+        return res.status(404).json({
+          error: 'Salesman not found',
+          message: error.message
+        });
+      }
+
+      next(error);
+    }
+  }
+);
+
+// GET /api/admin/salesmen/:id/customers - Get salesman's customers
+router.get('/:id/customers', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const {
+      status,
+      search,
+      page = 1,
+      limit = 20
+    } = req.query;
+
+    const dashboard = await salesmanService.getSalesmanDashboard(id);
+    let customers = dashboard.customers;
+
+    // Apply filters
+    if (status) {
+      customers = customers.filter(customer => customer.status === status);
+    }
+
+    if (search) {
+      const searchLower = search.toLowerCase();
+      customers = customers.filter(customer =>
+        customer.name.toLowerCase().includes(searchLower) ||
+        customer.email.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Apply pagination
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedCustomers = customers.slice(startIndex, endIndex);
+
+    res.json({
+      success: true,
+      data: paginatedCustomers,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: customers.length,
+        totalPages: Math.ceil(customers.length / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error getting salesman customers:', error);
+    next(error);
+  }
+});
+
+// GET /api/admin/salesmen/:id/performance - Get salesman performance
+router.get('/:id/performance', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { startDate, endDate } = req.query;
+
+    const [dashboard, referralStats, topCampaigns] = await Promise.all([
+      salesmanService.getSalesmanDashboard(id),
+      referralService.getReferralStats(id, { startDate, endDate }),
+      referralService.getTopCampaigns(id, 10)
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        performance: dashboard.performance,
+        referralStats,
+        topCampaigns
+      }
+    });
+  } catch (error) {
+    console.error('Error getting salesman performance:', error);
+    next(error);
+  }
+});
+
+// GET /api/admin/salesmen/analytics - Get overall salesmen analytics
+router.get('/analytics/overview', async (req, res, next) => {
+  try {
+    const { period = 'all_time' } = req.query;
+
+    const [leaderboard, totalSalesmen] = await Promise.all([
+      referralService.getReferralLeaderboard({ period, limit: 20 }),
+      salesmanService.getSalesmen({ limit: 1000 }) // Get count
+    ]);
+
+    const activeSalesmen = totalSalesmen.salesmen.filter(s => s.status === 'ACTIVE').length;
+    const totalReferrals = leaderboard.reduce((sum, s) => sum + s.totalReferrals, 0);
+    const totalConversions = leaderboard.reduce((sum, s) => sum + s.conversions, 0);
+    const totalCommission = leaderboard.reduce((sum, s) => sum + s.totalCommission, 0);
+
+    res.json({
+      success: true,
+      data: {
+        overview: {
+          totalSalesmen: totalSalesmen.pagination.totalCount,
+          activeSalesmen,
+          totalReferrals,
+          totalConversions,
+          totalCommission,
+          averageConversionRate: totalReferrals > 0 ? (totalConversions / totalReferrals) * 100 : 0
+        },
+        leaderboard,
+        period
+      }
+    });
+  } catch (error) {
+    console.error('Error getting salesmen analytics:', error);
+    next(error);
+  }
+});
+
+export default router;

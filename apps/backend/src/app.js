@@ -60,6 +60,9 @@ import adminSubscriptionAnalyticsRoutes from './routes/admin/subscriptionAnalyti
 import adminSubscriptionsRoutes from './routes/admin/subscriptions.js';
 import customerRoutes from './routes/customer.js';
 import notificationPreferencesRoutes from './routes/notificationPreferences.js';
+import salesmanRoutes from './routes/salesman.js';
+import referralRoutes from './routes/referral.js';
+import adminSalesmenRoutes from './routes/admin/salesmen.js';
 
 // Import middleware
 import { authMiddleware, requireAdmin } from './middleware/auth.js';
@@ -419,6 +422,9 @@ app.use('/api/bulk-operations', checkDatabaseMiddleware, bulkOperationsRoutes);
 app.use('/api/appointments', checkDatabaseMiddleware, appointmentRoutes);
 app.use('/api/advanced-scheduling', checkDatabaseMiddleware, advancedSchedulingRoutes);
 app.use('/api/notifications', checkDatabaseMiddleware, notificationPreferencesRoutes);
+app.use('/api/salesman', checkDatabaseMiddleware, salesmanRoutes);
+app.use('/api/referral', checkDatabaseMiddleware, referralRoutes);
+app.use('/api/admin/salesmen', checkDatabaseMiddleware, adminSalesmenRoutes);
 
 function requireAdminLocal(req, res, next) {
   if (!req.user || req.user.role !== 'ADMIN') {

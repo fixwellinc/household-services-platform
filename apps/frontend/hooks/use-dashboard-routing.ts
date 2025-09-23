@@ -86,6 +86,7 @@ export function useDashboardRouting(): DashboardRoutingState {
     const fallbackRoute = useMemo(() => {
         if (!user) return '/login';
         if (user.role === 'ADMIN') return '/admin';
+        if (user.role === 'SALESMAN') return '/salesman';
         if (user.role === 'CUSTOMER') return '/customer-dashboard';
         return '/dashboard';
     }, [user]);
@@ -110,6 +111,16 @@ export function useDashboardRouting(): DashboardRoutingState {
                     shouldRedirectToCustomerDashboard: false,
                     shouldShowGeneralDashboard: false,
                     targetRoute: '/admin',
+                };
+            }
+
+            // Salesman users go to salesman dashboard
+            if (user.role === 'SALESMAN') {
+                return {
+                    shouldRedirectToAdmin: false,
+                    shouldRedirectToCustomerDashboard: false,
+                    shouldShowGeneralDashboard: false,
+                    targetRoute: '/salesman',
                 };
             }
 
@@ -187,6 +198,14 @@ export function useDashboardRouting(): DashboardRoutingState {
                 path: '/admin',
                 label: 'Admin Dashboard',
                 description: 'Administrative controls and system management',
+            });
+        }
+
+        if (user.role === 'SALESMAN') {
+            routes.push({
+                path: '/salesman',
+                label: 'Salesman Dashboard',
+                description: 'Manage referrals and track performance',
             });
         }
 
@@ -312,6 +331,11 @@ export function useDashboardRouting(): DashboardRoutingState {
         // Admin routes
         if (route.startsWith('/admin')) {
             return user.role === 'ADMIN';
+        }
+
+        // Salesman routes
+        if (route.startsWith('/salesman')) {
+            return user.role === 'SALESMAN';
         }
 
         // Customer dashboard route

@@ -4,13 +4,24 @@ import jwt from 'jsonwebtoken';
 import prisma from '../config/database.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { ValidationError } from '../middleware/error.js';
+import referralService from '../services/referralService.js';
 
 const router = express.Router();
 
 // Register new user
 router.post('/register', async (req, res, next) => {
   try {
-    const { email, password, name, phone, address, postalCode, role = 'CUSTOMER' } = req.body;
+    const {
+      email,
+      password,
+      name,
+      phone,
+      address,
+      postalCode,
+      role = 'CUSTOMER',
+      referralCode,
+      referralSource = 'DIRECT_LINK'
+    } = req.body;
     
     // Validation
     if (!email || !password || !name) {
@@ -67,6 +78,28 @@ router.post('/register', async (req, res, next) => {
       { expiresIn: '7d' }
     );
     
+    // Process referral tracking if referral code was provided
+    let referralResult = null;
+    if (referralCode) {
+      try {
+        const metadata = {
+          referralSource,
+          ipAddress: req.ip || req.connection.remoteAddress,
+          userAgent: req.get('User-Agent'),
+          registrationDate: new Date().toISOString()
+        };
+
+        referralResult = await referralService.processRegistrationReferral(
+          user.id,
+          referralCode,
+          metadata
+        );
+      } catch (referralError) {
+        console.error('Error processing referral during registration:', referralError);
+        // Don't fail registration due to referral processing errors
+      }
+    }
+
     // Set secure auth cookie for middleware and SSR
     res.cookie('auth_token', token, {
       httpOnly: true,
@@ -74,12 +107,22 @@ router.post('/register', async (req, res, next) => {
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
     });
-    
-    res.status(201).json({
+
+    const response = {
       message: 'User created successfully',
       user,
       token
-    });
+    };
+
+    // Include referral information in response if applicable
+    if (referralResult && referralResult.success) {
+      response.referral = {
+        tracked: true,
+        salesmanName: referralResult.referral?.salesman?.displayName
+      };
+    }
+
+    res.status(201).json(response);
   } catch (error) {
     next(error);
   }

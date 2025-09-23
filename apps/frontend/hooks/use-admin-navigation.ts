@@ -5,6 +5,7 @@ import {
   Home,
   BarChart3,
   Users,
+  UserCheck,
   DollarSign,
   Mail,
   MessageSquare,
@@ -36,16 +37,22 @@ const defaultNavigationItems: NavigationItem[] = [
     icon: Calendar,
     path: '/admin/appointments'
   },
-  { 
-    id: 'users', 
-    name: 'User Management', 
+  {
+    id: 'users',
+    name: 'User Management',
     icon: Users,
     path: '/admin/users',
     badge: { count: 5, variant: 'info' }
   },
-  { 
-    id: 'subscriptions', 
-    name: 'Subscriptions', 
+  {
+    id: 'salesmen',
+    name: 'Salesmen',
+    icon: UserCheck,
+    path: '/admin/salesmen'
+  },
+  {
+    id: 'subscriptions',
+    name: 'Subscriptions',
     icon: DollarSign,
     path: '/admin/subscriptions'
   },
