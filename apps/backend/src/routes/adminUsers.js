@@ -116,6 +116,72 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * GET /api/admin/users/search
+ * Search users for salesman assignment (supports multiple roles)
+ */
+router.get('/search', async (req, res) => {
+  try {
+    const { q: query, roles } = req.query;
+
+    if (!query || query.length < 2) {
+      return res.json({
+        success: true,
+        data: []
+      });
+    }
+
+    // Parse roles parameter
+    let roleFilter = ['CUSTOMER', 'EMPLOYEE']; // Default eligible roles
+    if (roles) {
+      roleFilter = roles.split(',').map(role => role.trim());
+    }
+
+    // Build search where clause
+    const where = {
+      AND: [
+        {
+          role: {
+            in: roleFilter
+          }
+        },
+        {
+          OR: [
+            { name: { contains: query, mode: 'insensitive' } },
+            { email: { contains: query, mode: 'insensitive' } },
+            { phone: { contains: query, mode: 'insensitive' } }
+          ]
+        }
+      ]
+    };
+
+    const users = await prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        phone: true,
+        createdAt: true
+      },
+      orderBy: { name: 'asc' },
+      take: 20 // Limit results for performance
+    });
+
+    res.json({
+      success: true,
+      data: users
+    });
+  } catch (error) {
+    console.error('Error searching users:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to search users'
+    });
+  }
+});
+
+/**
  * GET /api/admin/users/:id
  * Get detailed user information including activity timeline
  */

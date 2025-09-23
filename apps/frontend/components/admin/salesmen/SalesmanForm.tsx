@@ -87,11 +87,16 @@ export function SalesmanForm({ salesman, onSubmit, onCancel }: SalesmanFormProps
 
         try {
             setSearchingUsers(true);
-            const response = await fetch(`/api/admin/users/search?q=${encodeURIComponent(query)}&role=CUSTOMER`);
+            // Search for both CUSTOMER and EMPLOYEE roles that can be converted to SALESMAN
+            const response = await fetch(`/api/admin/users/search?q=${encodeURIComponent(query)}&roles=CUSTOMER,EMPLOYEE`);
             const result = await response.json();
 
             if (result.success) {
-                setAvailableUsers(result.data || []);
+                // Filter out users who are already salesmen or admins
+                const eligibleUsers = (result.data || []).filter((user: User) =>
+                    user.role === 'CUSTOMER' || user.role === 'EMPLOYEE'
+                );
+                setAvailableUsers(eligibleUsers);
             }
         } catch (error) {
             console.error('Error searching users:', error);
@@ -239,7 +244,7 @@ export function SalesmanForm({ salesman, onSubmit, onCancel }: SalesmanFormProps
                                     Select User
                                 </CardTitle>
                                 <CardDescription>
-                                    Search and select an existing customer to convert to salesman
+                                    Search and select an existing customer or employee to convert to salesman
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
@@ -249,7 +254,7 @@ export function SalesmanForm({ salesman, onSubmit, onCancel }: SalesmanFormProps
                                             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                                             <input
                                                 type="text"
-                                                placeholder="Search users by name or email..."
+                                                placeholder="Search customers and employees by name or email..."
                                                 value={userSearch}
                                                 onChange={(e) => setUserSearch(e.target.value)}
                                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -268,11 +273,18 @@ export function SalesmanForm({ salesman, onSubmit, onCancel }: SalesmanFormProps
                                                         onClick={() => setSelectedUser(user)}
                                                         className="flex items-center justify-between p-3 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer"
                                                     >
-                                                        <div>
-                                                            <p className="font-medium">{user.name}</p>
+                                                        <div className="flex-1">
+                                                            <p className="font-medium text-gray-900">{user.name}</p>
                                                             <p className="text-sm text-gray-600">{user.email}</p>
                                                         </div>
-                                                        <Badge variant="outline">{user.role}</Badge>
+                                                        <div className="text-right">
+                                                            <Badge
+                                                                variant="outline"
+                                                                className={user.role === 'EMPLOYEE' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-gray-50 text-gray-700 border-gray-200'}
+                                                            >
+                                                                {user.role}
+                                                            </Badge>
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </div>
@@ -284,9 +296,19 @@ export function SalesmanForm({ salesman, onSubmit, onCancel }: SalesmanFormProps
                                     </>
                                 ) : (
                                     <div className="flex items-center justify-between p-3 border border-green-200 rounded-md bg-green-50">
-                                        <div>
-                                            <p className="font-medium text-green-900">{selectedUser.name}</p>
-                                            <p className="text-sm text-green-700">{selectedUser.email}</p>
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
+                                                <span className="text-white font-medium text-sm">
+                                                    {selectedUser.name.charAt(0).toUpperCase()}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-green-900">{selectedUser.name}</p>
+                                                <p className="text-sm text-green-700">{selectedUser.email}</p>
+                                                <Badge variant="outline" className="mt-1 bg-white text-green-800 border-green-300">
+                                                    Current: {selectedUser.role}
+                                                </Badge>
+                                            </div>
                                         </div>
                                         <Button
                                             type="button"
