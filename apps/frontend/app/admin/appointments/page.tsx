@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Settings, List, Grid } from 'lucide-react';
-import { AvailabilityManager, AppointmentsList, WeeklyScheduleGrid } from '@/components/admin/appointments';
+import { AvailabilityManager, AppointmentsList, WeeklyScheduleGrid, AppointmentAnalytics } from '@/components/admin/appointments';
 
 interface AvailabilityRule {
   id?: string;
@@ -99,85 +99,7 @@ export default function AppointmentsPage() {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Booking Trends</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Analytics coming soon</p>
-                  <p className="text-sm">Track booking patterns and optimize availability</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Popular Time Slots</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Analytics coming soon</p>
-                  <p className="text-sm">Identify peak booking times</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Service Demand</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Analytics coming soon</p>
-                  <p className="text-sm">Analyze service type popularity</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Conversion Rates</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Analytics coming soon</p>
-                  <p className="text-sm">Track booking to completion rates</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Customer Insights</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Analytics coming soon</p>
-                  <p className="text-sm">Understand customer booking behavior</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Revenue Impact</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Analytics coming soon</p>
-                  <p className="text-sm">Measure appointment booking ROI</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <AppointmentAnalytics />
         </TabsContent>
       </Tabs>
     </div>
