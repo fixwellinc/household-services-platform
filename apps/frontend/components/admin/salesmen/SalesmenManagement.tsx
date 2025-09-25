@@ -50,8 +50,13 @@ interface Salesman {
     monthlyTarget: number;
     quarterlyTarget: number;
     yearlyTarget: number;
-    status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+    status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'TERMINATED';
     startDate: string;
+    endDate?: string;
+    terminationReason?: string;
+    suspensionReason?: string;
+    adminNotes?: string;
+    lastActivityAt?: string;
     createdAt: string;
     performance?: {
         totalReferrals: number;
@@ -164,7 +169,7 @@ export function SalesmenManagement() {
                         personalMessage: salesman?.personalMessage || '',
                         commissionTier: ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM'].includes(salesman?.commissionTier)
                             ? salesman.commissionTier : 'BRONZE',
-                        status: ['ACTIVE', 'INACTIVE', 'SUSPENDED'].includes(salesman?.status)
+                        status: ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'TERMINATED'].includes(salesman?.status)
                             ? salesman.status : 'INACTIVE',
                         territoryPostalCodes: Array.isArray(salesman?.territoryPostalCodes)
                             ? salesman.territoryPostalCodes : [],
@@ -284,9 +289,13 @@ export function SalesmenManagement() {
     // Update salesman status
     const handleUpdateStatus = async (salesman: Salesman, status: string) => {
         try {
+            const reason = status === 'SUSPENDED' ? 'Administrative action via admin panel'
+                         : status === 'TERMINATED' ? 'Employment terminated via admin panel'
+                         : undefined;
+
             const response = await request(`/api/admin/salesmen/${salesman.id}/status`, {
-                method: 'PATCH',
-                body: JSON.stringify({ status })
+                method: 'PUT',
+                body: JSON.stringify({ status, reason, effectiveDate: new Date().toISOString() })
             });
 
             if (response.success) {
@@ -305,11 +314,28 @@ export function SalesmenManagement() {
     // Bulk operations
     const handleBulkOperation = async (operation: string, salesmanIds: string[]) => {
         try {
-            const response = await request('/api/admin/salesmen/bulk', {
+            const updates: any = {};
+
+            switch (operation) {
+                case 'activate':
+                    updates.status = 'ACTIVE';
+                    break;
+                case 'suspend':
+                    updates.status = 'SUSPENDED';
+                    updates.suspensionReason = 'Bulk administrative action via admin panel';
+                    break;
+                case 'terminate':
+                    updates.status = 'TERMINATED';
+                    updates.terminationReason = 'Bulk termination via admin panel';
+                    updates.endDate = new Date().toISOString();
+                    break;
+            }
+
+            const response = await request('/api/admin/salesmen/bulk-update', {
                 method: 'POST',
                 body: JSON.stringify({
-                    operation,
-                    salesmanIds
+                    salesmanIds,
+                    updates
                 })
             });
 
@@ -332,6 +358,7 @@ export function SalesmenManagement() {
         active: salesmen.filter(s => s && s.status === 'ACTIVE').length,
         inactive: salesmen.filter(s => s && s.status === 'INACTIVE').length,
         suspended: salesmen.filter(s => s && s.status === 'SUSPENDED').length,
+        terminated: salesmen.filter(s => s && s.status === 'TERMINATED').length,
         totalCommission: salesmen.reduce((sum, s) => {
             if (!s || !s.performance || typeof s.performance.monthlyCommission !== 'number') {
                 return sum;
@@ -400,6 +427,12 @@ export function SalesmenManagement() {
                         return (
                             <Badge variant="destructive">
                                 Suspended
+                            </Badge>
+                        );
+                    case 'TERMINATED':
+                        return (
+                            <Badge className="bg-red-100 text-red-800 border-red-200">
+                                Terminated
                             </Badge>
                         );
                     case 'INACTIVE':
@@ -508,6 +541,15 @@ export function SalesmenManagement() {
                             >
                                 <PauseCircle className="h-4 w-4 text-yellow-600" />
                             </Button>
+                        ) : status === 'TERMINATED' ? (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled
+                                title="Cannot reactivate terminated salesman"
+                            >
+                                <AlertTriangle className="h-4 w-4 text-gray-400" />
+                            </Button>
                         ) : (
                             <Button
                                 variant="ghost"
@@ -518,14 +560,17 @@ export function SalesmenManagement() {
                                 <PlayCircle className="h-4 w-4 text-green-600" />
                             </Button>
                         )}
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowDeleteDialog(salesman)}
-                            title="Delete salesman"
-                        >
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                        </Button>
+                        {status !== 'TERMINATED' && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setShowStatusDialog({salesman, status: 'TERMINATED'})}
+                                title="Terminate salesman"
+                                className="text-red-600 hover:text-red-800"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        )}
                     </div>
                 );
             }
@@ -542,7 +587,8 @@ export function SalesmenManagement() {
                 { value: '', label: 'All Statuses' },
                 { value: 'ACTIVE', label: 'Active' },
                 { value: 'INACTIVE', label: 'Inactive' },
-                { value: 'SUSPENDED', label: 'Suspended' }
+                { value: 'SUSPENDED', label: 'Suspended' },
+                { value: 'TERMINATED', label: 'Terminated' }
             ]
         },
         {
@@ -594,58 +640,72 @@ export function SalesmenManagement() {
             </div>
 
             {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <Card>
-                    <CardContent className="p-6">
+                    <CardContent className="p-4">
                         <div className="flex items-center">
                             <div className="p-2 bg-blue-100 rounded-md">
-                                <UserCheck className="h-6 w-6 text-blue-600" />
+                                <UserCheck className="h-5 w-5 text-blue-600" />
                             </div>
-                            <div className="ml-4">
-                                <p className="text-sm font-medium text-gray-600">Total Salesmen</p>
-                                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                            <div className="ml-3">
+                                <p className="text-xs font-medium text-gray-600">Total</p>
+                                <p className="text-xl font-bold text-gray-900">{stats.total}</p>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
                 <Card>
-                    <CardContent className="p-6">
+                    <CardContent className="p-4">
                         <div className="flex items-center">
                             <div className="p-2 bg-green-100 rounded-md">
-                                <Activity className="h-6 w-6 text-green-600" />
+                                <Activity className="h-5 w-5 text-green-600" />
                             </div>
-                            <div className="ml-4">
-                                <p className="text-sm font-medium text-gray-600">Active</p>
-                                <p className="text-2xl font-bold text-gray-900">{stats.active}</p>
+                            <div className="ml-3">
+                                <p className="text-xs font-medium text-gray-600">Active</p>
+                                <p className="text-xl font-bold text-gray-900">{stats.active}</p>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
                 <Card>
-                    <CardContent className="p-6">
+                    <CardContent className="p-4">
                         <div className="flex items-center">
                             <div className="p-2 bg-yellow-100 rounded-md">
-                                <DollarSign className="h-6 w-6 text-yellow-600" />
+                                <PauseCircle className="h-5 w-5 text-yellow-600" />
                             </div>
-                            <div className="ml-4">
-                                <p className="text-sm font-medium text-gray-600">Total Commission</p>
-                                <p className="text-2xl font-bold text-gray-900">${stats.totalCommission.toLocaleString()}</p>
+                            <div className="ml-3">
+                                <p className="text-xs font-medium text-gray-600">Inactive/Suspended</p>
+                                <p className="text-xl font-bold text-gray-900">{stats.inactive + stats.suspended}</p>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
                 <Card>
-                    <CardContent className="p-6">
+                    <CardContent className="p-4">
+                        <div className="flex items-center">
+                            <div className="p-2 bg-red-100 rounded-md">
+                                <AlertTriangle className="h-5 w-5 text-red-600" />
+                            </div>
+                            <div className="ml-3">
+                                <p className="text-xs font-medium text-gray-600">Terminated</p>
+                                <p className="text-xl font-bold text-gray-900">{stats.terminated}</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardContent className="p-4">
                         <div className="flex items-center">
                             <div className="p-2 bg-purple-100 rounded-md">
-                                <TrendingUp className="h-6 w-6 text-purple-600" />
+                                <TrendingUp className="h-5 w-5 text-purple-600" />
                             </div>
-                            <div className="ml-4">
-                                <p className="text-sm font-medium text-gray-600">Avg. Conversion</p>
-                                <p className="text-2xl font-bold text-gray-900">{stats.avgConversionRate.toFixed(1)}%</p>
+                            <div className="ml-3">
+                                <p className="text-xs font-medium text-gray-600">Avg. Conversion</p>
+                                <p className="text-xl font-bold text-gray-900">{stats.avgConversionRate.toFixed(1)}%</p>
                             </div>
                         </div>
                     </CardContent>
@@ -683,11 +743,11 @@ export function SalesmenManagement() {
                             onClick: () => handleBulkOperation('suspend', selectedSalesmen)
                         },
                         {
-                            id: 'delete',
-                            label: 'Delete',
+                            id: 'terminate',
+                            label: 'Terminate',
                             icon: Trash2,
                             variant: 'destructive',
-                            onClick: () => handleBulkOperation('delete', selectedSalesmen)
+                            onClick: () => handleBulkOperation('terminate', selectedSalesmen)
                         }
                     ]}
                 />
@@ -765,9 +825,9 @@ export function SalesmenManagement() {
 
             {showStatusDialog && (
                 <ConfirmationDialog
-                    title={`${showStatusDialog.status === 'ACTIVE' ? 'Activate' : 'Suspend'} Salesman`}
-                    description={`Are you sure you want to ${showStatusDialog.status.toLowerCase()} ${showStatusDialog.salesman.displayName}?`}
-                    confirmLabel={showStatusDialog.status === 'ACTIVE' ? 'Activate' : 'Suspend'}
+                    title={`${showStatusDialog.status === 'ACTIVE' ? 'Activate' : showStatusDialog.status === 'SUSPENDED' ? 'Suspend' : 'Terminate'} Salesman`}
+                    description={`Are you sure you want to ${showStatusDialog.status.toLowerCase()} ${showStatusDialog.salesman.displayName}? ${showStatusDialog.status === 'TERMINATED' ? 'This action cannot be undone and will permanently end their employment.' : ''}`}
+                    confirmLabel={showStatusDialog.status === 'ACTIVE' ? 'Activate' : showStatusDialog.status === 'SUSPENDED' ? 'Suspend' : 'Terminate'}
                     onConfirm={() => handleUpdateStatus(showStatusDialog.salesman, showStatusDialog.status)}
                     onCancel={() => setShowStatusDialog(null)}
                     variant={showStatusDialog.status === 'ACTIVE' ? 'default' : 'destructive'}

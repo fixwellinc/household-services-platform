@@ -11,6 +11,7 @@ import monitoringRoutes from './admin/monitoring.js';
 import exportRoutes from './admin/exports.js';
 import reportRoutes from './admin/reports.js';
 import availabilityRoutes from './admin/availability.js';
+import salesmenRoutes from './admin/salesmen.js';
 
 const router = express.Router();
 
@@ -31,6 +32,9 @@ router.use('/reports', reportRoutes);
 
 // Mount availability routes
 router.use('/availability', availabilityRoutes);
+
+// Mount salesmen routes
+router.use('/salesmen', salesmenRoutes);
 
 /**
  * GET /api/admin/dashboard/stats

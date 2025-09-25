@@ -34,7 +34,10 @@ interface Salesman {
     monthlyTarget: number;
     quarterlyTarget: number;
     yearlyTarget: number;
-    status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+    status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'TERMINATED';
+    adminNotes?: string;
+    terminationReason?: string;
+    suspensionReason?: string;
     startDate: string;
     createdAt: string;
 }
@@ -63,7 +66,8 @@ export function SalesmanForm({ salesman, onSubmit, onCancel }: SalesmanFormProps
         monthlyTarget: salesman?.monthlyTarget || 1000,
         quarterlyTarget: salesman?.quarterlyTarget || 3000,
         yearlyTarget: salesman?.yearlyTarget || 12000,
-        status: salesman?.status || 'ACTIVE'
+        status: salesman?.status || 'ACTIVE',
+        adminNotes: salesman?.adminNotes || ''
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -212,7 +216,8 @@ export function SalesmanForm({ salesman, onSubmit, onCancel }: SalesmanFormProps
     const statusOptions = [
         { value: 'ACTIVE', label: 'Active', description: 'Salesman can receive referrals' },
         { value: 'INACTIVE', label: 'Inactive', description: 'Salesman cannot receive new referrals' },
-        { value: 'SUSPENDED', label: 'Suspended', description: 'Salesman account is suspended' }
+        { value: 'SUSPENDED', label: 'Suspended', description: 'Salesman account is suspended' },
+        { value: 'TERMINATED', label: 'Terminated', description: 'Employment permanently ended' }
     ];
 
     return (
@@ -381,6 +386,22 @@ export function SalesmanForm({ salesman, onSubmit, onCancel }: SalesmanFormProps
                                         </option>
                                     ))}
                                 </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Admin Notes
+                                </label>
+                                <textarea
+                                    value={formData.adminNotes}
+                                    onChange={(e) => handleInputChange('adminNotes', e.target.value)}
+                                    rows={3}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Internal notes about this salesman (visible only to admins)"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    These notes are for internal use only and not visible to the salesman.
+                                </p>
                             </div>
                         </CardContent>
                     </Card>

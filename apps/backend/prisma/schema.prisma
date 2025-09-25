@@ -841,9 +841,16 @@ model SalesmanProfile {
   monthlyTarget       Int       @default(0)
   quarterlyTarget     Int       @default(0)
   yearlyTarget        Int       @default(0)
-  status              String    @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED
+  status              String    @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED, TERMINATED
   startDate           DateTime  @default(now())
   endDate             DateTime?
+
+  // Employment lifecycle fields
+  terminationReason   String?
+  suspensionReason    String?
+  adminNotes          String?
+  lastActivityAt      DateTime?
+
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 

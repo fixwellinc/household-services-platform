@@ -3,6 +3,7 @@ import { requireAdmin } from '../../middleware/auth.js';
 import { validate, sanitize } from '../../middleware/validation.js';
 import { ValidationError } from '../../middleware/error.js';
 import salesmanService from '../../services/salesmanService.js';
+import adminSalesmenService from '../../services/adminSalesmenService.js';
 import referralService from '../../services/referralService.js';
 import rateLimit from 'express-rate-limit';
 import {
@@ -351,31 +352,27 @@ router.get('/force-refresh', async (req, res, next) => {
   }
 });
 
-// GET /api/admin/salesmen - Get all salesmen
+// GET /api/admin/salesmen - Get all salesmen (enhanced version)
 router.get('/', async (req, res, next) => {
   try {
-    const {
-      status,
-      search,
-      page = 1,
-      limit = 20,
-      sortBy = 'createdAt',
-      sortOrder = 'desc'
-    } = req.query;
+    const options = {
+      page: parseInt(req.query.page) || 1,
+      limit: parseInt(req.query.limit) || 20,
+      status: req.query.status,
+      search: req.query.search,
+      commissionTier: req.query.commissionTier,
+      territory: req.query.territory,
+      sortBy: req.query.sortBy || 'createdAt',
+      sortOrder: req.query.sortOrder || 'desc'
+    };
 
-    const result = await salesmanService.getSalesmen({
-      status,
-      search,
-      page: parseInt(page),
-      limit: parseInt(limit),
-      sortBy,
-      sortOrder
-    });
+    const result = await adminSalesmenService.getAllSalesmen(options);
 
     res.json({
       success: true,
       data: result.salesmen,
-      pagination: result.pagination
+      pagination: result.pagination,
+      stats: result.stats
     });
   } catch (error) {
     console.error('Error getting salesmen:', error);
@@ -423,12 +420,12 @@ router.post('/',
   }
 );
 
-// GET /api/admin/salesmen/:id - Get specific salesman
+// GET /api/admin/salesmen/:id - Get specific salesman (enhanced)
 router.get('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const salesman = await salesmanService.getSalesmanByUserId(id);
+    const salesman = await adminSalesmenService.getSalesmanById(id);
 
     if (!salesman) {
       return res.status(404).json({
@@ -437,19 +434,9 @@ router.get('/:id', async (req, res, next) => {
       });
     }
 
-    // Get additional details
-    const [dashboard, referralStats] = await Promise.all([
-      salesmanService.getSalesmanDashboard(salesman.id),
-      referralService.getReferralStats(salesman.id)
-    ]);
-
     res.json({
       success: true,
-      data: {
-        profile: salesman,
-        dashboard,
-        referralStats
-      }
+      data: salesman
     });
   } catch (error) {
     console.error('Error getting salesman:', error);
