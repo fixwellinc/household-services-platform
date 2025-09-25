@@ -51,49 +51,75 @@ export default function CareersPage() {
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Current Openings</h2>
-            <div className="space-y-4">
-              <div className="border-l-4 border-blue-500 pl-4">
-                <h3 className="font-semibold text-gray-900">Service Technicians</h3>
-                <p className="text-sm text-gray-600">Full-time and part-time positions available</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Join Our Growing Team</h2>
+            <div className="space-y-6">
+              <p className="text-gray-600 leading-relaxed">
+                We're always looking for talented professionals to join our team. While we may not have specific openings posted right now,
+                we'd love to hear from you and keep your information on file for future opportunities.
+              </p>
+
+              <div className="bg-blue-50 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-900 mb-2">Areas We're Interested In:</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-700">
+                  <div className="flex items-center">
+                    <span className="text-blue-500 mr-2">•</span>
+                    Service & Maintenance
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-blue-500 mr-2">•</span>
+                    Customer Experience
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-blue-500 mr-2">•</span>
+                    Operations & Logistics
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-blue-500 mr-2">•</span>
+                    Technology & Innovation
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-blue-500 mr-2">•</span>
+                    Marketing & Growth
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-blue-500 mr-2">•</span>
+                    Administration & Support
+                  </div>
+                </div>
               </div>
-              <div className="border-l-4 border-green-500 pl-4">
-                <h3 className="font-semibold text-gray-900">Customer Service Representatives</h3>
-                <p className="text-sm text-gray-600">Help us deliver exceptional customer experiences</p>
-              </div>
-              <div className="border-l-4 border-purple-500 pl-4">
-                <h3 className="font-semibold text-gray-900">Operations Coordinators</h3>
-                <p className="text-sm text-gray-600">Manage and optimize our service operations</p>
-              </div>
-              <div className="border-l-4 border-orange-500 pl-4">
-                <h3 className="font-semibold text-gray-900">Marketing Specialists</h3>
-                <p className="text-sm text-gray-600">Help grow our brand and reach more customers</p>
-              </div>
+
+              <p className="text-sm text-gray-500 italic">
+                Don't see your specialty listed? We're always open to exceptional talent in any field that could help us serve our customers better.
+              </p>
             </div>
           </div>
         </div>
 
         <div className="bg-blue-50 rounded-lg p-8 text-center mb-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Ready to Apply?
+            Submit Your General Application
           </h2>
           <p className="text-gray-600 mb-6">
-            Send us your resume and cover letter, or fill out our application form.
+            Interested in joining our team? We'd love to learn about your skills and experience.
+            Submit your information and we'll reach out when opportunities that match your background become available.
           </p>
           <div className="space-x-4">
             <a
               href="/contact"
               className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
             >
-              Apply Now
+              Submit Application
             </a>
             <a
               href="mailto:careers@fixwell.com"
               className="inline-block bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
             >
-              Send Resume
+              Email Resume
             </a>
           </div>
+          <p className="text-sm text-gray-500 mt-4">
+            💡 Tip: Include your area of interest and preferred work arrangement in your message
+          </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
