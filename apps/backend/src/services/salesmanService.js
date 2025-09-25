@@ -302,11 +302,23 @@ class SalesmanService {
 
       // Also fix existing profiles that might have incomplete data
       console.log('🔧 Checking existing profiles for data completeness...');
-      const profilesToFix = existingProfiles.filter(profile =>
-        !profile.displayName ||
-        profile.displayName === 'Unknown' ||
-        !profile.status
-      );
+      const profilesToFix = existingProfiles.filter(profile => {
+        const needsDisplayNameFix = !profile.displayName ||
+          profile.displayName === 'Unknown' ||
+          profile.displayName === 'No email' ||
+          profile.displayName.includes('unknown') ||
+          (profile.user && profile.user.name && profile.displayName !== profile.user.name);
+
+        const needsStatusFix = !profile.status;
+
+        const needsFix = needsDisplayNameFix || needsStatusFix;
+
+        if (needsFix) {
+          console.log(`🔍 Profile needs fixing: ${profile.displayName} (User: ${profile.user?.name || profile.user?.email})`);
+        }
+
+        return needsFix;
+      });
 
       let fixedCount = 0;
       for (const profile of profilesToFix) {

@@ -229,6 +229,56 @@ router.get('/sync', async (req, res, next) => {
   }
 });
 
+// GET /api/admin/salesmen/force-refresh - Force refresh all profiles
+router.get('/force-refresh', async (req, res, next) => {
+  try {
+    console.log('🔄 Force refresh triggered by admin...');
+
+    // Get all existing profiles
+    const allProfiles = await require('../../config/database.js').default.salesmanProfile.findMany({
+      include: { user: true }
+    });
+
+    let updatedCount = 0;
+
+    // Force update all profiles with user data
+    for (const profile of allProfiles) {
+      try {
+        if (profile.user) {
+          const newDisplayName = profile.user.name || profile.user.email.split('@')[0];
+
+          await require('../../config/database.js').default.salesmanProfile.update({
+            where: { id: profile.id },
+            data: {
+              displayName: newDisplayName,
+              status: profile.status || 'ACTIVE'
+            }
+          });
+
+          console.log(`✅ Force updated profile: ${profile.user.email} -> ${newDisplayName}`);
+          updatedCount++;
+        }
+      } catch (error) {
+        console.error(`❌ Failed to update profile ${profile.id}:`, error.message);
+      }
+    }
+
+    // Get fresh data
+    const result = await salesmanService.getSalesmen({ limit: 100 });
+
+    res.json({
+      success: true,
+      message: `Force refreshed ${updatedCount} salesman profiles`,
+      updated: updatedCount,
+      currentSalesmen: result.salesmen.length,
+      data: result.salesmen
+    });
+  } catch (error) {
+    console.error('Error force refreshing salesmen profiles:', error);
+    next(error);
+  }
+});
+
 // GET /api/admin/salesmen - Get all salesmen
 router.get('/', async (req, res, next) => {
   try {
