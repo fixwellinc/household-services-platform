@@ -176,6 +176,54 @@ const validateSalesmanAdmin = (schemaName) => {
   };
 };
 
+// GET /api/admin/salesmen/debug - Debug endpoint to check user roles
+router.get('/debug', async (req, res, next) => {
+  try {
+    console.log('Debug endpoint triggered...');
+
+    // Get all users with SALESMAN role
+    const salesmanUsers = await require('../../config/database.js').default.user.findMany({
+      where: { role: 'SALESMAN' },
+      select: { id: true, email: true, name: true, role: true, salesmanProfile: true }
+    });
+
+    // Get all salesman profiles
+    const salesmanProfiles = await require('../../config/database.js').default.salesmanProfile.findMany({
+      select: { id: true, userId: true, referralCode: true, displayName: true }
+    });
+
+    res.json({
+      success: true,
+      salesmanUsers,
+      salesmanProfiles,
+      counts: {
+        salesmanUsers: salesmanUsers.length,
+        salesmanProfiles: salesmanProfiles.length
+      }
+    });
+  } catch (error) {
+    console.error('Error in debug endpoint:', error);
+    next(error);
+  }
+});
+
+// GET /api/admin/salesmen/sync - Debug endpoint to manually sync profiles
+router.get('/sync', async (req, res, next) => {
+  try {
+    console.log('Manual sync triggered...');
+    const created = await salesmanService.syncMissingSalesmanProfiles();
+
+    res.json({
+      success: true,
+      message: `Synced ${created} missing salesman profiles`,
+      created
+    });
+  } catch (error) {
+    console.error('Error syncing salesmen profiles:', error);
+    next(error);
+  }
+});
+
 // GET /api/admin/salesmen - Get all salesmen
 router.get('/', async (req, res, next) => {
   try {

@@ -74,7 +74,11 @@ export class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> => {
-    const url = `${this.baseURL}${endpoint}`;
+    // Remove duplicate /api if the baseURL already ends with /api and endpoint starts with /api
+    const cleanEndpoint = this.baseURL.endsWith('/api') && endpoint.startsWith('/api')
+      ? endpoint.slice(4)
+      : endpoint;
+    const url = `${this.baseURL}${cleanEndpoint}`;
 
     // API request logging (development only)
     if (process.env.NODE_ENV === 'development') {

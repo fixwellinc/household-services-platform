@@ -73,6 +73,7 @@ interface SalesmanFilters {
 export function SalesmenManagement() {
     const [salesmen, setSalesmen] = useState<Salesman[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [selectedSalesman, setSelectedSalesman] = useState<Salesman | null>(null);
     const [showSalesmanForm, setShowSalesmanForm] = useState(false);
     const [editingSalesman, setEditingSalesman] = useState<Salesman | null>(null);
@@ -115,17 +116,49 @@ export function SalesmenManagement() {
             const response = await request(`/api/admin/salesmen?${params.toString()}`);
 
             if (response.success) {
-                setSalesmen(response.data.salesmen || []);
+                // The API returns salesmen directly in response.data, not response.data.salesmen
+                const salesmenData = response.data || [];
+
+                // Ensure each salesman has required fields with defaults
+                const sanitizedSalesmen = salesmenData.map((salesman: any, index: number) => {
+                    // Ultra-safe object construction
+                    return {
+                        id: salesman?.id || `temp-${index}`,
+                        displayName: salesman?.displayName || salesman?.user?.name || 'Unknown',
+                        referralCode: salesman?.referralCode || 'N/A',
+                        commissionTier: salesman?.commissionTier || 'BRONZE',
+                        status: salesman?.status || 'INACTIVE',
+                        user: {
+                            id: salesman?.user?.id || '',
+                            email: salesman?.user?.email || 'No email',
+                            name: salesman?.user?.name || 'Unknown',
+                            phone: salesman?.user?.phone || '',
+                            createdAt: salesman?.user?.createdAt || new Date().toISOString(),
+                            ...(salesman?.user || {})
+                        },
+                        performance: {
+                            totalReferrals: 0,
+                            activeCustomers: 0,
+                            monthlyCommission: 0,
+                            conversionRate: 0,
+                            ...(salesman?.performance || {})
+                        },
+                        // Copy all other properties safely
+                        ...(salesman || {})
+                    };
+                });
+                setSalesmen(sanitizedSalesmen);
                 setPagination(prev => ({
                     ...prev,
-                    totalCount: response.data.totalCount || 0,
-                    totalPages: Math.ceil((response.data.totalCount || 0) / prev.limit)
+                    totalCount: response.pagination?.totalCount || 0,
+                    totalPages: response.pagination?.totalPages || Math.ceil((response.pagination?.totalCount || 0) / prev.limit)
                 }));
             } else {
                 showError('Failed to fetch salesmen');
             }
         } catch (error) {
             console.error('Error fetching salesmen:', error);
+            setError(error instanceof Error ? error.message : 'Failed to fetch salesmen');
             showError('Failed to fetch salesmen');
         } finally {
             setLoading(false);
@@ -243,15 +276,23 @@ export function SalesmenManagement() {
         }
     };
 
-    // Calculate statistics
+    // Calculate statistics with safe performance access
     const stats = {
         total: salesmen.length,
         active: salesmen.filter(s => s.status === 'ACTIVE').length,
         inactive: salesmen.filter(s => s.status === 'INACTIVE').length,
         suspended: salesmen.filter(s => s.status === 'SUSPENDED').length,
-        totalCommission: salesmen.reduce((sum, s) => sum + (s.performance?.monthlyCommission || 0), 0),
+        totalCommission: salesmen.reduce((sum, s) => {
+            const commission = s && s.performance && typeof s.performance.monthlyCommission === 'number'
+                ? s.performance.monthlyCommission : 0;
+            return sum + commission;
+        }, 0),
         avgConversionRate: salesmen.length > 0
-            ? salesmen.reduce((sum, s) => sum + (s.performance?.conversionRate || 0), 0) / salesmen.length
+            ? salesmen.reduce((sum, s) => {
+                const rate = s && s.performance && typeof s.performance.conversionRate === 'number'
+                    ? s.performance.conversionRate : 0;
+                return sum + rate;
+            }, 0) / salesmen.length
             : 0
     };
 
@@ -265,12 +306,12 @@ export function SalesmenManagement() {
                 <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                         <span className="text-white font-medium text-sm">
-                            {salesman.displayName.charAt(0).toUpperCase()}
+                            {(salesman.displayName || salesman.user?.name || salesman.user?.email || 'U')?.charAt(0)?.toUpperCase() || 'U'}
                         </span>
                     </div>
                     <div>
-                        <p className="font-medium text-gray-900">{salesman.displayName}</p>
-                        <p className="text-sm text-gray-600">{salesman.user.email}</p>
+                        <p className="font-medium text-gray-900">{salesman.displayName || salesman.user?.name || 'Unknown'}</p>
+                        <p className="text-sm text-gray-600">{salesman.user?.email || 'No email'}</p>
                     </div>
                 </div>
             )
@@ -281,7 +322,7 @@ export function SalesmenManagement() {
             sortable: true,
             render: (salesman: Salesman) => (
                 <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-                    {salesman.referralCode}
+                    {salesman.referralCode || 'N/A'}
                 </span>
             )
         },
@@ -308,41 +349,53 @@ export function SalesmenManagement() {
             title: 'Tier',
             sortable: true,
             render: (salesman: Salesman) => (
-                <Badge variant="outline">{salesman.commissionTier}</Badge>
+                <Badge variant="outline">{salesman.commissionTier || 'BRONZE'}</Badge>
             )
         },
         {
             key: 'performance.totalReferrals',
             title: 'Referrals',
             sortable: false,
-            render: (salesman: Salesman) => (
-                <div className="text-center">
-                    <p className="font-medium">{salesman.performance?.totalReferrals || 0}</p>
-                    <p className="text-xs text-gray-500">total</p>
-                </div>
-            )
+            render: (salesman: Salesman) => {
+                const totalReferrals = salesman && salesman.performance && typeof salesman.performance.totalReferrals === 'number'
+                    ? salesman.performance.totalReferrals : 0;
+                return (
+                    <div className="text-center">
+                        <p className="font-medium">{totalReferrals}</p>
+                        <p className="text-xs text-gray-500">total</p>
+                    </div>
+                );
+            }
         },
         {
             key: 'performance.monthlyCommission',
             title: 'Monthly Commission',
             sortable: false,
-            render: (salesman: Salesman) => (
-                <div className="text-center">
-                    <p className="font-medium">${(salesman.performance?.monthlyCommission || 0).toLocaleString()}</p>
-                    <p className="text-xs text-gray-500">this month</p>
-                </div>
-            )
+            render: (salesman: Salesman) => {
+                const monthlyCommission = salesman && salesman.performance && typeof salesman.performance.monthlyCommission === 'number'
+                    ? salesman.performance.monthlyCommission : 0;
+                return (
+                    <div className="text-center">
+                        <p className="font-medium">${monthlyCommission.toLocaleString()}</p>
+                        <p className="text-xs text-gray-500">this month</p>
+                    </div>
+                );
+            }
         },
         {
             key: 'performance.conversionRate',
             title: 'Conversion',
             sortable: false,
-            render: (salesman: Salesman) => (
-                <div className="text-center">
-                    <p className="font-medium">{(salesman.performance?.conversionRate || 0).toFixed(1)}%</p>
-                    <p className="text-xs text-gray-500">rate</p>
-                </div>
-            )
+            render: (salesman: Salesman) => {
+                const conversionRate = salesman && salesman.performance && typeof salesman.performance.conversionRate === 'number'
+                    ? salesman.performance.conversionRate : 0;
+                return (
+                    <div className="text-center">
+                        <p className="font-medium">{conversionRate.toFixed(1)}%</p>
+                        <p className="text-xs text-gray-500">rate</p>
+                    </div>
+                );
+            }
         },
         {
             key: 'actions',
@@ -427,6 +480,22 @@ export function SalesmenManagement() {
 
     if (loading && salesmen.length === 0) {
         return <AdminLoadingState message="Loading salesmen..." />;
+    }
+
+    // Early error return
+    if (error) {
+        return (
+            <div className="space-y-6">
+                <div className="text-center py-12">
+                    <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Salesmen</h3>
+                    <p className="text-gray-600 mb-4">{error}</p>
+                    <Button onClick={() => { setError(null); fetchSalesmen(); }}>
+                        Try Again
+                    </Button>
+                </div>
+            </div>
+        );
     }
 
     return (

@@ -229,11 +229,67 @@ class SalesmanService {
   }
 
   /**
+   * Sync missing salesman profiles for users with SALESMAN role
+   * @returns {Promise<number>} Number of profiles created
+   */
+  async syncMissingSalesmanProfiles() {
+    console.log('Starting sync of missing salesman profiles...');
+
+    // Find users with SALESMAN role but no salesman profile
+    const usersWithoutProfiles = await prisma.user.findMany({
+      where: {
+        role: 'SALESMAN',
+        salesmanProfile: null
+      }
+    });
+
+    console.log(`Found ${usersWithoutProfiles.length} users with SALESMAN role but no profile:`,
+      usersWithoutProfiles.map(u => ({ id: u.id, email: u.email, name: u.name })));
+
+    let createdCount = 0;
+
+    for (const user of usersWithoutProfiles) {
+      try {
+        // Generate referral code
+        const referralCode = await this.generateReferralCode();
+
+        // Create salesman profile
+        await prisma.salesmanProfile.create({
+          data: {
+            userId: user.id,
+            referralCode,
+            displayName: user.name || user.email.split('@')[0],
+            commissionRate: 5.0,
+            commissionType: 'PERCENTAGE',
+            commissionTier: 'BRONZE',
+            territoryPostalCodes: [],
+            territoryRegions: [],
+            monthlyTarget: 0,
+            quarterlyTarget: 0,
+            yearlyTarget: 0,
+            status: 'ACTIVE'
+          }
+        });
+
+        console.log(`Created salesman profile for user ${user.id} with referral code ${referralCode}`);
+        createdCount++;
+      } catch (error) {
+        console.error(`Failed to create salesman profile for user ${user.id}:`, error);
+      }
+    }
+
+    console.log(`Sync completed. Created ${createdCount} salesman profiles.`);
+    return createdCount;
+  }
+
+  /**
    * Get all salesmen with filtering and pagination
    * @param {Object} options - Query options
    * @returns {Promise<Object>} Paginated salesmen list
    */
   async getSalesmen(options = {}) {
+    // First, sync any missing salesman profiles
+    await this.syncMissingSalesmanProfiles();
     const {
       page = 1,
       limit = 20,

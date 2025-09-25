@@ -283,7 +283,7 @@ export function SalesmanDetailsPanel({ salesman, onClose, onEdit }: SalesmanDeta
                                         <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
                                             <Users className="h-6 w-6 text-blue-600" />
                                         </div>
-                                        <p className="text-2xl font-bold text-gray-900">{salesman.performance.totalReferrals}</p>
+                                        <p className="text-2xl font-bold text-gray-900">{salesman.performance?.totalReferrals || 0}</p>
                                         <p className="text-sm text-gray-600">Total Referrals</p>
                                     </div>
 
@@ -291,7 +291,7 @@ export function SalesmanDetailsPanel({ salesman, onClose, onEdit }: SalesmanDeta
                                         <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
                                             <UserCheck className="h-6 w-6 text-green-600" />
                                         </div>
-                                        <p className="text-2xl font-bold text-gray-900">{salesman.performance.activeCustomers}</p>
+                                        <p className="text-2xl font-bold text-gray-900">{salesman.performance?.activeCustomers || 0}</p>
                                         <p className="text-sm text-gray-600">Active Customers</p>
                                     </div>
 
@@ -299,7 +299,7 @@ export function SalesmanDetailsPanel({ salesman, onClose, onEdit }: SalesmanDeta
                                         <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-2">
                                             <DollarSign className="h-6 w-6 text-yellow-600" />
                                         </div>
-                                        <p className="text-2xl font-bold text-gray-900">${salesman.performance.monthlyCommission.toLocaleString()}</p>
+                                        <p className="text-2xl font-bold text-gray-900">${(salesman.performance?.monthlyCommission || 0).toLocaleString()}</p>
                                         <p className="text-sm text-gray-600">Monthly Commission</p>
                                     </div>
 
@@ -307,7 +307,7 @@ export function SalesmanDetailsPanel({ salesman, onClose, onEdit }: SalesmanDeta
                                         <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
                                             <Target className="h-6 w-6 text-purple-600" />
                                         </div>
-                                        <p className="text-2xl font-bold text-gray-900">{salesman.performance.conversionRate.toFixed(1)}%</p>
+                                        <p className="text-2xl font-bold text-gray-900">{(salesman.performance?.conversionRate || 0).toFixed(1)}%</p>
                                         <p className="text-sm text-gray-600">Conversion Rate</p>
                                     </div>
                                 </div>

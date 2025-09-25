@@ -102,6 +102,73 @@ router.get('/live', (req, res) => {
   });
 });
 
+// Manual sync endpoint to fix missing salesman profiles
+router.post('/sync-salesmen', async (req, res) => {
+  try {
+    console.log('Manual salesman sync requested...');
+
+    // Find users with SALESMAN role but no salesman profile
+    const usersWithoutProfiles = await prisma.user.findMany({
+      where: {
+        role: 'SALESMAN',
+        salesmanProfile: null
+      },
+      select: { id: true, email: true, name: true, role: true }
+    });
+
+    console.log(`Found ${usersWithoutProfiles.length} users needing profiles:`, usersWithoutProfiles);
+
+    const created = [];
+    const errors = [];
+
+    for (const user of usersWithoutProfiles) {
+      try {
+        // Generate a simple referral code
+        const referralCode = `SALES${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
+        // Create salesman profile
+        const profile = await prisma.salesmanProfile.create({
+          data: {
+            userId: user.id,
+            referralCode,
+            displayName: user.name || user.email.split('@')[0],
+            commissionRate: 5.0,
+            commissionType: 'PERCENTAGE',
+            commissionTier: 'BRONZE',
+            territoryPostalCodes: [],
+            territoryRegions: [],
+            monthlyTarget: 0,
+            quarterlyTarget: 0,
+            yearlyTarget: 0,
+            status: 'ACTIVE'
+          }
+        });
+
+        created.push({ userId: user.id, profileId: profile.id, referralCode });
+        console.log(`Created profile for user ${user.id} with code ${referralCode}`);
+      } catch (error) {
+        console.error(`Failed to create profile for user ${user.id}:`, error);
+        errors.push({ userId: user.id, error: error.message });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Processed ${usersWithoutProfiles.length} users`,
+      created: created.length,
+      createdProfiles: created,
+      errors: errors.length,
+      errorDetails: errors
+    });
+  } catch (error) {
+    console.error('Error in manual sync endpoint:', error);
+    res.status(500).json({
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
 // Performance metrics endpoint
 router.get('/metrics', async (req, res) => {
   try {

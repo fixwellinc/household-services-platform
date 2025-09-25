@@ -195,7 +195,11 @@ export const useApi = () => {
     options: RequestInit = {}
   ): Promise<T> => {
     const baseURL = process.env.NEXT_PUBLIC_API_URL || '/api';
-    const url = `${baseURL}${endpoint}`;
+    // Remove duplicate /api if the baseURL already ends with /api and endpoint starts with /api
+    const cleanEndpoint = baseURL.endsWith('/api') && endpoint.startsWith('/api')
+      ? endpoint.slice(4)
+      : endpoint;
+    const url = `${baseURL}${cleanEndpoint}`;
     
     // Get token from localStorage
     let token: string | null = null;
