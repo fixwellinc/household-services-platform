@@ -233,53 +233,78 @@ class SalesmanService {
    * @returns {Promise<number>} Number of profiles created
    */
   async syncMissingSalesmanProfiles() {
-    console.log('Starting sync of missing salesman profiles...');
+    console.log('🔄 Starting sync of missing salesman profiles...');
 
-    // Find users with SALESMAN role but no salesman profile
-    const usersWithoutProfiles = await prisma.user.findMany({
-      where: {
-        role: 'SALESMAN',
-        salesmanProfile: null
+    try {
+      // Get all users with SALESMAN role
+      const allSalesmanUsers = await prisma.user.findMany({
+        where: { role: 'SALESMAN' },
+        include: { salesmanProfile: true }
+      });
+
+      console.log(`📊 Found ${allSalesmanUsers.length} users with SALESMAN role`);
+
+      // Find users without profiles
+      const usersWithoutProfiles = allSalesmanUsers.filter(user => !user.salesmanProfile);
+
+      console.log(`🔍 Found ${usersWithoutProfiles.length} users with SALESMAN role but no profile:`);
+      usersWithoutProfiles.forEach(u => {
+        console.log(`  - ${u.email} (${u.name || 'No name'}) - ID: ${u.id}`);
+      });
+
+      // Also check for existing profiles
+      const existingProfiles = await prisma.salesmanProfile.findMany({
+        include: { user: true }
+      });
+      console.log(`📊 Found ${existingProfiles.length} existing salesman profiles:`);
+      existingProfiles.forEach(p => {
+        console.log(`  - ${p.displayName} (${p.user.email}) - Status: ${p.status || 'No status'}`);
+      });
+
+      let createdCount = 0;
+
+      for (const user of usersWithoutProfiles) {
+        try {
+          // Generate referral code
+          const referralCode = await this.generateReferralCode();
+
+          // Create salesman profile with explicit status
+          const newProfile = await prisma.salesmanProfile.create({
+            data: {
+              userId: user.id,
+              referralCode,
+              displayName: user.name || user.email.split('@')[0],
+              personalMessage: '',
+              commissionRate: 5.0,
+              commissionType: 'PERCENTAGE',
+              commissionTier: 'BRONZE',
+              status: 'ACTIVE', // Explicit status
+              territoryPostalCodes: [],
+              territoryRegions: [],
+              monthlyTarget: 0,
+              quarterlyTarget: 0,
+              yearlyTarget: 0
+            }
+          });
+
+          console.log(`✅ Created salesman profile for user ${user.id} (${user.email})`);
+          console.log(`   - Profile ID: ${newProfile.id}`);
+          console.log(`   - Referral Code: ${referralCode}`);
+          console.log(`   - Display Name: ${newProfile.displayName}`);
+          console.log(`   - Status: ${newProfile.status}`);
+
+          createdCount++;
+        } catch (error) {
+          console.error(`❌ Failed to create salesman profile for user ${user.id} (${user.email}):`, error.message);
+        }
       }
-    });
 
-    console.log(`Found ${usersWithoutProfiles.length} users with SALESMAN role but no profile:`,
-      usersWithoutProfiles.map(u => ({ id: u.id, email: u.email, name: u.name })));
-
-    let createdCount = 0;
-
-    for (const user of usersWithoutProfiles) {
-      try {
-        // Generate referral code
-        const referralCode = await this.generateReferralCode();
-
-        // Create salesman profile
-        await prisma.salesmanProfile.create({
-          data: {
-            userId: user.id,
-            referralCode,
-            displayName: user.name || user.email.split('@')[0],
-            commissionRate: 5.0,
-            commissionType: 'PERCENTAGE',
-            commissionTier: 'BRONZE',
-            territoryPostalCodes: [],
-            territoryRegions: [],
-            monthlyTarget: 0,
-            quarterlyTarget: 0,
-            yearlyTarget: 0,
-            status: 'ACTIVE'
-          }
-        });
-
-        console.log(`Created salesman profile for user ${user.id} with referral code ${referralCode}`);
-        createdCount++;
-      } catch (error) {
-        console.error(`Failed to create salesman profile for user ${user.id}:`, error);
-      }
+      console.log(`🎉 Sync completed. Created ${createdCount} salesman profiles.`);
+      return createdCount;
+    } catch (error) {
+      console.error('❌ Error during sync process:', error);
+      return 0;
     }
-
-    console.log(`Sync completed. Created ${createdCount} salesman profiles.`);
-    return createdCount;
   }
 
   /**
@@ -288,11 +313,15 @@ class SalesmanService {
    * @returns {Promise<Object>} Paginated salesmen list
    */
   async getSalesmen(options = {}) {
+    console.log('🔍 getSalesmen called with options:', options);
+
     // First, sync any missing salesman profiles
-    await this.syncMissingSalesmanProfiles();
+    const syncedCount = await this.syncMissingSalesmanProfiles();
+    console.log(`📊 Synced ${syncedCount} missing salesman profiles`);
+
     const {
       page = 1,
-      limit = 20,
+      limit = 50, // Increased default limit
       status,
       search,
       sortBy = 'createdAt',
@@ -302,7 +331,8 @@ class SalesmanService {
     const skip = (page - 1) * limit;
     const where = {};
 
-    if (status) {
+    // Only filter by status if explicitly provided
+    if (status && status !== '') {
       where.status = status;
     }
 
@@ -314,6 +344,8 @@ class SalesmanService {
         { user: { email: { contains: search, mode: 'insensitive' } } }
       ];
     }
+
+    console.log('🔍 Query where clause:', JSON.stringify(where, null, 2));
 
     const [salesmen, totalCount] = await Promise.all([
       prisma.salesmanProfile.findMany({
@@ -343,8 +375,43 @@ class SalesmanService {
       prisma.salesmanProfile.count({ where })
     ]);
 
+    console.log(`📊 Found ${salesmen.length} salesmen (total: ${totalCount})`);
+
+    // Enhanced data processing with performance metrics
+    const processedSalesmen = salesmen.map(salesman => {
+      // Ensure all required fields are present with safe defaults
+      const processedSalesman = {
+        id: salesman.id,
+        userId: salesman.userId,
+        displayName: salesman.displayName || salesman.user?.name || 'Unknown',
+        referralCode: salesman.referralCode,
+        personalMessage: salesman.personalMessage || '',
+        commissionRate: salesman.commissionRate || 5.0,
+        commissionType: salesman.commissionType || 'PERCENTAGE',
+        commissionTier: salesman.commissionTier || 'BRONZE',
+        status: salesman.status || 'ACTIVE',
+        territoryPostalCodes: salesman.territoryPostalCodes || [],
+        territoryRegions: salesman.territoryRegions || [],
+        monthlyTarget: salesman.monthlyTarget || 0,
+        quarterlyTarget: salesman.quarterlyTarget || 0,
+        yearlyTarget: salesman.yearlyTarget || 0,
+        startDate: salesman.createdAt,
+        createdAt: salesman.createdAt,
+        user: salesman.user,
+        performance: {
+          totalReferrals: salesman._count?.customerReferrals || 0,
+          activeCustomers: 0, // Will be calculated if needed
+          monthlyCommission: 0, // Will be calculated if needed
+          conversionRate: 0 // Will be calculated if needed
+        }
+      };
+
+      console.log(`👤 Processed salesman: ${processedSalesman.displayName} (${processedSalesman.status})`);
+      return processedSalesman;
+    });
+
     return {
-      salesmen,
+      salesmen: processedSalesmen,
       pagination: {
         page,
         limit,
