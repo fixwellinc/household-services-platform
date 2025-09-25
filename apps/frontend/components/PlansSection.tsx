@@ -364,31 +364,43 @@ export default function PlansSection() {
             </div>
           </div>
 
-          {/* Billing Toggle - BCAA Style */}
-          <div className="flex items-center justify-center gap-4 mb-12">
-            <span className={`text-sm font-medium ${billingPeriod === 'month' ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'}`}>
-              Monthly
-            </span>
-            <button
-              onClick={() => setBillingPeriod(billingPeriod === 'month' ? 'year' : 'month')}
-              className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
-                billingPeriod === 'year' ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
-              }`}
-            >
-              <span
-                className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm ${
-                  billingPeriod === 'year' ? 'translate-x-6' : 'translate-x-1'
+          {/* Billing Toggle - Enhanced with Always-Visible Savings */}
+          <div className="flex flex-col items-center justify-center gap-4 mb-12">
+            {/* Savings Badge - Always Visible */}
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-full shadow-lg border-2 border-white/20 animate-pulse">
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-bold">💰 Save 10% with Annual Billing!</span>
+              </div>
+            </div>
+
+            {/* Toggle Section */}
+            <div className="flex items-center justify-center gap-4">
+              <span className={`text-sm font-medium ${billingPeriod === 'month' ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'}`}>
+                Monthly
+              </span>
+              <button
+                onClick={() => setBillingPeriod(billingPeriod === 'month' ? 'year' : 'month')}
+                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
+                  billingPeriod === 'year' ? 'bg-green-600' : 'bg-gray-300 dark:bg-gray-600'
                 }`}
-              />
-            </button>
-            <span className={`text-sm font-medium ${billingPeriod === 'year' ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'}`}>
-              Yearly
-            </span>
-            {billingPeriod === 'year' && (
-              <Badge className="bg-green-100 text-green-700 border-green-200 px-3 py-1">
-                Save 10%
-              </Badge>
-            )}
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-sm ${
+                    billingPeriod === 'year' ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+              <div className="flex items-center gap-2">
+                <span className={`text-sm font-medium ${billingPeriod === 'year' ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'}`}>
+                  Yearly
+                </span>
+                {billingPeriod === 'year' && (
+                  <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 px-3 py-1 font-bold animate-bounce">
+                    ✓ ACTIVE
+                  </Badge>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -471,19 +483,27 @@ export default function PlansSection() {
                           <span className="text-white/80 text-lg font-medium">/{billingPeriod}</span>
                         </div>
                         {plan.originalPrice && (
-                          <div className="flex items-center justify-center gap-3 mb-3">
+                          <div className="flex flex-col items-center gap-2 mb-3">
                             <span className="text-lg text-white/60 line-through font-medium">
-                              ${getOriginalPrice(plan)}/{billingPeriod}
+                              Was ${getOriginalPrice(plan)}/{billingPeriod}
                             </span>
-                            <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white border-0 text-sm px-4 py-2 font-bold shadow-lg">
-                              Save ${calculateSavings(plan).toFixed(2)}
-                            </Badge>
+                            <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white border-0 px-6 py-3 font-black shadow-2xl rounded-full animate-pulse border-2 border-white/30">
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg">🎉</span>
+                                <span className="text-lg">Save ${calculateSavings(plan).toFixed(2)}</span>
+                              </div>
+                            </div>
                           </div>
                         )}
                         {billingPeriod === 'year' && (
-                          <p className="text-sm text-white/70 font-medium">
-                            Billed annually (${(plan.monthlyPrice * 0.9).toFixed(2)}/month)
-                          </p>
+                          <div className="bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-lg p-3 mt-2 border border-yellow-300/30">
+                            <p className="text-lg text-white font-bold">
+                              Billed annually (${(plan.monthlyPrice * 0.9).toFixed(2)}/month)
+                            </p>
+                            <p className="text-sm text-yellow-100 font-medium">
+                              💰 Save ${((plan.monthlyPrice * 12) - (plan.monthlyPrice * 0.9 * 12)).toFixed(2)} per year!
+                            </p>
+                          </div>
                         )}
                         {/* Savings Badge */}
                         <div className="mt-4">
@@ -632,19 +652,27 @@ export default function PlansSection() {
                           <span className="text-white/80 text-lg font-medium">/{billingPeriod}</span>
                         </div>
                         {plan.originalPrice && (
-                          <div className="flex items-center justify-center gap-3 mb-3">
+                          <div className="flex flex-col items-center gap-2 mb-3">
                             <span className="text-lg text-white/60 line-through font-medium">
-                              ${getOriginalPrice(plan)}/{billingPeriod}
+                              Was ${getOriginalPrice(plan)}/{billingPeriod}
                             </span>
-                            <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white border-0 text-sm px-4 py-2 font-bold shadow-lg">
-                              Save ${calculateSavings(plan).toFixed(2)}
-                            </Badge>
+                            <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white border-0 px-6 py-3 font-black shadow-2xl rounded-full animate-pulse border-2 border-white/30">
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg">🎉</span>
+                                <span className="text-lg">Save ${calculateSavings(plan).toFixed(2)}</span>
+                              </div>
+                            </div>
                           </div>
                         )}
                         {billingPeriod === 'year' && (
-                          <p className="text-sm text-white/70 font-medium">
-                            Billed annually (${(plan.monthlyPrice * 0.9).toFixed(2)}/month)
-                          </p>
+                          <div className="bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-lg p-3 mt-2 border border-yellow-300/30">
+                            <p className="text-lg text-white font-bold">
+                              Billed annually (${(plan.monthlyPrice * 0.9).toFixed(2)}/month)
+                            </p>
+                            <p className="text-sm text-yellow-100 font-medium">
+                              💰 Save ${((plan.monthlyPrice * 12) - (plan.monthlyPrice * 0.9 * 12)).toFixed(2)} per year!
+                            </p>
+                          </div>
                         )}
                         {/* Savings Badge */}
                         <div className="mt-4">
