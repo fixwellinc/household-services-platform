@@ -119,32 +119,82 @@ export function SalesmenManagement() {
                 // The API returns salesmen directly in response.data, not response.data.salesmen
                 const salesmenData = response.data || [];
 
-                // Ensure each salesman has required fields with defaults
+                // Enhanced data sanitization with validation
                 const sanitizedSalesmen = salesmenData.map((salesman: any, index: number) => {
-                    // Ultra-safe object construction
+                    // Validate that salesman is an object
+                    if (!salesman || typeof salesman !== 'object') {
+                        console.warn(`Invalid salesman data at index ${index}:`, salesman);
+                        return {
+                            id: `invalid-${index}`,
+                            userId: '',
+                            displayName: 'Invalid Record',
+                            referralCode: 'N/A',
+                            personalMessage: '',
+                            commissionTier: 'BRONZE',
+                            territoryPostalCodes: [],
+                            territoryRegions: [],
+                            monthlyTarget: 0,
+                            quarterlyTarget: 0,
+                            yearlyTarget: 0,
+                            status: 'INACTIVE',
+                            startDate: new Date().toISOString(),
+                            createdAt: new Date().toISOString(),
+                            user: {
+                                id: '',
+                                email: 'invalid@invalid.com',
+                                name: 'Invalid Record',
+                                phone: '',
+                                createdAt: new Date().toISOString()
+                            },
+                            performance: {
+                                totalReferrals: 0,
+                                activeCustomers: 0,
+                                monthlyCommission: 0,
+                                conversionRate: 0
+                            }
+                        };
+                    }
+
+                    // Enhanced validation with fallbacks
                     return {
                         id: salesman?.id || `temp-${index}`,
+                        userId: salesman?.userId || '',
                         displayName: salesman?.displayName || salesman?.user?.name || 'Unknown',
                         referralCode: salesman?.referralCode || 'N/A',
-                        commissionTier: salesman?.commissionTier || 'BRONZE',
-                        status: salesman?.status || 'INACTIVE',
+                        personalMessage: salesman?.personalMessage || '',
+                        commissionTier: ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM'].includes(salesman?.commissionTier)
+                            ? salesman.commissionTier : 'BRONZE',
+                        status: ['ACTIVE', 'INACTIVE', 'SUSPENDED'].includes(salesman?.status)
+                            ? salesman.status : 'INACTIVE',
+                        territoryPostalCodes: Array.isArray(salesman?.territoryPostalCodes)
+                            ? salesman.territoryPostalCodes : [],
+                        territoryRegions: Array.isArray(salesman?.territoryRegions)
+                            ? salesman.territoryRegions : [],
+                        monthlyTarget: typeof salesman?.monthlyTarget === 'number'
+                            ? salesman.monthlyTarget : 0,
+                        quarterlyTarget: typeof salesman?.quarterlyTarget === 'number'
+                            ? salesman.quarterlyTarget : 0,
+                        yearlyTarget: typeof salesman?.yearlyTarget === 'number'
+                            ? salesman.yearlyTarget : 0,
+                        startDate: salesman?.startDate || new Date().toISOString(),
+                        createdAt: salesman?.createdAt || new Date().toISOString(),
                         user: {
                             id: salesman?.user?.id || '',
                             email: salesman?.user?.email || 'No email',
                             name: salesman?.user?.name || 'Unknown',
                             phone: salesman?.user?.phone || '',
-                            createdAt: salesman?.user?.createdAt || new Date().toISOString(),
-                            ...(salesman?.user || {})
+                            createdAt: salesman?.user?.createdAt || new Date().toISOString()
                         },
                         performance: {
-                            totalReferrals: 0,
-                            activeCustomers: 0,
-                            monthlyCommission: 0,
-                            conversionRate: 0,
-                            ...(salesman?.performance || {})
-                        },
-                        // Copy all other properties safely
-                        ...(salesman || {})
+                            totalReferrals: typeof salesman?.performance?.totalReferrals === 'number'
+                                ? salesman.performance.totalReferrals : 0,
+                            activeCustomers: typeof salesman?.performance?.activeCustomers === 'number'
+                                ? salesman.performance.activeCustomers : 0,
+                            monthlyCommission: typeof salesman?.performance?.monthlyCommission === 'number'
+                                ? salesman.performance.monthlyCommission : 0,
+                            conversionRate: typeof salesman?.performance?.conversionRate === 'number'
+                                ? salesman.performance.conversionRate : 0
+                        }
                     };
                 });
                 setSalesmen(sanitizedSalesmen);
@@ -276,24 +326,24 @@ export function SalesmenManagement() {
         }
     };
 
-    // Calculate statistics with safe performance access
+    // Calculate statistics with safe property access
     const stats = {
         total: salesmen.length,
-        active: salesmen.filter(s => s.status === 'ACTIVE').length,
-        inactive: salesmen.filter(s => s.status === 'INACTIVE').length,
-        suspended: salesmen.filter(s => s.status === 'SUSPENDED').length,
+        active: salesmen.filter(s => s && s.status === 'ACTIVE').length,
+        inactive: salesmen.filter(s => s && s.status === 'INACTIVE').length,
+        suspended: salesmen.filter(s => s && s.status === 'SUSPENDED').length,
         totalCommission: salesmen.reduce((sum, s) => {
-            const commission = s && s.performance && typeof s.performance.monthlyCommission === 'number'
-                ? s.performance.monthlyCommission : 0;
-            return sum + commission;
+            if (!s || !s.performance || typeof s.performance.monthlyCommission !== 'number') {
+                return sum;
+            }
+            return sum + s.performance.monthlyCommission;
         }, 0),
-        avgConversionRate: salesmen.length > 0
-            ? salesmen.reduce((sum, s) => {
-                const rate = s && s.performance && typeof s.performance.conversionRate === 'number'
-                    ? s.performance.conversionRate : 0;
-                return sum + rate;
-            }, 0) / salesmen.length
-            : 0
+        avgConversionRate: (() => {
+            const validSalesmen = salesmen.filter(s => s && s.performance && typeof s.performance.conversionRate === 'number');
+            if (validSalesmen.length === 0) return 0;
+            const totalRate = validSalesmen.reduce((sum, s) => sum + s.performance.conversionRate, 0);
+            return totalRate / validSalesmen.length;
+        })()
     };
 
     // Table columns configuration
@@ -331,12 +381,20 @@ export function SalesmenManagement() {
             title: 'Status',
             sortable: true,
             render: (salesman: Salesman) => {
+                // Safe status access with validation
+                if (!salesman || typeof salesman !== 'object') {
+                    return <Badge className="bg-red-100 text-red-800">Error</Badge>;
+                }
+
                 const statusConfig = {
                     ACTIVE: { color: 'green', label: 'Active' },
                     INACTIVE: { color: 'gray', label: 'Inactive' },
                     SUSPENDED: { color: 'red', label: 'Suspended' }
                 };
-                const config = statusConfig[salesman.status] || statusConfig.INACTIVE;
+
+                const status = salesman.status || 'INACTIVE';
+                const config = statusConfig[status] || statusConfig.INACTIVE;
+
                 return (
                     <Badge className={`bg-${config.color}-100 text-${config.color}-800`}>
                         {config.label}
@@ -401,53 +459,66 @@ export function SalesmenManagement() {
             key: 'actions',
             title: 'Actions',
             sortable: false,
-            render: (salesman: Salesman) => (
-                <div className="flex items-center space-x-2">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedSalesman(salesman)}
-                        title="View details"
-                    >
-                        <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setEditingSalesman(salesman)}
-                        title="Edit salesman"
-                    >
-                        <Edit className="h-4 w-4" />
-                    </Button>
-                    {salesman.status === 'ACTIVE' ? (
+            render: (salesman: Salesman) => {
+                // Validate salesman object exists
+                if (!salesman || typeof salesman !== 'object') {
+                    return (
+                        <div className="flex items-center space-x-2">
+                            <Badge variant="destructive">Error</Badge>
+                        </div>
+                    );
+                }
+
+                const status = salesman.status || 'INACTIVE';
+
+                return (
+                    <div className="flex items-center space-x-2">
                         <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => setShowStatusDialog({salesman, status: 'SUSPENDED'})}
-                            title="Suspend salesman"
+                            onClick={() => setSelectedSalesman(salesman)}
+                            title="View details"
                         >
-                            <PauseCircle className="h-4 w-4 text-yellow-600" />
+                            <Eye className="h-4 w-4" />
                         </Button>
-                    ) : (
                         <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => setShowStatusDialog({salesman, status: 'ACTIVE'})}
-                            title="Activate salesman"
+                            onClick={() => setEditingSalesman(salesman)}
+                            title="Edit salesman"
                         >
-                            <PlayCircle className="h-4 w-4 text-green-600" />
+                            <Edit className="h-4 w-4" />
                         </Button>
-                    )}
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setShowDeleteDialog(salesman)}
-                        title="Delete salesman"
-                    >
-                        <Trash2 className="h-4 w-4 text-red-600" />
-                    </Button>
-                </div>
-            )
+                        {status === 'ACTIVE' ? (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setShowStatusDialog({salesman, status: 'SUSPENDED'})}
+                                title="Suspend salesman"
+                            >
+                                <PauseCircle className="h-4 w-4 text-yellow-600" />
+                            </Button>
+                        ) : (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setShowStatusDialog({salesman, status: 'ACTIVE'})}
+                                title="Activate salesman"
+                            >
+                                <PlayCircle className="h-4 w-4 text-green-600" />
+                            </Button>
+                        )}
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowDeleteDialog(salesman)}
+                            title="Delete salesman"
+                        >
+                            <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
+                    </div>
+                );
+            }
         }
     ];
 
