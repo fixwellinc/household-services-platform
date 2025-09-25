@@ -13,6 +13,108 @@ import {
 
 const router = express.Router();
 
+// Debug and fix endpoints (NO AUTH) - place before auth middleware
+router.get('/debug', async (req, res, next) => {
+  try {
+    console.log('🔍 Debug endpoint triggered...');
+
+    // Get all users with SALESMAN role
+    const salesmanUsers = await require('../../config/database.js').default.user.findMany({
+      where: { role: 'SALESMAN' },
+      select: { id: true, email: true, name: true, role: true, salesmanProfile: true }
+    });
+
+    // Get all salesman profiles
+    const salesmanProfiles = await require('../../config/database.js').default.salesmanProfile.findMany({
+      include: { user: true }
+    });
+
+    console.log('📊 Debug data:', {
+      salesmanUsers: salesmanUsers.length,
+      salesmanProfiles: salesmanProfiles.length
+    });
+
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      salesmanUsers,
+      salesmanProfiles,
+      counts: {
+        salesmanUsers: salesmanUsers.length,
+        salesmanProfiles: salesmanProfiles.length
+      },
+      analysis: {
+        usersWithoutProfiles: salesmanUsers.filter(u => !u.salesmanProfile).length,
+        profilesData: salesmanProfiles.map(p => ({
+          id: p.id,
+          displayName: p.displayName,
+          status: p.status,
+          userEmail: p.user?.email,
+          userName: p.user?.name
+        }))
+      }
+    });
+  } catch (error) {
+    console.error('Error in debug endpoint:', error);
+    next(error);
+  }
+});
+
+router.get('/fix-now', async (req, res, next) => {
+  try {
+    console.log('🔧 Immediate fix endpoint triggered...');
+    const prisma = require('../../config/database.js').default;
+
+    // Get all profiles that need fixing
+    const allProfiles = await prisma.salesmanProfile.findMany({
+      include: { user: true }
+    });
+
+    let updatedCount = 0;
+    const results = [];
+
+    for (const profile of allProfiles) {
+      if (profile.user) {
+        const oldDisplayName = profile.displayName;
+        const newDisplayName = profile.user.name || profile.user.email.split('@')[0];
+
+        if (oldDisplayName !== newDisplayName || !profile.status) {
+          await prisma.salesmanProfile.update({
+            where: { id: profile.id },
+            data: {
+              displayName: newDisplayName,
+              status: profile.status || 'ACTIVE'
+            }
+          });
+
+          results.push({
+            profileId: profile.id,
+            userEmail: profile.user.email,
+            oldDisplayName,
+            newDisplayName,
+            statusFixed: !profile.status
+          });
+
+          updatedCount++;
+          console.log(`✅ Fixed: ${profile.user.email} -> ${newDisplayName}`);
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Fixed ${updatedCount} salesman profiles`,
+      updatedCount,
+      results,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error in fix-now endpoint:', error);
+    next(error);
+  }
+});
+
 // Rate limiting for admin endpoints
 const adminRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -24,7 +126,7 @@ const adminRateLimit = rateLimit({
   legacyHeaders: false
 });
 
-// Apply admin authentication and rate limiting to all routes
+// Apply admin authentication and rate limiting to protected routes
 router.use(adminRateLimit);
 router.use(requireAdmin);
 router.use(logFailedAuth);
@@ -176,36 +278,6 @@ const validateSalesmanAdmin = (schemaName) => {
   };
 };
 
-// GET /api/admin/salesmen/debug - Debug endpoint to check user roles
-router.get('/debug', async (req, res, next) => {
-  try {
-    console.log('Debug endpoint triggered...');
-
-    // Get all users with SALESMAN role
-    const salesmanUsers = await require('../../config/database.js').default.user.findMany({
-      where: { role: 'SALESMAN' },
-      select: { id: true, email: true, name: true, role: true, salesmanProfile: true }
-    });
-
-    // Get all salesman profiles
-    const salesmanProfiles = await require('../../config/database.js').default.salesmanProfile.findMany({
-      select: { id: true, userId: true, referralCode: true, displayName: true }
-    });
-
-    res.json({
-      success: true,
-      salesmanUsers,
-      salesmanProfiles,
-      counts: {
-        salesmanUsers: salesmanUsers.length,
-        salesmanProfiles: salesmanProfiles.length
-      }
-    });
-  } catch (error) {
-    console.error('Error in debug endpoint:', error);
-    next(error);
-  }
-});
 
 // GET /api/admin/salesmen/sync - Debug endpoint to manually sync profiles
 router.get('/sync', async (req, res, next) => {
