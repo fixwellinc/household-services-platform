@@ -268,22 +268,23 @@ class SalesmanService {
           // Generate referral code
           const referralCode = await this.generateReferralCode();
 
-          // Create salesman profile with explicit status
+          // Create salesman profile with explicit status and proper display name
+          const displayName = user.name || user.email.split('@')[0] || 'Unknown Salesman';
           const newProfile = await prisma.salesmanProfile.create({
             data: {
               userId: user.id,
               referralCode,
-              displayName: user.name || user.email.split('@')[0],
-              personalMessage: '',
+              displayName,
+              personalMessage: `Welcome ${displayName}! Start referring customers with code ${referralCode}`,
               commissionRate: 5.0,
               commissionType: 'PERCENTAGE',
               commissionTier: 'BRONZE',
               status: 'ACTIVE', // Explicit status
               territoryPostalCodes: [],
               territoryRegions: [],
-              monthlyTarget: 0,
-              quarterlyTarget: 0,
-              yearlyTarget: 0
+              monthlyTarget: 10,
+              quarterlyTarget: 30,
+              yearlyTarget: 100
             }
           });
 
@@ -299,7 +300,40 @@ class SalesmanService {
         }
       }
 
-      console.log(`🎉 Sync completed. Created ${createdCount} salesman profiles.`);
+      // Also fix existing profiles that might have incomplete data
+      console.log('🔧 Checking existing profiles for data completeness...');
+      const profilesToFix = existingProfiles.filter(profile =>
+        !profile.displayName ||
+        profile.displayName === 'Unknown' ||
+        !profile.status
+      );
+
+      let fixedCount = 0;
+      for (const profile of profilesToFix) {
+        try {
+          const user = profile.user;
+          const newDisplayName = user.name || user.email.split('@')[0] || 'Unknown Salesman';
+
+          await prisma.salesmanProfile.update({
+            where: { id: profile.id },
+            data: {
+              displayName: newDisplayName,
+              status: profile.status || 'ACTIVE',
+              personalMessage: profile.personalMessage || `Welcome ${newDisplayName}! Start referring customers with code ${profile.referralCode}`,
+              monthlyTarget: profile.monthlyTarget || 10,
+              quarterlyTarget: profile.quarterlyTarget || 30,
+              yearlyTarget: profile.yearlyTarget || 100
+            }
+          });
+
+          console.log(`🔧 Fixed profile data for ${user.email} - Display name: ${newDisplayName}`);
+          fixedCount++;
+        } catch (error) {
+          console.error(`❌ Failed to fix profile ${profile.id}:`, error.message);
+        }
+      }
+
+      console.log(`🎉 Sync completed. Created ${createdCount} profiles, fixed ${fixedCount} existing profiles.`);
       return createdCount;
     } catch (error) {
       console.error('❌ Error during sync process:', error);

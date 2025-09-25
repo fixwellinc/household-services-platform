@@ -383,23 +383,33 @@ export function SalesmenManagement() {
             render: (salesman: Salesman) => {
                 // Safe status access with validation
                 if (!salesman || typeof salesman !== 'object') {
-                    return <Badge className="bg-red-100 text-red-800">Error</Badge>;
+                    return <Badge variant="destructive">Error</Badge>;
                 }
 
-                const statusConfig = {
-                    ACTIVE: { color: 'green', label: 'Active' },
-                    INACTIVE: { color: 'gray', label: 'Inactive' },
-                    SUSPENDED: { color: 'red', label: 'Suspended' }
-                };
-
                 const status = salesman.status || 'INACTIVE';
-                const config = statusConfig[status] || statusConfig.INACTIVE;
 
-                return (
-                    <Badge className={`bg-${config.color}-100 text-${config.color}-800`}>
-                        {config.label}
-                    </Badge>
-                );
+                // Use proper Badge variants instead of custom Tailwind classes
+                switch (status) {
+                    case 'ACTIVE':
+                        return (
+                            <Badge className="bg-green-100 text-green-800 border-green-200">
+                                Active
+                            </Badge>
+                        );
+                    case 'SUSPENDED':
+                        return (
+                            <Badge variant="destructive">
+                                Suspended
+                            </Badge>
+                        );
+                    case 'INACTIVE':
+                    default:
+                        return (
+                            <Badge variant="outline" className="bg-gray-100 text-gray-600">
+                                Inactive
+                            </Badge>
+                        );
+                }
             }
         },
         {

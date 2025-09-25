@@ -210,13 +210,18 @@ router.get('/debug', async (req, res, next) => {
 // GET /api/admin/salesmen/sync - Debug endpoint to manually sync profiles
 router.get('/sync', async (req, res, next) => {
   try {
-    console.log('Manual sync triggered...');
+    console.log('🔄 Manual sync triggered by admin...');
     const created = await salesmanService.syncMissingSalesmanProfiles();
+
+    // Also refresh the data to show immediate results
+    const result = await salesmanService.getSalesmen({ limit: 100 });
 
     res.json({
       success: true,
-      message: `Synced ${created} missing salesman profiles`,
-      created
+      message: `Synced and fixed salesman profiles. Created: ${created}`,
+      created,
+      currentSalesmen: result.salesmen.length,
+      data: result.salesmen
     });
   } catch (error) {
     console.error('Error syncing salesmen profiles:', error);
