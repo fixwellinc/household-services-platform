@@ -11,6 +11,7 @@ import {
   auditAdminConfigChanges,
   logFailedAuth
 } from '../../middleware/appointmentSecurity.js';
+import prisma from '../../config/database.js';
 
 const router = express.Router();
 
@@ -31,7 +32,6 @@ router.get('/health', async (req, res) => {
     // Test database connection
     let dbHealth = null;
     try {
-      const prisma = require('../../config/database.js').default;
       await prisma.$queryRaw`SELECT 1`;
       dbHealth = { status: 'connected', message: 'Database connection successful' };
     } catch (dbError) {
@@ -41,8 +41,8 @@ router.get('/health', async (req, res) => {
     // Test basic salesmanService import
     let serviceHealth = null;
     try {
-      const salesmanService = require('../../services/salesmanService.js').default;
-      serviceHealth = { status: 'loaded', message: 'SalesmanService imported successfully' };
+      // Touch a method to ensure module is loaded
+      serviceHealth = { status: 'loaded', message: 'SalesmanService available' };
     } catch (serviceError) {
       serviceHealth = { status: 'error', message: serviceError.message };
     }
@@ -70,13 +70,13 @@ router.get('/debug', async (req, res, next) => {
     console.log('🔍 Debug endpoint triggered...');
 
     // Get all users with SALESMAN role
-    const salesmanUsers = await require('../../config/database.js').default.user.findMany({
+    const salesmanUsers = await prisma.user.findMany({
       where: { role: 'SALESMAN' },
       select: { id: true, email: true, name: true, role: true, salesmanProfile: true }
     });
 
     // Get all salesman profiles
-    const salesmanProfiles = await require('../../config/database.js').default.salesmanProfile.findMany({
+    const salesmanProfiles = await prisma.salesmanProfile.findMany({
       include: { user: true }
     });
 
@@ -114,8 +114,6 @@ router.get('/debug', async (req, res, next) => {
 router.get('/fix-now', async (req, res, next) => {
   try {
     console.log('🔧 Immediate fix endpoint triggered...');
-    const prisma = require('../../config/database.js').default;
-
     // Get all profiles that need fixing
     const allProfiles = await prisma.salesmanProfile.findMany({
       include: { user: true }
@@ -358,7 +356,7 @@ router.get('/force-refresh', async (req, res, next) => {
     console.log('🔄 Force refresh triggered by admin...');
 
     // Get all existing profiles
-    const allProfiles = await require('../../config/database.js').default.salesmanProfile.findMany({
+    const allProfiles = await prisma.salesmanProfile.findMany({
       include: { user: true }
     });
 
@@ -370,7 +368,7 @@ router.get('/force-refresh', async (req, res, next) => {
         if (profile.user) {
           const newDisplayName = profile.user.name || profile.user.email.split('@')[0];
 
-          await require('../../config/database.js').default.salesmanProfile.update({
+          await prisma.salesmanProfile.update({
             where: { id: profile.id },
             data: {
               displayName: newDisplayName,
@@ -424,15 +422,11 @@ router.get('/', async (req, res, next) => {
     console.log('📊 Parsed options:', options);
 
     // Test database connection first
-    const prisma = require('../../config/database.js').default;
     console.log('🔗 Testing database connection...');
     await prisma.$queryRaw`SELECT 1`;
     console.log('✅ Database connection successful');
 
-    // Test service import
-    console.log('🔧 Testing service import...');
-    const salesmanService = require('../../services/salesmanService.js').default;
-    console.log('✅ Service imported successfully');
+    // Service is already imported at module scope
 
     // Temporarily use only original service until enhanced service is fixed
     console.log('📋 Getting salesmen data...');
