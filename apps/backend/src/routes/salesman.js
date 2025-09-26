@@ -5,7 +5,7 @@ import { ValidationError } from '../middleware/error.js';
 import salesmanService from '../services/salesmanService.js';
 import referralService from '../services/referralService.js';
 import prisma from '../config/database.js';
-import rateLimit from 'express-rate-limit';
+import { rateLimit } from 'express-rate-limit';
 
 const router = express.Router();
 

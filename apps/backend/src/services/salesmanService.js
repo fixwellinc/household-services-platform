@@ -386,8 +386,8 @@ class SalesmanService {
       where.OR = [
         { displayName: { contains: search, mode: 'insensitive' } },
         { referralCode: { contains: search, mode: 'insensitive' } },
-        { user: { name: { contains: search, mode: 'insensitive' } } },
-        { user: { email: { contains: search, mode: 'insensitive' } } }
+        { user: { is: { name: { contains: search, mode: 'insensitive' } } } },
+        { user: { is: { email: { contains: search, mode: 'insensitive' } } } }
       ];
     }
 

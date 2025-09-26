@@ -5,7 +5,7 @@ import { ValidationError } from '../../middleware/error.js';
 import salesmanService from '../../services/salesmanService.js';
 // import adminSalesmenService from '../../services/adminSalesmenService.js';
 import referralService from '../../services/referralService.js';
-import rateLimit from 'express-rate-limit';
+import { rateLimit } from 'express-rate-limit';
 import {
   adminConfigLimiter,
   auditAdminConfigChanges,

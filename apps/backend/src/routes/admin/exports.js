@@ -4,7 +4,7 @@ import { exportJobProcessor } from '../../services/exportJobProcessor.js';
 import { exportSecurityService } from '../../services/exportSecurityService.js';
 import queueService from '../../services/queueService.js';
 import authMiddleware, { requireRole } from '../../middleware/auth.js';
-import rateLimit from 'express-rate-limit';
+import { rateLimit } from 'express-rate-limit';
 import path from 'path';
 
 const router = express.Router();

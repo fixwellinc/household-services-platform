@@ -1,4 +1,4 @@
-import rateLimit from 'express-rate-limit';
+import { rateLimit } from 'express-rate-limit';
 import { auditService } from '../services/auditService.js';
 import { ValidationError } from './error.js';
 import validator from 'validator';

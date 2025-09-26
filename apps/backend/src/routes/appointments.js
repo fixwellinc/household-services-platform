@@ -4,7 +4,7 @@ import availabilityService from '../services/availabilityService.js';
 import { authMiddleware, requireCustomer, requireCustomerOrAdmin } from '../middleware/auth.js';
 import { validate, sanitize } from '../middleware/validation.js';
 import { ValidationError } from '../middleware/error.js';
-import rateLimit from 'express-rate-limit';
+import { rateLimit } from 'express-rate-limit';
 import {
   appointmentBookingLimiter,
   availabilityCheckLimiter,

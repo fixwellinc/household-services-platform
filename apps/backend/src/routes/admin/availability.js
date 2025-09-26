@@ -4,7 +4,7 @@ import { validate, sanitize } from '../../middleware/validation.js';
 import { ValidationError } from '../../middleware/error.js';
 import availabilityService from '../../services/availabilityService.js';
 import appointmentService from '../../services/appointmentService.js';
-import rateLimit from 'express-rate-limit';
+import { rateLimit } from 'express-rate-limit';
 import {
   adminConfigLimiter,
   sanitizeAppointmentInput,
