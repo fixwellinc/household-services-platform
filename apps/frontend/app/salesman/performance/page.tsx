@@ -27,10 +27,19 @@ export default function SalesmanPerformancePage() {
   if (loading) return <div className="p-6">Loading performance...</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
 
+  const hasActivity = Boolean(metrics?.acquisitionMetrics?.totalReferrals) || Boolean(metrics?.revenueMetrics?.totalCommissionEarned);
+
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold">Performance</h1>
-      <pre className="bg-gray-50 p-4 rounded border overflow-auto text-xs">{JSON.stringify(metrics, null, 2)}</pre>
+      {!hasActivity ? (
+        <div className="p-4 border rounded bg-gray-50 text-gray-700">
+          <div className="font-medium mb-1">No performance data yet.</div>
+          <div className="text-sm">Share your referral link and get your first customer to see metrics here.</div>
+        </div>
+      ) : (
+        <pre className="bg-gray-50 p-4 rounded border overflow-auto text-xs">{JSON.stringify(metrics, null, 2)}</pre>
+      )}
     </div>
   );
 }
