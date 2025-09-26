@@ -14,6 +14,56 @@ import {
 
 const router = express.Router();
 
+// Health check endpoint (NO AUTH) - for production diagnostics
+router.get('/health', async (req, res) => {
+  try {
+    console.log('🏥 Health check endpoint accessed');
+
+    // Basic server health
+    const serverHealth = {
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+      nodeVersion: process.version,
+      platform: process.platform
+    };
+
+    // Test database connection
+    let dbHealth = null;
+    try {
+      const prisma = require('../../config/database.js').default;
+      await prisma.$queryRaw`SELECT 1`;
+      dbHealth = { status: 'connected', message: 'Database connection successful' };
+    } catch (dbError) {
+      dbHealth = { status: 'error', message: dbError.message };
+    }
+
+    // Test basic salesmanService import
+    let serviceHealth = null;
+    try {
+      const salesmanService = require('../../services/salesmanService.js').default;
+      serviceHealth = { status: 'loaded', message: 'SalesmanService imported successfully' };
+    } catch (serviceError) {
+      serviceHealth = { status: 'error', message: serviceError.message };
+    }
+
+    res.json({
+      success: true,
+      server: serverHealth,
+      database: dbHealth,
+      salesmanService: serviceHealth,
+      environment: process.env.NODE_ENV || 'unknown'
+    });
+  } catch (error) {
+    console.error('Health check error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      stack: error.stack
+    });
+  }
+});
+
 // Debug and fix endpoints (NO AUTH) - place before auth middleware
 router.get('/debug', async (req, res, next) => {
   try {
@@ -355,6 +405,11 @@ router.get('/force-refresh', async (req, res, next) => {
 // GET /api/admin/salesmen - Get all salesmen (enhanced version with fallback)
 router.get('/', async (req, res, next) => {
   try {
+    console.log('📋 Main salesmen endpoint accessed with query:', req.query);
+
+    // Test if we can even reach this point
+    console.log('🔧 Testing basic functionality...');
+
     const options = {
       page: parseInt(req.query.page) || 1,
       limit: parseInt(req.query.limit) || 20,
@@ -366,7 +421,21 @@ router.get('/', async (req, res, next) => {
       sortOrder: req.query.sortOrder || 'desc'
     };
 
+    console.log('📊 Parsed options:', options);
+
+    // Test database connection first
+    const prisma = require('../../config/database.js').default;
+    console.log('🔗 Testing database connection...');
+    await prisma.$queryRaw`SELECT 1`;
+    console.log('✅ Database connection successful');
+
+    // Test service import
+    console.log('🔧 Testing service import...');
+    const salesmanService = require('../../services/salesmanService.js').default;
+    console.log('✅ Service imported successfully');
+
     // Temporarily use only original service until enhanced service is fixed
+    console.log('📋 Getting salesmen data...');
     const result = await salesmanService.getSalesmen({
       status: options.status,
       search: options.search,
@@ -375,16 +444,35 @@ router.get('/', async (req, res, next) => {
       sortBy: options.sortBy,
       sortOrder: options.sortOrder
     });
+    console.log('✅ Data retrieved successfully:', result.salesmen?.length || 0, 'salesmen');
 
     res.json({
       success: true,
       data: result.salesmen,
       pagination: result.pagination,
-      temporary_fallback: true
+      temporary_fallback: true,
+      debug: {
+        timestamp: new Date().toISOString(),
+        options_received: options,
+        data_count: result.salesmen?.length || 0
+      }
     });
   } catch (error) {
-    console.error('Error getting salesmen:', error);
-    next(error);
+    console.error('❌ Error getting salesmen:', error);
+    console.error('Error stack:', error.stack);
+
+    // Return detailed error for debugging
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+      debug_info: {
+        route: 'GET /api/admin/salesmen',
+        query: req.query,
+        error_type: error.constructor.name
+      }
+    });
   }
 });
 
