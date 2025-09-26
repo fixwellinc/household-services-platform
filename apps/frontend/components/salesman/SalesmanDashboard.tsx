@@ -138,7 +138,7 @@ export function SalesmanDashboard() {
     };
 
     const generateReferralLink = () => {
-        if (dashboardData?.referralCode) {
+        if (dashboardData?.referralCode && typeof window !== 'undefined') {
             const baseUrl = window.location.origin;
             return `${baseUrl}/register?ref=${dashboardData.referralCode}`;
         }
@@ -247,7 +247,7 @@ export function SalesmanDashboard() {
                             </div>
                             <div className="ml-4">
                                 <p className="text-sm font-medium text-gray-600">Monthly Commission</p>
-                                <p className="text-2xl font-bold text-gray-900">${overview.monthlyCommission.toLocaleString()}</p>
+                                <p className="text-2xl font-bold text-gray-900">${overview.monthlyCommission.toLocaleString('en-US')}</p>
                             </div>
                         </div>
                     </CardContent>
@@ -287,7 +287,7 @@ export function SalesmanDashboard() {
                             <div className="space-y-4">
                                 <div className="flex justify-between text-sm">
                                     <span className="text-gray-600">Progress</span>
-                                    <span className="font-medium">${performance.thisMonth.toLocaleString()} / ${performance.target.toLocaleString()}</span>
+                                    <span className="font-medium">${performance.thisMonth.toLocaleString('en-US')} / ${performance.target.toLocaleString('en-US')}</span>
                                 </div>
                                 <div className="w-full bg-gray-200 rounded-full h-3">
                                     <div
@@ -306,11 +306,11 @@ export function SalesmanDashboard() {
                             <div className="mt-6 grid grid-cols-2 gap-4">
                                 <div className="bg-gray-50 p-4 rounded-lg">
                                     <p className="text-sm text-gray-600">This Month</p>
-                                    <p className="text-xl font-bold text-gray-900">${performance.thisMonth.toLocaleString()}</p>
+                                    <p className="text-xl font-bold text-gray-900">${performance.thisMonth.toLocaleString('en-US')}</p>
                                 </div>
                                 <div className="bg-gray-50 p-4 rounded-lg">
                                     <p className="text-sm text-gray-600">Last Month</p>
-                                    <p className="text-xl font-bold text-gray-900">${performance.lastMonth.toLocaleString()}</p>
+                                    <p className="text-xl font-bold text-gray-900">${performance.lastMonth.toLocaleString('en-US')}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -354,8 +354,8 @@ export function SalesmanDashboard() {
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <p className="font-medium text-gray-900">${customer.totalPaid.toLocaleString()}</p>
-                                                <p className="text-sm text-gray-600">{new Date(customer.joinDate).toLocaleDateString()}</p>
+                                                <p className="font-medium text-gray-900">${customer.totalPaid.toLocaleString('en-US')}</p>
+                                                <p className="text-sm text-gray-600">{new Date(customer.joinDate).toLocaleDateString('en-US', { timeZone: 'UTC' })}</p>
                                             </div>
                                         </div>
                                     ))
