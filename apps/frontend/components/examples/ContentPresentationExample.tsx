@@ -137,7 +137,7 @@ export function ContentPresentationExample() {
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Response Time</span>
-                      <span className="font-semibold">< 300ms</span>
+                      <span className="font-semibold">&lt; 300ms</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Mobile Score</span>
