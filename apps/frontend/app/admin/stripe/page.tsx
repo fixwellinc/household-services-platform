@@ -18,6 +18,9 @@ export default function AdminStripePage() {
   const [data, setData] = useState<Diagnostics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedPrice, setSelectedPrice] = useState<string>('');
+  const [selectedTier, setSelectedTier] = useState<'STARTER' | 'HOMECARE' | 'PRIORITY'>('STARTER');
+  const [creating, setCreating] = useState(false);
 
   const load = async () => {
     try {
@@ -36,6 +39,35 @@ export default function AdminStripePage() {
   useEffect(() => {
     load();
   }, []);
+
+  const startTestCheckout = async () => {
+    try {
+      if (!selectedPrice) {
+        setError('Select a price to start checkout');
+        return;
+      }
+      setCreating(true);
+      const successUrl = `${window.location.origin}/pricing/subscribe?success=true`;
+      const cancelUrl = `${window.location.origin}/admin/stripe`;
+      const res = await fetch('/api/payments/create-subscription-checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+        body: JSON.stringify({ priceId: selectedPrice, tier: selectedTier, successUrl, cancelUrl }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.url) {
+        throw new Error(json.error || 'Failed to create checkout session');
+      }
+      window.location.href = json.url;
+    } catch (e: any) {
+      setError(e.message || 'Failed to start checkout');
+    } finally {
+      setCreating(false);
+    }
+  };
 
   if (loading) return <div className="p-6">Loading Stripe diagnostics...</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
@@ -110,30 +142,55 @@ export default function AdminStripePage() {
             {data.prices.length === 0 ? (
               <div className="text-gray-600">No prices found.</div>
             ) : (
-              <div className="overflow-x-auto border rounded">
-                <table className="min-w-full text-sm">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-2 text-left">ID</th>
-                      <th className="px-4 py-2 text-left">Product</th>
-                      <th className="px-4 py-2 text-left">Amount</th>
-                      <th className="px-4 py-2 text-left">Currency</th>
-                      <th className="px-4 py-2 text-left">Recurring</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.prices.map((pr) => (
-                      <tr key={pr.id} className="border-t">
-                        <td className="px-4 py-2 font-mono text-xs">{pr.id}</td>
-                        <td className="px-4 py-2 font-mono text-xs">{String(pr.product)}</td>
-                        <td className="px-4 py-2">{(pr.unit_amount ?? 0) / 100}</td>
-                        <td className="px-4 py-2">{pr.currency}</td>
-                        <td className="px-4 py-2">{pr.recurring ? `${pr.recurring.interval_count}/${pr.recurring.interval}` : '—'}</td>
+              <>
+                <div className="overflow-x-auto border rounded mb-4">
+                  <table className="min-w-full text-sm">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left">ID</th>
+                        <th className="px-4 py-2 text-left">Product</th>
+                        <th className="px-4 py-2 text-left">Amount</th>
+                        <th className="px-4 py-2 text-left">Currency</th>
+                        <th className="px-4 py-2 text-left">Recurring</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {data.prices.map((pr) => (
+                        <tr key={pr.id} className="border-t">
+                          <td className="px-4 py-2 font-mono text-xs">{pr.id}</td>
+                          <td className="px-4 py-2 font-mono text-xs">{String(pr.product)}</td>
+                          <td className="px-4 py-2">{(pr.unit_amount ?? 0) / 100}</td>
+                          <td className="px-4 py-2">{pr.currency}</td>
+                          <td className="px-4 py-2">{pr.recurring ? `${pr.recurring.interval_count}/${pr.recurring.interval}` : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="flex flex-col md:flex-row gap-3 items-center">
+                  <div className="flex-1 w-full">
+                    <label className="block text-xs text-gray-600 mb-1">Select Price</label>
+                    <select value={selectedPrice} onChange={(e) => setSelectedPrice(e.target.value)} className="w-full border rounded px-2 py-1">
+                      <option value="">-- choose a price --</option>
+                      {data.prices.map((pr) => (
+                        <option key={pr.id} value={pr.id}>{pr.id} • {(pr.unit_amount ?? 0)/100} {pr.currency}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">Tier</label>
+                    <select value={selectedTier} onChange={(e) => setSelectedTier(e.target.value as any)} className="border rounded px-2 py-1">
+                      <option value="STARTER">STARTER</option>
+                      <option value="HOMECARE">HOMECARE</option>
+                      <option value="PRIORITY">PRIORITY</option>
+                    </select>
+                  </div>
+                  <Button onClick={startTestCheckout} disabled={creating || !selectedPrice}>
+                    {creating ? 'Creating session...' : 'Start Test Checkout'}
+                  </Button>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
