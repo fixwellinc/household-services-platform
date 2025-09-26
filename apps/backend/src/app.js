@@ -16,6 +16,7 @@ import jwt from 'jsonwebtoken';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import path from 'path';
+import fs from 'fs';
 
 // Import services
 import socketService from './services/socketService.js';
@@ -1668,7 +1669,6 @@ app.use('/avatars', (req, res, next) => {
   
   // If the requested avatar doesn't exist, serve a default one
   const avatarPath = path.join(process.cwd(), 'apps/backend/public/avatars', req.path);
-  const fs = require('fs');
   
   if (!fs.existsSync(avatarPath)) {
     // Generate a simple SVG avatar based on the filename
