@@ -431,10 +431,6 @@ class SalesmanService {
   async getSalesmen(options = {}) {
     console.log('🔍 getSalesmen called with options:', options);
 
-    // First, sync any missing salesman profiles
-    const syncedCount = await this.syncMissingSalesmanProfiles();
-    console.log(`📊 Synced ${syncedCount} missing salesman profiles`);
-
     const {
       page = 1,
       limit = 50, // Increased default limit
@@ -461,7 +457,6 @@ class SalesmanService {
       ];
     }
 
-    console.log('🔍 Query where clause:', JSON.stringify(where, null, 2));
 
     const [salesmen, totalCount] = await Promise.all([
       prisma.salesmanProfile.findMany({
@@ -537,7 +532,6 @@ class SalesmanService {
         }
       };
 
-      console.log(`👤 Processed salesman: ${processedSalesman.displayName} (${processedSalesman.status})`);
       return processedSalesman;
     });
 

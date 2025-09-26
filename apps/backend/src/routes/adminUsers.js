@@ -75,24 +75,28 @@ router.get('/', async (req, res) => {
       prisma.user.count({ where })
     ]);
 
-    // Get subscription info for users who have subscriptions
-    const usersWithSubscriptions = await Promise.all(
-      users.map(async (user) => {
-        if (user.subscriptionId) {
-          const subscription = await prisma.subscription.findUnique({
-            where: { id: user.subscriptionId },
-            select: {
-              tier: true,
-              status: true,
-              currentPeriodStart: true,
-              currentPeriodEnd: true
-            }
-          });
-          return { ...user, subscription };
+    // Get subscription info for users who have subscriptions (batch to avoid N+1)
+    const subscriptionIds = users.map(u => u.subscriptionId).filter(Boolean);
+    let subscriptionsById = {};
+    if (subscriptionIds.length > 0) {
+      const subscriptions = await prisma.subscription.findMany({
+        where: { id: { in: subscriptionIds } },
+        select: {
+          id: true,
+          tier: true,
+          status: true,
+          currentPeriodStart: true,
+          currentPeriodEnd: true
         }
-        return user;
-      })
-    );
+      });
+      subscriptionsById = Object.fromEntries(subscriptions.map(s => [s.id, s]));
+    }
+
+    const usersWithSubscriptions = users.map(user => (
+      user.subscriptionId
+        ? { ...user, subscription: subscriptionsById[user.subscriptionId] || null }
+        : user
+    ));
 
     const totalPages = Math.ceil(totalCount / take);
 

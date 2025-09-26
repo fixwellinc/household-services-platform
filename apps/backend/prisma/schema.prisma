@@ -92,6 +92,7 @@ model User {
   referralDate                DateTime?
 
   @@index([referredByCode])
+  @@index([createdAt])
 }
 
 model CustomerEmployeeAssignment {
@@ -862,6 +863,7 @@ model SalesmanProfile {
   @@index([referralCode])
   @@index([userId])
   @@index([status])
+  @@index([createdAt])
 }
 
 model CustomerReferral {
