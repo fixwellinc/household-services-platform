@@ -352,7 +352,7 @@ router.get('/force-refresh', async (req, res, next) => {
   }
 });
 
-// GET /api/admin/salesmen - Get all salesmen (enhanced version)
+// GET /api/admin/salesmen - Get all salesmen (enhanced version with fallback)
 router.get('/', async (req, res, next) => {
   try {
     const options = {
@@ -366,14 +366,35 @@ router.get('/', async (req, res, next) => {
       sortOrder: req.query.sortOrder || 'desc'
     };
 
-    const result = await adminSalesmenService.getAllSalesmen(options);
+    try {
+      // Try enhanced service first
+      const result = await adminSalesmenService.getAllSalesmen(options);
+      res.json({
+        success: true,
+        data: result.salesmen,
+        pagination: result.pagination,
+        stats: result.stats
+      });
+    } catch (enhancedError) {
+      console.warn('Enhanced service failed, falling back to original:', enhancedError.message);
 
-    res.json({
-      success: true,
-      data: result.salesmen,
-      pagination: result.pagination,
-      stats: result.stats
-    });
+      // Fallback to original service
+      const result = await salesmanService.getSalesmen({
+        status: options.status,
+        search: options.search,
+        page: options.page,
+        limit: options.limit,
+        sortBy: options.sortBy,
+        sortOrder: options.sortOrder
+      });
+
+      res.json({
+        success: true,
+        data: result.salesmen,
+        pagination: result.pagination,
+        fallback: true
+      });
+    }
   } catch (error) {
     console.error('Error getting salesmen:', error);
     next(error);
@@ -420,24 +441,55 @@ router.post('/',
   }
 );
 
-// GET /api/admin/salesmen/:id - Get specific salesman (enhanced)
+// GET /api/admin/salesmen/:id - Get specific salesman (enhanced with fallback)
 router.get('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const salesman = await adminSalesmenService.getSalesmanById(id);
+    try {
+      // Try enhanced service first
+      const salesman = await adminSalesmenService.getSalesmanById(id);
 
-    if (!salesman) {
-      return res.status(404).json({
-        error: 'Salesman not found',
-        message: 'No salesman profile found for this ID'
+      if (!salesman) {
+        return res.status(404).json({
+          error: 'Salesman not found',
+          message: 'No salesman profile found for this ID'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: salesman
+      });
+    } catch (enhancedError) {
+      console.warn('Enhanced service failed, falling back to original:', enhancedError.message);
+
+      // Fallback to original service
+      const salesman = await salesmanService.getSalesmanByUserId(id);
+
+      if (!salesman) {
+        return res.status(404).json({
+          error: 'Salesman not found',
+          message: 'No salesman profile found for this ID'
+        });
+      }
+
+      // Get additional details
+      const [dashboard, referralStats] = await Promise.all([
+        salesmanService.getSalesmanDashboard(salesman.id),
+        referralService.getReferralStats(salesman.id)
+      ]);
+
+      res.json({
+        success: true,
+        data: {
+          profile: salesman,
+          dashboard,
+          referralStats
+        },
+        fallback: true
       });
     }
-
-    res.json({
-      success: true,
-      data: salesman
-    });
   } catch (error) {
     console.error('Error getting salesman:', error);
     next(error);
