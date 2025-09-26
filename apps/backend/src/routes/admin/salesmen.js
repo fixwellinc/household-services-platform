@@ -3,7 +3,7 @@ import { requireAdmin } from '../../middleware/auth.js';
 import { validate, sanitize } from '../../middleware/validation.js';
 import { ValidationError } from '../../middleware/error.js';
 import salesmanService from '../../services/salesmanService.js';
-import adminSalesmenService from '../../services/adminSalesmenService.js';
+// import adminSalesmenService from '../../services/adminSalesmenService.js';
 import referralService from '../../services/referralService.js';
 import rateLimit from 'express-rate-limit';
 import {
@@ -366,35 +366,22 @@ router.get('/', async (req, res, next) => {
       sortOrder: req.query.sortOrder || 'desc'
     };
 
-    try {
-      // Try enhanced service first
-      const result = await adminSalesmenService.getAllSalesmen(options);
-      res.json({
-        success: true,
-        data: result.salesmen,
-        pagination: result.pagination,
-        stats: result.stats
-      });
-    } catch (enhancedError) {
-      console.warn('Enhanced service failed, falling back to original:', enhancedError.message);
+    // Temporarily use only original service until enhanced service is fixed
+    const result = await salesmanService.getSalesmen({
+      status: options.status,
+      search: options.search,
+      page: options.page,
+      limit: options.limit,
+      sortBy: options.sortBy,
+      sortOrder: options.sortOrder
+    });
 
-      // Fallback to original service
-      const result = await salesmanService.getSalesmen({
-        status: options.status,
-        search: options.search,
-        page: options.page,
-        limit: options.limit,
-        sortBy: options.sortBy,
-        sortOrder: options.sortOrder
-      });
-
-      res.json({
-        success: true,
-        data: result.salesmen,
-        pagination: result.pagination,
-        fallback: true
-      });
-    }
+    res.json({
+      success: true,
+      data: result.salesmen,
+      pagination: result.pagination,
+      temporary_fallback: true
+    });
   } catch (error) {
     console.error('Error getting salesmen:', error);
     next(error);
@@ -446,50 +433,31 @@ router.get('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    try {
-      // Try enhanced service first
-      const salesman = await adminSalesmenService.getSalesmanById(id);
+    // Temporarily use only original service until enhanced service is fixed
+    const salesman = await salesmanService.getSalesmanByUserId(id);
 
-      if (!salesman) {
-        return res.status(404).json({
-          error: 'Salesman not found',
-          message: 'No salesman profile found for this ID'
-        });
-      }
-
-      res.json({
-        success: true,
-        data: salesman
-      });
-    } catch (enhancedError) {
-      console.warn('Enhanced service failed, falling back to original:', enhancedError.message);
-
-      // Fallback to original service
-      const salesman = await salesmanService.getSalesmanByUserId(id);
-
-      if (!salesman) {
-        return res.status(404).json({
-          error: 'Salesman not found',
-          message: 'No salesman profile found for this ID'
-        });
-      }
-
-      // Get additional details
-      const [dashboard, referralStats] = await Promise.all([
-        salesmanService.getSalesmanDashboard(salesman.id),
-        referralService.getReferralStats(salesman.id)
-      ]);
-
-      res.json({
-        success: true,
-        data: {
-          profile: salesman,
-          dashboard,
-          referralStats
-        },
-        fallback: true
+    if (!salesman) {
+      return res.status(404).json({
+        error: 'Salesman not found',
+        message: 'No salesman profile found for this ID'
       });
     }
+
+    // Get additional details
+    const [dashboard, referralStats] = await Promise.all([
+      salesmanService.getSalesmanDashboard(salesman.id),
+      referralService.getReferralStats(salesman.id)
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        profile: salesman,
+        dashboard,
+        referralStats
+      },
+      temporary_fallback: true
+    });
   } catch (error) {
     console.error('Error getting salesman:', error);
     next(error);
