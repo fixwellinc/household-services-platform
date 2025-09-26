@@ -12,6 +12,7 @@ import exportRoutes from './admin/exports.js';
 import reportRoutes from './admin/reports.js';
 import availabilityRoutes from './admin/availability.js';
 import salesmenRoutes from './admin/salesmen.js';
+import stripeAdminRoutes from './admin/stripe.js';
 
 const router = express.Router();
 
@@ -35,6 +36,9 @@ router.use('/availability', availabilityRoutes);
 
 // Mount salesmen routes
 router.use('/salesmen', salesmenRoutes);
+
+// Mount Stripe diagnostics routes
+router.use('/stripe', stripeAdminRoutes);
 
 /**
  * GET /api/admin/dashboard/stats

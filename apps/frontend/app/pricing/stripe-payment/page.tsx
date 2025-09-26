@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/shared';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/shared';
@@ -41,26 +41,6 @@ const PLAN_COLORS = {
   priority: 'from-amber-500 to-amber-600'
 };
 
-// Function to get actual Stripe price IDs from Railway environment
-const getStripePriceId = (planId: string, billingPeriod: 'monthly' | 'yearly'): string => {
-  const priceIds = {
-    starter: {
-      monthly: 'price_1S0WSNJZZWUMDx2PI1LEa5rs', // Real Stripe Starter Monthly
-      yearly: 'price_1S0WSTJZZWUMDx2P2k749Zyc'   // Real Stripe Starter Yearly
-    },
-    homecare: {
-      monthly: 'price_1S0WRtJZZWUMDx2PsO8c62ar', // Real Stripe HomeCare Monthly
-      yearly: 'price_1S0WRyJZZWUMDx2PJP4ZWw6Q'   // Real Stripe HomeCare Yearly
-    },
-    priority: {
-      monthly: 'price_1S0WS4JZZWUMDx2PrxSwIetN', // Real Stripe Priority Monthly
-      yearly: 'price_1S0WSBJZZWUMDx2PQkcSZNba'   // Real Stripe Priority Yearly
-    }
-  };
-  
-  return priceIds[planId as keyof typeof priceIds]?.[billingPeriod] || `price_${billingPeriod}_${planId}`;
-};
-
 function StripePaymentPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -76,31 +56,7 @@ function StripePaymentPageContent() {
   const prerequisites = useSubscriptionPrerequisites();
 
   // Get plan details
-  const selectedPlan = plansData?.plans?.find((p: any) => p.id === planId) ||
-    plansData?.plans?.[0] ||
-    {
-      id: planId,
-      name: `${planId.charAt(0).toUpperCase() + planId.slice(1)} Plan`,
-      description: 'Professional household services',
-      monthlyPrice: 29.99,
-      yearlyPrice: 299.99,
-      originalPrice: 39.99,
-      savings: 'Save on household services',
-      color: 'blue',
-      icon: 'star',
-      features: [
-        'Professional service providers',
-        'Priority booking & scheduling',
-        'Quality assurance guarantee',
-        'Member-exclusive discounts',
-        '24/7 customer support'
-      ],
-      popular: false,
-      stripePriceIds: {
-        monthly: getStripePriceId(planId, 'monthly'),
-        yearly: getStripePriceId(planId, 'yearly')
-      }
-    };
+  const selectedPlan = plansData?.plans?.find((p: any) => p.id === planId) || plansData?.plans?.[0] || null;
 
   // Debug logging
   console.log('🔍 Plans data:', plansData);
@@ -113,6 +69,7 @@ function StripePaymentPageContent() {
   const planColor = PLAN_COLORS[planId as keyof typeof PLAN_COLORS] || 'from-blue-500 to-blue-600';
 
   const getPrice = () => {
+    if (!selectedPlan) return 0;
     if (billingPeriod === 'yearly') {
       return selectedPlan.yearlyPrice || (selectedPlan.monthlyPrice * 12 * 0.9);
     }
@@ -120,6 +77,7 @@ function StripePaymentPageContent() {
   };
 
   const getOriginalPrice = () => {
+    if (!selectedPlan) return null;
     if (billingPeriod === 'yearly') {
       return selectedPlan.originalPrice ? selectedPlan.originalPrice * 12 : null;
     }
@@ -137,6 +95,11 @@ function StripePaymentPageContent() {
   const handleStripeCheckout = async () => {
     if (!selectedPlan) {
       toast.error('Plan details not found. Please try again.');
+      return;
+    }
+
+    if (!selectedPlan?.stripePriceIds?.monthly || !selectedPlan?.stripePriceIds?.yearly) {
+      toast.error('Stripe price IDs are not configured. Please try later.');
       return;
     }
 
