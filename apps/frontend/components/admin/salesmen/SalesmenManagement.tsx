@@ -379,7 +379,7 @@ export function SalesmenManagement() {
             key: 'displayName',
             title: 'Salesman',
             sortable: true,
-            render: (salesman: Salesman) => (
+            render: (_: any, salesman: Salesman) => (
                 <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                         <span className="text-white font-medium text-sm">
@@ -397,7 +397,7 @@ export function SalesmenManagement() {
             key: 'referralCode',
             title: 'Referral Code',
             sortable: true,
-            render: (salesman: Salesman) => (
+            render: (_: any, salesman: Salesman) => (
                 <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
                     {salesman.referralCode || 'N/A'}
                 </span>
@@ -407,7 +407,7 @@ export function SalesmenManagement() {
             key: 'status',
             title: 'Status',
             sortable: true,
-            render: (salesman: Salesman) => {
+            render: (_: any, salesman: Salesman) => {
                 // Safe status access with validation
                 if (!salesman || typeof salesman !== 'object') {
                     return <Badge variant="destructive">Error</Badge>;
@@ -449,7 +449,7 @@ export function SalesmenManagement() {
             key: 'commissionTier',
             title: 'Tier',
             sortable: true,
-            render: (salesman: Salesman) => (
+            render: (_: any, salesman: Salesman) => (
                 <Badge variant="outline">{salesman.commissionTier || 'BRONZE'}</Badge>
             )
         },
@@ -457,7 +457,7 @@ export function SalesmenManagement() {
             key: 'performance.totalReferrals',
             title: 'Referrals',
             sortable: false,
-            render: (salesman: Salesman) => {
+            render: (_: any, salesman: Salesman) => {
                 const totalReferrals = salesman && salesman.performance && typeof salesman.performance.totalReferrals === 'number'
                     ? salesman.performance.totalReferrals : 0;
                 return (
@@ -472,7 +472,7 @@ export function SalesmenManagement() {
             key: 'performance.monthlyCommission',
             title: 'Monthly Commission',
             sortable: false,
-            render: (salesman: Salesman) => {
+            render: (_: any, salesman: Salesman) => {
                 const monthlyCommission = salesman && salesman.performance && typeof salesman.performance.monthlyCommission === 'number'
                     ? salesman.performance.monthlyCommission : 0;
                 return (
@@ -487,7 +487,7 @@ export function SalesmenManagement() {
             key: 'performance.conversionRate',
             title: 'Conversion',
             sortable: false,
-            render: (salesman: Salesman) => {
+            render: (_: any, salesman: Salesman) => {
                 const conversionRate = salesman && salesman.performance && typeof salesman.performance.conversionRate === 'number'
                     ? salesman.performance.conversionRate : 0;
                 return (
@@ -502,7 +502,7 @@ export function SalesmenManagement() {
             key: 'actions',
             title: 'Actions',
             sortable: false,
-            render: (salesman: Salesman) => {
+            render: (_: any, salesman: Salesman) => {
                 // Validate salesman object exists
                 if (!salesman || typeof salesman !== 'object') {
                     return (
