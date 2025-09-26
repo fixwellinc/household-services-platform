@@ -28,7 +28,8 @@ class SalesmanService {
 
       // Check if code already exists
       const existing = await prisma.salesmanProfile.findUnique({
-        where: { referralCode: code }
+        where: { referralCode: code },
+        select: { id: true }
       });
 
       if (!existing) {
