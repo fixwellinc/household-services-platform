@@ -6,6 +6,7 @@ const roleRoutes = [
   { path: '/admin', role: 'ADMIN' },
   { path: '/dashboard', role: ['ADMIN', 'CUSTOMER'] }, // Both admin and customer can access /dashboard
   { path: '/customer', role: 'CUSTOMER' },
+  { path: '/customer-dashboard', role: 'CUSTOMER' },
   { path: '/settings', role: ['ADMIN', 'CUSTOMER'] },
   { path: '/profile', role: ['CUSTOMER'] },
   { path: '/bookings', role: ['CUSTOMER', 'ADMIN'] },
@@ -110,6 +111,7 @@ export const config = {
   matcher: [
     '/dashboard/:path*',
     '/customer/:path*',
+    '/customer-dashboard/:path*',
     '/settings/:path*',
     '/profile/:path*',
     '/bookings/:path*',
@@ -117,4 +119,4 @@ export const config = {
     '/support/:path*',
     '/services/:path*',
   ],
-}; 
+};

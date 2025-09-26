@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     // Build the URL with query parameters
     const url = new URL(request.url)
     const railwayUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cultured-account-production.up.railway.app/api'
-    const targetUrl = `${railwayUrl}/customer-dashboard${url.search}`
+    const targetUrl = `${railwayUrl}/dashboard/customer${url.search}`
     
     const response = await fetch(targetUrl, {
       method: 'GET',

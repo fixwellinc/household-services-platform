@@ -13,14 +13,15 @@ const nextConfig = {
   },
   // Additional fix for deployment context
   env: {
-    NEXT_BUILD_ID: process.env.NEXT_BUILD_ID,
-    NEXT_DEPLOYMENT_ID: process.env.NEXT_DEPLOYMENT_ID,
+    NEXT_BUILD_ID: process.env.NEXT_BUILD_ID || 'build-' + Date.now(),
+    NEXT_DEPLOYMENT_ID: process.env.NEXT_DEPLOYMENT_ID || process.env.RAILWAY_DEPLOYMENT_ID || process.env.RAILWAY_GIT_COMMIT_SHA || 'deploy-' + Date.now(),
     RAILWAY_DEPLOYMENT_ID: process.env.RAILWAY_DEPLOYMENT_ID,
     RAILWAY_GIT_COMMIT_SHA: process.env.RAILWAY_GIT_COMMIT_SHA,
   },
-  // Force build ID to be available at runtime
+  // Force build and deployment IDs to be available at runtime
   publicRuntimeConfig: {
     buildId: process.env.NEXT_BUILD_ID || 'runtime-' + Date.now(),
+    deploymentId: process.env.NEXT_DEPLOYMENT_ID || process.env.RAILWAY_DEPLOYMENT_ID || process.env.RAILWAY_GIT_COMMIT_SHA || 'runtime-deploy-' + Date.now(),
   },
   images: {
     remotePatterns: [
@@ -95,6 +96,8 @@ const nextConfig = {
   experimental: {
     // Only keep essential optimizations
     serverComponentsExternalPackages: ['sharp'],
+    // Explicitly provide a deploymentId so runtime never reads undefined
+    deploymentId: process.env.NEXT_DEPLOYMENT_ID || process.env.RAILWAY_DEPLOYMENT_ID || process.env.RAILWAY_GIT_COMMIT_SHA || 'local-deploy-id',
   },
   
   // Build optimizations
