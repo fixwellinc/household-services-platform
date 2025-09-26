@@ -116,6 +116,15 @@ class PerformanceTracker {
 
   private async reportCriticalMetric(metric: PerformanceMetric) {
     try {
+      // Only report from admin pages to avoid 403s on protected endpoints
+      if (typeof window !== 'undefined') {
+        const path = window.location.pathname || '';
+        const isAdminPage = path.startsWith('/admin');
+        if (!isAdminPage) {
+          return; // Skip reporting from non-admin pages (e.g., salesman dashboard)
+        }
+      }
+
       await fetch('/api/admin/monitoring/performance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -62,14 +62,61 @@ export function SalesmanDashboard() {
     const fetchDashboardData = async () => {
         try {
             setIsLoading(true);
-            const response = await fetch('/api/salesman/dashboard');
+            const [dashboardRes, profileRes] = await Promise.all([
+                fetch('/api/salesman/dashboard'),
+                fetch('/api/salesman/profile')
+            ]);
 
-            if (!response.ok) {
+            if (!dashboardRes.ok) {
                 throw new Error('Failed to fetch dashboard data');
             }
+            if (!profileRes.ok) {
+                throw new Error('Failed to fetch profile data');
+            }
 
-            const result = await response.json();
-            setDashboardData(result.data);
+            const dashboardJson = await dashboardRes.json();
+            const profileJson = await profileRes.json();
+
+            const dash = dashboardJson?.data || {};
+            const profileData = profileJson?.data || {};
+
+            const totalReferrals = dash?.overview?.totalReferrals ?? 0;
+            const activeCustomers = dash?.overview?.activeCustomers ?? 0;
+
+            const mappedData: DashboardData = {
+                overview: {
+                    totalReferrals,
+                    activeCustomers,
+                    monthlyCommission: dash?.overview?.totalCommission ?? 0,
+                    conversionRate: totalReferrals > 0 ? Math.round((activeCustomers / totalReferrals) * 100) : 0
+                },
+                recentCustomers: Array.isArray(dash?.customers)
+                    ? dash.customers.map((customer: any) => ({
+                        id: customer.id,
+                        name: customer.name,
+                        email: customer.email,
+                        joinDate: customer.joinDate,
+                        status: customer.status,
+                        totalPaid: customer.totalValue ?? 0
+                    }))
+                    : [],
+                performance: {
+                    thisMonth: dash?.performance?.targetProgress?.monthly?.achieved ?? 0,
+                    lastMonth: 0,
+                    target: dash?.performance?.targetProgress?.monthly?.target ?? (profileData?.monthlyTarget ?? 0),
+                    rank: dash?.performance?.rank ?? 0,
+                    totalSalesmen: dash?.performance?.totalSalesmen ?? 0
+                },
+                referralCode: profileData?.referralCode ?? '',
+                profile: {
+                    id: profileData?.id ?? '',
+                    displayName: profileData?.displayName ?? '',
+                    commissionTier: profileData?.commissionTier ?? '',
+                    monthlyTarget: profileData?.monthlyTarget ?? 0
+                }
+            };
+
+            setDashboardData(mappedData);
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
             setError('Failed to load dashboard data. Please try again.');
@@ -141,14 +188,14 @@ export function SalesmanDashboard() {
     }
 
     const { overview, recentCustomers, performance, referralCode, profile } = dashboardData;
-    const progressPercentage = (performance.thisMonth / performance.target) * 100;
+    const progressPercentage = performance.target > 0 ? (performance.thisMonth / performance.target) * 100 : 0;
 
     return (
         <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Welcome back, {profile.displayName}!</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Welcome back, {profile?.displayName || 'there'}!</h1>
                     <p className="text-gray-600 mt-1">Here's how your referral business is performing.</p>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -250,7 +297,9 @@ export function SalesmanDashboard() {
                                 </div>
                                 <div className="flex justify-between text-sm text-gray-600">
                                     <span>{progressPercentage.toFixed(1)}% Complete</span>
-                                    <span>Rank #{performance.rank} of {performance.totalSalesmen}</span>
+                                    {performance.rank > 0 && performance.totalSalesmen > 0 && (
+                                        <span>Rank #{performance.rank} of {performance.totalSalesmen}</span>
+                                    )}
                                 </div>
                             </div>
 
@@ -418,12 +467,20 @@ export function SalesmanDashboard() {
                                 <Award className="h-8 w-8 text-white" />
                             </div>
                             <h3 className="font-semibold text-gray-900 mb-2">Great Work!</h3>
-                            <p className="text-sm text-gray-600 mb-4">
-                                You're in the top {Math.ceil((performance.rank / performance.totalSalesmen) * 100)}% of salesmen this month.
-                            </p>
-                            <Badge className="bg-yellow-100 text-yellow-800">
-                                Rank #{performance.rank}
-                            </Badge>
+                            {performance.rank > 0 && performance.totalSalesmen > 0 ? (
+                                <>
+                                    <p className="text-sm text-gray-600 mb-4">
+                                        You're in the top {Math.ceil((performance.rank / performance.totalSalesmen) * 100)}% of salesmen this month.
+                                    </p>
+                                    <Badge className="bg-yellow-100 text-yellow-800">
+                                        Rank #{performance.rank}
+                                    </Badge>
+                                </>
+                            ) : (
+                                <p className="text-sm text-gray-600 mb-0">
+                                    Track your performance as you start referring customers.
+                                </p>
+                            )}
                         </CardContent>
                     </Card>
                 </div>
