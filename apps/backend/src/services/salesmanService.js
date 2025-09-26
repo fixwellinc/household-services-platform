@@ -65,7 +65,12 @@ class SalesmanService {
     // Validate user exists and is not already a salesman
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      include: { salesmanProfile: true }
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        salesmanProfile: { select: { id: true, userId: true } }
+      }
     });
 
     if (!user) {
@@ -110,9 +115,24 @@ class SalesmanService {
         territoryRegions,
         monthlyTarget,
         quarterlyTarget,
-        yearlyTarget
+        yearlyTarget,
+        status: 'ACTIVE'
       },
-      include: {
+      select: {
+        id: true,
+        userId: true,
+        referralCode: true,
+        displayName: true,
+        personalMessage: true,
+        commissionRate: true,
+        commissionType: true,
+        commissionTier: true,
+        status: true,
+        territoryPostalCodes: true,
+        territoryRegions: true,
+        monthlyTarget: true,
+        quarterlyTarget: true,
+        yearlyTarget: true,
         user: {
           select: {
             id: true,
@@ -137,7 +157,22 @@ class SalesmanService {
   async getSalesmanByUserId(userId) {
     return await prisma.salesmanProfile.findUnique({
       where: { userId },
-      include: {
+      select: {
+        id: true,
+        userId: true,
+        referralCode: true,
+        displayName: true,
+        personalMessage: true,
+        commissionRate: true,
+        commissionType: true,
+        commissionTier: true,
+        status: true,
+        territoryPostalCodes: true,
+        territoryRegions: true,
+        monthlyTarget: true,
+        quarterlyTarget: true,
+        yearlyTarget: true,
+        createdAt: true,
         user: {
           select: {
             id: true,
@@ -166,7 +201,12 @@ class SalesmanService {
   async getSalesmanByReferralCode(referralCode) {
     return await prisma.salesmanProfile.findUnique({
       where: { referralCode: referralCode.toUpperCase() },
-      include: {
+      select: {
+        id: true,
+        userId: true,
+        referralCode: true,
+        displayName: true,
+        status: true,
         user: {
           select: {
             id: true,
@@ -214,7 +254,21 @@ class SalesmanService {
         ...(yearlyTarget !== undefined && { yearlyTarget }),
         ...(status !== undefined && { status })
       },
-      include: {
+      select: {
+        id: true,
+        userId: true,
+        referralCode: true,
+        displayName: true,
+        personalMessage: true,
+        commissionRate: true,
+        commissionType: true,
+        commissionTier: true,
+        status: true,
+        territoryPostalCodes: true,
+        territoryRegions: true,
+        monthlyTarget: true,
+        quarterlyTarget: true,
+        yearlyTarget: true,
         user: {
           select: {
             id: true,
@@ -239,7 +293,12 @@ class SalesmanService {
       // Get all users with SALESMAN role
       const allSalesmanUsers = await prisma.user.findMany({
         where: { role: 'SALESMAN' },
-        include: { salesmanProfile: true }
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          salesmanProfile: { select: { id: true, userId: true } }
+        }
       });
 
       console.log(`📊 Found ${allSalesmanUsers.length} users with SALESMAN role`);
@@ -254,7 +313,17 @@ class SalesmanService {
 
       // Also check for existing profiles
       const existingProfiles = await prisma.salesmanProfile.findMany({
-        include: { user: true }
+        select: {
+          id: true,
+          userId: true,
+          displayName: true,
+          referralCode: true,
+          status: true,
+          monthlyTarget: true,
+          quarterlyTarget: true,
+          yearlyTarget: true,
+          user: { select: { id: true, email: true, name: true } }
+        }
       });
       console.log(`📊 Found ${existingProfiles.length} existing salesman profiles:`);
       existingProfiles.forEach(p => {
@@ -399,7 +468,22 @@ class SalesmanService {
         skip,
         take: limit,
         orderBy: { [sortBy]: sortOrder },
-        include: {
+        select: {
+          id: true,
+          userId: true,
+          referralCode: true,
+          displayName: true,
+          personalMessage: true,
+          commissionRate: true,
+          commissionType: true,
+          commissionTier: true,
+          status: true,
+          territoryPostalCodes: true,
+          territoryRegions: true,
+          monthlyTarget: true,
+          quarterlyTarget: true,
+          yearlyTarget: true,
+          createdAt: true,
           user: {
             select: {
               id: true,
@@ -627,7 +711,8 @@ class SalesmanService {
   async getSalesmanDashboard(salesmanId) {
     const salesman = await prisma.salesmanProfile.findUnique({
       where: { id: salesmanId },
-      include: {
+      select: {
+        id: true,
         customerReferrals: {
           include: {
             customer: {
@@ -837,7 +922,9 @@ class SalesmanService {
   async deleteSalesman(salesmanId) {
     const salesman = await prisma.salesmanProfile.findUnique({
       where: { id: salesmanId },
-      include: {
+      select: {
+        id: true,
+        userId: true,
         customerReferrals: true,
         commissionTransactions: true
       }
