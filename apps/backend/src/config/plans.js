@@ -70,40 +70,6 @@ export const PLANS = {
     timePerVisit: '1 hour',
     visitsPerMonth: 1
   }
-    id: 'priority',
-    name: 'Priority Plan',
-    description: 'For homeowners who want their home proactively managed',
-    monthlyPrice: 120.99,
-    yearlyPrice: 1306.69, // 10% discount ($120.99 x 12 months x 0.9)
-    originalPrice: 199.00,
-    stripePriceIds: {
-      monthly: process.env.STRIPE_PRIORITY_MONTHLY_PRICE_ID || 'price_1S0WS4JZZWUMDx2PrxSwIetN',
-      yearly: process.env.STRIPE_PRIORITY_YEARLY_PRICE_ID || 'price_1S0WSBJZZWUMDx2PQkcSZNba'
-    },
-    features: [
-      '2 visits per month (up to 2 hours total)',
-      'All services from Starter + HomeCare Plans',
-      'Same-week emergency callout (1 per quarter)',
-      'Full-home "fix-it list" checkup every visit',
-      'Smart home device setup (doorbells, cameras, thermostats)',
-      'TV mounting, shelf and curtain installations',
-      'Basic furniture assembly',
-      'Window screen replacement/repair',
-      'Interior door planing or sticking fixes',
-      'Paint touch-ups (up to 1 wall/surface per visit)',
-      'Light fixture replacement/upgrade',
-      'Tile regrouting (small areas)',
-      '10% off larger renovations or handyman jobs',
-      'Free consumables: caulk, screws, anchors, silicone',
-      'Early access to Fixwell promos and partner perks'
-    ],
-    savings: 'Complete home management',
-    color: 'amber',
-    icon: 'sparkles',
-    visitFrequency: 'Bi-weekly',
-    timePerVisit: '2 hours total',
-    visitsPerMonth: 2
-  }
 };
 
 // Optional Add-Ons (Available to All Tiers)
@@ -149,51 +115,43 @@ export const PLAN_COMPARISON = {
   features: [
     {
       name: 'Visit Frequency',
-      starter: 'Monthly',
-      homecare: 'Monthly',
-      priority: 'Bi-weekly'
+      basic: 'Monthly',
+      premium: 'Monthly'
     },
     {
       name: 'Time Per Visit',
-      starter: '0.5 hours',
-      homecare: '1 hour',
-      priority: '2 hours total'
+      basic: '0.5 hours',
+      premium: '1 hour'
     },
     {
       name: 'Emergency Callouts',
-      starter: 'Standard rate',
-      homecare: 'Standard rate (priority booking)',
-      priority: 'Same-week (1 per quarter)'
+      basic: 'Standard rate',
+      premium: 'Standard rate (priority booking)'
     },
     {
       name: 'Service Scope',
-      starter: 'Basic maintenance',
-      homecare: 'Extended maintenance',
-      priority: 'Full home management'
+      basic: 'Basic maintenance',
+      premium: 'Extended maintenance'
     },
     {
       name: 'Project Discounts',
-      starter: 'Upgrade discounts',
-      homecare: '10% off add-ons',
-      priority: '10% off renovations'
+      basic: 'Upgrade discounts',
+      premium: '10% off add-ons'
     },
     {
       name: 'Free Consumables',
-      starter: false,
-      homecare: false,
-      priority: true
+      basic: false,
+      premium: false
     },
     {
       name: 'Annual Inspection',
-      starter: true,
-      homecare: true,
-      priority: true
+      basic: true,
+      premium: true
     },
     {
       name: 'Smart Home Setup',
-      starter: false,
-      homecare: false,
-      priority: true
+      basic: false,
+      premium: false
     }
   ]
 };
