@@ -14,7 +14,7 @@ export interface User {
 export interface Subscription {
   id: string;
   userId: string;
-  tier: 'STARTER' | 'HOMECARE' | 'PRIORITY';
+  tier: 'BASIC' | 'PREMIUM';
   status: 'ACTIVE' | 'CANCELLED' | 'PENDING';
   startDate: Date;
   endDate?: Date;

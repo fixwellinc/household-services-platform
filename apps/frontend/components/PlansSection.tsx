@@ -85,27 +85,27 @@ const getPlanColors = (colorName: string) => {
 const testimonials = [
   {
     name: 'Sarah Johnson',
-    role: 'Home Care Member',
+    role: 'Premium Member',
     location: 'Vancouver',
-    content: 'The Home Care plan has transformed how I manage my household. The priority booking and faster response times make all the difference for my busy schedule.',
+    content: 'The Premium plan has transformed how I manage my household. The priority booking and faster response times make all the difference for my busy schedule.',
     rating: 5,
     avatar: 'SJ',
     savings: '$1,200 saved this year'
   },
   {
     name: 'Michael Chen',
-    role: 'Priority Member',
+    role: 'Premium Member',
     location: 'Burnaby',
-    content: 'As a Priority member, I get the white-glove treatment I expect. My dedicated account manager knows exactly what I need before I even ask.',
+    content: 'As a Premium member, I get the white-glove treatment I expect. My dedicated account manager knows exactly what I need before I even ask.',
     rating: 5,
     avatar: 'MC',
     savings: '$1,800 saved this year'
   },
   {
     name: 'Emily Rodriguez',
-    role: 'Starter Member',
+    role: 'Basic Member',
     location: 'Richmond',
-    content: 'Perfect for my needs! The Starter plan gives me access to reliable services without breaking the bank. Great value for money.',
+    content: 'Perfect for my needs! The Basic plan gives me access to reliable services without breaking the bank. Great value for money.',
     rating: 5,
     avatar: 'ER',
     savings: '$600 saved this year'
@@ -165,49 +165,49 @@ export default function PlansSection() {
   };
 
   // Fallback plans in case API fails
-  const fallbackPlans = [
-    {
-      id: 'starter',
-      name: 'Starter Plan',
-      description: 'Perfect for light upkeep & peace of mind. Monthly maintenance visits to keep your home in top condition.',
-      monthlyPrice: 21.99,
-      yearlyPrice: 237.49,
-      originalPrice: 49.00,
-      features: [
-        '1 visit per month (up to 0.5 hour)',
-        'Minor repairs (squeaky doors, loose handles)',
-        'Lightbulb replacements',
-        'Smoke detector battery checks',
-        'Faucet tightening & leak checks',
-        'Cabinet hinge adjustment',
-        'Basic caulking (kitchen/bathroom)',
-        'Door alignment & lubrication',
-        'Home safety check (visual)',
-        'Priority scheduling',
-        'Free annual home inspection',
-        'Access to discounted upgrade services'
-      ],
-      savings: 'Peace of mind maintenance',
-      popular: false,
-      cta: 'CHOOSE STARTER',
-      icon: Star
-    },
-    {
-      id: 'homecare',
-      name: 'HomeCare Plan',
-      description: 'Monthly help for ongoing maintenance and upkeep. Enhanced services for comprehensive home care.',
-      monthlyPrice: 54.99,
-      yearlyPrice: 593.89,
-      originalPrice: 79.00,
-      features: [
-        '1 visit per month (up to 1 hour)',
-        'Everything from Starter Plan',
-        'Gutter inspection/clearing (ground floor)',
-        'Seasonal maintenance (weatherstripping, window sealing)',
-        'Small drywall repairs or touch-ups',
-        'Power outlet/switch inspection',
-        'Hanging shelves, photos, curtains',
-        'Appliance checks (wobbling, leaks, noise)',
+const fallbackPlans = [
+  {
+    id: 'basic',
+    name: 'Basic Plan',
+    description: 'Perfect for light upkeep & peace of mind. Monthly maintenance visits to keep your home in top condition.',
+    monthlyPrice: 21.99,
+    yearlyPrice: 237.49,
+    originalPrice: 49.00,
+    features: [
+      '1 visit per month (up to 0.5 hour)',
+      'Minor repairs (squeaky doors, loose handles)',
+      'Lightbulb replacements',
+      'Smoke detector battery checks',
+      'Faucet tightening & leak checks',
+      'Cabinet hinge adjustment',
+      'Basic caulking (kitchen/bathroom)',
+      'Door alignment & lubrication',
+      'Home safety check (visual)',
+      'Priority scheduling',
+      'Free annual home inspection',
+      'Access to discounted upgrade services'
+    ],
+    savings: 'Peace of mind maintenance',
+    popular: false,
+    cta: 'CHOOSE BASIC',
+    icon: Star
+  },
+  {
+    id: 'premium',
+    name: 'Premium Plan',
+    description: 'Monthly help for ongoing maintenance and upkeep. Enhanced services for comprehensive home care.',
+    monthlyPrice: 54.99,
+    yearlyPrice: 593.89,
+    originalPrice: 79.00,
+    features: [
+      '1 visit per month (up to 1 hour)',
+      'Everything from Basic Plan',
+      'Gutter inspection/clearing (ground floor)',
+      'Seasonal maintenance (weatherstripping, window sealing)',
+      'Small drywall repairs or touch-ups',
+      'Power outlet/switch inspection',
+      'Hanging shelves, photos, curtains',
+      'Appliance checks (wobbling, leaks, noise)',
         'Toilet tank/flush adjustments',
         'Exterior door & lock tune-ups',
         '10% off hourly add-ons or larger projects',

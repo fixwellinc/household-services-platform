@@ -3,16 +3,16 @@
 // Updated with 10% yearly discount - July 2025
 
 export const PLANS = {
-  STARTER: {
-    id: 'starter',
-    name: 'Starter Plan',
+  BASIC: {
+    id: 'basic',
+    name: 'Basic Plan',
     description: 'Perfect for light upkeep & peace of mind',
     monthlyPrice: 21.99,
     yearlyPrice: 237.49, // 10% discount ($21.99 x 12 months x 0.9)
     originalPrice: 49.00,
     stripePriceIds: {
-      monthly: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || 'price_1S0WSNJZZWUMDx2PI1LEa5rs',
-      yearly: process.env.STRIPE_STARTER_YEARLY_PRICE_ID || 'price_1S0WSTJZZWUMDx2P2k749Zyc'
+      monthly: process.env.STRIPE_BASIC_MONTHLY_PRICE_ID || 'price_1S0WSNJZZWUMDx2PI1LEa5rs',
+      yearly: process.env.STRIPE_BASIC_YEARLY_PRICE_ID || 'price_1S0WSTJZZWUMDx2P2k749Zyc'
     },
     features: [
       '1 visit per month (up to 0.5 hour)',
@@ -36,16 +36,16 @@ export const PLANS = {
     visitsPerMonth: 1
   },
   
-  HOMECARE: {
-    id: 'homecare',
-    name: 'HomeCare Plan',
+  PREMIUM: {
+    id: 'premium',
+    name: 'Premium Plan',
     description: 'Monthly help for ongoing maintenance and upkeep',
     monthlyPrice: 54.99,
     yearlyPrice: 593.89, // 10% discount ($54.99 x 12 months x 0.9)
     originalPrice: 79.00,
     stripePriceIds: {
-      monthly: process.env.STRIPE_HOMECARE_MONTHLY_PRICE_ID || 'price_1S0WRtJZZWUMDx2PsO8c62ar',
-      yearly: process.env.STRIPE_HOMECARE_YEARLY_PRICE_ID || 'price_1S0WRyJZZWUMDx2PJP4ZWw6Q'
+      monthly: process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || 'price_1S0WRtJZZWUMDx2PsO8c62ar',
+      yearly: process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID || 'price_1S0WRyJZZWUMDx2PJP4ZWw6Q'
     },
     features: [
       '1 visit per month (up to 1 hour)',
@@ -69,9 +69,7 @@ export const PLANS = {
     visitFrequency: 'Monthly',
     timePerVisit: '1 hour',
     visitsPerMonth: 1
-  },
-  
-  PRIORITY: {
+  }
     id: 'priority',
     name: 'Priority Plan',
     description: 'For homeowners who want their home proactively managed',
@@ -202,30 +200,26 @@ export const PLAN_COMPARISON = {
 
 // Service discounts by plan
 export const SERVICE_DISCOUNTS = {
-  STARTER: 0,
-  HOMECARE: 0.10, // 10%
-  PRIORITY: 0.10 // 10%
+  BASIC: 0,
+  PREMIUM: 0.10 // 10%
 };
 
 // Visit frequencies by plan (visits per month)
 export const VISIT_FREQUENCIES = {
-  STARTER: 1, // monthly
-  HOMECARE: 1, // monthly
-  PRIORITY: 2 // bi-weekly
+  BASIC: 1, // monthly
+  PREMIUM: 1 // monthly
 };
 
 // Time allowances by plan (hours per visit)
 export const TIME_ALLOWANCES = {
-  STARTER: 0.5,
-  HOMECARE: 1,
-  PRIORITY: 2
+  BASIC: 0.5,
+  PREMIUM: 1
 };
 
 // Emergency response by plan
 export const EMERGENCY_RESPONSE = {
-  STARTER: 'standard_rate',
-  HOMECARE: 'priority_booking',
-  PRIORITY: 'same_week_quarterly'
+  BASIC: 'standard_rate',
+  PREMIUM: 'priority_booking'
 };
 
 // Helper functions
@@ -234,7 +228,14 @@ export const getPlanById = (planId) => {
 };
 
 export const getPlanByTier = (tier) => {
-  return PLANS[tier.toUpperCase()];
+  if (!tier) return undefined;
+  const upper = tier.toUpperCase();
+  // Backward compatibility mapping
+  if (upper === 'STARTER') return PLANS.BASIC;
+  if (upper === 'HOMECARE') return PLANS.PREMIUM;
+  // Priority plan removed
+  if (upper === 'PRIORITY') return undefined;
+  return PLANS[upper];
 };
 
 export const getAllPlans = () => {

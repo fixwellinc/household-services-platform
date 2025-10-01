@@ -24,7 +24,7 @@ import DynamicLocationPromptModal from '@/components/location/DynamicLocationPro
 
 const plans = [
   {
-    name: 'Starter',
+    name: 'Basic',
     price: 21.99,
     period: 'month',
             description: 'Perfect for individual households',
@@ -47,7 +47,7 @@ const plans = [
     ctaColor: 'bg-blue-600 hover:bg-blue-700'
   },
   {
-    name: 'Home Care',
+    name: 'Premium',
     price: 54.99,
     period: 'month',
     description: 'Enhanced features for busy families',
@@ -56,7 +56,7 @@ const plans = [
     bgColor: 'bg-purple-50',
     borderColor: 'border-purple-200',
     features: [
-      'Everything in Starter',
+      'Everything in Basic',
       'Priority booking system',
       'Extended service categories',
       'Up to 24 hrs response time',
@@ -73,59 +73,28 @@ const plans = [
     popular: true,
     cta: 'Let\'s Get You Started',
     ctaColor: 'bg-purple-600 hover:bg-purple-700'
-  },
-  {
-    name: 'Priority',
-    price: 120.99,
-    period: 'month',
-            description: 'Ultimate convenience for luxury households',
-    icon: Sparkles,
-    color: 'from-amber-500 to-amber-600',
-    bgColor: 'bg-amber-50',
-    borderColor: 'border-amber-200',
-    features: [
-      'Everything in Home Care',
-      'Concierge service',
-      'Up to 12 hrs response time',
-      'Dedicated account manager',
-      '24/7 priority support',
-      'Custom service packages',
-      'Premium service team',
-      'White-glove service',
-      'Professional quality assurance',
-      'Flexible scheduling',
-      'All service categories',
-      'Advanced analytics dashboard',
-      'Family member management',
-      'Integration with smart home',
-      'Exclusive events & offers',
-      'Up to 20% service discount'
-    ],
-    popular: false,
-    cta: 'Let\'s Get You Started',
-    ctaColor: 'bg-amber-600 hover:bg-amber-700'
   }
 ];
 
 const testimonials = [
   {
     name: 'Sarah Johnson',
-    role: 'Home Care Member',
-            content: 'The Home Care plan has transformed how I manage my household. The priority booking and faster response times make all the difference for my busy schedule.',
+    role: 'Premium Member',
+    content: 'The Premium plan has transformed how I manage my household. The priority booking and faster response times make all the difference for my busy schedule.',
     rating: 5,
     avatar: 'SJ'
   },
   {
     name: 'Michael Chen',
-    role: 'Priority Member',
-    content: 'As a Priority member, I get the white-glove treatment I expect. My dedicated account manager knows exactly what I need before I even ask.',
+    role: 'Premium Member',
+    content: 'As a Premium member, I get the white-glove treatment I expect. My dedicated account manager knows exactly what I need before I even ask.',
     rating: 5,
     avatar: 'MC'
   },
   {
     name: 'Emily Rodriguez',
-    role: 'Starter Member',
-    content: 'Perfect for my needs! The Starter plan gives me access to reliable services without breaking the bank. Great value for money.',
+    role: 'Basic Member',
+    content: 'Perfect for my needs! The Basic plan gives me access to reliable services without breaking the bank. Great value for money.',
     rating: 5,
     avatar: 'ER'
   }

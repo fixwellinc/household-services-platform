@@ -31,25 +31,23 @@ interface SubscribePlanFormProps {
 }
 
 const PLAN_ICONS = {
-  starter: Star,
-  homecare: Crown,
-  priority: Sparkles
+  basic: Star,
+  premium: Crown
 };
 
 const PLAN_COLORS = {
-  starter: 'from-blue-500 to-blue-600',
-  homecare: 'from-purple-500 to-purple-600', 
-  priority: 'from-amber-500 to-amber-600'
+  basic: 'from-blue-500 to-blue-600',
+  premium: 'from-purple-500 to-purple-600'
 };
 
 // Fallback plan data for debugging
 const FALLBACK_PLANS: Record<string, any> = {
-  starter: {
-    id: 'starter',
-    name: 'Starter Plan',
+  basic: {
+    id: 'basic',
+    name: 'Basic Plan',
     description: 'Perfect for light upkeep & peace of mind',
-            monthlyPrice: 21.99,
-          yearlyPrice: 237.49,
+    monthlyPrice: 21.99,
+    yearlyPrice: 237.49,
     originalPrice: 49.00,
     savings: 'Peace of mind maintenance',
     color: 'blue',
@@ -68,24 +66,24 @@ const FALLBACK_PLANS: Record<string, any> = {
       'Free annual home inspection',
       'Access to discounted upgrade services'
     ],
-                  stripePriceIds: {
-                monthly: 'price_1S0WSNJZZWUMDx2PI1LEa5rs', // Real Stripe Starter Monthly
-                yearly: 'price_1S0WSTJZZWUMDx2P2k749Zyc'   // Real Stripe Starter Yearly
-              }
+    stripePriceIds: {
+      monthly: 'price_1S0WSNJZZWUMDx2PI1LEa5rs', // Stripe Basic Monthly
+      yearly: 'price_1S0WSTJZZWUMDx2P2k749Zyc'   // Stripe Basic Yearly
+    }
   },
-  homecare: {
-    id: 'homecare',
-    name: 'HomeCare Plan',
+  premium: {
+    id: 'premium',
+    name: 'Premium Plan',
     description: 'Monthly help for ongoing maintenance and upkeep',
-            monthlyPrice: 54.99,
-          yearlyPrice: 593.89,
+    monthlyPrice: 54.99,
+    yearlyPrice: 593.89,
     originalPrice: 79.00,
     savings: 'Professional monthly maintenance',
     color: 'purple',
     icon: 'crown',
     features: [
       '1 visit per month (up to 1 hour)',
-      'Everything from Starter Plan',
+      'Everything from Basic Plan',
       'Gutter inspection/clearing (ground floor)',
       'Seasonal maintenance (weatherstripping, window sealing)',
       'Small drywall repairs or touch-ups',
@@ -98,41 +96,9 @@ const FALLBACK_PLANS: Record<string, any> = {
       'Seasonal home maintenance reminders',
       'Emergency visits at standard rate (priority booking)'
     ],
-                  stripePriceIds: {
-                monthly: 'price_1S0WRtJZZWUMDx2PsO8c62ar', // Real Stripe HomeCare Monthly
-                yearly: 'price_1S0WRyJZZWUMDx2PJP4ZWw6Q'   // Real Stripe HomeCare Yearly
-              }
-  },
-  priority: {
-    id: 'priority',
-    name: 'Priority Plan',
-    description: 'For homeowners who want their home proactively managed',
-            monthlyPrice: 120.99,
-          yearlyPrice: 1306.69,
-    originalPrice: 199.00,
-    savings: 'Complete home management',
-    color: 'amber',
-    icon: 'sparkles',
-    features: [
-      '2 visits per month (up to 2 hours total)',
-      'All services from Starter + HomeCare Plans',
-      'Same-week emergency callout (1 per quarter)',
-      'Full-home "fix-it list" checkup every visit',
-      'Smart home device setup (doorbells, cameras, thermostats)',
-      'TV mounting, shelf and curtain installations',
-      'Basic furniture assembly',
-      'Window screen replacement/repair',
-      'Interior door planing or sticking fixes',
-      'Paint touch-ups (up to 1 wall/surface per visit)',
-      'Light fixture replacement/upgrade',
-      'Tile regrouting (small areas)',
-      '10% off larger renovations or handyman jobs',
-      'Free consumables: caulk, screws, anchors, silicone',
-      'Early access to Fixwell promos and partner perks'
-    ],
     stripePriceIds: {
-      monthly: 'price_1S0WS4JZZWUMDx2PrxSwIetN', // Real Stripe Priority Monthly
-      yearly: 'price_1S0WSBJZZWUMDx2PQkcSZNba'   // Real Stripe Priority Yearly
+      monthly: 'price_1S0WRtJZZWUMDx2PsO8c62ar', // Stripe Premium Monthly
+      yearly: 'price_1S0WRyJZZWUMDx2PJP4ZWw6Q'   // Stripe Premium Yearly
     }
   }
 };

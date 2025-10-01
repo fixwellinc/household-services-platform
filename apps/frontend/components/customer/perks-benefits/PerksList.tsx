@@ -26,14 +26,14 @@ interface Perk {
   icon: string;
   isIncluded: boolean;
   isPremium: boolean;
-  requiredTier?: 'STARTER' | 'HOMECARE' | 'PRIORITY';
+  requiredTier?: 'BASIC' | 'PREMIUM' | 'STARTER' | 'HOMECARE' | 'PRIORITY';
   usageLimit?: number;
   currentUsage?: number;
   category: 'BOOKING' | 'BILLING' | 'SUPPORT' | 'EXCLUSIVE';
 }
 
 interface PerksListProps {
-  userTier: 'STARTER' | 'HOMECARE' | 'PRIORITY';
+  userTier: 'BASIC' | 'PREMIUM' | 'STARTER' | 'HOMECARE' | 'PRIORITY';
   perks: Perk[];
   onUpgradeClick?: (requiredTier: string) => void;
 }
@@ -52,15 +52,21 @@ const PERK_ICONS = {
 };
 
 const TIER_COLORS = {
+  BASIC: 'from-blue-500 to-blue-600',
+  PREMIUM: 'from-purple-500 to-purple-600',
+  // Legacy mapping for backward compatibility
   STARTER: 'from-blue-500 to-blue-600',
   HOMECARE: 'from-purple-500 to-purple-600',
   PRIORITY: 'from-amber-500 to-amber-600'
 };
 
 const TIER_NAMES = {
+  BASIC: 'Basic',
+  PREMIUM: 'Premium',
+  // Legacy mapping for backward compatibility
   STARTER: 'Starter',
-  HOMECARE: 'HomeCare',
-  PRIORITY: 'Priority'
+  HOMECARE: 'Premium',
+  PRIORITY: 'Premium'
 };
 
 const CATEGORY_COLORS = {
@@ -72,7 +78,7 @@ const CATEGORY_COLORS = {
 
 export default function PerksList({ userTier, perks, onUpgradeClick }: PerksListProps) {
   const getTierLevel = (tier: string) => {
-    const levels = { STARTER: 1, HOMECARE: 2, PRIORITY: 3 };
+    const levels = { BASIC: 1, PREMIUM: 2, STARTER: 1, HOMECARE: 2, PRIORITY: 3 };
     return levels[tier as keyof typeof levels] || 0;
   };
 

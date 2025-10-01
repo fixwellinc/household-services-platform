@@ -19,7 +19,7 @@ export default function AdminStripePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPrice, setSelectedPrice] = useState<string>('');
-  const [selectedTier, setSelectedTier] = useState<'STARTER' | 'HOMECARE' | 'PRIORITY'>('STARTER');
+const [selectedTier, setSelectedTier] = useState<'BASIC' | 'PREMIUM'>('BASIC');
   const [creating, setCreating] = useState(false);
 
   const load = async () => {
@@ -181,9 +181,8 @@ export default function AdminStripePage() {
                   <div>
                     <label className="block text-xs text-gray-600 mb-1">Tier</label>
                     <select value={selectedTier} onChange={(e) => setSelectedTier(e.target.value as any)} className="border rounded px-2 py-1">
-                      <option value="STARTER">STARTER</option>
-                      <option value="HOMECARE">HOMECARE</option>
-                      <option value="PRIORITY">PRIORITY</option>
+<option value="BASIC">BASIC</option>
+                      <option value="PREMIUM">PREMIUM</option>
                     </select>
                   </div>
                   <Button onClick={startTestCheckout} disabled={creating || !selectedPrice}>
