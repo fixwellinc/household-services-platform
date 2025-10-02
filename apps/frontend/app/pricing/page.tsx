@@ -122,9 +122,9 @@ function PricingPageContent() {
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-6">
               Simple, Transparent Pricing
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-              All plans include access to our core household services. Starter Plan includes cleaning and maintenance, HomeCare Plan adds repair and organization, and Priority Plan includes all services plus custom packages and concierge service.
-            </p>
+              <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
+                All plans include access to our core household services. Basic includes cleaning and maintenance; Premium adds repair, organization, and priority booking.
+              </p>
           </div>
 
           <div className="max-w-4xl mx-auto text-center mb-12">
@@ -133,7 +133,7 @@ function PricingPageContent() {
                 Response Times by Plan
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-300">
-                Response times vary by plan: Starter Plan (up to 48 hrs), HomeCare Plan (up to 24 hrs), Priority Plan (up to 12 hrs). Emergency services are available for urgent situations with Priority Plan members getting priority scheduling.
+                Response times vary by plan: Basic (up to 48 hrs) and Premium (up to 24 hrs). Emergency services are available for urgent situations with Premium members getting priority scheduling.
               </p>
             </div>
           </div>
@@ -180,7 +180,7 @@ function PricingPageContent() {
                 What services are included in each plan?
               </h3>
               <p className="text-gray-600">
-                All plans include access to our core household services. Starter includes cleaning and maintenance, Home Care adds repair and organization, and Priority includes all services plus custom packages and concierge service.
+                All plans include access to our core household services. Basic includes cleaning and maintenance, and Premium adds repair and organization with priority booking.
               </p>
             </div>
 
@@ -189,7 +189,7 @@ function PricingPageContent() {
                 How quickly can I get service?
               </h3>
               <p className="text-gray-600">
-                Response times vary by plan: Starter (up to 48 hrs), Home Care (up to 24 hrs), Priority (up to 12 hrs). Emergency services are available for urgent situations with Priority members getting priority scheduling.
+                Response times vary by plan: Basic (up to 48 hrs) and Premium (up to 24 hrs). Emergency services are available for urgent situations with Premium members getting priority scheduling.
               </p>
             </div>
 

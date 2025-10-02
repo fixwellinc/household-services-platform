@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/shared';
 import {
   Star,
   Crown,
-  Sparkles,
   Check,
   X,
   TrendingUp,
@@ -45,15 +44,14 @@ interface Plan {
 
 interface PlanFeature {
   name: string;
-  starter: string | boolean;
-  homecare: string | boolean;
-  priority: string | boolean;
+  basic: string | boolean;
+  premium: string | boolean;
 }
 
 const PLANS: Record<string, Plan> = {
-  STARTER: {
-    id: 'starter',
-    name: 'Starter Plan',
+  BASIC: {
+    id: 'basic',
+    name: 'Basic Plan',
     description: 'Perfect for light upkeep & peace of mind',
     monthlyPrice: 21.99,
     yearlyPrice: 237.49,
@@ -68,9 +66,9 @@ const PLANS: Record<string, Plan> = {
       'Free annual inspection'
     ]
   },
-  HOMECARE: {
-    id: 'homecare',
-    name: 'HomeCare Plan',
+  PREMIUM: {
+    id: 'premium',
+    name: 'Premium Plan',
     description: 'Monthly help for ongoing maintenance',
     monthlyPrice: 54.99,
     yearlyPrice: 593.89,
@@ -79,30 +77,12 @@ const PLANS: Record<string, Plan> = {
     popular: true,
     features: [
       '1 visit per month (up to 1 hour)',
-      'Everything from Starter Plan',
+      'Everything from Basic Plan',
       'Seasonal maintenance',
       'Small repairs & touch-ups',
       'Appliance checks',
       '10% off add-on services',
       'Emergency visits at standard rate'
-    ]
-  },
-  PRIORITY: {
-    id: 'priority',
-    name: 'Priority Plan',
-    description: 'Complete home management',
-    monthlyPrice: 120.99,
-    yearlyPrice: 1306.69,
-    icon: Sparkles,
-    color: 'from-amber-500 to-amber-600',
-    features: [
-      '2 visits per month (up to 2 hours total)',
-      'All services from previous plans',
-      'Same-week emergency callout',
-      'Smart home device setup',
-      'Full home maintenance',
-      '10% off renovations',
-      'Free consumables included'
     ]
   }
 };
@@ -110,45 +90,38 @@ const PLANS: Record<string, Plan> = {
 const COMPARISON_FEATURES: PlanFeature[] = [
   {
     name: 'Visit Frequency',
-    starter: 'Monthly',
-    homecare: 'Monthly',
-    priority: 'Bi-weekly'
+    basic: 'Monthly',
+    premium: 'Monthly'
   },
   {
     name: 'Time Per Visit',
-    starter: '0.5 hours',
-    homecare: '1 hour',
-    priority: '2 hours total'
+    basic: '0.5 hours',
+    premium: '1 hour'
   },
   {
     name: 'Emergency Callouts',
-    starter: 'Standard rate',
-    homecare: 'Priority booking',
-    priority: 'Same-week (1/quarter)'
+    basic: 'Standard rate',
+    premium: 'Priority booking'
   },
   {
     name: 'Service Discounts',
-    starter: false,
-    homecare: '10% off add-ons',
-    priority: '10% off renovations'
+    basic: false,
+    premium: '10% off add-ons'
   },
   {
     name: 'Free Consumables',
-    starter: false,
-    homecare: false,
-    priority: true
+    basic: false,
+    premium: false
   },
   {
     name: 'Smart Home Setup',
-    starter: false,
-    homecare: false,
-    priority: true
+    basic: false,
+    premium: false
   },
   {
     name: 'Annual Inspection',
-    starter: true,
-    homecare: true,
-    priority: true
+    basic: true,
+    premium: true
   }
 ];
 
@@ -222,15 +195,13 @@ export default function PlanComparison({
   };
 
   const isUpgrade = (tier: string) => {
-    const tierHierarchy = { STARTER: 1, HOMECARE: 2, PRIORITY: 3 };
-    return tierHierarchy[tier as keyof typeof tierHierarchy] > 
-           tierHierarchy[currentSubscription.tier as keyof typeof tierHierarchy];
+    const tierHierarchy = { BASIC: 1, PREMIUM: 2 } as const;
+    return (tierHierarchy as any)[tier] > (tierHierarchy as any)[currentSubscription.tier];
   };
 
   const isDowngrade = (tier: string) => {
-    const tierHierarchy = { STARTER: 1, HOMECARE: 2, PRIORITY: 3 };
-    return tierHierarchy[tier as keyof typeof tierHierarchy] < 
-           tierHierarchy[currentSubscription.tier as keyof typeof tierHierarchy];
+    const tierHierarchy = { BASIC: 1, PREMIUM: 2 } as const;
+    return (tierHierarchy as any)[tier] < (tierHierarchy as any)[currentSubscription.tier];
   };
 
   return (

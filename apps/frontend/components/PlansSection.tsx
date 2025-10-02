@@ -784,35 +784,30 @@ const fallbackPlans = [
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Features</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-gray-100">Starter</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-gray-100">Home Care</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-gray-100">Priority</th>
+<th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-gray-100">Basic</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-gray-100">Premium</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
                   <tr>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Response Time</td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Up to 48 hrs</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Up to 24 hrs</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Up to 12 hrs</td>
+<td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Up to 24 hrs</td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Customer Support</td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Email only</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Phone & Email</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">24/7 Priority</td>
+<td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Phone & Email</td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Service Categories</td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Basic</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Extended</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">All + Custom</td>
+<td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Extended</td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Service Discount</td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">None</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Up to 10%</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Up to 20%</td>
+<td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Up to 10%</td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Account Manager</td>
@@ -821,10 +816,7 @@ const fallbackPlans = [
                     </td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
                       <X className="h-4 w-4 text-red-500 mx-auto" />
-                    </td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
-                      <Check className="h-4 w-4 text-green-500 mx-auto" />
-                    </td>
+</td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Concierge Service</td>
@@ -833,25 +825,18 @@ const fallbackPlans = [
                     </td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
                       <X className="h-4 w-4 text-red-500 mx-auto" />
-                    </td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
-                      <Check className="h-4 w-4 text-green-500 mx-auto" />
-                    </td>
+</td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Emergency Call-out</td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Standard rate</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Standard rate</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Free</td>
+<td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Standard rate</td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Quality Assurance</td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
                       <Check className="h-4 w-4 text-green-500 mx-auto" />
-                    </td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
-                      <Check className="h-4 w-4 text-green-500 mx-auto" />
-                    </td>
+</td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
                       <Check className="h-4 w-4 text-green-500 mx-auto" />
                     </td>
@@ -863,10 +848,9 @@ const fallbackPlans = [
 
           {/* Mobile Comparison Cards */}
           <div className="md:hidden space-y-6">
-            {[
-              { name: 'Starter', color: 'blue', icon: Star },
-              { name: 'Home Care', color: 'purple', icon: Crown },
-              { name: 'Priority', color: 'amber', icon: Sparkles }
+{[
+              { name: 'Basic', color: 'blue', icon: Star },
+              { name: 'Premium', color: 'purple', icon: Crown }
             ].map((plan, index) => (
               <Card key={index} className="bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700">
                 <CardHeader className="pb-4">
@@ -884,19 +868,19 @@ const fallbackPlans = [
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="font-medium text-gray-900 dark:text-gray-100">Response Time</p>
-                      <p className="text-gray-600 dark:text-gray-400">{index === 0 ? 'Up to 48 hrs' : index === 1 ? 'Up to 24 hrs' : 'Up to 12 hrs'}</p>
+<p className="text-gray-600 dark:text-gray-400">{index === 0 ? 'Up to 48 hrs' : 'Up to 24 hrs'}</p>
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 dark:text-gray-100">Support</p>
-                      <p className="text-gray-600 dark:text-gray-400">{index === 0 ? 'Email only' : index === 1 ? 'Phone & Email' : '24/7 Priority'}</p>
+<p className="text-gray-600 dark:text-gray-400">{index === 0 ? 'Email only' : 'Phone & Email'}</p>
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 dark:text-gray-100">Service Discount</p>
-                      <p className="text-gray-600 dark:text-gray-400">{index === 0 ? 'None' : index === 1 ? 'Up to 10%' : 'Up to 20%'}</p>
+<p className="text-gray-600 dark:text-gray-400">{index === 0 ? 'None' : 'Up to 10%'}</p>
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 dark:text-gray-100">Account Manager</p>
-                      <p className="text-gray-600 dark:text-gray-400">{index === 2 ? '✓ Included' : '✗ Not included'}</p>
+<p className="text-gray-600 dark:text-gray-400">✗ Not included</p>
                     </div>
                   </div>
                   <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
