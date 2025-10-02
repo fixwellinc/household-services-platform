@@ -201,7 +201,7 @@ const fallbackPlans = [
     originalPrice: 79.00,
     features: [
       '1 visit per month (up to 1 hour)',
-      'Everything from Basic Plan',
+'Everything from Basic Plan'
       'Gutter inspection/clearing (ground floor)',
       'Seasonal maintenance (weatherstripping, window sealing)',
       'Small drywall repairs or touch-ups',
@@ -264,15 +264,17 @@ const fallbackPlans = [
   }
 
   const getDiscountedPrice = (plan: any) => {
+    // Show monthly amount even when Yearly is selected (yearly is 12 months at discounted rate)
     if (billingPeriod === 'year') {
-      return plan.yearlyPrice;
+      return Number((plan.yearlyPrice / 12).toFixed(2));
     }
     return plan.monthlyPrice;
   };
 
   const getOriginalPrice = (plan: any) => {
+    // When yearly is selected, compare monthly vs monthly (original monthly vs discounted monthly)
     if (billingPeriod === 'year') {
-      return plan.originalPrice * 12; // Yearly original price
+      return plan.originalPrice;
     }
     return plan.originalPrice;
   };
@@ -280,7 +282,7 @@ const fallbackPlans = [
   const calculateSavings = (plan: any) => {
     const original = getOriginalPrice(plan);
     const discounted = getDiscountedPrice(plan);
-    return original - discounted;
+    return Number((original - discounted).toFixed(2));
   };
 
   return (
@@ -405,10 +407,10 @@ const fallbackPlans = [
         </div>
 
         {/* Plans Cards - BCAA Style */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 lg:gap-8 mb-16 max-w-5xl mx-auto">
           {plansLoading ? (
             // Loading skeleton
-            Array.from({ length: 3 }).map((_, index) => (
+            Array.from({ length: 2 }).map((_, index) => (
               <Card key={index} className="animate-pulse bg-blue-600 h-96">
                 <CardHeader className="text-center">
                   <div className="w-16 h-16 bg-white/20 rounded-full mx-auto mb-4"></div>

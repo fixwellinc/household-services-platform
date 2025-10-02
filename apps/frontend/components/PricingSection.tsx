@@ -108,7 +108,8 @@ export default function PricingSection() {
   const router = useRouter();
 
   const getDiscountedPrice = (price: number) => {
-    return billingPeriod === 'year' ? price * 10 : price; // Yearly discount
+    // Show per-month amount even for yearly (apply 10% discount to monthly price)
+    return billingPeriod === 'year' ? Number((price * 0.9).toFixed(2)) : price;
   };
 
   return (
@@ -158,7 +159,7 @@ export default function PricingSection() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto mb-16 md:mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto mb-16 md:mb-20">
           {plans.map((plan) => (
             <Card 
               key={plan.name}
