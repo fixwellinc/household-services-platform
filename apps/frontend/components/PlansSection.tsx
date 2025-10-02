@@ -201,7 +201,7 @@ const fallbackPlans = [
     originalPrice: 79.00,
     features: [
       '1 visit per month (up to 1 hour)',
-'Everything from Basic Plan'
+'Everything from Basic Plan',
       'Gutter inspection/clearing (ground floor)',
       'Seasonal maintenance (weatherstripping, window sealing)',
       'Small drywall repairs or touch-ups',
