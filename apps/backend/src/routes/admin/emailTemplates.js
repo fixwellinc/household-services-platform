@@ -2,7 +2,7 @@ import express from 'express';
 import { authMiddleware, requireAdmin } from '../../middleware/auth.js';
 import { auditPresets } from '../../middleware/auditMiddleware.js';
 import { auditService } from '../../services/auditService.js';
-import { prisma } from '../../config/database.js';
+import prisma from '../../config/database.js';
 
 const router = express.Router();
 
