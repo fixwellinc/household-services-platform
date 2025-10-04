@@ -44,23 +44,7 @@ const mockCampaigns = [
 
 export async function GET(request: NextRequest) {
   try {
-    // Try to connect to backend first
-    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
-    
-    try {
-      const response = await fetch(`${backendUrl.replace(/\/$/, '')}/admin/email-templates/campaigns`, {
-        headers: { 'Cookie': request.headers.get('cookie') || '' }
-      })
-      
-      if (response.ok) {
-        const data = await response.json()
-        return NextResponse.json(data, { status: response.status })
-      }
-    } catch (backendError) {
-      console.log('Backend not available, using mock campaigns data:', backendError.message)
-    }
-    
-    // Fallback to mock data
+    // Return mock data directly since backend doesn't have campaigns endpoint yet
     return NextResponse.json({
       success: true,
       campaigns: mockCampaigns
