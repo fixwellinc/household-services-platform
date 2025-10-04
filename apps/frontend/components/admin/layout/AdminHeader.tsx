@@ -3,6 +3,7 @@
 import React from 'react';
 import { Menu, LogOut, Bell, Search, Settings } from 'lucide-react';
 import { Button } from '../../ui/shared';
+import { PWAStatusIndicator } from '../../PWAInstallPrompt';
 
 interface AdminHeaderProps {
   onMenuClick: () => void;
@@ -44,6 +45,9 @@ export function AdminHeader({ onMenuClick, user }: AdminHeaderProps) {
 
         {/* Right side actions */}
         <div className="flex items-center space-x-2">
+          {/* PWA Status Indicator */}
+          <PWAStatusIndicator />
+          
           {/* Global search - Desktop only */}
           <div className="hidden lg:block">
             <div className="relative">

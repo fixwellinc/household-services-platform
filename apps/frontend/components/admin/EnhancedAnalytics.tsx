@@ -146,7 +146,7 @@ export default function EnhancedAnalytics() {
       // Fetch perk utilization
       const perkResponse = await fetch('/api/analytics/perk-utilization');
       if (perkResponse.ok) {
-        const perkData = await revenueResponse.json();
+        const perkData = await perkResponse.json();
         setPerkUtilization(perkData);
       }
     } catch (error) {

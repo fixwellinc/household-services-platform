@@ -86,7 +86,7 @@ export function CustomerDashboardLogic({ children }: CustomerDashboardLogicProps
             userId: user?.id || '',
             type: 'ACCOUNT',
             priority: 'LOW',
-            title: 'Welcome to Priority Plan',
+title: 'Welcome to Premium Plan',
             message: 'Your subscription upgrade is now active. Enjoy your new benefits!',
             actionRequired: false,
             isRead: true,

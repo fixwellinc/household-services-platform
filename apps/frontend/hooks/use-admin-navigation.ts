@@ -14,7 +14,8 @@ import {
   FileText,
   Activity,
   Shield,
-  Calendar
+  Calendar,
+  BookOpen
 } from 'lucide-react';
 import { NavigationItem, NavigationState, AdminPreferences } from '../types/admin';
 
@@ -86,6 +87,12 @@ const defaultNavigationItems: NavigationItem[] = [
     name: 'Settings', 
     icon: Settings,
     path: '/admin/settings'
+  },
+  { 
+    id: 'api-docs', 
+    name: 'API Documentation', 
+    icon: BookOpen,
+    path: '/admin/api-docs'
   }
 ];
 

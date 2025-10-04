@@ -1,19 +1,25 @@
 "use client";
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Home, Bug, Copy, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
+  showDetails?: boolean;
+  context?: string;
 }
 
 interface State {
   hasError: boolean;
   error: Error | null;
   errorInfo: ErrorInfo | null;
+  errorId: string | null;
+  showDetails: boolean;
 }
 
 export class AdminErrorBoundary extends Component<Props, State> {
@@ -22,15 +28,20 @@ export class AdminErrorBoundary extends Component<Props, State> {
     this.state = {
       hasError: false,
       error: null,
-      errorInfo: null
+      errorInfo: null,
+      errorId: null,
+      showDetails: props.showDetails || false
     };
   }
 
   static getDerivedStateFromError(error: Error): State {
+    const errorId = `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     return {
       hasError: true,
       error,
-      errorInfo: null
+      errorInfo: null,
+      errorId,
+      showDetails: false
     };
   }
 
@@ -47,14 +58,83 @@ export class AdminErrorBoundary extends Component<Props, State> {
 
     // Log error for debugging
     console.error('Admin Error Boundary caught an error:', error, errorInfo);
+
+    // Send error to monitoring service
+    this.reportError(error, errorInfo);
+  }
+
+  reportError = (error: Error, errorInfo: ErrorInfo) => {
+    const errorReport = {
+      errorId: this.state.errorId,
+      message: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+      context: this.props.context || 'Unknown',
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      url: window.location.href
+    };
+
+    // Send to error reporting service
+    fetch('/api/admin/errors', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(errorReport)
+    }).catch(err => {
+      console.error('Failed to report error:', err);
+    });
   }
 
   handleReset = () => {
     this.setState({
       hasError: false,
       error: null,
-      errorInfo: null
+      errorInfo: null,
+      errorId: null,
+      showDetails: false
     });
+  };
+
+  toggleDetails = () => {
+    this.setState(prev => ({ showDetails: !prev.showDetails }));
+  };
+
+  copyErrorDetails = () => {
+    const errorDetails = {
+      errorId: this.state.errorId,
+      message: this.state.error?.message,
+      stack: this.state.error?.stack,
+      componentStack: this.state.errorInfo?.componentStack,
+      context: this.props.context,
+      timestamp: new Date().toISOString()
+    };
+    
+    navigator.clipboard.writeText(JSON.stringify(errorDetails, null, 2));
+  };
+
+  downloadErrorReport = () => {
+    const errorReport = {
+      errorId: this.state.errorId,
+      message: this.state.error?.message,
+      stack: this.state.error?.stack,
+      componentStack: this.state.errorInfo?.componentStack,
+      context: this.props.context,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      url: window.location.href
+    };
+
+    const blob = new Blob([JSON.stringify(errorReport, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `error-report-${this.state.errorId}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   handleRefresh = () => {
@@ -87,37 +167,80 @@ export class AdminErrorBoundary extends Component<Props, State> {
                 An error occurred in the admin dashboard. Please try refreshing the page or contact support if the problem persists.
               </p>
 
-              {process.env.NODE_ENV === 'development' && this.state.error && (
-                <div className="text-left bg-gray-100 rounded-lg p-4 mb-6">
-                  <h3 className="font-medium text-gray-900 mb-2 flex items-center">
-                    <Bug className="h-4 w-4 mr-2" />
-                    Error Details (Development Only)
-                  </h3>
-                  <div className="text-sm text-gray-700 font-mono">
+              {this.state.errorId && (
+                <div className="mb-4">
+                  <Badge variant="outline" className="text-xs">
+                    Error ID: {this.state.errorId}
+                  </Badge>
+                </div>
+              )}
+
+              {(process.env.NODE_ENV === 'development' || this.state.showDetails) && this.state.error && (
+                <div className="text-left bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-medium text-red-900 flex items-center">
+                      <Bug className="h-4 w-4 mr-2" />
+                      Error Details
+                    </h3>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={this.copyErrorDetails}
+                        title="Copy error details"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={this.downloadErrorReport}
+                        title="Download error report"
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="text-sm text-red-800 font-mono">
                     <p className="font-semibold mb-1">{this.state.error.name}:</p>
                     <p className="mb-2">{this.state.error.message}</p>
+                    
                     {this.state.error.stack && (
                       <details className="mb-2">
-                        <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
+                        <summary className="cursor-pointer text-red-600 hover:text-red-800">
                           Stack Trace
                         </summary>
-                        <pre className="mt-2 text-xs overflow-auto bg-white p-2 rounded border">
+                        <pre className="mt-2 text-xs overflow-auto bg-red-100 p-2 rounded border max-h-32">
                           {this.state.error.stack}
                         </pre>
                       </details>
                     )}
-                    {this.state.errorInfo && (
+                    
+                    {this.state.errorInfo?.componentStack && (
                       <details>
-                        <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
+                        <summary className="cursor-pointer text-red-600 hover:text-red-800">
                           Component Stack
                         </summary>
-                        <pre className="mt-2 text-xs overflow-auto bg-white p-2 rounded border">
+                        <pre className="mt-2 text-xs overflow-auto bg-red-100 p-2 rounded border max-h-32">
                           {this.state.errorInfo.componentStack}
                         </pre>
                       </details>
                     )}
                   </div>
                 </div>
+              )}
+
+              {process.env.NODE_ENV === 'production' && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={this.toggleDetails}
+                  className="mb-4"
+                >
+                  <Bug className="h-4 w-4 mr-2" />
+                  {this.state.showDetails ? 'Hide' : 'Show'} Error Details
+                </Button>
               )}
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center">

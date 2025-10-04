@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     default: 'Fixwell Services - Professional Household Services',
     template: '%s | Fixwell Services'
   },
-  description: 'Book cleaning, repairs, and more with trusted, verified professionals. Choose from Starter Plan, HomeCare Plan, or Priority Plan.',
+description: 'Book cleaning, repairs, and more with trusted, verified professionals. Choose from Basic or Premium Plan.',
   keywords: ['household services', 'cleaning', 'maintenance', 'repair', 'professional services', 'home care'],
   authors: [{ name: 'Fixwell Services' }],
   creator: 'Fixwell Services',
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://fixwell-services-platform-production.up.railway.app',
     title: 'Fixwell Services - Professional Household Services',
-    description: 'Book cleaning, repairs, and more with trusted, verified professionals. Choose from Starter Plan, HomeCare Plan, or Priority Plan.',
+description: 'Book cleaning, repairs, and more with trusted, verified professionals. Choose from Basic or Premium Plan.',
     siteName: 'Fixwell Services',
     images: [
       {
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Fixwell Services - Professional Household Services',
-    description: 'Book cleaning, repairs, and more with trusted, verified professionals. Choose from Starter Plan, HomeCare Plan, or Priority Plan.',
+description: 'Book cleaning, repairs, and more with trusted, verified professionals. Choose from Basic or Premium Plan.',
     images: ['/og-image.jpg'],
   },
   robots: {

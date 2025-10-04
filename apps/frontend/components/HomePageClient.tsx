@@ -86,7 +86,7 @@ export default function HomePageClient() {
             </h1>
             
             <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8 leading-relaxed">
-              Connect with verified professionals for all your household needs. Choose from Starter Plan, HomeCare Plan, or Priority Plan.
+Connect with verified professionals for all your household needs. Choose from Basic or Premium Plan.
             </p>
             
             {/* Decorative elements */}

@@ -118,7 +118,7 @@ export default function ContactPage() {
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-2">Emergency Services</h4>
-                <p className="text-gray-600">Available 24/7 for Priority Plan members</p>
+<p className="text-gray-600">Available 24/7</p>
                 <p className="text-gray-600">Standard response times apply for other plans</p>
               </div>
             </div>

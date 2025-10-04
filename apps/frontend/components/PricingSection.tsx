@@ -198,12 +198,17 @@ export default function PricingSection() {
                     <span className="text-3xl md:text-4xl font-bold text-gray-900">
                       ${getDiscountedPrice(plan.price)}
                     </span>
-                    <span className="text-gray-500 text-sm md:text-base">/{billingPeriod}</span>
+<span className="text-gray-500 text-sm md:text-base">/month</span>
                   </div>
-                  {billingPeriod === 'year' && (
-                    <p className="text-xs md:text-sm text-gray-500 mt-1">
-                      Billed annually (${(plan.price * 0.9).toFixed(2)}/month)
-                    </p>
+{billingPeriod === 'year' && (
+                    <>
+                      <p className="text-xs md:text-sm text-gray-500 mt-1">
+                        Billed annually (${(Number((plan.price * 0.9).toFixed(2)) * 12).toFixed(2)}/year)
+                      </p>
+                      <p className="text-xs md:text-sm text-green-600 mt-1">
+                        Save ${(plan.price * 12 * 0.1).toFixed(2)}/year
+                      </p>
+                    </>
                   )}
                 </div>
               </CardHeader>
@@ -272,9 +277,8 @@ export default function PricingSection() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Features</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Starter Plan</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">HomeCare Plan</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Priority Plan</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Basic Plan</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Premium Plan</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -282,43 +286,16 @@ export default function PricingSection() {
                     <td className="px-6 py-4 text-sm text-gray-900 font-medium">Response Time</td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600">24 hours</td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600">12 hours</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">2 hours</td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 text-sm text-gray-900 font-medium">Customer Support</td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600">Email only</td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600">Phone & Email</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">24/7 Priority</td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 text-sm text-gray-900 font-medium">Service Categories</td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600">Basic</td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600">Premium</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">All + Custom</td>
-                  </tr>
-                  <tr>
-                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">Account Manager</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">
-                      <X className="h-4 w-4 text-red-500 mx-auto" />
-                    </td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">
-                      <X className="h-4 w-4 text-red-500 mx-auto" />
-                    </td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">
-                      <Check className="h-4 w-4 text-green-500 mx-auto" />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">Concierge Service</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">
-                      <X className="h-4 w-4 text-red-500 mx-auto" />
-                    </td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">
-                      <X className="h-4 w-4 text-red-500 mx-auto" />
-                    </td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">
-                      <Check className="h-4 w-4 text-green-500 mx-auto" />
-                    </td>
                   </tr>
                 </tbody>
               </table>

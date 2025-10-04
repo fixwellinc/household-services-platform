@@ -216,37 +216,8 @@ const fallbackPlans = [
       ],
       savings: 'Professional monthly maintenance',
       popular: true,
-      cta: 'CHOOSE HOMECARE',
+      cta: 'CHOOSE PREMIUM',
       icon: Crown
-    },
-    {
-      id: 'priority',
-      name: 'Priority Plan',
-      description: 'For homeowners who want their home proactively managed. Complete home management with premium benefits.',
-      monthlyPrice: 120.99,
-      yearlyPrice: 1306.69,
-      originalPrice: 199.00,
-      features: [
-        '2 visits per month (up to 2 hours total)',
-        'All services from Starter + HomeCare Plans',
-        'Same-week emergency callout (1 per quarter)',
-        'Full-home "fix-it list" checkup every visit',
-        'Smart home device setup (doorbells, cameras, thermostats)',
-        'TV mounting, shelf and curtain installations',
-        'Basic furniture assembly',
-        'Window screen replacement/repair',
-        'Interior door planing or sticking fixes',
-        'Paint touch-ups (up to 1 wall/surface per visit)',
-        'Light fixture replacement/upgrade',
-        'Tile regrouting (small areas)',
-        '10% off larger renovations or handyman jobs',
-        'Free consumables: caulk, screws, anchors, silicone',
-        'Early access to Fixwell promos and partner perks'
-      ],
-      savings: 'Complete home management',
-      popular: false,
-      cta: 'CHOOSE PRIORITY',
-      icon: Sparkles
     }
   ];
 
@@ -482,12 +453,12 @@ const fallbackPlans = [
                           <span className="text-5xl font-black text-white">
                             ${getDiscountedPrice(plan)}
                           </span>
-                          <span className="text-white/80 text-lg font-medium">/{billingPeriod}</span>
+<span className="text-white/80 text-lg font-medium">/month</span>
                         </div>
                         {plan.originalPrice && (
                           <div className="flex flex-col items-center gap-2 mb-3">
                             <span className="text-lg text-white/60 line-through font-medium">
-                              Was ${getOriginalPrice(plan)}/{billingPeriod}
+Was ${getOriginalPrice(plan)}/month
                             </span>
                             <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white border-0 px-6 py-3 font-black shadow-2xl rounded-full animate-pulse border-2 border-white/30">
                               <div className="flex items-center gap-2">
@@ -500,7 +471,7 @@ const fallbackPlans = [
                         {billingPeriod === 'year' && (
                           <div className="bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-lg p-3 mt-2 border border-yellow-300/30">
                             <p className="text-lg text-white font-bold">
-                              Billed annually (${(plan.monthlyPrice * 0.9).toFixed(2)}/month)
+Billed annually (${(plan.monthlyPrice * 0.9 * 12).toFixed(2)}/year)
                             </p>
                             <p className="text-sm text-yellow-100 font-medium">
                               💰 Save ${((plan.monthlyPrice * 12) - (plan.monthlyPrice * 0.9 * 12)).toFixed(2)} per year!
@@ -666,13 +637,13 @@ const fallbackPlans = [
                             </div>
                           </div>
                         )}
-                        {billingPeriod === 'year' && (
+{billingPeriod === 'year' && (
                           <div className="bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-lg p-3 mt-2 border border-yellow-300/30">
                             <p className="text-lg text-white font-bold">
-                              Billed annually (${(plan.monthlyPrice * 0.9).toFixed(2)}/month)
+                              Billed annually ${(Number(getDiscountedPrice(plan).toFixed(2)) * 12).toFixed(2)}/year
                             </p>
                             <p className="text-sm text-yellow-100 font-medium">
-                              💰 Save ${((plan.monthlyPrice * 12) - (plan.monthlyPrice * 0.9 * 12)).toFixed(2)} per year!
+                              💰 Save ${((plan.originalPrice - Number(getDiscountedPrice(plan).toFixed(2))) * 12).toFixed(2)} per year!
                             </p>
                           </div>
                         )}
@@ -812,24 +783,6 @@ const fallbackPlans = [
 <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Up to 10%</td>
                   </tr>
                   <tr>
-                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Account Manager</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
-                      <X className="h-4 w-4 text-red-500 mx-auto" />
-                    </td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
-                      <X className="h-4 w-4 text-red-500 mx-auto" />
-</td>
-                  </tr>
-                  <tr>
-                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Concierge Service</td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
-                      <X className="h-4 w-4 text-red-500 mx-auto" />
-                    </td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
-                      <X className="h-4 w-4 text-red-500 mx-auto" />
-</td>
-                  </tr>
-                  <tr>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">Emergency Call-out</td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Standard rate</td>
 <td className="px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">Standard rate</td>
@@ -869,20 +822,12 @@ const fallbackPlans = [
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="font-medium text-gray-900 dark:text-gray-100">Response Time</p>
-<p className="text-gray-600 dark:text-gray-400">{index === 0 ? 'Up to 48 hrs' : 'Up to 24 hrs'}</p>
-                    </div>
-                    <div>
                       <p className="font-medium text-gray-900 dark:text-gray-100">Support</p>
 <p className="text-gray-600 dark:text-gray-400">{index === 0 ? 'Email only' : 'Phone & Email'}</p>
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 dark:text-gray-100">Service Discount</p>
 <p className="text-gray-600 dark:text-gray-400">{index === 0 ? 'None' : 'Up to 10%'}</p>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-gray-100">Account Manager</p>
-<p className="text-gray-600 dark:text-gray-400">✗ Not included</p>
                     </div>
                   </div>
                   <div className="pt-4 border-t border-gray-200 dark:border-gray-600">

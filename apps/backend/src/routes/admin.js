@@ -7,12 +7,19 @@ import socketService from '../services/socketService.js';
 import searchService from '../services/searchService.js';
 import searchIndexService from '../services/searchIndexService.js';
 import billingAdjustmentRoutes from './admin/billingAdjustments.js';
-import monitoringRoutes from './admin/monitoring.js';
 import exportRoutes from './admin/exports.js';
 import reportRoutes from './admin/reports.js';
 import availabilityRoutes from './admin/availability.js';
 import salesmenRoutes from './admin/salesmen.js';
 import stripeAdminRoutes from './admin/stripe.js';
+import errorRoutes from './admin/errors.js';
+import settingsRoutes from './admin/settings.js';
+import emailTemplatesRoutes from './admin/emailTemplates.js';
+import monitoringRoutes from './admin/monitoring.js';
+import onboardingRoutes from './admin/onboarding.js';
+import tenantsRoutes from './admin/tenants.js';
+import analyticsMLRoutes from './admin/analyticsML.js';
+import apiDocsRoutes from './admin/apiDocs.js';
 
 const router = express.Router();
 
@@ -39,6 +46,28 @@ router.use('/salesmen', salesmenRoutes);
 
 // Mount Stripe diagnostics routes
 router.use('/stripe', stripeAdminRoutes);
+
+// Mount error reporting routes
+router.use('/errors', errorRoutes);
+
+// Mount settings routes
+router.use('/settings', settingsRoutes);
+
+// Mount email templates routes
+router.use('/email-templates', emailTemplatesRoutes);
+
+// Mount monitoring routes
+router.use('/monitoring', monitoringRoutes);
+
+// Mount onboarding routes
+router.use('/onboarding', onboardingRoutes);
+
+// Mount tenants routes
+router.use('/tenants', tenantsRoutes);
+
+// Mount ML analytics routes
+router.use('/analytics/ml', analyticsMLRoutes);
+router.use('/api-docs', apiDocsRoutes);
 
 /**
  * GET /api/admin/dashboard/stats
