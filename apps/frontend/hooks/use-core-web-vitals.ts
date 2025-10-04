@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Core Web Vitals React Hook
  * 

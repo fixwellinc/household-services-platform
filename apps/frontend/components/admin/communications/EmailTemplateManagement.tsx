@@ -81,7 +81,6 @@ export function EmailTemplateManagement() {
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [showPreview, setShowPreview] = useState(false);
   const [testEmail, setTestEmail] = useState('');
-  const [isUsingMockData, setIsUsingMockData] = useState(false);
 
   const { request } = useApi();
   const { showSuccess, showError } = useToast();
@@ -96,229 +95,109 @@ export function EmailTemplateManagement() {
       setLoading(true);
       setError(null);
       
-      // Try to fetch from API first
-      try {
-        const [templatesResponse, campaignsResponse] = await Promise.all([
-          request('/admin/email-templates'),
-          request('/admin/email-templates/campaigns')
-        ]);
-        
-        if (templatesResponse.success) {
-          setTemplates(templatesResponse.templates || []);
-        }
-        
-        if (campaignsResponse.success) {
-          setCampaigns(campaignsResponse.campaigns || []);
-        }
-        
-        setIsUsingMockData(false);
-      } catch (apiError) {
-        console.warn('API not available, using mock data:', apiError);
-        
-        // Fallback to mock data if API is not available
-        const mockTemplates: EmailTemplate[] = [
-          {
-            id: '1',
-            name: 'Welcome Email',
-            subject: 'Welcome to {{companyName}}!',
-            content: `Dear {{customerName}},
-
-Welcome to {{companyName}}! We're thrilled to have you as our newest customer.
-
-Your account has been set up and you can start using our services immediately. Here's what you need to know:
-
-• Your customer ID: {{customerId}}
-• Service start date: {{serviceStartDate}}
-• Primary contact: {{primaryContact}}
-
-If you have any questions, don't hesitate to reach out to our support team.
-
-Best regards,
-The {{companyName}} Team`,
-            type: 'welcome',
-            category: 'transactional',
-            isActive: true,
-            variables: ['companyName', 'customerName', 'customerId', 'serviceStartDate', 'primaryContact'],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            usageCount: 45
-          },
-          {
-            id: '2',
-            name: 'Booking Confirmation',
-            subject: 'Booking Confirmed - {{serviceName}}',
-            content: `Dear {{customerName}},
-
-Your booking has been confirmed!
-
-Service Details:
-• Service: {{serviceName}}
-• Date: {{serviceDate}}
-• Time: {{serviceTime}}
-• Address: {{serviceAddress}}
-• Technician: {{technicianName}}
-
-Please ensure someone is available at the scheduled time. If you need to reschedule, please contact us at least 24 hours in advance.
-
-Thank you for choosing {{companyName}}!
-
-Best regards,
-The {{companyName}} Team`,
-            type: 'booking_confirmation',
-            category: 'transactional',
-            isActive: true,
-            variables: ['customerName', 'serviceName', 'serviceDate', 'serviceTime', 'serviceAddress', 'technicianName', 'companyName'],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            usageCount: 23
-          },
-          {
-            id: '3',
-            name: 'Payment Receipt',
-            subject: 'Payment Receipt - {{invoiceNumber}}',
-            content: `Dear {{customerName}},
-
-Thank you for your payment! Here's your receipt:
-
-Payment Details:
-• Invoice Number: {{invoiceNumber}}
-• Amount Paid: {{amount}}
-• Payment Method: {{paymentMethod}}
-• Payment Date: {{paymentDate}}
-• Service Period: {{servicePeriod}}
-
-If you have any questions about this payment, please contact our billing department.
-
-Best regards,
-The {{companyName}} Team`,
-            type: 'payment_receipt',
-            category: 'transactional',
-            isActive: true,
-            variables: ['customerName', 'invoiceNumber', 'amount', 'paymentMethod', 'paymentDate', 'servicePeriod', 'companyName'],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            usageCount: 67
-          }
-        ];
-
-        const mockCampaigns: EmailCampaign[] = [
-          {
-            id: '1',
-            name: 'Monthly Newsletter',
-            templateId: '1',
-            subject: 'FixWell Monthly Newsletter',
-            recipients: 1250,
-            sent: 1250,
-            opened: 890,
-            clicked: 234,
-            status: 'sent',
-            scheduledAt: new Date().toISOString(),
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: '2',
-            name: 'Service Reminder',
-            templateId: '2',
-            subject: 'Upcoming Service Appointment',
-            recipients: 450,
-            sent: 450,
-            opened: 320,
-            clicked: 89,
-            status: 'sent',
-            scheduledAt: new Date().toISOString(),
-            createdAt: new Date().toISOString()
-          }
-        ];
-
-        setTemplates(mockTemplates);
-        setCampaigns(mockCampaigns);
-        setIsUsingMockData(true);
+      const [templatesResponse, campaignsResponse] = await Promise.all([
+        request('/admin/email-templates'),
+        request('/admin/email-templates/campaigns')
+      ]);
+      
+      if (templatesResponse.success) {
+        setTemplates(templatesResponse.templates || []);
+      } else {
+        throw new Error(templatesResponse.error || 'Failed to fetch templates');
       }
-    } catch (err) {
-      console.error('Error fetching email data:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch email data');
+      
+      if (campaignsResponse.success) {
+        setCampaigns(campaignsResponse.campaigns || []);
+      } else {
+        throw new Error(campaignsResponse.error || 'Failed to fetch campaigns');
+      }
+      
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch data');
+      setTemplates([]);
+      setCampaigns([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateTemplate = () => {
-    setEditingTemplate(null);
-    setShowTemplateForm(true);
-  };
+  const handleCreateTemplate = async (templateData: Partial<EmailTemplate>) => {
+    try {
+      const response = await request('/admin/email-templates', {
+        method: 'POST',
+        body: JSON.stringify(templateData),
+      });
 
-  const handleEditTemplate = (template: EmailTemplate) => {
-    setEditingTemplate(template);
-    setShowTemplateForm(true);
-  };
-
-  const handleDeleteTemplate = async (templateId: string) => {
-    if (!window.confirm('Are you sure you want to delete this template? This action cannot be undone.')) {
-      return;
+      if (response.success) {
+        showSuccess('Template created successfully');
+        setTemplates(prev => [response.template, ...prev]);
+        setShowTemplateForm(false);
+      } else {
+        throw new Error(response.error || 'Failed to create template');
+      }
+    } catch (error) {
+      console.error('Error creating template:', error);
+      showError(error instanceof Error ? error.message : 'Failed to create template');
     }
+  };
+
+  const handleUpdateTemplate = async (id: string, templateData: Partial<EmailTemplate>) => {
+    try {
+      const response = await request(`/admin/email-templates/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(templateData),
+      });
+
+      if (response.success) {
+        showSuccess('Template updated successfully');
+        setTemplates(prev => prev.map(t => t.id === id ? response.template : t));
+        setEditingTemplate(null);
+      } else {
+        throw new Error(response.error || 'Failed to update template');
+      }
+    } catch (error) {
+      console.error('Error updating template:', error);
+      showError(error instanceof Error ? error.message : 'Failed to update template');
+    }
+  };
+
+  const handleDeleteTemplate = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this template?')) return;
 
     try {
-      const response = await request(`/admin/email-templates/${templateId}`, {
-        method: 'DELETE'
+      const response = await request(`/admin/email-templates/${id}`, {
+        method: 'DELETE',
       });
 
       if (response.success) {
         showSuccess('Template deleted successfully');
-        fetchData();
+        setTemplates(prev => prev.filter(t => t.id !== id));
       } else {
         throw new Error(response.error || 'Failed to delete template');
       }
-    } catch (err) {
-      console.error('Error deleting template:', err);
-      showError(err instanceof Error ? err.message : 'Failed to delete template');
+    } catch (error) {
+      console.error('Error deleting template:', error);
+      showError(error instanceof Error ? error.message : 'Failed to delete template');
     }
   };
 
-  const handleDuplicateTemplate = async (template: EmailTemplate) => {
+  const handleTestEmail = async (templateId: string, email: string) => {
     try {
-      const duplicateTemplate = {
-        ...template,
-        name: `${template.name} (Copy)`,
-        id: undefined
-      };
-
-      const response = await request('/admin/email-templates', {
+      const response = await request(`/admin/email-templates/${templateId}/test`, {
         method: 'POST',
-        body: JSON.stringify(duplicateTemplate)
+        body: JSON.stringify({ email }),
       });
 
       if (response.success) {
-        showSuccess('Template duplicated successfully');
-        fetchData();
-      } else {
-        throw new Error(response.error || 'Failed to duplicate template');
-      }
-    } catch (err) {
-      console.error('Error duplicating template:', err);
-      showError(err instanceof Error ? err.message : 'Failed to duplicate template');
-    }
-  };
-
-  const handleTestEmail = async (template: EmailTemplate) => {
-    if (!testEmail) {
-      showError('Please enter a test email address');
-      return;
-    }
-
-    try {
-      const response = await request(`/admin/email-templates/${template.id}/test`, {
-        method: 'POST',
-        body: JSON.stringify({ email: testEmail })
-      });
-
-      if (response.success) {
-        showSuccess(`Test email sent to ${testEmail}`);
+        showSuccess('Test email sent successfully');
+        setTestEmail('');
       } else {
         throw new Error(response.error || 'Failed to send test email');
       }
-    } catch (err) {
-      console.error('Error sending test email:', err);
-      showError(err instanceof Error ? err.message : 'Failed to send test email');
+    } catch (error) {
+      console.error('Error sending test email:', error);
+      showError(error instanceof Error ? error.message : 'Failed to send test email');
     }
   };
 
@@ -331,25 +210,26 @@ The {{companyName}} Team`,
     return matchesSearch && matchesType && matchesCategory;
   });
 
-  const getTemplateIcon = (type: string) => {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'sent': return 'bg-green-100 text-green-800';
+      case 'sending': return 'bg-blue-100 text-blue-800';
+      case 'scheduled': return 'bg-yellow-100 text-yellow-800';
+      case 'failed': return 'bg-red-100 text-red-800';
+      case 'draft': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
     switch (type) {
       case 'welcome': return <Users className="h-4 w-4" />;
       case 'booking_confirmation': return <Calendar className="h-4 w-4" />;
       case 'payment_receipt': return <CreditCard className="h-4 w-4" />;
       case 'appointment_reminder': return <Clock className="h-4 w-4" />;
-      case 'password_reset': return <AlertTriangle className="h-4 w-4" />;
       case 'newsletter': return <Mail className="h-4 w-4" />;
       case 'promotional': return <Globe className="h-4 w-4" />;
       default: return <FileText className="h-4 w-4" />;
-    }
-  };
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'transactional': return 'bg-blue-100 text-blue-800';
-      case 'marketing': return 'bg-green-100 text-green-800';
-      case 'system': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -359,116 +239,48 @@ The {{companyName}} Team`,
 
   if (error) {
     return (
-      <AdminErrorState
-        title="Failed to load email templates"
-        message={error}
+      <AdminErrorState 
+        message="Failed to load email templates"
+        error={error}
         onRetry={fetchData}
       />
     );
   }
 
   return (
-    <AdminErrorBoundary context="EmailTemplateManagement">
-      <div className="p-6 space-y-6">
-        {/* Mock Data Warning */}
-        {isUsingMockData && (
-          <Alert className="border-yellow-200 bg-yellow-50">
-            <AlertTriangle className="h-4 w-4 text-yellow-600" />
-            <AlertDescription className="text-yellow-800">
-              <strong>Demo Mode:</strong> The backend API is not available. You're viewing sample email templates and campaigns. 
-              Changes will not be saved until the API is connected.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Header */}
+    <AdminErrorBoundary>
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Mail className="w-8 h-8 text-blue-600" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Email Templates</h1>
-              <p className="text-gray-600">Manage email templates and campaigns</p>
-            </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Email Communications</h1>
+            <p className="text-gray-600">Manage email templates and campaigns</p>
           </div>
-          
-          <Button onClick={handleCreateTemplate}>
-            <Plus className="h-4 w-4 mr-2" />
+          <Button onClick={() => setShowTemplateForm(true)} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
             New Template
           </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <FileText className="h-8 w-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Templates</p>
-                  <p className="text-2xl font-bold text-gray-900">{templates.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <CheckCircle className="h-8 w-8 text-green-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Active Templates</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {templates.filter(t => t.isActive).length}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Send className="h-8 w-8 text-purple-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Campaigns</p>
-                  <p className="text-2xl font-bold text-gray-900">{campaigns.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Users className="h-8 w-8 text-orange-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Recipients</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {campaigns.reduce((sum, c) => sum + c.recipients, 0)}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
-            <TabsTrigger value="templates">Templates</TabsTrigger>
-            <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="templates" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Templates ({templates.length})
+            </TabsTrigger>
+            <TabsTrigger value="campaigns" className="flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              Campaigns ({campaigns.length})
+            </TabsTrigger>
           </TabsList>
 
-          {/* Templates Tab */}
-          <TabsContent value="templates" className="space-y-6">
-            {/* Search and Filters */}
+          <TabsContent value="templates" className="space-y-4">
+            {/* Filters */}
             <Card>
-              <CardContent className="p-6">
-                <div className="flex flex-col md:flex-row gap-4">
+              <CardContent className="p-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                   <div className="flex-1">
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                       <Input
                         placeholder="Search templates..."
                         value={searchQuery}
@@ -477,9 +289,8 @@ The {{companyName}} Team`,
                       />
                     </div>
                   </div>
-                  
                   <Select value={filterType} onValueChange={setFilterType}>
-                    <SelectTrigger className="w-48">
+                    <SelectTrigger className="w-full sm:w-[180px]">
                       <SelectValue placeholder="Filter by type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -488,15 +299,13 @@ The {{companyName}} Team`,
                       <SelectItem value="booking_confirmation">Booking Confirmation</SelectItem>
                       <SelectItem value="payment_receipt">Payment Receipt</SelectItem>
                       <SelectItem value="appointment_reminder">Appointment Reminder</SelectItem>
-                      <SelectItem value="password_reset">Password Reset</SelectItem>
                       <SelectItem value="newsletter">Newsletter</SelectItem>
                       <SelectItem value="promotional">Promotional</SelectItem>
                       <SelectItem value="custom">Custom</SelectItem>
                     </SelectContent>
                   </Select>
-                  
                   <Select value={filterCategory} onValueChange={setFilterCategory}>
-                    <SelectTrigger className="w-48">
+                    <SelectTrigger className="w-full sm:w-[180px]">
                       <SelectValue placeholder="Filter by category" />
                     </SelectTrigger>
                     <SelectContent>
@@ -510,90 +319,77 @@ The {{companyName}} Team`,
               </CardContent>
             </Card>
 
-            {/* Templates Grid */}
+            {/* Templates List */}
             {filteredTemplates.length === 0 ? (
               <AdminEmptyState
+                icon={FileText}
                 title="No templates found"
-                message="No email templates match your current filters."
-                icon={<Mail className="h-12 w-12 text-gray-400" />}
-                action={
-                  <Button onClick={handleCreateTemplate}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create First Template
-                  </Button>
-                }
+                description="Create your first email template to get started"
+                actionLabel="Create Template"
+                onAction={() => setShowTemplateForm(true)}
               />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid gap-4">
                 {filteredTemplates.map((template) => (
-                  <Card key={template.id} className="hover:shadow-lg transition-shadow">
-                    <CardHeader className="pb-3">
+                  <Card key={template.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
                       <div className="flex items-start justify-between">
-                        <div className="flex items-center space-x-2">
-                          {getTemplateIcon(template.type)}
-                          <CardTitle className="text-lg">{template.name}</CardTitle>
-                        </div>
-                        <Badge className={getCategoryColor(template.category)}>
-                          {template.category}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent className="space-y-4">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Subject</p>
-                        <p className="text-sm text-gray-900">{template.subject}</p>
-                      </div>
-                      
-                      <div className="flex items-center justify-between text-sm text-gray-500">
-                        <span>Used {template.usageCount} times</span>
-                        <div className="flex items-center space-x-1">
-                          {template.isActive ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <Clock className="h-4 w-4 text-gray-400" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            {getTypeIcon(template.type)}
+                            <h3 className="text-lg font-semibold text-gray-900">{template.name}</h3>
+                            <Badge variant="outline" className="text-xs">
+                              {template.type.replace('_', ' ')}
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              {template.category}
+                            </Badge>
+                          </div>
+                          <p className="text-gray-600 mb-2">{template.subject}</p>
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <span>Created: {new Date(template.createdAt).toLocaleDateString()}</span>
+                            <span>Used: {template.usageCount} times</span>
+                            {template.lastUsed && (
+                              <span>Last used: {new Date(template.lastUsed).toLocaleDateString()}</span>
+                            )}
+                          </div>
+                          {template.variables.length > 0 && (
+                            <div className="mt-2">
+                              <p className="text-sm text-gray-500 mb-1">Variables:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {template.variables.map((variable) => (
+                                  <Badge key={variable} variant="outline" className="text-xs">
+                                    {variable}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
                           )}
-                          <span>{template.isActive ? 'Active' : 'Inactive'}</span>
                         </div>
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedTemplate(template)}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          Preview
-                        </Button>
-                        
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditTemplate(template)}
-                        >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Edit
-                        </Button>
-                        
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDuplicateTemplate(template)}
-                        >
-                          <Copy className="h-4 w-4 mr-1" />
-                          Duplicate
-                        </Button>
-                        
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteTemplate(template.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Delete
-                        </Button>
+                        <div className="flex items-center gap-2 ml-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedTemplate(template)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setEditingTemplate(template)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteTemplate(template.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -602,121 +398,133 @@ The {{companyName}} Team`,
             )}
           </TabsContent>
 
-          {/* Campaigns Tab */}
-          <TabsContent value="campaigns" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Email Campaigns</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <AdminEmptyState
-                  title="No campaigns yet"
-                  message="Create your first email campaign to start sending bulk emails."
-                  icon={<Send className="h-12 w-12 text-gray-400" />}
-                  action={
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Campaign
-                    </Button>
-                  }
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Email Analytics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <AdminEmptyState
-                  title="Analytics coming soon"
-                  message="Email analytics and performance metrics will be available soon."
-                  icon={<FileText className="h-12 w-12 text-gray-400" />}
-                />
-              </CardContent>
-            </Card>
+          <TabsContent value="campaigns" className="space-y-4">
+            {campaigns.length === 0 ? (
+              <AdminEmptyState
+                icon={Mail}
+                title="No campaigns found"
+                description="Email campaigns will appear here when created"
+              />
+            ) : (
+              <div className="grid gap-4">
+                {campaigns.map((campaign) => (
+                  <Card key={campaign.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-lg font-semibold text-gray-900">{campaign.name}</h3>
+                            <Badge className={getStatusColor(campaign.status)}>
+                              {campaign.status}
+                            </Badge>
+                          </div>
+                          <p className="text-gray-600 mb-4">{campaign.subject}</p>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                            <div>
+                              <p className="text-gray-500">Recipients</p>
+                              <p className="font-semibold">{campaign.recipients.toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500">Sent</p>
+                              <p className="font-semibold">{campaign.sent.toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500">Opened</p>
+                              <p className="font-semibold">{campaign.opened.toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500">Clicked</p>
+                              <p className="font-semibold">{campaign.clicked.toLocaleString()}</p>
+                            </div>
+                          </div>
+                          <div className="mt-4 text-sm text-gray-500">
+                            <span>Created: {new Date(campaign.createdAt).toLocaleDateString()}</span>
+                            {campaign.scheduledAt && (
+                              <span className="ml-4">
+                                Scheduled: {new Date(campaign.scheduledAt).toLocaleDateString()}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 
         {/* Template Preview Modal */}
         {selectedTemplate && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-              <div className="flex items-center justify-between p-6 border-b">
-                <h2 className="text-xl font-semibold">Template Preview</h2>
-                <Button variant="ghost" onClick={() => setSelectedTemplate(null)}>
-                  ×
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Eye className="h-5 w-5" />
+                  Template Preview
+                </CardTitle>
+                <Button variant="outline" onClick={() => setSelectedTemplate(null)}>
+                  Close
                 </Button>
-              </div>
-              
-              <div className="p-6 space-y-4">
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium">Subject</Label>
-                  <p className="text-lg font-semibold">{selectedTemplate.subject}</p>
-                </div>
-                
-                <div>
-                  <Label className="text-sm font-medium">Content</Label>
-                  <div className="border rounded-lg p-4 bg-gray-50 max-h-96 overflow-y-auto">
+                  <h3 className="text-lg font-semibold mb-2">{selectedTemplate.name}</h3>
+                  <p className="text-gray-600 mb-4">{selectedTemplate.subject}</p>
+                  <div className="border rounded-lg p-4 bg-gray-50">
                     <div dangerouslySetInnerHTML={{ __html: selectedTemplate.content }} />
                   </div>
                 </div>
-                
-                <div className="flex items-center space-x-4">
-                  <div className="flex-1">
-                    <Label htmlFor="testEmail">Test Email Address</Label>
-                    <Input
-                      id="testEmail"
-                      type="email"
-                      placeholder="Enter email address"
-                      value={testEmail}
-                      onChange={(e) => setTestEmail(e.target.value)}
-                    />
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    placeholder="Enter email address for test"
+                    value={testEmail}
+                    onChange={(e) => setTestEmail(e.target.value)}
+                    className="flex-1"
+                  />
                   <Button
-                    onClick={() => handleTestEmail(selectedTemplate)}
+                    onClick={() => handleTestEmail(selectedTemplate.id, testEmail)}
                     disabled={!testEmail}
                   >
                     <Send className="h-4 w-4 mr-2" />
                     Send Test
                   </Button>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         )}
 
         {/* Template Form Modal */}
-        {showTemplateForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-              <div className="flex items-center justify-between p-6 border-b">
-                <h2 className="text-xl font-semibold">
+        {(showTemplateForm || editingTemplate) && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>
                   {editingTemplate ? 'Edit Template' : 'Create New Template'}
-                </h2>
-                <Button variant="ghost" onClick={() => setShowTemplateForm(false)}>
-                  ×
+                </CardTitle>
+                <Button variant="outline" onClick={() => {
+                  setShowTemplateForm(false);
+                  setEditingTemplate(null);
+                }}>
+                  Close
                 </Button>
-              </div>
-              
-              <div className="p-6">
-                <EmailTemplateForm
+              </CardHeader>
+              <CardContent>
+                <TemplateForm
                   template={editingTemplate}
-                  onSave={() => {
-                    setShowTemplateForm(false);
-                    setEditingTemplate(null);
-                    fetchData();
-                  }}
+                  onSubmit={editingTemplate ? 
+                    (data) => handleUpdateTemplate(editingTemplate.id, data) :
+                    handleCreateTemplate
+                  }
                   onCancel={() => {
                     setShowTemplateForm(false);
                     setEditingTemplate(null);
                   }}
                 />
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         )}
       </div>
@@ -724,113 +532,42 @@ The {{companyName}} Team`,
   );
 }
 
-// Email Template Form Component
-interface EmailTemplateFormProps {
+// Template Form Component
+function TemplateForm({ 
+  template, 
+  onSubmit, 
+  onCancel 
+}: { 
   template?: EmailTemplate | null;
-  onSave: () => void;
+  onSubmit: (data: Partial<EmailTemplate>) => void;
   onCancel: () => void;
-}
-
-function EmailTemplateForm({ template, onSave, onCancel }: EmailTemplateFormProps) {
+}) {
   const [formData, setFormData] = useState({
     name: template?.name || '',
     subject: template?.subject || '',
     content: template?.content || '',
     type: template?.type || 'custom',
     category: template?.category || 'transactional',
-    isActive: template?.isActive ?? true
+    isActive: template?.isActive ?? true,
   });
 
-  const [saving, setSaving] = useState(false);
-  const { request } = useApi();
-  const { showSuccess, showError } = useToast();
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    try {
-      setSaving(true);
-      
-      const url = template ? `/admin/email-templates/${template.id}` : '/admin/email-templates';
-      const method = template ? 'PUT' : 'POST';
-      
-      const response = await request(url, {
-        method,
-        body: JSON.stringify(formData)
-      });
-      
-      if (response.success) {
-        showSuccess(template ? 'Template updated successfully' : 'Template created successfully');
-        onSave();
-      } else {
-        throw new Error(response.error || 'Failed to save template');
-      }
-    } catch (err) {
-      console.error('Error saving template:', err);
-      showError(err instanceof Error ? err.message : 'Failed to save template');
-    } finally {
-      setSaving(false);
-    }
+    onSubmit(formData);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="name">Template Name</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-            required
-          />
-        </div>
-        
-        <div>
-          <Label htmlFor="type">Template Type</Label>
-          <Select value={formData.type} onValueChange={(value: any) => setFormData(prev => ({ ...prev, type: value }))}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="welcome">Welcome Email</SelectItem>
-              <SelectItem value="booking_confirmation">Booking Confirmation</SelectItem>
-              <SelectItem value="payment_receipt">Payment Receipt</SelectItem>
-              <SelectItem value="appointment_reminder">Appointment Reminder</SelectItem>
-              <SelectItem value="password_reset">Password Reset</SelectItem>
-              <SelectItem value="newsletter">Newsletter</SelectItem>
-              <SelectItem value="promotional">Promotional</SelectItem>
-              <SelectItem value="custom">Custom</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="name">Template Name</Label>
+        <Input
+          id="name"
+          value={formData.name}
+          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+          required
+        />
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="category">Category</Label>
-          <Select value={formData.category} onValueChange={(value: any) => setFormData(prev => ({ ...prev, category: value }))}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="transactional">Transactional</SelectItem>
-              <SelectItem value="marketing">Marketing</SelectItem>
-              <SelectItem value="system">System</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="isActive"
-            checked={formData.isActive}
-            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
-          />
-          <Label htmlFor="isActive">Active</Label>
-        </div>
-      </div>
-      
+
       <div>
         <Label htmlFor="subject">Subject Line</Label>
         <Input
@@ -840,26 +577,70 @@ function EmailTemplateForm({ template, onSave, onCancel }: EmailTemplateFormProp
           required
         />
       </div>
-      
+
       <div>
-        <Label htmlFor="content">Email Content</Label>
+        <Label htmlFor="type">Type</Label>
+        <Select value={formData.type} onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as any }))}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="welcome">Welcome</SelectItem>
+            <SelectItem value="booking_confirmation">Booking Confirmation</SelectItem>
+            <SelectItem value="payment_receipt">Payment Receipt</SelectItem>
+            <SelectItem value="appointment_reminder">Appointment Reminder</SelectItem>
+            <SelectItem value="newsletter">Newsletter</SelectItem>
+            <SelectItem value="promotional">Promotional</SelectItem>
+            <SelectItem value="custom">Custom</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="category">Category</Label>
+        <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value as any }))}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="transactional">Transactional</SelectItem>
+            <SelectItem value="marketing">Marketing</SelectItem>
+            <SelectItem value="system">System</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="content">Content</Label>
         <Textarea
           id="content"
           value={formData.content}
           onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-          rows={12}
+          rows={10}
+          placeholder="Enter your email template content. Use {{variableName}} for dynamic content."
           required
-          placeholder="Enter your email content here. You can use HTML formatting."
         />
+        <p className="text-sm text-gray-500 mt-1">
+          Use double curly braces for variables: {{customerName}}, {{serviceType}}, etc.
+        </p>
       </div>
-      
-      <div className="flex justify-end space-x-3">
+
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="isActive"
+          checked={formData.isActive}
+          onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
+        />
+        <Label htmlFor="isActive">Active</Label>
+      </div>
+
+      <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" disabled={saving}>
+        <Button type="submit">
           <Save className="h-4 w-4 mr-2" />
-          {saving ? 'Saving...' : 'Save Template'}
+          {template ? 'Update Template' : 'Create Template'}
         </Button>
       </div>
     </form>

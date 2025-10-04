@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Enhanced Error Tracking React Hook
  * 
@@ -5,7 +7,7 @@
  */
 
 import { useEffect, useCallback } from 'react';
-import { errorTracker } from '@/lib/enhanced-error-tracker';
+import { enhancedErrorTracker } from '@/lib/enhanced-error-tracker';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UseErrorTrackingOptions {
