@@ -67,8 +67,8 @@ const FALLBACK_PLANS: Record<string, any> = {
       'Access to discounted upgrade services'
     ],
     stripePriceIds: {
-      monthly: 'price_1S0WSNJZZWUMDx2PI1LEa5rs', // Stripe Basic Monthly
-      yearly: 'price_1S0WSTJZZWUMDx2P2k749Zyc'   // Stripe Basic Yearly
+      monthly: 'price_1S0WQuJZZWUMDx2PpvItbRmV', // Stripe Basic Monthly
+      yearly: 'price_1S0WQxJZZWUMDx2PStnBtGFG'   // Stripe Basic Yearly
     }
   },
   premium: {
@@ -97,8 +97,8 @@ const FALLBACK_PLANS: Record<string, any> = {
       'Emergency visits at standard rate (priority booking)'
     ],
     stripePriceIds: {
-      monthly: 'price_1S0WRtJZZWUMDx2PsO8c62ar', // Stripe Premium Monthly
-      yearly: 'price_1S0WRyJZZWUMDx2PJP4ZWw6Q'   // Stripe Premium Yearly
+      monthly: 'price_1SEXCMJZZWUMDx2Pp5HdMSEJ', // Stripe Premium Monthly
+      yearly: 'price_1SEXCNJZZWUMDx2P7WZCKc8K'   // Stripe Premium Yearly
     }
   }
 };
