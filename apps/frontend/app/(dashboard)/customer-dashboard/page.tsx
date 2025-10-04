@@ -43,6 +43,16 @@ import {
 } from '@/components/customer/accessibility/AccessibilityComponents';
 import { ScreenReaderOnly } from '@/components/customer/accessibility/AccessibilityComponents';
 import AccessibilityInit from '@/components/customer/accessibility/AccessibilityInit';
+import PerformanceMonitor from '@/components/customer/performance/PerformanceMonitor';
+import OfflineStatus from '@/components/customer/offline/OfflineStatus';
+import AdvancedServiceFilter from '@/components/customer/services/AdvancedServiceFilter';
+import DataExport from '@/components/customer/export/DataExport';
+import PWAInstallPrompt from '@/components/customer/pwa/PWAInstallPrompt';
+import AIRecommendations from '@/components/customer/ai/AIRecommendations';
+import Personalization from '@/components/customer/personalization/Personalization';
+import { useOfflineManager } from '@/hooks/use-offline-manager';
+import { useErrorTracking } from '@/hooks/use-error-tracking';
+import { coreWebVitalsMonitor } from '@/lib/core-web-vitals-monitor';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,6 +92,18 @@ function CustomerDashboardContent({
   handlePlanChanged,
   handleCancellationComplete
 }: any) {
+  // Initialize new features
+  const { retryPendingActions, clearPendingActions } = useOfflineManager();
+  const { addBreadcrumb } = useErrorTracking({ componentName: 'CustomerDashboard' });
+
+  // Initialize Core Web Vitals monitoring
+  React.useEffect(() => {
+    coreWebVitalsMonitor.init();
+    addBreadcrumb('dashboard_loaded', { 
+      subscriptionTier: transformedSubscription?.tier,
+      socketConnected 
+    });
+  }, [addBreadcrumb, transformedSubscription?.tier, socketConnected]);
   return (
     <ResponsiveLayout>
       {/* Initialize accessibility features */}
@@ -102,6 +124,19 @@ function CustomerDashboardContent({
           // Handle logout
           window.location.href = '/logout';
         }}
+      />
+
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt 
+        onInstall={() => addBreadcrumb('pwa_installed')}
+        onDismiss={() => addBreadcrumb('pwa_dismissed')}
+      />
+
+      {/* Offline Status */}
+      <OfflineStatus 
+        onRetry={retryPendingActions}
+        onClear={clearPendingActions}
+        showDetails={true}
       />
 
       <ResponsiveContainer padding="md">
@@ -267,46 +302,157 @@ function CustomerDashboardContent({
             >
               <div id="available-services">
                 {transformedSubscription ? (
-                  <AvailableServices
-                    userTier={transformedSubscription.tier}
-                    services={[
-                      {
-                        id: '1',
-                        name: 'Home Cleaning',
-                        description: 'Professional home cleaning service',
-                        category: 'Cleaning',
-                        basePrice: 120,
-                        isIncluded: true,
-                        requiresUpgrade: false
-                      },
-                      {
-                        id: '2',
-                        name: 'Plumbing Repair',
-                        description: 'Basic plumbing repairs and maintenance',
-                        category: 'Maintenance',
-                        basePrice: 150,
-                        isIncluded: false,
-                        requiresUpgrade: false
-                      },
-                      {
-                        id: '3',
-                        name: 'Emergency Service',
-                        description: '24/7 emergency home services',
-                        category: 'Emergency',
-                        basePrice: 200,
-                        isIncluded: transformedSubscription.tier === 'PRIORITY',
-                        requiresUpgrade: transformedSubscription.tier !== 'PRIORITY',
-                        upgradeToTier: 'PRIORITY'
-                      }
-                    ]}
-                    onServiceRequest={(serviceId) => {
-                      console.log('Service requested:', serviceId);
-                    }}
-                    onUpgradePrompt={(requiredTier) => {
-                      console.log('Upgrade required to:', requiredTier);
-                      setShowPlanChangeWorkflow(true);
-                    }}
-                  />
+                  <>
+                    <AdvancedServiceFilter
+                      services={[
+                        {
+                          serviceId: '1',
+                          service: {
+                            id: '1',
+                            name: 'Home Cleaning',
+                            description: 'Professional home cleaning service',
+                            category: 'CLEANING',
+                            complexity: 'SIMPLE',
+                            basePrice: 120,
+                            isActive: true,
+                            rating: 4.8,
+                            estimatedDuration: 120,
+                            location: 'Toronto',
+                            maxParticipants: 2,
+                            features: ['eco-friendly', 'insured', 'guaranteed']
+                          },
+                          isIncluded: true,
+                          discountPercentage: 10,
+                          requiresUpgrade: false,
+                          currentUsage: 2
+                        },
+                        {
+                          serviceId: '2',
+                          service: {
+                            id: '2',
+                            name: 'Plumbing Repair',
+                            description: 'Basic plumbing repairs and maintenance',
+                            category: 'REPAIR',
+                            complexity: 'MODERATE',
+                            basePrice: 150,
+                            isActive: true,
+                            rating: 4.6,
+                            estimatedDuration: 90,
+                            location: 'Toronto',
+                            maxParticipants: 1,
+                            features: ['same-day', 'insured', 'guaranteed']
+                          },
+                          isIncluded: false,
+                          discountPercentage: 0,
+                          requiresUpgrade: false,
+                          currentUsage: 0
+                        },
+                        {
+                          serviceId: '3',
+                          service: {
+                            id: '3',
+                            name: 'Emergency Service',
+                            description: '24/7 emergency home services',
+                            category: 'REPAIR',
+                            complexity: 'COMPLEX',
+                            basePrice: 200,
+                            isActive: true,
+                            rating: 4.9,
+                            estimatedDuration: 60,
+                            location: 'Toronto',
+                            maxParticipants: 1,
+                            features: ['same-day', 'insured', 'guaranteed']
+                          },
+                          isIncluded: transformedSubscription.tier === 'PRIORITY',
+                          discountPercentage: transformedSubscription.tier === 'PRIORITY' ? 20 : 0,
+                          requiresUpgrade: transformedSubscription.tier !== 'PRIORITY',
+                          upgradeToTier: 'PRIORITY',
+                          currentUsage: 0
+                        }
+                      ]}
+                      onFilteredServices={(services) => {
+                        addBreadcrumb('services_filtered', { count: services.length });
+                      }}
+                    />
+                    <AvailableServices
+                      userTier={transformedSubscription.tier}
+                      services={[
+                        {
+                          serviceId: '1',
+                          service: {
+                            id: '1',
+                            name: 'Home Cleaning',
+                            description: 'Professional home cleaning service',
+                            category: 'CLEANING',
+                            complexity: 'SIMPLE',
+                            basePrice: 120,
+                            isActive: true,
+                            rating: 4.8,
+                            estimatedDuration: 120,
+                            location: 'Toronto',
+                            maxParticipants: 2,
+                            features: ['eco-friendly', 'insured', 'guaranteed']
+                          },
+                          isIncluded: true,
+                          discountPercentage: 10,
+                          requiresUpgrade: false,
+                          currentUsage: 2
+                        },
+                        {
+                          serviceId: '2',
+                          service: {
+                            id: '2',
+                            name: 'Plumbing Repair',
+                            description: 'Basic plumbing repairs and maintenance',
+                            category: 'REPAIR',
+                            complexity: 'MODERATE',
+                            basePrice: 150,
+                            isActive: true,
+                            rating: 4.6,
+                            estimatedDuration: 90,
+                            location: 'Toronto',
+                            maxParticipants: 1,
+                            features: ['same-day', 'insured', 'guaranteed']
+                          },
+                          isIncluded: false,
+                          discountPercentage: 0,
+                          requiresUpgrade: false,
+                          currentUsage: 0
+                        },
+                        {
+                          serviceId: '3',
+                          service: {
+                            id: '3',
+                            name: 'Emergency Service',
+                            description: '24/7 emergency home services',
+                            category: 'REPAIR',
+                            complexity: 'COMPLEX',
+                            basePrice: 200,
+                            isActive: true,
+                            rating: 4.9,
+                            estimatedDuration: 60,
+                            location: 'Toronto',
+                            maxParticipants: 1,
+                            features: ['same-day', 'insured', 'guaranteed']
+                          },
+                          isIncluded: transformedSubscription.tier === 'PRIORITY',
+                          discountPercentage: transformedSubscription.tier === 'PRIORITY' ? 20 : 0,
+                          requiresUpgrade: transformedSubscription.tier !== 'PRIORITY',
+                          upgradeToTier: 'PRIORITY',
+                          currentUsage: 0
+                        }
+                      ]}
+                      onServiceRequest={(serviceId) => {
+                        addBreadcrumb('service_requested', { serviceId });
+                        console.log('Service requested:', serviceId);
+                      }}
+                      onUpgradePrompt={(requiredTier) => {
+                        addBreadcrumb('upgrade_prompted', { requiredTier });
+                        console.log('Upgrade required to:', requiredTier);
+                        setShowPlanChangeWorkflow(true);
+                      }}
+                    />
+                  </>
                 ) : (
                   <Card className="border-0 shadow-lg">
                     <CardContent className="p-6 lg:p-8 text-center">
@@ -462,6 +608,32 @@ function CustomerDashboardContent({
               />
             </section>
 
+            {/* Performance Monitor */}
+            <section>
+              <PerformanceMonitor 
+                showDetails={false}
+                onExport={() => addBreadcrumb('performance_exported')}
+              />
+            </section>
+
+            {/* AI Recommendations */}
+            <section>
+              <AIRecommendations
+                userData={{
+                  subscription: transformedSubscription,
+                  usageAnalytics: realtimeUsage ? [realtimeUsage] : [],
+                  serviceRequests: [],
+                  preferences: user?.preferences
+                }}
+                onRecommendationClick={(recommendation) => {
+                  addBreadcrumb('recommendation_clicked', { 
+                    recommendationId: recommendation.id,
+                    type: recommendation.type 
+                  });
+                }}
+              />
+            </section>
+
             {/* Recent Notifications */}
             <section>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Updates</h3>
@@ -533,8 +705,43 @@ function CustomerDashboardContent({
                 tier: transformedSubscription.tier
               } : undefined}
               onUpgradeClick={(suggestedTier) => {
+                addBreadcrumb('upgrade_suggested', { suggestedTier });
                 console.log('Upgrade suggested to:', suggestedTier);
                 setShowPlanChangeWorkflow(true);
+              }}
+            />
+          </section>
+
+          {/* Data Export Section */}
+          <section>
+            <DataExport
+              data={{
+                subscription: transformedSubscription,
+                usageAnalytics: realtimeUsage ? [realtimeUsage] : [],
+                serviceRequests: [],
+                notifications: notifications
+              }}
+              onExport={(format, data) => {
+                addBreadcrumb('data_exported', { format, dataCount: Object.keys(data).length });
+              }}
+            />
+          </section>
+
+          {/* Personalization Section */}
+          <section>
+            <Personalization
+              userData={{
+                id: user?.id || '',
+                preferences: user?.preferences,
+                behavior: {
+                  mostUsedFeatures: ['services', 'analytics', 'notifications'],
+                  preferredTimes: ['Morning', 'Afternoon'],
+                  favoriteServices: ['Home Cleaning', 'Plumbing Repair']
+                }
+              }}
+              onSave={(settings) => {
+                addBreadcrumb('personalization_saved', { settings });
+                console.log('Personalization settings saved:', settings);
               }}
             />
           </section>

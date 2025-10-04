@@ -1,37 +1,42 @@
-const CACHE_NAME = 'fixwell-admin-v1';
-const OFFLINE_URL = '/admin/offline';
+/**
+ * Service Worker for Offline Support
+ * 
+ * Provides offline functionality for the customer dashboard
+ */
 
-// Resources to cache for offline functionality
-const STATIC_CACHE_URLS = [
-  '/admin',
-  '/admin/users',
-  '/admin/analytics',
-  '/admin/settings',
-  '/admin/monitoring',
-  '/admin/communications',
-  '/admin/tenants',
-  '/admin/onboarding',
-  '/offline.html',
-  '/manifest.json'
+const CACHE_NAME = 'customer-dashboard-v1';
+const STATIC_CACHE_NAME = 'static-resources-v1';
+const DYNAMIC_CACHE_NAME = 'dynamic-resources-v1';
+
+// Static resources to cache
+const STATIC_RESOURCES = [
+  '/',
+  '/customer-dashboard',
+  '/static/js/bundle.js',
+  '/static/css/main.css',
+  '/manifest.json',
+  '/favicon.ico',
+  '/offline.html'
 ];
 
 // API endpoints to cache
-const API_CACHE_URLS = [
-  '/api/admin/dashboard/stats',
-  '/api/admin/users',
-  '/api/admin/analytics',
-  '/api/admin/settings'
+const API_CACHE_PATTERNS = [
+  '/api/dashboard/customer',
+  '/api/subscription',
+  '/api/services',
+  '/api/notifications',
+  '/api/usage-analytics'
 ];
 
 // Install event - cache static resources
 self.addEventListener('install', (event) => {
-  console.log('Service Worker: Install event');
+  console.log('Service Worker: Installing...');
   
   event.waitUntil(
-    caches.open(CACHE_NAME)
+    caches.open(STATIC_CACHE_NAME)
       .then((cache) => {
         console.log('Service Worker: Caching static resources');
-        return cache.addAll(STATIC_CACHE_URLS);
+        return cache.addAll(STATIC_RESOURCES);
       })
       .then(() => {
         console.log('Service Worker: Static resources cached');
@@ -45,14 +50,16 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activate event');
+  console.log('Service Worker: Activating...');
   
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME) {
+            if (cacheName !== STATIC_CACHE_NAME && 
+                cacheName !== DYNAMIC_CACHE_NAME && 
+                cacheName !== CACHE_NAME) {
               console.log('Service Worker: Deleting old cache', cacheName);
               return caches.delete(cacheName);
             }
@@ -66,102 +73,257 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event - serve cached content when offline
+// Fetch event - implement caching strategies
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
-  
+
   // Skip non-GET requests
   if (request.method !== 'GET') {
     return;
   }
-  
+
   // Skip chrome-extension and other non-http requests
   if (!url.protocol.startsWith('http')) {
     return;
   }
-  
-  // Handle navigation requests
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .catch(() => {
-          return caches.match(OFFLINE_URL) || caches.match('/offline.html');
-        })
-    );
-    return;
+
+  // Handle different types of requests
+  if (isStaticResource(request)) {
+    event.respondWith(handleStaticResource(request));
+  } else if (isApiRequest(request)) {
+    event.respondWith(handleApiRequest(request));
+  } else if (isNavigationRequest(request)) {
+    event.respondWith(handleNavigationRequest(request));
+  } else {
+    event.respondWith(handleOtherRequest(request));
   }
-  
-  // Handle API requests
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          // Cache successful API responses
-          if (response.ok && API_CACHE_URLS.some(apiUrl => url.pathname.startsWith(apiUrl))) {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(request, responseClone);
-              });
-          }
-          return response;
-        })
-        .catch(() => {
-          // Return cached API response if available
-          return caches.match(request);
-        })
-    );
-    return;
-  }
-  
-  // Handle static resource requests
-  event.respondWith(
-    caches.match(request)
-      .then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        
-        return fetch(request)
-          .then((response) => {
-            // Cache successful responses
-            if (response.ok) {
-              const responseClone = response.clone();
-              caches.open(CACHE_NAME)
-                .then((cache) => {
-                  cache.put(request, responseClone);
-                });
-            }
-            return response;
-          })
-          .catch(() => {
-            // Return offline page for HTML requests
-            if (request.headers.get('accept').includes('text/html')) {
-              return caches.match('/offline.html');
-            }
-          });
-      })
-  );
 });
+
+// Check if request is for static resources
+function isStaticResource(request) {
+  const url = new URL(request.url);
+  return url.pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/);
+}
+
+// Check if request is for API endpoints
+function isApiRequest(request) {
+  const url = new URL(request.url);
+  return url.pathname.startsWith('/api/');
+}
+
+// Check if request is navigation
+function isNavigationRequest(request) {
+  return request.mode === 'navigate';
+}
+
+// Handle static resources - Cache First strategy
+async function handleStaticResource(request) {
+  try {
+    const cache = await caches.open(STATIC_CACHE_NAME);
+    const cachedResponse = await cache.match(request);
+    
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    const networkResponse = await fetch(request);
+    
+    if (networkResponse.ok) {
+      cache.put(request, networkResponse.clone());
+    }
+    
+    return networkResponse;
+  } catch (error) {
+    console.error('Service Worker: Failed to handle static resource', error);
+    return new Response('Resource not available offline', { status: 503 });
+  }
+}
+
+// Handle API requests - Network First with Cache Fallback
+async function handleApiRequest(request) {
+  try {
+    const networkResponse = await fetch(request);
+    
+    if (networkResponse.ok) {
+      const cache = await caches.open(DYNAMIC_CACHE_NAME);
+      cache.put(request, networkResponse.clone());
+    }
+    
+    return networkResponse;
+  } catch (error) {
+    console.log('Service Worker: Network failed, trying cache for API request');
+    
+    const cache = await caches.open(DYNAMIC_CACHE_NAME);
+    const cachedResponse = await cache.match(request);
+    
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    // Return offline response for API requests
+    return new Response(
+      JSON.stringify({ 
+        error: 'Offline', 
+        message: 'This data is not available offline',
+        offline: true 
+      }),
+      { 
+        status: 503,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+  }
+}
+
+// Handle navigation requests - Network First with Offline Fallback
+async function handleNavigationRequest(request) {
+  try {
+    const networkResponse = await fetch(request);
+    return networkResponse;
+  } catch (error) {
+    console.log('Service Worker: Network failed for navigation, serving offline page');
+    
+    const cache = await caches.open(STATIC_CACHE_NAME);
+    const offlineResponse = await cache.match('/offline.html');
+    
+    if (offlineResponse) {
+      return offlineResponse;
+    }
+    
+    // Fallback offline page
+    return new Response(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Offline - Customer Dashboard</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <style>
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              margin: 0; padding: 20px; background: #f5f5f5;
+              display: flex; align-items: center; justify-content: center; min-height: 100vh;
+            }
+            .container { 
+              text-align: center; background: white; padding: 40px; 
+              border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+              max-width: 400px; width: 100%;
+            }
+            .icon { font-size: 48px; margin-bottom: 20px; }
+            h1 { color: #333; margin-bottom: 16px; }
+            p { color: #666; margin-bottom: 24px; }
+            .retry-btn {
+              background: #007bff; color: white; border: none;
+              padding: 12px 24px; border-radius: 6px; cursor: pointer;
+              font-size: 16px; transition: background 0.2s;
+            }
+            .retry-btn:hover { background: #0056b3; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="icon">📱</div>
+            <h1>You're Offline</h1>
+            <p>It looks like you're not connected to the internet. Some features may not be available.</p>
+            <button class="retry-btn" onclick="window.location.reload()">
+              Try Again
+            </button>
+          </div>
+        </body>
+      </html>
+    `, {
+      headers: { 'Content-Type': 'text/html' }
+    });
+  }
+}
+
+// Handle other requests - Cache First strategy
+async function handleOtherRequest(request) {
+  try {
+    const cache = await caches.open(DYNAMIC_CACHE_NAME);
+    const cachedResponse = await cache.match(request);
+    
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    const networkResponse = await fetch(request);
+    
+    if (networkResponse.ok) {
+      cache.put(request, networkResponse.clone());
+    }
+    
+    return networkResponse;
+  } catch (error) {
+    console.error('Service Worker: Failed to handle request', error);
+    return new Response('Resource not available offline', { status: 503 });
+  }
+}
 
 // Background sync for offline actions
 self.addEventListener('sync', (event) => {
-  console.log('Service Worker: Background sync', event.tag);
+  console.log('Service Worker: Background sync triggered', event.tag);
   
-  if (event.tag === 'admin-actions') {
-    event.waitUntil(syncAdminActions());
+  if (event.tag === 'background-sync') {
+    event.waitUntil(doBackgroundSync());
   }
 });
 
+// Perform background sync
+async function doBackgroundSync() {
+  try {
+    // Get pending offline actions from IndexedDB
+    const pendingActions = await getPendingOfflineActions();
+    
+    for (const action of pendingActions) {
+      try {
+        await syncOfflineAction(action);
+        await removePendingOfflineAction(action.id);
+      } catch (error) {
+        console.error('Service Worker: Failed to sync action', action, error);
+      }
+    }
+  } catch (error) {
+    console.error('Service Worker: Background sync failed', error);
+  }
+}
+
+// Get pending offline actions from IndexedDB
+async function getPendingOfflineActions() {
+  // This would typically use IndexedDB to store offline actions
+  // For now, return empty array
+  return [];
+}
+
+// Sync offline action
+async function syncOfflineAction(action) {
+  const response = await fetch(action.url, {
+    method: action.method,
+    headers: action.headers,
+    body: action.body
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Sync failed: ${response.status}`);
+  }
+  
+  return response;
+}
+
+// Remove pending offline action
+async function removePendingOfflineAction(actionId) {
+  // This would typically remove from IndexedDB
+  console.log('Service Worker: Removed pending action', actionId);
+}
+
 // Push notification handling
 self.addEventListener('push', (event) => {
-  console.log('Service Worker: Push event', event);
+  console.log('Service Worker: Push notification received');
   
   const options = {
-    body: event.data ? event.data.text() : 'New notification from FixWell Admin',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/badge-72x72.png',
+    body: event.data ? event.data.text() : 'New notification',
+    icon: '/icon-192x192.png',
+    badge: '/badge-72x72.png',
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
@@ -170,122 +332,33 @@ self.addEventListener('push', (event) => {
     actions: [
       {
         action: 'explore',
-        title: 'View Details',
-        icon: '/icons/checkmark.png'
+        title: 'View Dashboard',
+        icon: '/icon-192x192.png'
       },
       {
         action: 'close',
         title: 'Close',
-        icon: '/icons/xmark.png'
+        icon: '/icon-192x192.png'
       }
     ]
   };
   
   event.waitUntil(
-    self.registration.showNotification('FixWell Admin', options)
+    self.registration.showNotification('Customer Dashboard', options)
   );
 });
 
 // Notification click handling
 self.addEventListener('notificationclick', (event) => {
-  console.log('Service Worker: Notification click', event);
+  console.log('Service Worker: Notification clicked');
   
   event.notification.close();
   
   if (event.action === 'explore') {
     event.waitUntil(
-      clients.openWindow('/admin')
+      clients.openWindow('/customer-dashboard')
     );
   }
 });
 
-// Message handling from main thread
-self.addEventListener('message', (event) => {
-  console.log('Service Worker: Message received', event.data);
-  
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
-  
-  if (event.data && event.data.type === 'CACHE_URLS') {
-    event.waitUntil(
-      caches.open(CACHE_NAME)
-        .then((cache) => {
-          return cache.addAll(event.data.urls);
-        })
-    );
-  }
-});
-
-// Helper function to sync admin actions
-async function syncAdminActions() {
-  try {
-    // Get pending actions from IndexedDB
-    const pendingActions = await getPendingActions();
-    
-    for (const action of pendingActions) {
-      try {
-        const response = await fetch(action.url, {
-          method: action.method,
-          headers: action.headers,
-          body: action.body
-        });
-        
-        if (response.ok) {
-          // Remove from pending actions
-          await removePendingAction(action.id);
-          console.log('Service Worker: Synced action', action.id);
-        }
-      } catch (error) {
-        console.error('Service Worker: Failed to sync action', action.id, error);
-      }
-    }
-  } catch (error) {
-    console.error('Service Worker: Failed to sync admin actions', error);
-  }
-}
-
-// Helper function to get pending actions from IndexedDB
-async function getPendingActions() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('FixWellAdminDB', 1);
-    
-    request.onerror = () => reject(request.error);
-    
-    request.onsuccess = () => {
-      const db = request.result;
-      const transaction = db.transaction(['pendingActions'], 'readonly');
-      const store = transaction.objectStore('pendingActions');
-      const getAllRequest = store.getAll();
-      
-      getAllRequest.onsuccess = () => resolve(getAllRequest.result);
-      getAllRequest.onerror = () => reject(getAllRequest.error);
-    };
-    
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains('pendingActions')) {
-        db.createObjectStore('pendingActions', { keyPath: 'id' });
-      }
-    };
-  });
-}
-
-// Helper function to remove pending action from IndexedDB
-async function removePendingAction(actionId) {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('FixWellAdminDB', 1);
-    
-    request.onerror = () => reject(request.error);
-    
-    request.onsuccess = () => {
-      const db = request.result;
-      const transaction = db.transaction(['pendingActions'], 'readwrite');
-      const store = transaction.objectStore('pendingActions');
-      const deleteRequest = store.delete(actionId);
-      
-      deleteRequest.onsuccess = () => resolve();
-      deleteRequest.onerror = () => reject(deleteRequest.error);
-    };
-  });
-}
+console.log('Service Worker: Loaded');

@@ -65,7 +65,7 @@ interface SubscriptionOverviewProps {
   isLoading?: boolean;
 }
 
-export default function SubscriptionOverview({
+const SubscriptionOverview = React.memo(function SubscriptionOverview({
   subscription,
   paymentMethods = [],
   invoices = [],
@@ -137,4 +137,6 @@ export default function SubscriptionOverview({
       )}
     </div>
   );
-}
+});
+
+export default SubscriptionOverview;

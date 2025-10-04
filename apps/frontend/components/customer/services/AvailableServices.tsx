@@ -80,7 +80,7 @@ const TIER_NAMES = {
   PRIORITY: 'Priority'
 };
 
-export default function AvailableServices({ 
+const AvailableServices = React.memo(function AvailableServices({ 
   userTier, 
   services, 
   onServiceRequest, 
@@ -410,4 +410,6 @@ export default function AvailableServices({
       </Card>
     </div>
   );
-}
+});
+
+export default AvailableServices;

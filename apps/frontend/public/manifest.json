@@ -1,15 +1,16 @@
 {
-  "name": "FixWell Admin Panel",
-  "short_name": "FixWell Admin",
-  "description": "Professional admin panel for FixWell home maintenance services",
-  "start_url": "/admin",
+  "name": "Customer Dashboard",
+  "short_name": "Dashboard",
+  "description": "Customer dashboard for managing subscriptions, services, and account activity",
+  "start_url": "/customer-dashboard",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#3B82F6",
+  "theme_color": "#007bff",
   "orientation": "portrait-primary",
-  "scope": "/admin",
+  "scope": "/",
   "lang": "en",
-  "categories": ["business", "productivity", "utilities"],
+  "dir": "ltr",
+  "categories": ["productivity", "utilities"],
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
@@ -62,83 +63,108 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshots/admin-dashboard.png",
+      "src": "/screenshots/desktop-dashboard.png",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Admin Dashboard Overview"
+      "label": "Desktop Dashboard View"
     },
     {
-      "src": "/screenshots/admin-mobile.png",
-      "sizes": "390x844",
+      "src": "/screenshots/mobile-dashboard.png",
+      "sizes": "375x667",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Mobile Admin Interface"
+      "label": "Mobile Dashboard View"
     }
   ],
   "shortcuts": [
     {
-      "name": "Dashboard",
-      "short_name": "Dashboard",
-      "description": "View admin dashboard",
-      "url": "/admin",
+      "name": "View Subscription",
+      "short_name": "Subscription",
+      "description": "View current subscription details",
+      "url": "/customer-dashboard#subscription",
       "icons": [
         {
-          "src": "/icons/dashboard-96x96.png",
+          "src": "/icons/shortcut-subscription.png",
           "sizes": "96x96"
         }
       ]
     },
     {
-      "name": "Users",
-      "short_name": "Users",
-      "description": "Manage users",
-      "url": "/admin/users",
+      "name": "Request Service",
+      "short_name": "Services",
+      "description": "Request a new service",
+      "url": "/customer-dashboard#services",
       "icons": [
         {
-          "src": "/icons/users-96x96.png",
+          "src": "/icons/shortcut-services.png",
           "sizes": "96x96"
         }
       ]
     },
     {
-      "name": "Analytics",
+      "name": "View Analytics",
       "short_name": "Analytics",
-      "description": "View analytics",
-      "url": "/admin/analytics",
+      "description": "View usage analytics",
+      "url": "/customer-dashboard#analytics",
       "icons": [
         {
-          "src": "/icons/analytics-96x96.png",
+          "src": "/icons/shortcut-analytics.png",
           "sizes": "96x96"
         }
       ]
     },
     {
-      "name": "Settings",
-      "short_name": "Settings",
-      "description": "Admin settings",
-      "url": "/admin/settings",
+      "name": "Notifications",
+      "short_name": "Notifications",
+      "description": "View notifications",
+      "url": "/customer-dashboard#notifications",
       "icons": [
         {
-          "src": "/icons/settings-96x96.png",
+          "src": "/icons/shortcut-notifications.png",
           "sizes": "96x96"
         }
       ]
     }
   ],
-  "related_applications": [
-    {
-      "platform": "webapp",
-      "url": "https://admin.fixwell.com/manifest.json"
-    }
-  ],
+  "related_applications": [],
   "prefer_related_applications": false,
   "edge_side_panel": {
     "preferred_width": 400
   },
   "launch_handler": {
-    "client_mode": "focus-existing"
+    "client_mode": "navigate-existing"
   },
   "handle_links": "preferred",
-  "capture_links": "existing-client-navigate"
+  "protocol_handlers": [
+    {
+      "protocol": "web+dashboard",
+      "url": "/customer-dashboard?action=%s"
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "/customer-dashboard/import",
+      "accept": {
+        "application/json": [".json"],
+        "text/csv": [".csv"]
+      }
+    }
+  ],
+  "share_target": {
+    "action": "/customer-dashboard/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "files",
+          "accept": ["image/*", "application/pdf"]
+        }
+      ]
+    }
+  }
 }

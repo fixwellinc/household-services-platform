@@ -24,7 +24,7 @@ interface UsageAnalyticsProps {
   onUpgradeClick?: (suggestedTier: string) => void;
 }
 
-export default function UsageAnalytics({ 
+const UsageAnalytics = React.memo(function UsageAnalytics({ 
   subscription, 
   onUpgradeClick 
 }: UsageAnalyticsProps) {
@@ -171,4 +171,6 @@ export default function UsageAnalytics({
       </Card>
     </div>
   );
-}
+});
+
+export default UsageAnalytics;

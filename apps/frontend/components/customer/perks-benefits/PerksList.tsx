@@ -76,7 +76,7 @@ const CATEGORY_COLORS = {
   EXCLUSIVE: 'bg-amber-50 border-amber-200 text-amber-800'
 };
 
-export default function PerksList({ userTier, perks, onUpgradeClick }: PerksListProps) {
+const PerksList = React.memo(function PerksList({ userTier, perks, onUpgradeClick }: PerksListProps) {
   const getTierLevel = (tier: string) => {
     const levels = { BASIC: 1, PREMIUM: 2, STARTER: 1, HOMECARE: 2, PRIORITY: 3 };
     return levels[tier as keyof typeof levels] || 0;
@@ -255,4 +255,6 @@ export default function PerksList({ userTier, perks, onUpgradeClick }: PerksList
       </Card>
     </div>
   );
-}
+});
+
+export default PerksList;
