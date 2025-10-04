@@ -2,74 +2,13 @@ import express from 'express';
 import { authMiddleware, requireAdmin } from '../../middleware/auth.js';
 import { auditPresets } from '../../middleware/auditMiddleware.js';
 import { auditService } from '../../services/auditService.js';
+import { prisma } from '../../config/database.js';
 
 const router = express.Router();
 
 // Apply admin role check
 router.use(authMiddleware);
 router.use(requireAdmin);
-
-// Mock email templates data - in real implementation, this would come from database
-let emailTemplates = [
-  {
-    id: '1',
-    name: 'Welcome Email',
-    subject: 'Welcome to FixWell!',
-    content: '<h1>Welcome to FixWell!</h1><p>Thank you for joining us. We\'re excited to help you with your home maintenance needs.</p>',
-    type: 'welcome',
-    category: 'transactional',
-    isActive: true,
-    variables: ['{{userName}}', '{{userEmail}}'],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    lastUsed: new Date().toISOString(),
-    usageCount: 45
-  },
-  {
-    id: '2',
-    name: 'Booking Confirmation',
-    subject: 'Your appointment has been confirmed',
-    content: '<h2>Appointment Confirmed</h2><p>Your appointment for {{serviceType}} has been confirmed for {{appointmentDate}} at {{appointmentTime}}.</p>',
-    type: 'booking_confirmation',
-    category: 'transactional',
-    isActive: true,
-    variables: ['{{serviceType}}', '{{appointmentDate}}', '{{appointmentTime}}', '{{technicianName}}'],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    lastUsed: new Date().toISOString(),
-    usageCount: 123
-  },
-  {
-    id: '3',
-    name: 'Payment Receipt',
-    subject: 'Payment Receipt - {{invoiceNumber}}',
-    content: '<h2>Payment Receipt</h2><p>Thank you for your payment of ${{amount}} for invoice {{invoiceNumber}}.</p>',
-    type: 'payment_receipt',
-    category: 'transactional',
-    isActive: true,
-    variables: ['{{invoiceNumber}}', '{{amount}}', '{{paymentMethod}}', '{{paymentDate}}'],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    lastUsed: new Date().toISOString(),
-    usageCount: 67
-  }
-];
-
-let emailCampaigns = [
-  {
-    id: '1',
-    name: 'Monthly Newsletter',
-    templateId: '1',
-    subject: 'FixWell Monthly Newsletter',
-    recipients: 1250,
-    sent: 1250,
-    opened: 890,
-    clicked: 234,
-    status: 'sent',
-    scheduledAt: new Date().toISOString(),
-    createdAt: new Date().toISOString()
-  }
-];
 
 /**
  * GET /api/admin/email-templates
@@ -79,24 +18,40 @@ router.get('/', async (req, res) => {
   try {
     const { type, category, active } = req.query;
     
-    let filteredTemplates = [...emailTemplates];
-    
-    if (type && type !== 'all') {
-      filteredTemplates = filteredTemplates.filter(t => t.type === type);
-    }
-    
-    if (category && category !== 'all') {
-      filteredTemplates = filteredTemplates.filter(t => t.category === category);
-    }
+    // Build where clause for filtering
+    const where = {};
     
     if (active !== undefined) {
-      const isActive = active === 'true';
-      filteredTemplates = filteredTemplates.filter(t => t.isActive === isActive);
+      // For now, we'll consider all templates as active since we don't have an isActive field
+      // You can add this field to the EmailTemplate model if needed
     }
+    
+    const templates = await prisma.emailTemplate.findMany({
+      where,
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+    
+    // Transform the data to match frontend expectations
+    const transformedTemplates = templates.map(template => ({
+      id: template.id,
+      name: template.name,
+      subject: template.subject,
+      content: template.isHtmlMode ? template.html : template.body,
+      type: extractTemplateType(template.name),
+      category: 'transactional',
+      isActive: true,
+      variables: extractVariables(template.isHtmlMode ? template.html : template.body),
+      createdAt: template.createdAt.toISOString(),
+      updatedAt: template.updatedAt.toISOString(),
+      lastUsed: template.updatedAt.toISOString(), // Using updatedAt as proxy for lastUsed
+      usageCount: 0 // We don't track usage count yet
+    }));
     
     res.json({
       success: true,
-      templates: filteredTemplates
+      templates: transformedTemplates
     });
   } catch (error) {
     console.error('Error fetching email templates:', error);
@@ -114,7 +69,9 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const template = emailTemplates.find(t => t.id === id);
+    const template = await prisma.emailTemplate.findUnique({
+      where: { id }
+    });
     
     if (!template) {
       return res.status(404).json({
@@ -123,9 +80,24 @@ router.get('/:id', async (req, res) => {
       });
     }
     
+    const transformedTemplate = {
+      id: template.id,
+      name: template.name,
+      subject: template.subject,
+      content: template.isHtmlMode ? template.html : template.body,
+      type: extractTemplateType(template.name),
+      category: 'transactional',
+      isActive: true,
+      variables: extractVariables(template.isHtmlMode ? template.html : template.body),
+      createdAt: template.createdAt.toISOString(),
+      updatedAt: template.updatedAt.toISOString(),
+      lastUsed: template.updatedAt.toISOString(),
+      usageCount: 0
+    };
+    
     res.json({
       success: true,
-      template
+      template: transformedTemplate
     });
   } catch (error) {
     console.error('Error fetching email template:', error);
@@ -153,7 +125,9 @@ router.post('/', async (req, res) => {
     }
     
     // Check if template name already exists
-    const existingTemplate = emailTemplates.find(t => t.name === name);
+    const existingTemplate = await prisma.emailTemplate.findUnique({
+      where: { name }
+    });
     if (existingTemplate) {
       return res.status(400).json({
         success: false,
@@ -161,21 +135,19 @@ router.post('/', async (req, res) => {
       });
     }
     
-    const newTemplate = {
-      id: (emailTemplates.length + 1).toString(),
-      name,
-      subject,
-      content,
-      type: type || 'custom',
-      category: category || 'transactional',
-      isActive: isActive !== undefined ? isActive : true,
-      variables: extractVariables(content),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      usageCount: 0
-    };
+    // Determine if content is HTML or plain text
+    const isHtmlMode = content.includes('<') && content.includes('>');
     
-    emailTemplates.push(newTemplate);
+    const newTemplate = await prisma.emailTemplate.create({
+      data: {
+        name,
+        subject,
+        body: isHtmlMode ? null : content,
+        html: isHtmlMode ? content : null,
+        isHtmlMode,
+        createdBy: req.user.id
+      }
+    });
     
     // Log audit event
     await auditService.log({
@@ -185,8 +157,8 @@ router.post('/', async (req, res) => {
       entityId: newTemplate.id,
       changes: {
         name,
-        type,
-        category
+        type: type || 'custom',
+        category: category || 'transactional'
       },
       metadata: {
         ipAddress: req.ip,
@@ -197,9 +169,24 @@ router.post('/', async (req, res) => {
       severity: 'medium'
     });
     
+    const transformedTemplate = {
+      id: newTemplate.id,
+      name: newTemplate.name,
+      subject: newTemplate.subject,
+      content: newTemplate.isHtmlMode ? newTemplate.html : newTemplate.body,
+      type: extractTemplateType(newTemplate.name),
+      category: 'transactional',
+      isActive: true,
+      variables: extractVariables(newTemplate.isHtmlMode ? newTemplate.html : newTemplate.body),
+      createdAt: newTemplate.createdAt.toISOString(),
+      updatedAt: newTemplate.updatedAt.toISOString(),
+      lastUsed: newTemplate.updatedAt.toISOString(),
+      usageCount: 0
+    };
+    
     res.status(201).json({
       success: true,
-      template: newTemplate,
+      template: transformedTemplate,
       message: 'Template created successfully'
     });
   } catch (error) {
@@ -220,28 +207,46 @@ router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const { name, subject, content, type, category, isActive } = req.body;
     
-    const templateIndex = emailTemplates.findIndex(t => t.id === id);
-    if (templateIndex === -1) {
+    const existingTemplate = await prisma.emailTemplate.findUnique({
+      where: { id }
+    });
+    
+    if (!existingTemplate) {
       return res.status(404).json({
         success: false,
         error: 'Template not found'
       });
     }
     
-    const oldTemplate = { ...emailTemplates[templateIndex] };
+    // Check if new name conflicts with existing templates (excluding current one)
+    if (name && name !== existingTemplate.name) {
+      const nameConflict = await prisma.emailTemplate.findUnique({
+        where: { name }
+      });
+      if (nameConflict) {
+        return res.status(400).json({
+          success: false,
+          error: 'Template name already exists'
+        });
+      }
+    }
     
-    // Update template
-    emailTemplates[templateIndex] = {
-      ...emailTemplates[templateIndex],
-      name: name || emailTemplates[templateIndex].name,
-      subject: subject || emailTemplates[templateIndex].subject,
-      content: content || emailTemplates[templateIndex].content,
-      type: type || emailTemplates[templateIndex].type,
-      category: category || emailTemplates[templateIndex].category,
-      isActive: isActive !== undefined ? isActive : emailTemplates[templateIndex].isActive,
-      variables: content ? extractVariables(content) : emailTemplates[templateIndex].variables,
-      updatedAt: new Date().toISOString()
-    };
+    // Determine if content is HTML or plain text
+    const isHtmlMode = content && content.includes('<') && content.includes('>');
+    
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (subject) updateData.subject = subject;
+    if (content) {
+      updateData.body = isHtmlMode ? null : content;
+      updateData.html = isHtmlMode ? content : null;
+      updateData.isHtmlMode = isHtmlMode;
+    }
+    
+    const updatedTemplate = await prisma.emailTemplate.update({
+      where: { id },
+      data: updateData
+    });
     
     // Log audit event
     await auditService.log({
@@ -250,11 +255,8 @@ router.put('/:id', async (req, res) => {
       entityType: 'email_template',
       entityId: id,
       changes: {
-        name: { from: oldTemplate.name, to: emailTemplates[templateIndex].name },
-        subject: { from: oldTemplate.subject, to: emailTemplates[templateIndex].subject },
-        type: { from: oldTemplate.type, to: emailTemplates[templateIndex].type },
-        category: { from: oldTemplate.category, to: emailTemplates[templateIndex].category },
-        isActive: { from: oldTemplate.isActive, to: emailTemplates[templateIndex].isActive }
+        name: { from: existingTemplate.name, to: updatedTemplate.name },
+        subject: { from: existingTemplate.subject, to: updatedTemplate.subject }
       },
       metadata: {
         ipAddress: req.ip,
@@ -265,9 +267,24 @@ router.put('/:id', async (req, res) => {
       severity: 'medium'
     });
     
+    const transformedTemplate = {
+      id: updatedTemplate.id,
+      name: updatedTemplate.name,
+      subject: updatedTemplate.subject,
+      content: updatedTemplate.isHtmlMode ? updatedTemplate.html : updatedTemplate.body,
+      type: extractTemplateType(updatedTemplate.name),
+      category: 'transactional',
+      isActive: true,
+      variables: extractVariables(updatedTemplate.isHtmlMode ? updatedTemplate.html : updatedTemplate.body),
+      createdAt: updatedTemplate.createdAt.toISOString(),
+      updatedAt: updatedTemplate.updatedAt.toISOString(),
+      lastUsed: updatedTemplate.updatedAt.toISOString(),
+      usageCount: 0
+    };
+    
     res.json({
       success: true,
-      template: emailTemplates[templateIndex],
+      template: transformedTemplate,
       message: 'Template updated successfully'
     });
   } catch (error) {
@@ -287,16 +304,20 @@ router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     
-    const templateIndex = emailTemplates.findIndex(t => t.id === id);
-    if (templateIndex === -1) {
+    const existingTemplate = await prisma.emailTemplate.findUnique({
+      where: { id }
+    });
+    
+    if (!existingTemplate) {
       return res.status(404).json({
         success: false,
         error: 'Template not found'
       });
     }
     
-    const deletedTemplate = emailTemplates[templateIndex];
-    emailTemplates.splice(templateIndex, 1);
+    await prisma.emailTemplate.delete({
+      where: { id }
+    });
     
     // Log audit event
     await auditService.log({
@@ -305,7 +326,7 @@ router.delete('/:id', async (req, res) => {
       entityType: 'email_template',
       entityId: id,
       changes: {
-        deletedTemplate: deletedTemplate.name
+        deletedTemplate: existingTemplate.name
       },
       metadata: {
         ipAddress: req.ip,
@@ -345,7 +366,10 @@ router.post('/:id/test', async (req, res) => {
       });
     }
     
-    const template = emailTemplates.find(t => t.id === id);
+    const template = await prisma.emailTemplate.findUnique({
+      where: { id }
+    });
+    
     if (!template) {
       return res.status(404).json({
         success: false,
@@ -357,16 +381,9 @@ router.post('/:id/test', async (req, res) => {
     console.log('Sending test email:', {
       to: email,
       subject: template.subject,
-      content: template.content,
+      content: template.isHtmlMode ? template.html : template.body,
       templateId: id
     });
-    
-    // Update usage count
-    const templateIndex = emailTemplates.findIndex(t => t.id === id);
-    if (templateIndex !== -1) {
-      emailTemplates[templateIndex].usageCount += 1;
-      emailTemplates[templateIndex].lastUsed = new Date().toISOString();
-    }
     
     // Log audit event
     await auditService.log({
@@ -400,14 +417,16 @@ router.post('/:id/test', async (req, res) => {
 });
 
 /**
- * GET /api/admin/email-campaigns
- * Get all email campaigns
+ * GET /api/admin/email-templates/campaigns
+ * Get all email campaigns (placeholder for future implementation)
  */
 router.get('/campaigns', async (req, res) => {
   try {
+    // For now, return empty campaigns array
+    // In the future, this would query a campaigns table
     res.json({
       success: true,
-      campaigns: emailCampaigns
+      campaigns: []
     });
   } catch (error) {
     console.error('Error fetching email campaigns:', error);
@@ -422,6 +441,7 @@ router.get('/campaigns', async (req, res) => {
  * Helper function to extract variables from email content
  */
 function extractVariables(content) {
+  if (!content) return [];
   const variableRegex = /\{\{([^}]+)\}\}/g;
   const variables = [];
   let match;
@@ -433,6 +453,19 @@ function extractVariables(content) {
   }
   
   return variables;
+}
+
+/**
+ * Helper function to extract template type from name
+ */
+function extractTemplateType(name) {
+  const nameLower = name.toLowerCase();
+  if (nameLower.includes('welcome')) return 'welcome';
+  if (nameLower.includes('booking') || nameLower.includes('appointment')) return 'booking_confirmation';
+  if (nameLower.includes('payment') || nameLower.includes('receipt')) return 'payment_receipt';
+  if (nameLower.includes('reminder')) return 'reminder';
+  if (nameLower.includes('completion') || nameLower.includes('completed')) return 'service_completion';
+  return 'custom';
 }
 
 export default router;
