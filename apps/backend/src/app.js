@@ -1096,65 +1096,7 @@ app.post('/api/admin/email-blast', requireAdmin, bulkAdminLimiter, async (req, r
   }
 });
 
-// Admin: Email Templates CRUD
-app.get('/api/admin/email-templates', requireAdmin, async (req, res) => {
-  try {
-    if (!prisma) return res.status(503).json({ error: 'Database not available' });
-    const templates = await prisma.emailTemplate.findMany({ orderBy: { updatedAt: 'desc' } });
-    res.json({ templates });
-  } catch (error) {
-    console.error('Get email templates error:', error);
-    res.status(500).json({ error: 'Failed to get email templates' });
-  }
-});
-
-app.get('/api/admin/email-templates/:id', requireAdmin, async (req, res) => {
-  try {
-    if (!prisma) return res.status(503).json({ error: 'Database not available' });
-    const template = await prisma.emailTemplate.findUnique({ where: { id: req.params.id } });
-    if (!template) return res.status(404).json({ error: 'Not found' });
-    res.json({ template });
-  } catch (error) {
-    console.error('Get email template error:', error);
-    res.status(500).json({ error: 'Failed to get email template' });
-  }
-});
-
-app.post('/api/admin/email-templates', requireAdmin, async (req, res) => {
-  try {
-    if (!prisma) return res.status(503).json({ error: 'Database not available' });
-    const { id, name, subject, body, html, isHtmlMode = false } = req.body || {};
-    if (!name || !subject) return res.status(400).json({ error: 'Name and subject are required' });
-    let template;
-    if (id) {
-      template = await prisma.emailTemplate.update({
-        where: { id },
-        data: { name, subject, body: body || null, html: html || null, isHtmlMode: !!isHtmlMode }
-      });
-    } else {
-      template = await prisma.emailTemplate.upsert({
-        where: { name },
-        update: { subject, body: body || null, html: html || null, isHtmlMode: !!isHtmlMode },
-        create: { name, subject, body: body || null, html: html || null, isHtmlMode: !!isHtmlMode, createdBy: req.user?.id || null }
-      });
-    }
-    res.json({ template });
-  } catch (error) {
-    console.error('Save email template error:', error);
-    res.status(500).json({ error: 'Failed to save email template' });
-  }
-});
-
-app.delete('/api/admin/email-templates/:id', requireAdmin, async (req, res) => {
-  try {
-    if (!prisma) return res.status(503).json({ error: 'Database not available' });
-    await prisma.emailTemplate.delete({ where: { id: req.params.id } });
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Delete email template error:', error);
-    res.status(500).json({ error: 'Failed to delete email template' });
-  }
-});
+// Email Templates CRUD is handled by the dedicated admin routes
 
 // Admin: Send mobile notification (basic SMS helper)
 app.post('/api/admin/notifications', requireAdmin, bulkAdminLimiter, async (req, res) => {

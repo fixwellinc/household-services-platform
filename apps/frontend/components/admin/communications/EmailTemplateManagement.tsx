@@ -81,6 +81,7 @@ export function EmailTemplateManagement() {
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [showPreview, setShowPreview] = useState(false);
   const [testEmail, setTestEmail] = useState('');
+  const [isUsingMockData, setIsUsingMockData] = useState(false);
 
   const { request } = useApi();
   const { showSuccess, showError } = useToast();
@@ -95,17 +96,143 @@ export function EmailTemplateManagement() {
       setLoading(true);
       setError(null);
       
-      const [templatesResponse, campaignsResponse] = await Promise.all([
-        request('/admin/email-templates'),
-        request('/admin/email-campaigns')
-      ]);
-      
-      if (templatesResponse.success) {
-        setTemplates(templatesResponse.templates || []);
-      }
-      
-      if (campaignsResponse.success) {
-        setCampaigns(campaignsResponse.campaigns || []);
+      // Try to fetch from API first
+      try {
+        const [templatesResponse, campaignsResponse] = await Promise.all([
+          request('/admin/email-templates'),
+          request('/admin/email-templates/campaigns')
+        ]);
+        
+        if (templatesResponse.success) {
+          setTemplates(templatesResponse.templates || []);
+        }
+        
+        if (campaignsResponse.success) {
+          setCampaigns(campaignsResponse.campaigns || []);
+        }
+        
+        setIsUsingMockData(false);
+      } catch (apiError) {
+        console.warn('API not available, using mock data:', apiError);
+        
+        // Fallback to mock data if API is not available
+        const mockTemplates: EmailTemplate[] = [
+          {
+            id: '1',
+            name: 'Welcome Email',
+            subject: 'Welcome to {{companyName}}!',
+            content: `Dear {{customerName}},
+
+Welcome to {{companyName}}! We're thrilled to have you as our newest customer.
+
+Your account has been set up and you can start using our services immediately. Here's what you need to know:
+
+• Your customer ID: {{customerId}}
+• Service start date: {{serviceStartDate}}
+• Primary contact: {{primaryContact}}
+
+If you have any questions, don't hesitate to reach out to our support team.
+
+Best regards,
+The {{companyName}} Team`,
+            type: 'welcome',
+            category: 'transactional',
+            isActive: true,
+            variables: ['companyName', 'customerName', 'customerId', 'serviceStartDate', 'primaryContact'],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            usageCount: 45
+          },
+          {
+            id: '2',
+            name: 'Booking Confirmation',
+            subject: 'Booking Confirmed - {{serviceName}}',
+            content: `Dear {{customerName}},
+
+Your booking has been confirmed!
+
+Service Details:
+• Service: {{serviceName}}
+• Date: {{serviceDate}}
+• Time: {{serviceTime}}
+• Address: {{serviceAddress}}
+• Technician: {{technicianName}}
+
+Please ensure someone is available at the scheduled time. If you need to reschedule, please contact us at least 24 hours in advance.
+
+Thank you for choosing {{companyName}}!
+
+Best regards,
+The {{companyName}} Team`,
+            type: 'booking_confirmation',
+            category: 'transactional',
+            isActive: true,
+            variables: ['customerName', 'serviceName', 'serviceDate', 'serviceTime', 'serviceAddress', 'technicianName', 'companyName'],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            usageCount: 23
+          },
+          {
+            id: '3',
+            name: 'Payment Receipt',
+            subject: 'Payment Receipt - {{invoiceNumber}}',
+            content: `Dear {{customerName}},
+
+Thank you for your payment! Here's your receipt:
+
+Payment Details:
+• Invoice Number: {{invoiceNumber}}
+• Amount Paid: {{amount}}
+• Payment Method: {{paymentMethod}}
+• Payment Date: {{paymentDate}}
+• Service Period: {{servicePeriod}}
+
+If you have any questions about this payment, please contact our billing department.
+
+Best regards,
+The {{companyName}} Team`,
+            type: 'payment_receipt',
+            category: 'transactional',
+            isActive: true,
+            variables: ['customerName', 'invoiceNumber', 'amount', 'paymentMethod', 'paymentDate', 'servicePeriod', 'companyName'],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            usageCount: 67
+          }
+        ];
+
+        const mockCampaigns: EmailCampaign[] = [
+          {
+            id: '1',
+            name: 'Monthly Newsletter',
+            templateId: '1',
+            subject: 'FixWell Monthly Newsletter',
+            recipients: 1250,
+            sent: 1250,
+            opened: 890,
+            clicked: 234,
+            status: 'sent',
+            scheduledAt: new Date().toISOString(),
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: '2',
+            name: 'Service Reminder',
+            templateId: '2',
+            subject: 'Upcoming Service Appointment',
+            recipients: 450,
+            sent: 450,
+            opened: 320,
+            clicked: 89,
+            status: 'sent',
+            scheduledAt: new Date().toISOString(),
+            createdAt: new Date().toISOString()
+          }
+        ];
+
+        setTemplates(mockTemplates);
+        setCampaigns(mockCampaigns);
+        setIsUsingMockData(true);
       }
     } catch (err) {
       console.error('Error fetching email data:', err);
@@ -243,6 +370,17 @@ export function EmailTemplateManagement() {
   return (
     <AdminErrorBoundary context="EmailTemplateManagement">
       <div className="p-6 space-y-6">
+        {/* Mock Data Warning */}
+        {isUsingMockData && (
+          <Alert className="border-yellow-200 bg-yellow-50">
+            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-yellow-800">
+              <strong>Demo Mode:</strong> The backend API is not available. You're viewing sample email templates and campaigns. 
+              Changes will not be saved until the API is connected.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
