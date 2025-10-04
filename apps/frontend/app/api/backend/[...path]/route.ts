@@ -9,7 +9,7 @@ export async function GET(
   const path = pathArray.join('/');
   
   try {
-    const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
     const backendBase = base.replace(/\/$/, '');
     
     // Get headers from the request
@@ -49,7 +49,7 @@ export async function POST(
   const body = await request.json();
   
   try {
-    const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
     const backendBase = base.replace(/\/$/, '');
     
     // Get headers from the request
@@ -90,7 +90,7 @@ export async function PUT(
   const body = await request.json();
   
   try {
-    const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
     const backendBase = base.replace(/\/$/, '');
     
     // Get headers from the request
@@ -131,7 +131,7 @@ export async function PATCH(
   const body = await request.json();
   
   try {
-    const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
     const backendBase = base.replace(/\/$/, '');
     
     // Get headers from the request
@@ -171,7 +171,7 @@ export async function DELETE(
   const path = pathArray.join('/');
   
   try {
-    const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const base = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
     const backendBase = base.replace(/\/$/, '');
     
     // Get headers from the request

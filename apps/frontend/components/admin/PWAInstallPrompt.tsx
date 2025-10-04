@@ -9,7 +9,10 @@ import {
   CheckCircle, 
   AlertCircle,
   Wifi,
-  WifiOff
+  WifiOff,
+  ChevronDown,
+  ChevronUp,
+  Minimize2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,6 +30,15 @@ export function PWAInstallPrompt() {
   const [isInstalled, setIsInstalled] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [installMethod, setInstallMethod] = useState<'browser' | 'manual'>('browser');
+  const [isMinimized, setIsMinimized] = useState(false);
+
+  useEffect(() => {
+    // Load minimized state from localStorage
+    const savedMinimizedState = localStorage.getItem('pwa-install-minimized');
+    if (savedMinimizedState) {
+      setIsMinimized(JSON.parse(savedMinimizedState));
+    }
+  }, []);
 
   useEffect(() => {
     // Check if app is already installed
@@ -192,50 +204,79 @@ export function PWAInstallPrompt() {
               <Download className="h-5 w-5" />
               Install FixWell Admin
             </CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleDismiss}
-              className="text-blue-600 hover:text-blue-800"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  const newMinimizedState = !isMinimized;
+                  setIsMinimized(newMinimizedState);
+                  localStorage.setItem('pwa-install-minimized', JSON.stringify(newMinimizedState));
+                }}
+                className="text-blue-600 hover:text-blue-800"
+                title={isMinimized ? "Expand" : "Minimize"}
+              >
+                {isMinimized ? <ChevronUp className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDismiss}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </CardHeader>
         
-        <CardContent className="space-y-4">
-          <p className="text-blue-700">
-            Install FixWell Admin as a Progressive Web App for better performance and offline access.
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center space-x-3 p-3 bg-white rounded-lg">
-              <Smartphone className="h-6 w-6 text-blue-600" />
-              <div>
-                <h4 className="font-semibold text-blue-800">Mobile Access</h4>
-                <p className="text-sm text-blue-600">Use on your phone like a native app</p>
+        {!isMinimized && (
+          <CardContent className="space-y-4">
+            <p className="text-blue-700">
+              Install FixWell Admin as a Progressive Web App for better performance and offline access.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center space-x-3 p-3 bg-white rounded-lg">
+                <Smartphone className="h-6 w-6 text-blue-600" />
+                <div>
+                  <h4 className="font-semibold text-blue-800">Mobile Access</h4>
+                  <p className="text-sm text-blue-600">Use on your phone like a native app</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-3 p-3 bg-white rounded-lg">
+                <WifiOff className="h-6 w-6 text-blue-600" />
+                <div>
+                  <h4 className="font-semibold text-blue-800">Offline Support</h4>
+                  <p className="text-sm text-blue-600">Works without internet connection</p>
+                </div>
               </div>
             </div>
             
-            <div className="flex items-center space-x-3 p-3 bg-white rounded-lg">
-              <WifiOff className="h-6 w-6 text-blue-600" />
-              <div>
-                <h4 className="font-semibold text-blue-800">Offline Support</h4>
-                <p className="text-sm text-blue-600">Works without internet connection</p>
-              </div>
+            <div className="flex space-x-3">
+              <Button onClick={handleInstallClick} className="flex-1">
+                <Download className="h-4 w-4 mr-2" />
+                Install App
+              </Button>
+              <Button variant="outline" onClick={handleDismiss}>
+                Maybe Later
+              </Button>
             </div>
-          </div>
-          
-          <div className="flex space-x-3">
-            <Button onClick={handleInstallClick} className="flex-1">
-              <Download className="h-4 w-4 mr-2" />
-              Install App
-            </Button>
-            <Button variant="outline" onClick={handleDismiss}>
-              Maybe Later
-            </Button>
-          </div>
-        </CardContent>
+          </CardContent>
+        )}
+        
+        {isMinimized && (
+          <CardContent className="py-2">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-blue-600">Install FixWell Admin for better experience</p>
+              <Button onClick={handleInstallClick} size="sm" className="text-xs">
+                <Download className="h-3 w-3 mr-1" />
+                Install
+              </Button>
+            </div>
+          </CardContent>
+        )}
       </Card>
     );
   }
@@ -246,40 +287,88 @@ export function PWAInstallPrompt() {
   return (
     <Card className="border-gray-200">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Monitor className="h-5 w-5" />
-          Install as App
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Monitor className="h-5 w-5" />
+            Install as App
+          </CardTitle>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const newMinimizedState = !isMinimized;
+                setIsMinimized(newMinimizedState);
+                localStorage.setItem('pwa-install-minimized', JSON.stringify(newMinimizedState));
+              }}
+              className="text-gray-600 hover:text-gray-800"
+              title={isMinimized ? "Expand" : "Minimize"}
+            >
+              {isMinimized ? <ChevronUp className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDismiss}
+              className="text-gray-600 hover:text-gray-800"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       
-      <CardContent className="space-y-4">
-        <p className="text-gray-600">
-          Install FixWell Admin as a Progressive Web App for better performance and offline access.
-        </p>
-        
-        <div className="space-y-3">
-          <h4 className="font-semibold text-gray-800">
-            Install on {instructions.browser}:
-          </h4>
-          <ol className="space-y-2 text-sm text-gray-600">
-            {instructions.steps.map((step, index) => (
-              <li key={index} className="flex items-start space-x-2">
-                <Badge variant="outline" className="mt-0.5 text-xs">
-                  {index + 1}
-                </Badge>
-                <span>{step}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
-        
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Once installed, you can access FixWell Admin from your device's home screen or app drawer.
-          </AlertDescription>
-        </Alert>
-      </CardContent>
+      {!isMinimized && (
+        <CardContent className="space-y-4">
+          <p className="text-gray-600">
+            Install FixWell Admin as a Progressive Web App for better performance and offline access.
+          </p>
+          
+          <div className="space-y-3">
+            <h4 className="font-semibold text-gray-800">
+              Install on {instructions.browser}:
+            </h4>
+            <ol className="space-y-2 text-sm text-gray-600">
+              {instructions.steps.map((step, index) => (
+                <li key={index} className="flex items-start space-x-2">
+                  <Badge variant="outline" className="mt-0.5 text-xs">
+                    {index + 1}
+                  </Badge>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+          
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Once installed, you can access FixWell Admin from your device's home screen or app drawer.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      )}
+      
+      {isMinimized && (
+        <CardContent className="py-2">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-600">Install FixWell Admin for better experience</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-xs"
+              onClick={() => {
+                const newMinimizedState = false;
+                setIsMinimized(newMinimizedState);
+                localStorage.setItem('pwa-install-minimized', JSON.stringify(newMinimizedState));
+              }}
+            >
+              <Monitor className="h-3 w-3 mr-1" />
+              View Instructions
+            </Button>
+          </div>
+        </CardContent>
+      )}
     </Card>
   );
 }

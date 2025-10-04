@@ -31,7 +31,7 @@ interface SocketProviderProps {
 
 export function SocketProvider({ 
   children, 
-  url = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+  url = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
   options = {}
 }: SocketProviderProps) {
   const [socket, setSocket] = useState<Socket | null>(null);
