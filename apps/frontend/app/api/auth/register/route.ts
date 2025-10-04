@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     
     // Proxy the request to the Railway backend
-    const railwayUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cultured-account-production.up.railway.app/api'
+    const railwayUrl = process.env.NEXT_PUBLIC_API_URL || 'https://fixwell.up.railway.app/api'
     const response = await fetch(`${railwayUrl}/auth/register`, {
       method: 'POST',
       headers: {

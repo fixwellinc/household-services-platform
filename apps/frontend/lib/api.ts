@@ -181,7 +181,12 @@ export class ApiClient {
     email: string;
     password: string;
     name: string;
+    phone?: string;
+    address?: string;
+    postalCode?: string;
     role?: 'CUSTOMER';
+    referralCode?: string;
+    referralSource?: string;
   }): Promise<AuthResponse> => {
     const response = await this.request<AuthResponse>('/auth/register', {
       method: 'POST',
