@@ -97,8 +97,8 @@ const FALLBACK_PLANS: Record<string, any> = {
       'Emergency visits at standard rate (priority booking)'
     ],
     stripePriceIds: {
-      monthly: 'price_1SEXCMJZZWUMDx2Pp5HdMSEJ', // Stripe Premium Monthly
-      yearly: 'price_1SEXCNJZZWUMDx2P7WZCKc8K'   // Stripe Premium Yearly
+      monthly: 'price_1SEXCMJZZWUMDx2Pp5HdMSEJ', // Stripe Premium Monthly - Updated
+      yearly: 'price_1SEXCNJZZWUMDx2P7WZCKc8K'   // Stripe Premium Yearly - Updated
     }
   }
 };
