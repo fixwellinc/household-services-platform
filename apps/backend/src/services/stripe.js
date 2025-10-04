@@ -352,7 +352,7 @@ export const createSubscriptionCheckoutSession = async (priceId, successUrl, can
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
-      mode: 'subscription',
+      mode: 'payment', // Changed from 'subscription' to 'payment' to work with one-time prices
       success_url: successUrl,
       cancel_url: cancelUrl,
       metadata,
