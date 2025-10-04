@@ -3,7 +3,7 @@
 import React from 'react';
 import { Menu, LogOut, Bell, Search, Settings } from 'lucide-react';
 import { Button } from '../../ui/shared';
-import { PWAStatusIndicator } from '../../PWAInstallPrompt';
+import { PWAStatusIndicator } from '../PWAInstallPrompt';
 
 interface AdminHeaderProps {
   onMenuClick: () => void;
