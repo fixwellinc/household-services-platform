@@ -11,8 +11,8 @@ export const PLANS = {
     yearlyPrice: 237.49, // 10% discount ($21.99 x 12 months x 0.9)
     originalPrice: 49.00,
     stripePriceIds: {
-      monthly: process.env.STRIPE_BASIC_MONTHLY_PRICE_ID || 'price_1S0WSNJZZWUMDx2PI1LEa5rs',
-      yearly: process.env.STRIPE_BASIC_YEARLY_PRICE_ID || 'price_1S0WSTJZZWUMDx2P2k749Zyc'
+      monthly: process.env.STRIPE_BASIC_MONTHLY_PRICE_ID || 'price_1S0WQuJZZWUMDx2PpvItbRmV',
+      yearly: process.env.STRIPE_BASIC_YEARLY_PRICE_ID || 'price_1S0WQxJZZWUMDx2PStnBtGFG'
     },
     features: [
       '1 visit per month (up to 0.5 hour)',
@@ -44,8 +44,8 @@ export const PLANS = {
     yearlyPrice: 593.89, // 10% discount ($54.99 x 12 months x 0.9)
     originalPrice: 79.00,
     stripePriceIds: {
-      monthly: process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || 'price_1S0WRtJZZWUMDx2PsO8c62ar',
-      yearly: process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID || 'price_1S0WRyJZZWUMDx2PJP4ZWw6Q'
+      monthly: process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || 'price_1SEXCMJZZWUMDx2Pp5HdMSEJ',
+      yearly: process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID || 'price_1SEXCNJZZWUMDx2P7WZCKc8K'
     },
     features: [
       '1 visit per month (up to 1 hour)',
