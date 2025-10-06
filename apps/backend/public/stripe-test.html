@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe Payment Tester</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #555;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .loading {
+            color: #007bff;
+        }
+        .test-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .card-item {
+            padding: 10px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .card-item:hover {
+            background-color: #f0f0f0;
+        }
+        .card-number {
+            font-weight: bold;
+            font-family: monospace;
+        }
+        .card-description {
+            font-size: 12px;
+            color: #666;
+        }
+        input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px;
+            width: 200px;
+        }
+        .form-group {
+            margin: 10px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Stripe Payment Tester</h1>
+        <p style="text-align: center; color: #666;">
+            Test your Stripe integration using test card numbers that work in both test and live mode
+        </p>
+
+        <!-- Basic Connection Test -->
+        <div class="test-section">
+            <h3>🔗 Basic Connection Test</h3>
+            <p>Test if Stripe is properly configured and accessible.</p>
+            <button onclick="testConnection()">Test Stripe Connection</button>
+            <div id="connection-result" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Payment Intent Test -->
+        <div class="test-section">
+            <h3>💳 Payment Intent Test</h3>
+            <p>Create a payment intent to test basic Stripe functionality.</p>
+            <div class="form-group">
+                <label>Amount ($):</label>
+                <input type="number" id="amount" value="20.00" step="0.01" min="0.50">
+            </div>
+            <button onclick="testPaymentIntent()">Create Payment Intent</button>
+            <div id="payment-intent-result" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Customer Test -->
+        <div class="test-section">
+            <h3>👤 Customer Test</h3>
+            <p>Create a test customer in Stripe.</p>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="customer-email" value="test@jjglass.ca">
+            </div>
+            <div class="form-group">
+                <label>Name:</label>
+                <input type="text" id="customer-name" value="Test Customer">
+            </div>
+            <button onclick="testCustomer()">Create Customer</button>
+            <div id="customer-result" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Payment Method Test -->
+        <div class="test-section">
+            <h3>💳 Payment Method Test</h3>
+            <p>Create and attach a payment method to a customer.</p>
+            <div class="form-group">
+                <label>Customer ID:</label>
+                <input type="text" id="customer-id" placeholder="Enter customer ID from above">
+            </div>
+            <div class="form-group">
+                <label>Test Card:</label>
+                <select id="test-card">
+                    <option value="4242424242424242">Visa Success (4242424242424242)</option>
+                    <option value="5555555555554444">Mastercard (5555555555554444)</option>
+                    <option value="378282246310005">Amex (378282246310005)</option>
+                    <option value="4000000000000002">Declined (4000000000000002)</option>
+                    <option value="4000000000009995">Insufficient Funds (4000000000009995)</option>
+                    <option value="4000000000000069">Expired Card (4000000000000069)</option>
+                    <option value="4000002500003155">3D Secure (4000002500003155)</option>
+                </select>
+            </div>
+            <button onclick="testPaymentMethod()">Create Payment Method</button>
+            <div id="payment-method-result" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Payment Test -->
+        <div class="test-section">
+            <h3>💰 Payment Test</h3>
+            <p>Process a payment using a payment method.</p>
+            <div class="form-group">
+                <label>Customer ID:</label>
+                <input type="text" id="payment-customer-id" placeholder="Enter customer ID">
+            </div>
+            <div class="form-group">
+                <label>Payment Method ID:</label>
+                <input type="text" id="payment-method-id" placeholder="Enter payment method ID">
+            </div>
+            <div class="form-group">
+                <label>Amount ($):</label>
+                <input type="number" id="payment-amount" value="20.00" step="0.01" min="0.50">
+            </div>
+            <button onclick="testPayment()">Process Payment</button>
+            <div id="payment-result" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Declined Payment Test -->
+        <div class="test-section">
+            <h3>❌ Declined Payment Test</h3>
+            <p>Test handling of declined payments.</p>
+            <div class="form-group">
+                <label>Customer ID:</label>
+                <input type="text" id="declined-customer-id" placeholder="Enter customer ID">
+            </div>
+            <div class="form-group">
+                <label>Amount ($):</label>
+                <input type="number" id="declined-amount" value="20.00" step="0.01" min="0.50">
+            </div>
+            <button onclick="testDeclinedPayment()">Test Declined Payment</button>
+            <div id="declined-result" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Test Cards Reference -->
+        <div class="test-section">
+            <h3>💳 Test Card Numbers</h3>
+            <p>These cards work in both test and live mode:</p>
+            <div class="test-cards">
+                <div class="card-item" onclick="copyToClipboard('4242424242424242')">
+                    <div class="card-number">4242424242424242</div>
+                    <div class="card-description">Visa Success</div>
+                </div>
+                <div class="card-item" onclick="copyToClipboard('5555555555554444')">
+                    <div class="card-number">5555555555554444</div>
+                    <div class="card-description">Mastercard Success</div>
+                </div>
+                <div class="card-item" onclick="copyToClipboard('378282246310005')">
+                    <div class="card-number">378282246310005</div>
+                    <div class="card-description">Amex Success</div>
+                </div>
+                <div class="card-item" onclick="copyToClipboard('4000000000000002')">
+                    <div class="card-number">4000000000000002</div>
+                    <div class="card-description">Card Declined</div>
+                </div>
+                <div class="card-item" onclick="copyToClipboard('4000000000009995')">
+                    <div class="card-number">4000000000009995</div>
+                    <div class="card-description">Insufficient Funds</div>
+                </div>
+                <div class="card-item" onclick="copyToClipboard('4000000000000069')">
+                    <div class="card-number">4000000000000069</div>
+                    <div class="card-description">Expired Card</div>
+                </div>
+                <div class="card-item" onclick="copyToClipboard('4000002500003155')">
+                    <div class="card-number">4000002500003155</div>
+                    <div class="card-description">3D Secure Required</div>
+                </div>
+            </div>
+            <p style="font-size: 12px; color: #666;">
+                💡 Click any card number to copy it. Use any future expiry date (e.g., 12/2025) and any 3-digit CVC.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin + '/api/stripe-test';
+
+        function showResult(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = `result ${isError ? 'error' : 'success'}`;
+            element.textContent = JSON.stringify(data, null, 2);
+        }
+
+        function showLoading(elementId) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = 'result loading';
+            element.textContent = 'Loading...';
+        }
+
+        async function testConnection() {
+            showLoading('connection-result');
+            try {
+                const response = await fetch(`${API_BASE}/test-stripe`);
+                const data = await response.json();
+                showResult('connection-result', data, !data.success);
+            } catch (error) {
+                showResult('connection-result', { error: error.message }, true);
+            }
+        }
+
+        async function testPaymentIntent() {
+            showLoading('payment-intent-result');
+            try {
+                const amount = parseFloat(document.getElementById('amount').value) * 100; // Convert to cents
+                const response = await fetch(`${API_BASE}/test-payment-intent`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ amount, currency: 'usd' })
+                });
+                const data = await response.json();
+                showResult('payment-intent-result', data, !data.success);
+            } catch (error) {
+                showResult('payment-intent-result', { error: error.message }, true);
+            }
+        }
+
+        async function testCustomer() {
+            showLoading('customer-result');
+            try {
+                const email = document.getElementById('customer-email').value;
+                const name = document.getElementById('customer-name').value;
+                const response = await fetch(`${API_BASE}/test-customer`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, name })
+                });
+                const data = await response.json();
+                showResult('customer-result', data, !data.success);
+                
+                // Auto-fill customer ID in other forms
+                if (data.success && data.customer) {
+                    document.getElementById('customer-id').value = data.customer.id;
+                    document.getElementById('payment-customer-id').value = data.customer.id;
+                    document.getElementById('declined-customer-id').value = data.customer.id;
+                }
+            } catch (error) {
+                showResult('customer-result', { error: error.message }, true);
+            }
+        }
+
+        async function testPaymentMethod() {
+            showLoading('payment-method-result');
+            try {
+                const customerId = document.getElementById('customer-id').value;
+                const cardNumber = document.getElementById('test-card').value;
+                
+                if (!customerId) {
+                    throw new Error('Please create a customer first');
+                }
+                
+                const response = await fetch(`${API_BASE}/test-payment-method`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ customerId, cardNumber })
+                });
+                const data = await response.json();
+                showResult('payment-method-result', data, !data.success);
+                
+                // Auto-fill payment method ID
+                if (data.success && data.paymentMethod) {
+                    document.getElementById('payment-method-id').value = data.paymentMethod.id;
+                }
+            } catch (error) {
+                showResult('payment-method-result', { error: error.message }, true);
+            }
+        }
+
+        async function testPayment() {
+            showLoading('payment-result');
+            try {
+                const customerId = document.getElementById('payment-customer-id').value;
+                const paymentMethodId = document.getElementById('payment-method-id').value;
+                const amount = parseFloat(document.getElementById('payment-amount').value) * 100;
+                
+                if (!customerId || !paymentMethodId) {
+                    throw new Error('Please create a customer and payment method first');
+                }
+                
+                const response = await fetch(`${API_BASE}/test-payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ customerId, paymentMethodId, amount })
+                });
+                const data = await response.json();
+                showResult('payment-result', data, !data.success);
+            } catch (error) {
+                showResult('payment-result', { error: error.message }, true);
+            }
+        }
+
+        async function testDeclinedPayment() {
+            showLoading('declined-result');
+            try {
+                const customerId = document.getElementById('declined-customer-id').value;
+                const amount = parseFloat(document.getElementById('declined-amount').value) * 100;
+                
+                if (!customerId) {
+                    throw new Error('Please create a customer first');
+                }
+                
+                const response = await fetch(`${API_BASE}/test-declined-payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ customerId, amount })
+                });
+                const data = await response.json();
+                showResult('declined-result', data, !data.success);
+            } catch (error) {
+                showResult('declined-result', { error: error.message }, true);
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert(`Copied: ${text}`);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+
+        // Auto-run connection test on page load
+        window.onload = function() {
+            testConnection();
+        };
+    </script>
+</body>
+</html>
