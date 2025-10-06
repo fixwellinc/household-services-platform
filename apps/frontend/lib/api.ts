@@ -779,7 +779,17 @@ export class ApiClient {
 }
 
 // Create and export API client instance
-const api = new ApiClient(process.env.NEXT_PUBLIC_API_URL || '/api');
+// Use frontend API routes for admin endpoints, backend for others
+const getBaseURL = () => {
+  // For admin email templates, use frontend API routes
+  if (typeof window !== 'undefined') {
+    return '/api';
+  }
+  // Server-side, use backend URL
+  return process.env.NEXT_PUBLIC_API_URL || '/api';
+};
+
+const api = new ApiClient(getBaseURL());
 
 export const apiClient = api;
 export default api; 
