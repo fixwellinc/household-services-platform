@@ -97,7 +97,7 @@ export function CustomerDashboardContent() {
       {/* Mobile Navigation */}
       <MobileNavigation
         isConnected={socketConnected}
-        notificationCount={notifications.filter(n => !n.isRead).length}
+        notificationCount={notifications?.filter(n => !n.isRead)?.length || 0}
         userTier={transformedSubscription?.tier}
         onLogout={() => {
           // Handle logout
@@ -219,7 +219,7 @@ export function CustomerDashboardContent() {
                     <div>
                       <h3 className="font-medium text-gray-900">Notifications</h3>
                       <p className="text-sm text-gray-600">
-                        {notifications.filter(n => !n.isRead).length} unread
+                        {notifications?.filter(n => !n.isRead)?.length || 0} unread
                       </p>
                     </div>
                     <Bell className="h-8 w-8 text-orange-600" />
@@ -233,16 +233,16 @@ export function CustomerDashboardContent() {
           </section>
 
           {/* Critical Notifications */}
-          {notifications.filter(n => !n.isRead && n.priority === 'HIGH').length > 0 && (
+          {notifications?.filter(n => !n.isRead && n.priority === 'HIGH')?.length > 0 && (
             <section aria-labelledby="critical-notifications-heading">
               <h2 id="critical-notifications-heading" className="text-xl font-semibold text-gray-900 mb-6">
                 Important Notifications
               </h2>
               <div className="space-y-4">
                 {notifications
-                  .filter(n => !n.isRead && n.priority === 'HIGH')
-                  .slice(0, 3)
-                  .map((notification) => (
+                  ?.filter(n => !n.isRead && n.priority === 'HIGH')
+                  ?.slice(0, 3)
+                  ?.map((notification) => (
                     <Card key={notification.id} className="border-red-200 bg-red-50">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between">

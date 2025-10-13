@@ -116,8 +116,8 @@ export function CustomerDashboardLogic({ children }: CustomerDashboardLogicProps
         }
     ]);
 
-    // Merge real-time notifications with local ones
-    const notifications = [...realtimeNotifications, ...localNotifications];
+    // Merge real-time notifications with local ones - ensure arrays exist
+    const notifications = [...(realtimeNotifications || []), ...(localNotifications || [])];
 
     // Access control: Redirect non-customer users or users without subscription history
     useEffect(() => {
@@ -355,7 +355,7 @@ export function CustomerDashboardLogic({ children }: CustomerDashboardLogicProps
         socketConnected,
         lastUpdated,
         refreshData,
-        notifications,
+        notifications: notifications || [],
         handleMarkAsRead,
         handleMarkAllAsRead,
         handleDeleteNotification,
