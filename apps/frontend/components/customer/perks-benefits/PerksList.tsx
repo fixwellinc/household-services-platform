@@ -92,7 +92,7 @@ const PerksList = React.memo(function PerksList({ userTier, perks, onUpgradeClic
     return Math.min((perk.currentUsage / perk.usageLimit) * 100, 100);
   };
 
-  const groupedPerks = perks.reduce((acc, perk) => {
+  const groupedPerks = (perks || []).reduce((acc, perk) => {
     if (!acc[perk.category]) {
       acc[perk.category] = [];
     }

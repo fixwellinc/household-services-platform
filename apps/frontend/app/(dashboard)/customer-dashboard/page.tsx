@@ -271,14 +271,61 @@ function CustomerDashboardContent() {
               <div id="perks-benefits">
                 {transformedSubscription ? (
                   <PerksList
-                    subscription={transformedSubscription}
-                    usage={{
-                      priorityBookingCount: realtimeUsage?.priorityBookings || 0,
-                      maxPriorityBookings: realtimeUsage?.limits?.maxPriorityBookings || 5,
-                      discountAmount: realtimeUsage?.discountsSaved || 0,
-                      maxDiscountAmount: realtimeUsage?.limits?.maxDiscountAmount || 500,
-                      freeServiceUsed: (realtimeUsage?.servicesUsed || 0) > 0,
-                      emergencyServiceUsed: (realtimeUsage?.emergencyServices || 0) > 0
+                    userTier={transformedSubscription.tier}
+                    perks={[
+                      {
+                        id: 'priority-booking',
+                        name: 'Priority Booking',
+                        description: 'Get priority scheduling for your services',
+                        icon: 'star',
+                        isIncluded: true,
+                        isPremium: false,
+                        requiredTier: 'STARTER',
+                        usageLimit: realtimeUsage?.limits?.maxPriorityBookings || 5,
+                        currentUsage: realtimeUsage?.priorityBookings || 0,
+                        category: 'BOOKING'
+                      },
+                      {
+                        id: 'discount-savings',
+                        name: 'Member Discounts',
+                        description: 'Save money on all services with exclusive member pricing',
+                        icon: 'percent',
+                        isIncluded: true,
+                        isPremium: false,
+                        requiredTier: 'STARTER',
+                        usageLimit: realtimeUsage?.limits?.maxDiscountAmount || 500,
+                        currentUsage: realtimeUsage?.discountsSaved || 0,
+                        category: 'BILLING'
+                      },
+                      {
+                        id: 'free-service',
+                        name: 'Free Service',
+                        description: 'One free service per month',
+                        icon: 'gift',
+                        isIncluded: true,
+                        isPremium: false,
+                        requiredTier: 'STARTER',
+                        usageLimit: 1,
+                        currentUsage: (realtimeUsage?.servicesUsed || 0) > 0 ? 1 : 0,
+                        category: 'EXCLUSIVE'
+                      },
+                      {
+                        id: 'emergency-service',
+                        name: 'Emergency Service',
+                        description: '24/7 emergency home services',
+                        icon: 'zap',
+                        isIncluded: transformedSubscription.tier === 'PRIORITY',
+                        isPremium: true,
+                        requiredTier: 'PRIORITY',
+                        usageLimit: realtimeUsage?.limits?.maxEmergencyServices || 2,
+                        currentUsage: realtimeUsage?.emergencyServices || 0,
+                        category: 'SUPPORT'
+                      }
+                    ]}
+                    onUpgradeClick={(requiredTier) => {
+                      addBreadcrumb('upgrade_prompted', { requiredTier });
+                      console.log('Upgrade required to:', requiredTier);
+                      setShowPlanChangeWorkflow(true);
                     }}
                   />
                 ) : (

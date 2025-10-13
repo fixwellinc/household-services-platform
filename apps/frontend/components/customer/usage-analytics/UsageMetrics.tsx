@@ -410,13 +410,13 @@ export default function UsageMetrics({
                 <div className="flex justify-between items-center">
                   <span className="font-medium text-gray-900">Total Savings:</span>
                   <span className="text-lg font-bold text-green-600">
-                    {formatCurrency(serviceBreakdown.reduce((sum, s) => sum + s.discountAmount, 0))}
+                    {formatCurrency((serviceBreakdown || []).reduce((sum, s) => sum + s.discountAmount, 0))}
                   </span>
                 </div>
                 <div className="flex justify-between items-center mt-1">
                   <span className="text-sm text-gray-600">Total Spent:</span>
                   <span className="text-sm font-medium text-gray-900">
-                    {formatCurrency(serviceBreakdown.reduce((sum, s) => sum + s.finalAmount, 0))}
+                    {formatCurrency((serviceBreakdown || []).reduce((sum, s) => sum + s.finalAmount, 0))}
                   </span>
                 </div>
               </div>
@@ -444,7 +444,7 @@ export default function UsageMetrics({
         <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-green-600">
-              {formatCurrency(serviceBreakdown.reduce((sum, s) => sum + s.discountAmount, 0))}
+              {formatCurrency((serviceBreakdown || []).reduce((sum, s) => sum + s.discountAmount, 0))}
             </div>
             <div className="text-sm text-green-700">Total Savings</div>
           </CardContent>
@@ -453,8 +453,8 @@ export default function UsageMetrics({
         <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-purple-600">
-              {Math.round((serviceBreakdown.reduce((sum, s) => sum + s.discountAmount, 0) / 
-                Math.max(serviceBreakdown.reduce((sum, s) => sum + s.totalAmount, 0), 1)) * 100)}%
+              {Math.round(((serviceBreakdown || []).reduce((sum, s) => sum + s.discountAmount, 0) / 
+                Math.max((serviceBreakdown || []).reduce((sum, s) => sum + s.totalAmount, 0), 1)) * 100)}%
             </div>
             <div className="text-sm text-purple-700">Average Discount</div>
           </CardContent>
