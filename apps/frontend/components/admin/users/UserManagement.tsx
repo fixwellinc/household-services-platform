@@ -24,6 +24,7 @@ import { UserRoleAssignment } from '../permissions/UserRoleAssignment';
 import { UserImpersonation } from '../permissions/UserImpersonation';
 import { ConfirmationDialog } from './ConfirmationDialog';
 import { UserSuspensionWorkflow } from './UserSuspensionWorkflow';
+import { UserStatsCards } from './UserStatsCards';
 import { useApi } from '@/hooks/use-api';
 import { useToast } from '@/hooks/use-toast';
 import { PermissionGuard } from '@/hooks/use-permissions';
@@ -276,27 +277,6 @@ export function UserManagement() {
       }
     },
     {
-      key: 'subscription',
-      label: 'Subscription',
-      render: (subscription: any, user: User) => {
-        if (!user) {
-          return <span className="text-gray-400">No user data</span>;
-        }
-        return user.subscription ? (
-          <div className="flex flex-col">
-            <span className="text-sm font-medium">{user.subscription.tier}</span>
-            <span className={`text-xs ${
-              user.subscription.status === 'ACTIVE' ? 'text-green-600' : 'text-red-600'
-            }`}>
-              {user.subscription.status}
-            </span>
-          </div>
-        ) : (
-          <span className="text-gray-400">No subscription</span>
-        );
-      }
-    },
-    {
       key: 'phone',
       label: 'Phone',
       render: (phone: string, user: User) => phone || '-'
@@ -381,6 +361,16 @@ export function UserManagement() {
             )}
           </PermissionGuard>
 
+          <PermissionGuard permission="users.lock">
+            <button
+              onClick={() => handleViewUser(user)} // Open details panel for lock/unlock
+              className="p-1 text-red-600 hover:text-red-800"
+              title="Lock/Unlock Account (opens details)"
+            >
+              <Shield className="w-4 h-4" />
+            </button>
+          </PermissionGuard>
+
           <PermissionGuard permission="users.update">
             <button
               onClick={() => handleResetPassword(user)}
@@ -429,6 +419,31 @@ export function UserManagement() {
             <span>Add User</span>
           </button>
       </div>
+
+      {/* Info Banner */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-start">
+          <div className="flex-shrink-0">
+            <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-blue-800">
+              Customer Management
+            </h3>
+            <div className="mt-2 text-sm text-blue-700">
+              <p>
+                Customer accounts are managed in the <strong>Subscriptions</strong> page. 
+                This page focuses on system users (Admin, Employee, Technician, Salesman).
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* User Statistics */}
+      <UserStatsCards />
 
       {/* Search and Filters */}
       <SimpleSearchAndFilter

@@ -30,7 +30,7 @@ export function UserForm({ user, onClose, onSave }: UserFormProps) {
     phone: user?.phone || '',
     address: user?.address || '',
     postalCode: user?.postalCode || '',
-    role: user?.role || 'CUSTOMER'
+    role: user?.role || 'EMPLOYEE'
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);

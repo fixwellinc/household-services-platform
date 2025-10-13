@@ -34,6 +34,17 @@ model User {
   activatedAt       DateTime?
   activatedBy       String?
   activationReason  String?
+  
+  // Activity tracking fields
+  lastLoginAt       DateTime?
+  passwordChangedAt DateTime?
+  isLocked          Boolean                      @default(false)
+  lockedAt          DateTime?
+  lockedBy          String?
+  lockReason        String?
+  forcePasswordChange Boolean                    @default(false)
+  failedLoginAttempts Int                        @default(0)
+  lastFailedLoginAt DateTime?
   assignedEmployee  CustomerEmployeeAssignment?  @relation("CustomerAssignment")
   assignedCustomers CustomerEmployeeAssignment[] @relation("EmployeeAssignments")
   subscriptionUsage SubscriptionUsage?

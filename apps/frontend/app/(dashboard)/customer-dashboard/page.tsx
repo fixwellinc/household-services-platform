@@ -1,6 +1,6 @@
 import React from 'react';
 import { CustomerDashboardWrapper } from '@/components/dashboard/CustomerDashboardWrapper';
-import { CustomerDashboardLogic } from '@/components/dashboard/CustomerDashboardLogic';
+import { CustomerDashboardLogic, useCustomerDashboard } from '@/components/dashboard/CustomerDashboardLogic';
 import { DashboardRouteGuard } from '@/components/dashboard/DashboardRouteGuard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/shared';
 import { Badge, Button } from '@/components/ui/shared';
@@ -60,38 +60,37 @@ export default function CustomerDashboardPage() {
   return (
     <CustomerDashboardWrapper>
       <CustomerDashboardLogic>
-        {(props) => (
-          <DashboardRouteGuard requiredRole="CUSTOMER">
-            <CustomerDashboardContent {...props} />
-          </DashboardRouteGuard>
-        )}
+        <DashboardRouteGuard requiredRole="CUSTOMER">
+          <CustomerDashboardContent />
+        </DashboardRouteGuard>
       </CustomerDashboardLogic>
     </CustomerDashboardWrapper>
   );
 }
 
 // Separate component for the actual dashboard content
-function CustomerDashboardContent({
-  user,
-  subscriptionStatus,
-  transformedSubscription,
-  realtimeUsage,
-  socketConnected,
-  lastUpdated,
-  refreshData,
-  notifications,
-  handleMarkAsRead,
-  handleMarkAllAsRead,
-  handleDeleteNotification,
-  handlePlanChange,
-  handleCancelSubscription,
-  showPlanChangeWorkflow,
-  showCancellationModal,
-  setShowPlanChangeWorkflow,
-  setShowCancellationModal,
-  handlePlanChanged,
-  handleCancellationComplete
-}: any) {
+function CustomerDashboardContent() {
+  const {
+    user,
+    subscriptionStatus,
+    transformedSubscription,
+    realtimeUsage,
+    socketConnected,
+    lastUpdated,
+    refreshData,
+    notifications,
+    handleMarkAsRead,
+    handleMarkAllAsRead,
+    handleDeleteNotification,
+    handlePlanChange,
+    handleCancelSubscription,
+    showPlanChangeWorkflow,
+    showCancellationModal,
+    setShowPlanChangeWorkflow,
+    setShowCancellationModal,
+    handlePlanChanged,
+    handleCancellationComplete
+  } = useCustomerDashboard();
   // Initialize new features
   const { retryPendingActions, clearPendingActions } = useOfflineManager();
   const { addBreadcrumb } = useErrorTracking({ componentName: 'CustomerDashboard' });

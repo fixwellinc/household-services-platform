@@ -10,8 +10,41 @@ import { DashboardRouteGuard } from '@/components/dashboard/DashboardRouteGuard'
 import { FullPageLoader } from '@/components/customer/loading/LoadingStates';
 import { Notification } from '@fixwell/types';
 
+// Create context for dashboard data
+interface CustomerDashboardContextType {
+    user: any;
+    subscriptionStatus: any;
+    transformedSubscription: any;
+    realtimeUsage: any;
+    socketConnected: boolean;
+    lastUpdated: any;
+    refreshData: () => void;
+    notifications: Notification[];
+    handleMarkAsRead: (notificationId: string) => void;
+    handleMarkAllAsRead: () => void;
+    handleDeleteNotification: (notificationId: string) => void;
+    handlePlanChange: () => void;
+    handleCancelSubscription: () => void;
+    showPlanChangeWorkflow: boolean;
+    showCancellationModal: boolean;
+    setShowPlanChangeWorkflow: (show: boolean) => void;
+    setShowCancellationModal: (show: boolean) => void;
+    handlePlanChanged: () => void;
+    handleCancellationComplete: () => void;
+}
+
+const CustomerDashboardContext = React.createContext<CustomerDashboardContextType | null>(null);
+
+export const useCustomerDashboard = () => {
+    const context = React.useContext(CustomerDashboardContext);
+    if (!context) {
+        throw new Error('useCustomerDashboard must be used within CustomerDashboardLogic');
+    }
+    return context;
+};
+
 interface CustomerDashboardLogicProps {
-    children: (props: any) => React.ReactNode;
+    children: React.ReactNode;
 }
 
 export function CustomerDashboardLogic({ children }: CustomerDashboardLogicProps) {
@@ -298,7 +331,7 @@ title: 'Welcome to Premium Plan',
         );
     }
 
-    return children({
+    const contextValue: CustomerDashboardContextType = {
         user,
         subscriptionStatus,
         transformedSubscription,
@@ -318,5 +351,11 @@ title: 'Welcome to Premium Plan',
         setShowCancellationModal,
         handlePlanChanged,
         handleCancellationComplete
-    });
+    };
+
+    return (
+        <CustomerDashboardContext.Provider value={contextValue}>
+            {children}
+        </CustomerDashboardContext.Provider>
+    );
 }

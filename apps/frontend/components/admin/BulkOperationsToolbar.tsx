@@ -19,7 +19,13 @@ import {
   XCircle, 
   Pause,
   AlertTriangle,
-  Loader2
+  Loader2,
+  Lock,
+  Unlock,
+  Key,
+  Shield,
+  Download,
+  Mail
 } from 'lucide-react';
 import { useBulkOperations } from '@/hooks/use-bulk-operations';
 import { BulkOperationConfirmDialog } from './BulkOperationConfirmDialog';
@@ -53,6 +59,18 @@ const getOperationIcon = (type: string) => {
       return <XCircle className="h-4 w-4" />;
     case 'suspend':
       return <Pause className="h-4 w-4" />;
+    case 'lock':
+      return <Lock className="h-4 w-4" />;
+    case 'unlock':
+      return <Unlock className="h-4 w-4" />;
+    case 'reset_password':
+      return <Key className="h-4 w-4" />;
+    case 'assign_role':
+      return <Shield className="h-4 w-4" />;
+    case 'export_data':
+      return <Download className="h-4 w-4" />;
+    case 'send_notification':
+      return <Mail className="h-4 w-4" />;
     default:
       return <Edit className="h-4 w-4" />;
   }

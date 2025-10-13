@@ -124,6 +124,102 @@ export const auditPresets = {
     severity: 'high'
   }),
 
+  userSuspend: auditMiddleware({
+    action: 'SUSPEND_USER',
+    entityType: 'user',
+    getEntityId: (req) => req.params.id || req.params.userId,
+    getChanges: (req) => ({
+      reason: req.body.reason
+    }),
+    severity: 'high'
+  }),
+
+  userActivate: auditMiddleware({
+    action: 'ACTIVATE_USER',
+    entityType: 'user',
+    getEntityId: (req) => req.params.id || req.params.userId,
+    getChanges: (req) => ({
+      role: req.body.role,
+      reason: req.body.reason
+    }),
+    severity: 'medium'
+  }),
+
+  userLock: auditMiddleware({
+    action: 'LOCK_USER',
+    entityType: 'user',
+    getEntityId: (req) => req.params.id || req.params.userId,
+    getChanges: (req) => ({
+      reason: req.body.reason
+    }),
+    severity: 'high'
+  }),
+
+  userUnlock: auditMiddleware({
+    action: 'UNLOCK_USER',
+    entityType: 'user',
+    getEntityId: (req) => req.params.id || req.params.userId,
+    getChanges: (req) => ({
+      reason: req.body.reason
+    }),
+    severity: 'medium'
+  }),
+
+  roleAssign: auditMiddleware({
+    action: 'ASSIGN_ROLE',
+    entityType: 'user_role',
+    getEntityId: (req) => req.params.id || req.params.userId,
+    getChanges: (req) => ({
+      roleId: req.body.roleId,
+      expiresAt: req.body.expiresAt
+    }),
+    severity: 'high'
+  }),
+
+  roleRemove: auditMiddleware({
+    action: 'REMOVE_ROLE',
+    entityType: 'user_role',
+    getEntityId: (req) => req.params.id || req.params.userId,
+    getChanges: (req) => ({
+      roleId: req.params.roleId
+    }),
+    severity: 'high'
+  }),
+
+  roleCreate: auditMiddleware({
+    action: 'CREATE_ROLE',
+    entityType: 'role',
+    getEntityId: (req, responseData) => {
+      try {
+        const parsed = typeof responseData === 'string' ? JSON.parse(responseData) : responseData;
+        return parsed?.role?.id || 'unknown';
+      } catch {
+        return 'unknown';
+      }
+    },
+    getChanges: (req) => ({
+      created: req.body
+    }),
+    severity: 'high'
+  }),
+
+  roleUpdate: auditMiddleware({
+    action: 'UPDATE_ROLE',
+    entityType: 'role',
+    getEntityId: (req) => req.params.id,
+    getChanges: (req) => ({
+      updated: req.body
+    }),
+    severity: 'high'
+  }),
+
+  roleDelete: auditMiddleware({
+    action: 'DELETE_ROLE',
+    entityType: 'role',
+    getEntityId: (req) => req.params.id,
+    severity: 'high'
+  }),
+
   subscriptionUpdate: auditMiddleware({
     action: 'UPDATE_SUBSCRIPTION',
     entityType: 'subscription',

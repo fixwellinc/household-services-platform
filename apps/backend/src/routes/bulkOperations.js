@@ -286,6 +286,54 @@ router.get('/supported-operations', async (req, res) => {
         requiresConfirmation: true,
         riskLevel: 'high',
         supportedEntities: ['user', 'subscription']
+      },
+      {
+        type: 'lock',
+        label: 'Lock Accounts',
+        description: 'Lock selected user accounts for security',
+        requiresConfirmation: true,
+        riskLevel: 'high',
+        supportedEntities: ['user']
+      },
+      {
+        type: 'unlock',
+        label: 'Unlock Accounts',
+        description: 'Unlock selected user accounts',
+        requiresConfirmation: false,
+        riskLevel: 'medium',
+        supportedEntities: ['user']
+      },
+      {
+        type: 'reset_password',
+        label: 'Reset Passwords',
+        description: 'Reset passwords for selected users',
+        requiresConfirmation: true,
+        riskLevel: 'high',
+        supportedEntities: ['user']
+      },
+      {
+        type: 'assign_role',
+        label: 'Assign Role',
+        description: 'Assign role to selected users',
+        requiresConfirmation: true,
+        riskLevel: 'high',
+        supportedEntities: ['user']
+      },
+      {
+        type: 'export_data',
+        label: 'Export Data',
+        description: 'Export user data for GDPR compliance',
+        requiresConfirmation: false,
+        riskLevel: 'low',
+        supportedEntities: ['user']
+      },
+      {
+        type: 'send_notification',
+        label: 'Send Notification',
+        description: 'Send notification to selected users',
+        requiresConfirmation: false,
+        riskLevel: 'low',
+        supportedEntities: ['user']
       }
     ];
 

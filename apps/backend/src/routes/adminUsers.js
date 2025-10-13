@@ -10,6 +10,127 @@ const router = express.Router();
 router.use(requireAdmin);
 
 /**
+ * GET /api/admin/users/stats
+ * Get user statistics for dashboard
+ */
+router.get('/stats', async (req, res) => {
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const [
+      totalUsers,
+      activeUsers,
+      suspendedUsers,
+      lockedUsers,
+      adminUsers,
+      employeeUsers,
+      technicianUsers,
+      salesmanUsers,
+      recentUsers,
+      inactiveUsers,
+      usersWithFailedLogins
+    ] = await Promise.all([
+      // Total users (excluding CUSTOMER)
+      prisma.user.count({
+        where: { role: { not: 'CUSTOMER' } }
+      }),
+      
+      // Active users (not suspended, not locked, not deleted)
+      prisma.user.count({
+        where: { 
+          role: { notIn: ['CUSTOMER', 'SUSPENDED', 'DELETED'] },
+          isLocked: { not: true }
+        }
+      }),
+      
+      // Suspended users
+      prisma.user.count({
+        where: { role: 'SUSPENDED' }
+      }),
+      
+      // Locked users
+      prisma.user.count({
+        where: { isLocked: true }
+      }),
+      
+      // Admin users
+      prisma.user.count({
+        where: { role: 'ADMIN' }
+      }),
+      
+      // Employee users
+      prisma.user.count({
+        where: { role: 'EMPLOYEE' }
+      }),
+      
+      // Technician users
+      prisma.user.count({
+        where: { role: 'TECHNICIAN' }
+      }),
+      
+      // Salesman users
+      prisma.user.count({
+        where: { role: 'SALESMAN' }
+      }),
+      
+      // Recent users (last 7 days)
+      prisma.user.count({
+        where: { 
+          createdAt: { gte: sevenDaysAgo },
+          role: { not: 'CUSTOMER' }
+        }
+      }),
+      
+      // Inactive users (no login in 30+ days)
+      prisma.user.count({
+        where: {
+          OR: [
+            { lastLoginAt: { lt: thirtyDaysAgo } },
+            { lastLoginAt: null }
+          ],
+          role: { not: 'CUSTOMER' }
+        }
+      }),
+      
+      // Users with failed login attempts
+      prisma.user.count({
+        where: { 
+          failedLoginAttempts: { gt: 0 },
+          role: { not: 'CUSTOMER' }
+        }
+      })
+    ]);
+
+    res.json({
+      success: true,
+      stats: {
+        totalUsers,
+        activeUsers,
+        suspendedUsers,
+        lockedUsers,
+        adminUsers,
+        employeeUsers,
+        technicianUsers,
+        salesmanUsers,
+        recentUsers,
+        inactiveUsers,
+        usersWithFailedLogins
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching user stats:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch user statistics'
+    });
+  }
+});
+
+/**
  * GET /api/admin/users
  * Get all users with advanced filtering and search
  */
@@ -33,16 +154,19 @@ router.get('/', async (req, res) => {
     // Build where clause
     const where = {};
     
+    // Default filter: exclude CUSTOMER role users unless explicitly requested
+    if (!role) {
+      where.role = { not: 'CUSTOMER' };
+    } else if (role) {
+      where.role = role;
+    }
+    
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
         { email: { contains: search, mode: 'insensitive' } },
         { phone: { contains: search, mode: 'insensitive' } }
       ];
-    }
-
-    if (role) {
-      where.role = role;
     }
 
     if (startDate || endDate) {
@@ -216,7 +340,16 @@ router.get('/:id', async (req, res) => {
         suspensionReason: true,
         activatedAt: true,
         activatedBy: true,
-        activationReason: true
+        activationReason: true,
+        lastLoginAt: true,
+        passwordChangedAt: true,
+        isLocked: true,
+        lockedAt: true,
+        lockedBy: true,
+        lockReason: true,
+        forcePasswordChange: true,
+        failedLoginAttempts: true,
+        lastFailedLoginAt: true
       }
     });
 
@@ -282,6 +415,56 @@ router.get('/:id', async (req, res) => {
       }
     });
 
+    // Get role assignments
+    const roleAssignments = await prisma.userRole.findMany({
+      where: { userId: user.id },
+      include: {
+        role: {
+          select: {
+            id: true,
+            name: true,
+            description: true
+          }
+        },
+        assignedByUser: {
+          select: {
+            id: true,
+            email: true,
+            name: true
+          }
+        }
+      },
+      orderBy: { assignedAt: 'desc' }
+    });
+
+    // Get impersonation sessions
+    const impersonationSessions = await prisma.impersonationSession.findMany({
+      where: {
+        OR: [
+          { adminId: user.id },
+          { targetUserId: user.id }
+        ]
+      },
+      include: {
+        admin: {
+          select: {
+            id: true,
+            email: true,
+            name: true
+          }
+        },
+        targetUser: {
+          select: {
+            id: true,
+            email: true,
+            name: true
+          }
+        }
+      },
+      orderBy: { startedAt: 'desc' },
+      take: 10
+    });
+
     // Build activity timeline
     const activities = [
       ...bookings.map(booking => ({
@@ -306,7 +489,24 @@ router.get('/:id', async (req, res) => {
         type: 'audit',
         action: log.action,
         timestamp: log.createdAt,
-        data: log
+        data: log,
+        actor: log.admin
+      })),
+      ...roleAssignments.map(assignment => ({
+        type: 'role_change',
+        action: `Role assigned: ${assignment.role.name}`,
+        timestamp: assignment.assignedAt,
+        data: assignment,
+        actor: assignment.assignedByUser
+      })),
+      ...impersonationSessions.map(session => ({
+        type: 'impersonation',
+        action: session.adminId === user.id ? 
+          `Impersonated ${session.targetUser.email}` : 
+          `Impersonated by ${session.admin.email}`,
+        timestamp: session.startedAt,
+        data: session,
+        actor: session.adminId === user.id ? session.admin : session.targetUser
       }))
     ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
@@ -317,10 +517,18 @@ router.get('/:id', async (req, res) => {
         subscription
       },
       activities: activities.slice(0, 50), // Limit to 50 most recent activities
+      roleAssignments,
+      impersonationSessions,
       stats: {
         totalBookings: bookings.length,
         totalQuotes: quotes.length,
-        totalMessages: messages.length
+        totalMessages: messages.length,
+        totalRoleAssignments: roleAssignments.length,
+        totalImpersonationSessions: impersonationSessions.length,
+        failedLoginAttempts: user.failedLoginAttempts || 0,
+        isLocked: user.isLocked || false,
+        lastLoginAt: user.lastLoginAt,
+        passwordChangedAt: user.passwordChangedAt
       }
     });
   } catch (error) {
@@ -433,7 +641,7 @@ router.put('/:id', auditPresets.userUpdate, async (req, res) => {
  */
 router.post('/', auditPresets.userCreate, async (req, res) => {
   try {
-    const { name, email, password, phone, address, postalCode, role = 'CUSTOMER' } = req.body;
+    const { name, email, password, phone, address, postalCode, role = 'EMPLOYEE' } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
@@ -698,6 +906,307 @@ router.post('/:id/activate', auditPresets.userActivate, async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to activate user'
+    });
+  }
+});
+
+/**
+ * POST /api/admin/users/:id/lock
+ * Lock user account
+ */
+router.post('/:id/lock', auditPresets.userLock, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    if (!reason || !reason.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Lock reason is required'
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id }
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    if (user.isLocked) {
+      return res.status(400).json({
+        success: false,
+        error: 'User is already locked'
+      });
+    }
+
+    await prisma.user.update({
+      where: { id },
+      data: {
+        isLocked: true,
+        lockedAt: new Date(),
+        lockedBy: req.user.id,
+        lockReason: reason.trim()
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'User account locked successfully'
+    });
+  } catch (error) {
+    console.error('Error locking user:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to lock user account'
+    });
+  }
+});
+
+/**
+ * POST /api/admin/users/:id/unlock
+ * Unlock user account
+ */
+router.post('/:id/unlock', auditPresets.userUnlock, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    if (!reason || !reason.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Unlock reason is required'
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id }
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    if (!user.isLocked) {
+      return res.status(400).json({
+        success: false,
+        error: 'User is not locked'
+      });
+    }
+
+    await prisma.user.update({
+      where: { id },
+      data: {
+        isLocked: false,
+        lockedAt: null,
+        lockedBy: null,
+        lockReason: null,
+        failedLoginAttempts: 0 // Reset failed attempts
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'User account unlocked successfully'
+    });
+  } catch (error) {
+    console.error('Error unlocking user:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to unlock user account'
+    });
+  }
+});
+
+/**
+ * GET /api/admin/users/:id/roles
+ * Get user's role assignments
+ */
+router.get('/:id/roles', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const userRoles = await prisma.userRole.findMany({
+      where: { userId: id },
+      include: {
+        role: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            isSystem: true
+          }
+        },
+        assignedByUser: {
+          select: {
+            id: true,
+            email: true,
+            name: true
+          }
+        }
+      },
+      orderBy: { assignedAt: 'desc' }
+    });
+
+    res.json({
+      success: true,
+      roles: userRoles
+    });
+  } catch (error) {
+    console.error('Error fetching user roles:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch user roles'
+    });
+  }
+});
+
+/**
+ * POST /api/admin/users/:id/roles
+ * Assign role to user
+ */
+router.post('/:id/roles', auditPresets.roleAssign, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { roleId, expiresAt } = req.body;
+
+    if (!roleId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Role ID is required'
+      });
+    }
+
+    // Check if user exists
+    const user = await prisma.user.findUnique({
+      where: { id }
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    // Check if role exists
+    const role = await prisma.role.findUnique({
+      where: { id: roleId }
+    });
+
+    if (!role) {
+      return res.status(404).json({
+        success: false,
+        error: 'Role not found'
+      });
+    }
+
+    // Check if role is already assigned
+    const existingAssignment = await prisma.userRole.findUnique({
+      where: {
+        userId_roleId: {
+          userId: id,
+          roleId: roleId
+        }
+      }
+    });
+
+    if (existingAssignment) {
+      return res.status(400).json({
+        success: false,
+        error: 'Role is already assigned to this user'
+      });
+    }
+
+    // Create role assignment
+    const userRole = await prisma.userRole.create({
+      data: {
+        userId: id,
+        roleId: roleId,
+        assignedBy: req.user.id,
+        expiresAt: expiresAt ? new Date(expiresAt) : null
+      },
+      include: {
+        role: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            isSystem: true
+          }
+        },
+        assignedByUser: {
+          select: {
+            id: true,
+            email: true,
+            name: true
+          }
+        }
+      }
+    });
+
+    res.json({
+      success: true,
+      userRole
+    });
+  } catch (error) {
+    console.error('Error assigning role:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to assign role'
+    });
+  }
+});
+
+/**
+ * DELETE /api/admin/users/:id/roles/:roleId
+ * Remove role assignment from user
+ */
+router.delete('/:id/roles/:roleId', auditPresets.roleRemove, async (req, res) => {
+  try {
+    const { id, roleId } = req.params;
+
+    const userRole = await prisma.userRole.findUnique({
+      where: {
+        userId_roleId: {
+          userId: id,
+          roleId: roleId
+        }
+      }
+    });
+
+    if (!userRole) {
+      return res.status(404).json({
+        success: false,
+        error: 'Role assignment not found'
+      });
+    }
+
+    await prisma.userRole.delete({
+      where: {
+        userId_roleId: {
+          userId: id,
+          roleId: roleId
+        }
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Role assignment removed successfully'
+    });
+  } catch (error) {
+    console.error('Error removing role assignment:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to remove role assignment'
     });
   }
 });
