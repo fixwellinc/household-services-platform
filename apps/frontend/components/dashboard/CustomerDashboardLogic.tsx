@@ -116,8 +116,11 @@ export function CustomerDashboardLogic({ children }: CustomerDashboardLogicProps
         }
     ]);
 
-    // Merge real-time notifications with local ones - ensure arrays exist
-    const notifications = [...(realtimeNotifications || []), ...(localNotifications || [])];
+    // Merge real-time notifications with local ones - ensure arrays exist and are never undefined
+    const notifications = [
+        ...(Array.isArray(realtimeNotifications) ? realtimeNotifications : []), 
+        ...(Array.isArray(localNotifications) ? localNotifications : [])
+    ];
 
     // Access control: Redirect non-customer users or users without subscription history
     useEffect(() => {
@@ -224,19 +227,19 @@ export function CustomerDashboardLogic({ children }: CustomerDashboardLogicProps
 
     // Notification handlers
     const handleMarkAsRead = (notificationId: string) => {
-        setLocalNotifications(prev =>
-            prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n)
+        setLocalNotifications(prev => 
+            (prev || []).map(n => n.id === notificationId ? { ...n, isRead: true } : n)
         );
         // TODO: Also mark real-time notifications as read via API
     };
 
     const handleMarkAllAsRead = () => {
-        setLocalNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+        setLocalNotifications(prev => (prev || []).map(n => ({ ...n, isRead: true })));
         // TODO: Also mark all real-time notifications as read via API
     };
 
     const handleDeleteNotification = (notificationId: string) => {
-        setLocalNotifications(prev => prev.filter(n => n.id !== notificationId));
+        setLocalNotifications(prev => (prev || []).filter(n => n.id !== notificationId));
         // TODO: Also delete real-time notifications via API
     };
 
@@ -355,7 +358,7 @@ export function CustomerDashboardLogic({ children }: CustomerDashboardLogicProps
         socketConnected,
         lastUpdated,
         refreshData,
-        notifications: notifications || [],
+        notifications: notifications,
         handleMarkAsRead,
         handleMarkAllAsRead,
         handleDeleteNotification,
