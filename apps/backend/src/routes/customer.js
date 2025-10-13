@@ -193,6 +193,87 @@ router.get('/usage', authMiddleware, async (req, res) => {
   }
 });
 
+// Get usage metrics for analytics
+router.post('/usage/metrics', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { startDate, endDate } = req.body;
+
+    // Get usage data
+    const usage = usageTrackingService.getUserUsage(userId);
+    const limits = usageTrackingService.getLimitsForTier('HOMECARE'); // Default tier
+
+    // Generate mock metrics for the requested period
+    const metrics = [
+      {
+        id: 'services_used',
+        name: 'Services Used',
+        value: usage.servicesUsed || 0,
+        category: 'SERVICES',
+        unit: 'count',
+        trend: 'up',
+        change: '+2'
+      },
+      {
+        id: 'discount_savings',
+        name: 'Discount Savings',
+        value: usage.discountsSaved || 0,
+        category: 'BILLING',
+        unit: 'currency',
+        trend: 'up',
+        change: '+$45'
+      },
+      {
+        id: 'priority_bookings',
+        name: 'Priority Bookings',
+        value: usage.priorityBookings || 0,
+        category: 'BOOKING',
+        unit: 'count',
+        trend: 'stable',
+        change: '0'
+      }
+    ];
+
+    // Generate mock service breakdown
+    const serviceBreakdown = [
+      {
+        serviceId: 'plumbing',
+        serviceName: 'Plumbing Services',
+        totalAmount: 150.00,
+        discountAmount: 30.00,
+        finalAmount: 120.00,
+        usageCount: 2
+      },
+      {
+        serviceId: 'electrical',
+        serviceName: 'Electrical Services',
+        totalAmount: 200.00,
+        discountAmount: 40.00,
+        finalAmount: 160.00,
+        usageCount: 1
+      }
+    ];
+
+    const totalSavings = serviceBreakdown.reduce((sum, service) => sum + service.discountAmount, 0);
+    const totalSpent = serviceBreakdown.reduce((sum, service) => sum + service.finalAmount, 0);
+
+    res.json({
+      success: true,
+      metrics,
+      serviceBreakdown,
+      totalSavings,
+      totalSpent,
+      message: 'Usage metrics retrieved successfully'
+    });
+  } catch (error) {
+    console.error('Error getting usage metrics:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get usage metrics'
+    });
+  }
+});
+
 // Reset usage for testing
 router.post('/reset-usage', authMiddleware, async (req, res) => {
   try {
