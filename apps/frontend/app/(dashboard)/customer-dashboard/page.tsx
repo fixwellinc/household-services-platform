@@ -90,7 +90,8 @@ function CustomerDashboardContent() {
     setShowPlanChangeWorkflow,
     setShowCancellationModal,
     handlePlanChanged,
-    handleCancellationComplete
+    handleCancellationComplete,
+    perkUpdates
   } = useCustomerDashboard();
   // Initialize new features
   const { retryPendingActions, clearPendingActions } = useOfflineManager();

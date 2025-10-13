@@ -31,6 +31,7 @@ interface CustomerDashboardContextType {
     setShowCancellationModal: (show: boolean) => void;
     handlePlanChanged: () => void;
     handleCancellationComplete: () => void;
+    perkUpdates: any[];
 }
 
 const CustomerDashboardContext = React.createContext<CustomerDashboardContextType | null>(null);
@@ -359,7 +360,8 @@ export function CustomerDashboardLogic({ children }: CustomerDashboardLogicProps
         setShowPlanChangeWorkflow,
         setShowCancellationModal,
         handlePlanChanged,
-        handleCancellationComplete
+        handleCancellationComplete,
+        perkUpdates
     };
 
     return (
