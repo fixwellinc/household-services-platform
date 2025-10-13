@@ -123,35 +123,54 @@ export function SubscriptionManagement() {
                 }
             });
 
+            console.log('Fetching subscriptions with params:', params.toString());
             const response = await request(`/admin/subscriptions?${params.toString()}`);
+
+            console.log('Subscriptions response:', response);
 
             if (response.success) {
                 // Ensure all subscriptions have required properties
                 const safeSubscriptions = (response.subscriptions || []).map((sub: any) => ({
                     ...sub,
-                    user: sub.user || { email: 'Unknown', name: null },
-                    tier: sub.tier || 'Unknown',
-                    status: sub.status || 'Unknown',
-                    paymentFrequency: sub.paymentFrequency || 'Unknown',
+                    user: sub.user || { 
+                        id: sub.userId || 'unknown', 
+                        email: 'Unknown User', 
+                        name: null,
+                        phone: null,
+                        createdAt: sub.createdAt || new Date().toISOString()
+                    },
+                    tier: sub.tier || 'UNKNOWN',
+                    status: sub.status || 'UNKNOWN',
+                    paymentFrequency: sub.paymentFrequency || 'MONTHLY',
                     lifetimeValue: sub.lifetimeValue || 0,
                     churnRiskScore: sub.churnRiskScore || 0,
                     availableCredits: sub.availableCredits || 0,
-                    createdAt: sub.createdAt || new Date().toISOString()
+                    loyaltyPoints: sub.loyaltyPoints || 0,
+                    isPaused: sub.isPaused || false,
+                    pauseStartDate: sub.pauseStartDate || null,
+                    pauseEndDate: sub.pauseEndDate || null,
+                    createdAt: sub.createdAt || new Date().toISOString(),
+                    updatedAt: sub.updatedAt || new Date().toISOString()
                 }));
                 
+                console.log('Processed subscriptions:', safeSubscriptions.length);
                 setSubscriptions(safeSubscriptions);
                 setPagination(prev => ({
                     ...prev,
                     ...response.pagination
                 }));
             } else {
+                console.error('API returned error:', response.error);
                 throw new Error(response.error || 'Failed to fetch subscriptions');
             }
         } catch (error) {
             console.error('Error fetching subscriptions:', error);
-            showError(error instanceof Error ? error.message : "Failed to fetch subscriptions");
-            // Set empty state on error
-            setSubscriptions([]);
+            const errorMessage = error instanceof Error ? error.message : "Failed to fetch subscriptions";
+            showError(errorMessage);
+            // Set empty state on error but don't clear existing data immediately
+            if (subscriptions.length === 0) {
+                setSubscriptions([]);
+            }
         } finally {
             setLoading(false);
         }
@@ -305,21 +324,89 @@ export function SubscriptionManagement() {
                 if (!subscription) {
                     return <Badge variant="outline">Unknown</Badge>;
                 }
+
+                // Enhanced status determination
+                const getStatusInfo = (sub: Subscription) => {
+                    const baseStatus = sub.status || 'UNKNOWN';
+                    const isPaused = sub.isPaused;
+                    const currentDate = new Date();
+                    const periodEnd = sub.currentPeriodEnd ? new Date(sub.currentPeriodEnd) : null;
+                    const isExpired = periodEnd && currentDate > periodEnd;
+                    const isNearExpiry = periodEnd && (periodEnd.getTime() - currentDate.getTime()) < (7 * 24 * 60 * 60 * 1000); // 7 days
+
+                    if (isPaused) {
+                        return {
+                            status: 'PAUSED',
+                            variant: 'secondary' as const,
+                            description: sub.pauseEndDate ? `Paused until ${new Date(sub.pauseEndDate).toLocaleDateString()}` : 'Paused indefinitely'
+                        };
+                    }
+
+                    if (baseStatus === 'CANCELLED') {
+                        return {
+                            status: 'CANCELLED',
+                            variant: 'destructive' as const,
+                            description: 'Subscription cancelled'
+                        };
+                    }
+
+                    if (baseStatus === 'PAST_DUE') {
+                        return {
+                            status: 'PAST_DUE',
+                            variant: 'destructive' as const,
+                            description: 'Payment overdue'
+                        };
+                    }
+
+                    if (baseStatus === 'INCOMPLETE') {
+                        return {
+                            status: 'INCOMPLETE',
+                            variant: 'secondary' as const,
+                            description: 'Payment incomplete'
+                        };
+                    }
+
+                    if (isExpired) {
+                        return {
+                            status: 'EXPIRED',
+                            variant: 'destructive' as const,
+                            description: 'Subscription expired'
+                        };
+                    }
+
+                    if (isNearExpiry && baseStatus === 'ACTIVE') {
+                        return {
+                            status: 'ACTIVE',
+                            variant: 'default' as const,
+                            description: `Renews ${periodEnd?.toLocaleDateString()}`
+                        };
+                    }
+
+                    if (baseStatus === 'ACTIVE') {
+                        return {
+                            status: 'ACTIVE',
+                            variant: 'default' as const,
+                            description: periodEnd ? `Renews ${periodEnd.toLocaleDateString()}` : 'Active subscription'
+                        };
+                    }
+
+                    return {
+                        status: baseStatus,
+                        variant: 'outline' as const,
+                        description: 'Unknown status'
+                    };
+                };
+
+                const statusInfo = getStatusInfo(subscription);
+
                 return (
                     <div className="flex flex-col">
-                        <Badge variant={
-                            status === 'ACTIVE' ? 'default' :
-                                status === 'PAUSED' ? 'secondary' :
-                                    status === 'CANCELLED' ? 'destructive' :
-                                        'outline'
-                        }>
-                            {status || 'Unknown'}
+                        <Badge variant={statusInfo.variant}>
+                            {statusInfo.status}
                         </Badge>
-                        {subscription.isPaused && (
-                            <span className="text-xs text-orange-600 mt-1">
-                                Paused until {subscription.pauseEndDate ? new Date(subscription.pauseEndDate).toLocaleDateString() : 'indefinite'}
-                            </span>
-                        )}
+                        <span className="text-xs text-gray-500 mt-1">
+                            {statusInfo.description}
+                        </span>
                     </div>
                 );
             }
@@ -391,6 +478,33 @@ export function SubscriptionManagement() {
                 if (!date) return '-';
                 try {
                     return new Date(date).toLocaleDateString();
+                } catch {
+                    return 'Invalid date';
+                }
+            }
+        },
+        {
+            key: 'currentPeriodEnd',
+            label: 'Next Billing',
+            sortable: true,
+            render: (date: string, subscription: Subscription) => {
+                if (!date) return '-';
+                try {
+                    const billingDate = new Date(date);
+                    const now = new Date();
+                    const daysUntil = Math.ceil((billingDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                    
+                    return (
+                        <div className="flex flex-col">
+                            <span className="text-sm">{billingDate.toLocaleDateString()}</span>
+                            <span className={`text-xs ${daysUntil < 0 ? 'text-red-600' : daysUntil <= 7 ? 'text-orange-600' : 'text-gray-500'}`}>
+                                {daysUntil < 0 ? `${Math.abs(daysUntil)} days overdue` : 
+                                 daysUntil === 0 ? 'Due today' :
+                                 daysUntil === 1 ? 'Due tomorrow' :
+                                 `${daysUntil} days`}
+                            </span>
+                        </div>
+                    );
                 } catch {
                     return 'Invalid date';
                 }
@@ -547,9 +661,32 @@ export function SubscriptionManagement() {
                     {/* Subscriptions Table */}
                     {loading && subscriptions.length === 0 ? (
                         <AdminTableLoadingState rows={10} />
+                    ) : subscriptions.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-12 px-4">
+                            <div className="text-center">
+                                <CreditCard className="mx-auto h-12 w-12 text-gray-400" />
+                                <h3 className="mt-2 text-sm font-medium text-gray-900">No subscriptions found</h3>
+                                <p className="mt-1 text-sm text-gray-500">
+                                    {Object.keys(filters).length > 0 
+                                        ? "Try adjusting your filters to see more results."
+                                        : "No subscriptions have been created yet."
+                                    }
+                                </p>
+                                <div className="mt-6">
+                                    <Button
+                                        onClick={fetchSubscriptions}
+                                        variant="outline"
+                                        size="sm"
+                                    >
+                                        <Search className="mr-2 h-4 w-4" />
+                                        Refresh
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
                     ) : (
                         <EnhancedDataTable
-                            title="Subscriptions"
+                            title={`Subscriptions (${subscriptions.length})`}
                             data={subscriptions}
                             columns={columns}
                             entityType="subscriptions"

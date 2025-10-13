@@ -90,11 +90,37 @@ router.get('/', async (req, res) => {
       prisma.subscription.count({ where })
     ]);
 
+    // Enhance subscription data with calculated fields
+    const enhancedSubscriptions = subscriptions.map(subscription => {
+      const currentDate = new Date();
+      const periodEnd = subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd) : null;
+      const isExpired = periodEnd && currentDate > periodEnd;
+      const isNearExpiry = periodEnd && (periodEnd.getTime() - currentDate.getTime()) < (7 * 24 * 60 * 60 * 1000);
+      
+      // Calculate effective status
+      let effectiveStatus = subscription.status;
+      if (subscription.isPaused) {
+        effectiveStatus = 'PAUSED';
+      } else if (isExpired && subscription.status === 'ACTIVE') {
+        effectiveStatus = 'EXPIRED';
+      } else if (isNearExpiry && subscription.status === 'ACTIVE') {
+        effectiveStatus = 'ACTIVE'; // Keep as active but mark as near expiry
+      }
+
+      return {
+        ...subscription,
+        effectiveStatus,
+        isExpired,
+        isNearExpiry,
+        daysUntilExpiry: periodEnd ? Math.ceil((periodEnd.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24)) : null
+      };
+    });
+
     const totalPages = Math.ceil(totalCount / take);
 
     res.json({
       success: true,
-      subscriptions,
+      subscriptions: enhancedSubscriptions,
       pagination: {
         page: parseInt(page),
         limit: take,

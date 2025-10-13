@@ -43,7 +43,10 @@ export enum SubscriptionStatus {
   ACTIVE = 'ACTIVE',
   CANCELLED = 'CANCELLED',
   PAST_DUE = 'PAST_DUE',
-  UNPAID = 'UNPAID'
+  UNPAID = 'UNPAID',
+  PAUSED = 'PAUSED',
+  INCOMPLETE = 'INCOMPLETE',
+  EXPIRED = 'EXPIRED'
 }
 
 // Service types

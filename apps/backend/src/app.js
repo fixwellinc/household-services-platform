@@ -48,6 +48,7 @@ import jobRoutes from './routes/jobs.js';
 import rewardsRoutes from './routes/rewards.js';
 import performanceRoutes from './routes/performance.js';
 import securityRoutes from './routes/security.js';
+import logoRoutes from './routes/logos.js';
 import stripeTestRoutes from './routes/stripe-test.js';
 import healthRoutes from './routes/health.js';
 import adminRoutes from './routes/admin.js';
@@ -412,6 +413,7 @@ app.use('/api/rewards', checkDatabaseMiddleware, rewardsRoutes);
 app.use('/api/dashboard', checkDatabaseMiddleware, dashboardRoutes);
 app.use('/api/performance', checkDatabaseMiddleware, performanceRoutes);
 app.use('/api/security', checkDatabaseMiddleware, securityRoutes);
+app.use('/api/logos', checkDatabaseMiddleware, logoRoutes);
 app.use('/api/stripe-test', stripeTestRoutes);
 app.use('/health', healthRoutes); // Health check endpoint (no database check needed)
 app.use('/api/webhooks', webhookRoutes);

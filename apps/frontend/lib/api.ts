@@ -776,6 +776,88 @@ export class ApiClient {
   }> => {
     return this.request('/dashboard/customer');
   }
+
+  // Logo generation endpoints
+  generateLogo = async (data: {
+    companyName: string;
+    description: string;
+    style: 'modern' | 'classic' | 'minimalist' | 'playful' | 'professional';
+    colors: string[];
+    industry: string;
+    format: 'png' | 'svg' | 'jpg';
+    size: 'small' | 'medium' | 'large';
+  }): Promise<{
+    success: boolean;
+    logoUrl?: string;
+    metadata?: {
+      prompt: string;
+      model: string;
+      generationTime: number;
+      timestamp: string;
+    };
+    error?: string;
+  }> => {
+    return this.request('/logos/generate', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  getLogoStyles = async (): Promise<{
+    success: boolean;
+    styles: string[];
+  }> => {
+    return this.request('/logos/styles');
+  }
+
+  getLogoIndustries = async (): Promise<{
+    success: boolean;
+    industries: string[];
+  }> => {
+    return this.request('/logos/industries');
+  }
+
+  getLogos = async (): Promise<{
+    success: boolean;
+    logos: Array<{
+      filename: string;
+      url: string;
+      createdAt: string;
+    }>;
+  }> => {
+    return this.request('/logos/list');
+  }
+
+  deleteLogo = async (filename: string): Promise<{
+    success: boolean;
+    message?: string;
+    error?: string;
+  }> => {
+    return this.request(`/logos/${filename}`, {
+      method: 'DELETE',
+    });
+  }
+
+  uploadLogo = async (file: File): Promise<{
+    success: boolean;
+    logoUrl?: string;
+    filename?: string;
+    originalName?: string;
+    size?: number;
+    mimetype?: string;
+    error?: string;
+  }> => {
+    const formData = new FormData();
+    formData.append('logo', file);
+    
+    return this.request('/logos/upload', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        // Don't set Content-Type, let browser set it with boundary
+      },
+    });
+  }
 }
 
 // Create and export API client instance

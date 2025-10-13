@@ -15,7 +15,8 @@ import {
   Activity,
   Shield,
   Calendar,
-  BookOpen
+  BookOpen,
+  Wand2
 } from 'lucide-react';
 import { NavigationItem, NavigationState, AdminPreferences } from '../types/admin';
 
@@ -93,6 +94,12 @@ const defaultNavigationItems: NavigationItem[] = [
     name: 'API Documentation', 
     icon: BookOpen,
     path: '/admin/api-docs'
+  },
+  { 
+    id: 'logo-generator', 
+    name: 'Logo Generator', 
+    icon: Wand2,
+    path: '/admin/logo-generator'
   }
 ];
 
