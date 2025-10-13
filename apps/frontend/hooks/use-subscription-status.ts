@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../lib/api';
@@ -70,8 +71,15 @@ export interface UseSubscriptionStatusResult extends SubscriptionStatus {
  * and handles all subscription states properly with loading and error states.
  */
 export function useSubscriptionStatus(): UseSubscriptionStatusResult {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, isHydrated } = useAuth();
   const performanceMonitor = useDashboardPerformanceMonitor();
+  
+  // Prevent SSR issues by not running the hook until hydrated
+  const [isClient, setIsClient] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
   
   // Enhanced error handler for subscription data
   const errorHandler = useApiErrorHandler({
@@ -114,7 +122,7 @@ export function useSubscriptionStatus(): UseSubscriptionStatusResult {
         throw error;
       }
     },
-    enabled: !!user && !authLoading,
+    enabled: !!user && !authLoading && isClient && isHydrated,
     staleTime: 5 * 60 * 1000, // 5 minutes - increased for better caching
     gcTime: 10 * 60 * 1000, // 10 minutes - increased for better caching
     refetchOnWindowFocus: false, // Prevent unnecessary refetches
@@ -231,7 +239,7 @@ export function useSubscriptionStatus(): UseSubscriptionStatusResult {
   const subscriptionStatus = determineSubscriptionStatus(userPlanData);
   
   // Determine overall loading state
-  const isLoading = authLoading || planLoading || errorHandler.isRetrying;
+  const isLoading = authLoading || planLoading || errorHandler.isRetrying || !isClient || !isHydrated;
   
   // Enhanced error information
   const primaryError = error || errorHandler.error;
