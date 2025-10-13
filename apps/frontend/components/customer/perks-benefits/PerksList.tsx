@@ -221,7 +221,7 @@ const PerksList = React.memo(function PerksList({ userTier, perks, onUpgradeClic
         <div key={category} className="space-y-3">
           <div className="flex items-center gap-2">
             <h4 className="font-medium text-gray-800 text-sm">
-              {category.charAt(0) + category.slice(1).toLowerCase()} Benefits
+              {category?.charAt(0) + category?.slice(1).toLowerCase() || 'Unknown'} Benefits
             </h4>
             <Badge className={`${CATEGORY_COLORS[category as keyof typeof CATEGORY_COLORS]} text-xs px-2 py-0.5`}>
               {categoryPerks.filter(p => isAccessible(p)).length} of {categoryPerks.length}

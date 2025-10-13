@@ -268,7 +268,7 @@ export default function UsageMetrics({
               <h4 className="font-semibold text-gray-900">{metric.name}</h4>
             </div>
             <Badge className={`${CATEGORY_COLORS[metric.category]} text-xs px-2 py-1`}>
-              {metric.category.toLowerCase()}
+              {metric.category?.toLowerCase() || 'unknown'}
             </Badge>
           </div>
 
@@ -285,7 +285,7 @@ export default function UsageMetrics({
           <div className="flex items-center gap-1 text-sm">
             <TrendIcon className={`h-4 w-4 ${getTrendColor(metric.trend.direction)}`} />
             <span className={getTrendColor(metric.trend.direction)}>
-              {metric.trend.percentage}% {metric.trend.direction.toLowerCase()}
+              {metric.trend.percentage}% {metric.trend.direction?.toLowerCase() || 'stable'}
             </span>
             <span className="text-gray-500">vs {metric.trend.period}</span>
           </div>
