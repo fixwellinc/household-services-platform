@@ -64,6 +64,11 @@ class EnhancedErrorTracker {
    * Initialize error tracking
    */
   private initializeTracking(): void {
+    // Only initialize on client side
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     // Set up online/offline detection
     window.addEventListener('online', () => {
       this.isOnline = true;
@@ -91,6 +96,11 @@ class EnhancedErrorTracker {
    * Set up global error handlers
    */
   private setupGlobalErrorHandlers(): void {
+    // Only set up on client side
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     // JavaScript errors
     window.addEventListener('error', (event) => {
       this.trackError({
@@ -150,6 +160,11 @@ class EnhancedErrorTracker {
    * Set up performance monitoring
    */
   private setupPerformanceMonitoring(): void {
+    // Only set up on client side
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     // Monitor memory usage
     if ('memory' in performance) {
       setInterval(() => {
@@ -276,19 +291,28 @@ class EnhancedErrorTracker {
    * Build error context
    */
   private buildErrorContext(): ErrorContext {
-    return {
+    const baseContext = {
       sessionId: this.sessionId,
       timestamp: new Date(),
-      url: window.location.href,
-      userAgent: navigator.userAgent,
-      viewport: {
-        width: window.innerWidth,
-        height: window.innerHeight,
-      },
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
       deviceInfo: this.getDeviceInfo(),
       performance: this.userContext.performance,
       ...this.userContext,
     };
+
+    // Add browser-specific context only on client side
+    if (typeof window !== 'undefined') {
+      return {
+        ...baseContext,
+        url: window.location.href,
+        viewport: {
+          width: window.innerWidth,
+          height: window.innerHeight,
+        },
+      };
+    }
+
+    return baseContext;
   }
 
   /**
