@@ -95,7 +95,7 @@ export function useSubscriptionStatus(): UseSubscriptionStatusResult {
     }
   });
   
-  // Query user's current plan data with performance monitoring
+  // Query user's current plan data with performance monitoring and request deduplication
   const {
     data: userPlanData,
     isLoading: planLoading,
@@ -127,6 +127,7 @@ export function useSubscriptionStatus(): UseSubscriptionStatusResult {
     gcTime: 10 * 60 * 1000, // 10 minutes - increased for better caching
     refetchOnWindowFocus: false, // Prevent unnecessary refetches
     refetchOnMount: false, // Use cached data when available
+    refetchOnReconnect: false, // Don't refetch on network reconnect
     retry: (failureCount, error) => {
       performanceMonitor.recordRetry();
       
@@ -144,6 +145,11 @@ export function useSubscriptionStatus(): UseSubscriptionStatusResult {
       return failureCount < 3;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    // Add request deduplication
+    meta: {
+      requestDeduplication: true,
+      component: 'useSubscriptionStatus'
+    }
   });
 
   // Determine subscription status based on API response

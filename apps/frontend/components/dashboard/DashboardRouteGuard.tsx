@@ -3,8 +3,6 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../contexts/AuthContext';
-import { useDashboardRouting } from '../../hooks/use-dashboard-routing';
-import { useSubscriptionStatus } from '../../hooks/use-subscription-status';
 import { useErrorHandler } from '../customer/error-handling/useErrorHandler';
 import { FullPageLoader, LoadingOverlay } from '../customer/loading/LoadingStates';
 import { AlertCircle, RefreshCw, Home, LogIn } from 'lucide-react';
@@ -161,32 +159,11 @@ export function DashboardRouteGuard({
   showLoadingOverlay = false
 }: DashboardRouteGuardProps) {
   const { user, isLoading: authLoading, isAuthenticated, isHydrated } = useAuth();
-  const subscriptionStatus = useSubscriptionStatus();
-  const dashboardRouting = useDashboardRouting();
   const router = useRouter();
   const { isTransitioning, transitionState, dashboardState } = useDashboardTransitions();
   
-  // Error handler for subscription and routing errors
-  const errorHandler = useErrorHandler({
-    maxRetries: 3,
-    retryDelay: 1000,
-    onError: (error) => {
-      console.error('Dashboard Route Guard Error:', error);
-    },
-    onMaxRetriesReached: (error) => {
-      console.error('Max retries reached for dashboard routing:', error);
-    }
-  });
-
   // Determine critical loading state (blocks rendering completely)
   const isCriticalLoading = !isHydrated || authLoading;
-  
-  // Determine overall loading state
-  const isLoading = isCriticalLoading || subscriptionStatus.isLoading || dashboardRouting.isLoading;
-  
-  // Determine if there are any errors
-  const hasError = subscriptionStatus.error || dashboardRouting.error || errorHandler.error;
-  const primaryError = subscriptionStatus.error || dashboardRouting.error || errorHandler.error;
 
   // Handle authentication redirect
   useEffect(() => {
@@ -211,54 +188,15 @@ export function DashboardRouteGuard({
     }
   }, [isAuthenticated, user, requiredRole, router]);
 
-  // Handle automatic dashboard routing
-  useEffect(() => {
-    if (
-      isAuthenticated && 
-      user && 
-      !subscriptionStatus.isLoading && 
-      !dashboardRouting.isLoading &&
-      !hasError
-    ) {
-      const currentPath = window.location.pathname;
-      const targetRoute = dashboardRouting.targetRoute;
-      
-      // Only redirect if we're on a generic dashboard route and need to go somewhere specific
-      if (
-        (currentPath === '/dashboard' || currentPath === '/customer-dashboard') &&
-        targetRoute !== currentPath &&
-        targetRoute !== '/login'
-      ) {
-        dashboardRouting.navigateToDashboard(true);
-      }
-    }
-  }, [
-    isAuthenticated, 
-    user, 
-    subscriptionStatus.isLoading, 
-    dashboardRouting.isLoading,
-    dashboardRouting.targetRoute,
-    dashboardRouting.navigateToDashboard,
-    hasError
-  ]);
+  // Note: Automatic dashboard routing is now handled by CustomerDashboardLogic
+  // to prevent duplicate hook calls and race conditions
 
-  // Retry function for error recovery
+  // Retry function for error recovery - simplified since routing is handled by parent
   const handleRetry = async () => {
     try {
-      await errorHandler.executeWithRetry(async () => {
-        // Refetch subscription data
-        if (subscriptionStatus.error) {
-          subscriptionStatus.refetch();
-        }
-        
-        // If there are other errors, we'll let the hooks handle their own retry logic
-        if (!subscriptionStatus.error && !subscriptionStatus.isLoading) {
-          // Force a re-evaluation of routing logic
-          window.location.reload();
-        }
-      });
+      // Simple retry by refreshing the page - let CustomerDashboardLogic handle data refetch
+      window.location.reload();
     } catch (error) {
-      // Error is already handled by the error handler
       console.error('Retry failed:', error);
     }
   };
@@ -277,16 +215,7 @@ export function DashboardRouteGuard({
   }
 
   // Show error state if there are unrecoverable errors
-  if (hasError && primaryError) {
-    return (
-      <ErrorDisplay
-        error={primaryError}
-        onRetry={handleRetry}
-        canRetry={errorHandler.canRetry}
-        isRetrying={errorHandler.isRetrying}
-      />
-    );
-  }
+  // Note: Most errors are now handled by CustomerDashboardLogic
 
   // Don't render children if not authenticated (redirect is in progress)
   if (!isAuthenticated) {
@@ -309,17 +238,7 @@ export function DashboardRouteGuard({
   }
 
   // Render children with optional loading overlay
-  if (showLoadingOverlay && (subscriptionStatus.isLoading || dashboardRouting.isLoading)) {
-    return (
-      <LoadingOverlay
-        isLoading={true}
-        message="Updating dashboard..."
-        blur={true}
-      >
-        {children}
-      </LoadingOverlay>
-    );
-  }
+  // Note: Loading states are now handled by CustomerDashboardLogic
 
   // Wrap children with error boundary and transition components for comprehensive error handling
   return (
@@ -341,7 +260,7 @@ export function DashboardRouteGuard({
       >
         <NavigationTransition
           isNavigating={transitionState === 'navigating'}
-          destination={dashboardRouting.targetRoute}
+          destination="/customer-dashboard"
         >
           <DashboardTransitionWrapper
             transitionKey={`${user?.id || 'anonymous'}-${dashboardState}`}
@@ -374,22 +293,15 @@ export function withDashboardRouteGuard<P extends object>(
 // Utility hook for components that need to check route guard status
 export function useDashboardRouteGuardStatus() {
   const { user, isLoading: authLoading, isAuthenticated, isHydrated } = useAuth();
-  const subscriptionStatus = useSubscriptionStatus();
-  const dashboardRouting = useDashboardRouting();
   
-  const isLoading = !isHydrated || authLoading || subscriptionStatus.isLoading || dashboardRouting.isLoading;
-  const hasError = subscriptionStatus.error || dashboardRouting.error;
-  const isReady = isAuthenticated && !isLoading && !hasError;
+  const isLoading = !isHydrated || authLoading;
+  const isReady = isAuthenticated && !isLoading;
   
   return {
     isLoading,
-    hasError,
     isReady,
     isAuthenticated,
-    user,
-    subscriptionStatus,
-    dashboardRouting,
-    error: subscriptionStatus.error || dashboardRouting.error
+    user
   };
 }
 

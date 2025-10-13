@@ -106,7 +106,7 @@ export function useCustomerRealtime(userId?: string) {
     }));
   }, [isConnected]);
 
-  // Subscribe to customer-specific updates
+  // Subscribe to customer-specific updates with duplicate prevention
   const subscribeToUpdates = useCallback(() => {
     // Only subscribe if we have a valid userId (not empty string) and socket is connected
     if (!socket || !isConnected || !userId || userId === '' || subscribedRef.current) {
@@ -271,6 +271,15 @@ export function useCustomerRealtime(userId?: string) {
       return cleanup;
     }
   }, [socket, isConnected, userId, subscribeToUpdates]);
+
+  // Cleanup subscription when userId changes or component unmounts
+  useEffect(() => {
+    return () => {
+      if (subscribedRef.current) {
+        unsubscribeFromUpdates();
+      }
+    };
+  }, [userId, unsubscribeFromUpdates]);
 
   // Cleanup on unmount
   useEffect(() => {

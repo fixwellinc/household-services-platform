@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscriptionStatus } from '@/hooks/use-subscription-status';
@@ -9,6 +9,7 @@ import { useCustomerRealtime } from '@/hooks/use-customer-realtime';
 import { DashboardRouteGuard } from '@/components/dashboard/DashboardRouteGuard';
 import { FullPageLoader } from '@/components/customer/loading/LoadingStates';
 import { Notification } from '@fixwell/types';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Create context for dashboard data
 interface CustomerDashboardContextType {
@@ -53,6 +54,7 @@ export function CustomerDashboardLogic({ children }: CustomerDashboardLogicProps
     const subscriptionStatus = useSubscriptionStatus();
     const dashboardRouting = useDashboardRouting();
     const router = useRouter();
+    const queryClient = useQueryClient();
 
     // Always call hooks unconditionally - use empty string as fallback for user?.id
     const userId = user?.id || '';
@@ -122,7 +124,7 @@ export function CustomerDashboardLogic({ children }: CustomerDashboardLogicProps
         if (!authLoading && user && !subscriptionStatus.isLoading) {
             // Admin users should be redirected to admin dashboard
             if (user.role === 'ADMIN') {
-                router.push('/admin');
+                router.replace('/admin');
                 return;
             }
 
@@ -206,14 +208,18 @@ export function CustomerDashboardLogic({ children }: CustomerDashboardLogicProps
 
     const handlePlanChanged = () => {
         setShowPlanChangeWorkflow(false);
-        // Refresh the page data
-        window.location.reload();
+        // Invalidate and refetch subscription data instead of page reload
+        queryClient.invalidateQueries({ queryKey: ['user-plan'] });
+        queryClient.invalidateQueries({ queryKey: ['user'] });
+        refreshData(); // Refresh real-time data
     };
 
     const handleCancellationComplete = () => {
         setShowCancellationModal(false);
-        // Refresh the page data
-        window.location.reload();
+        // Invalidate and refetch subscription data instead of page reload
+        queryClient.invalidateQueries({ queryKey: ['user-plan'] });
+        queryClient.invalidateQueries({ queryKey: ['user'] });
+        refreshData(); // Refresh real-time data
     };
 
     // Notification handlers
@@ -312,7 +318,7 @@ export function CustomerDashboardLogic({ children }: CustomerDashboardLogicProps
     }, [billingEvents, user?.id]);
 
     // Transform subscription data for components - prefer real-time data when available
-    const transformedSubscription = (() => {
+    const transformedSubscription = useMemo(() => {
         // Use real-time subscription data if available and not just the initial connection message
         if (realtimeSubscription && realtimeSubscription.id !== 'initial') {
             return realtimeSubscription;
@@ -339,9 +345,9 @@ export function CustomerDashboardLogic({ children }: CustomerDashboardLogicProps
         }
 
         return null;
-    })();
+    }, [realtimeSubscription, subscriptionStatus.subscription, subscriptionStatus.plan]);
 
-    const contextValue: CustomerDashboardContextType = {
+    const contextValue: CustomerDashboardContextType = useMemo(() => ({
         user,
         subscriptionStatus,
         transformedSubscription,
@@ -362,7 +368,28 @@ export function CustomerDashboardLogic({ children }: CustomerDashboardLogicProps
         handlePlanChanged,
         handleCancellationComplete,
         perkUpdates
-    };
+    }), [
+        user,
+        subscriptionStatus,
+        transformedSubscription,
+        realtimeUsage,
+        socketConnected,
+        lastUpdated,
+        refreshData,
+        notifications,
+        handleMarkAsRead,
+        handleMarkAllAsRead,
+        handleDeleteNotification,
+        handlePlanChange,
+        handleCancelSubscription,
+        showPlanChangeWorkflow,
+        showCancellationModal,
+        setShowPlanChangeWorkflow,
+        setShowCancellationModal,
+        handlePlanChanged,
+        handleCancellationComplete,
+        perkUpdates
+    ]);
 
     return (
         <CustomerDashboardContext.Provider value={contextValue}>
