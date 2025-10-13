@@ -7,34 +7,31 @@ import fs from 'fs/promises';
 import path from 'path';
 import fetch from 'node-fetch';
 
-export interface LogoGenerationRequest {
-  companyName: string;
-  description: string;
-  style: 'modern' | 'classic' | 'minimalist' | 'playful' | 'professional';
-  colors: string[];
-  industry: string;
-  format: 'png' | 'svg' | 'jpg';
-  size: 'small' | 'medium' | 'large';
-}
+/**
+ * @typedef {Object} LogoGenerationRequest
+ * @property {string} companyName
+ * @property {string} description
+ * @property {'modern'|'classic'|'minimalist'|'playful'|'professional'} style
+ * @property {string[]} colors
+ * @property {string} industry
+ * @property {'png'|'svg'|'jpg'} format
+ * @property {'small'|'medium'|'large'} size
+ */
 
-export interface LogoGenerationResponse {
-  success: boolean;
-  logoUrl?: string;
-  logoPath?: string;
-  error?: string;
-  metadata?: {
-    prompt: string;
-    model: string;
-    generationTime: number;
-    timestamp: string;
-  };
-}
+/**
+ * @typedef {Object} LogoGenerationResponse
+ * @property {boolean} success
+ * @property {string} [logoUrl]
+ * @property {string} [logoPath]
+ * @property {string} [error]
+ * @property {Object} [metadata]
+ * @property {string} metadata.prompt
+ * @property {string} metadata.model
+ * @property {number} metadata.generationTime
+ * @property {string} metadata.timestamp
+ */
 
 export class MCPLogoService {
-  private bananaApiKey: string;
-  private bananaModelKey: string;
-  private isConfigured = false;
-
   constructor() {
     this.bananaApiKey = process.env.BANANA_API_KEY || '';
     this.bananaModelKey = process.env.BANANA_MODEL_KEY || '';
@@ -49,8 +46,10 @@ export class MCPLogoService {
 
   /**
    * Generate a logo using Google Gemini via Banana
+   * @param {LogoGenerationRequest} request
+   * @returns {Promise<LogoGenerationResponse>}
    */
-  async generateLogo(request: LogoGenerationRequest): Promise<LogoGenerationResponse> {
+  async generateLogo(request) {
     if (!this.isConfigured) {
       return {
         success: false,
@@ -101,8 +100,11 @@ export class MCPLogoService {
 
   /**
    * Call Gemini via Banana API for image generation
+   * @param {string} prompt
+   * @param {LogoGenerationRequest} request
+   * @returns {Promise<Object>}
    */
-  async callGeminiViaBanana(prompt: string, request: LogoGenerationRequest) {
+  async callGeminiViaBanana(prompt, request) {
     try {
       const bananaPayload = {
         modelKey: this.bananaModelKey,
@@ -152,8 +154,11 @@ export class MCPLogoService {
 
   /**
    * Poll Banana API for job completion
+   * @param {string} jobId
+   * @param {number} maxAttempts
+   * @returns {Promise<Object>}
    */
-  async pollBananaResult(jobId: string, maxAttempts = 30) {
+  async pollBananaResult(jobId, maxAttempts = 30) {
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
         const response = await fetch(`https://api.banana.dev/check/v4/`, {
@@ -206,8 +211,10 @@ export class MCPLogoService {
 
   /**
    * Create a detailed prompt for logo generation
+   * @param {LogoGenerationRequest} request
+   * @returns {string}
    */
-  private createLogoPrompt(request: LogoGenerationRequest): string {
+  createLogoPrompt(request) {
     const { companyName, description, style, colors, industry } = request;
     
     const styleDescriptions = {
@@ -237,32 +244,39 @@ export class MCPLogoService {
 
   /**
    * Get image width based on size preference
+   * @param {string} size
+   * @returns {number}
    */
-  private getImageWidth(size: string): number {
+  getImageWidth(size) {
     const sizes = {
       small: 256,
       medium: 512,
       large: 1024
     };
-    return sizes[size as keyof typeof sizes] || 512;
+    return sizes[size] || 512;
   }
 
   /**
    * Get image height based on size preference
+   * @param {string} size
+   * @returns {number}
    */
-  private getImageHeight(size: string): number {
+  getImageHeight(size) {
     const sizes = {
       small: 256,
       medium: 512,
       large: 1024
     };
-    return sizes[size as keyof typeof sizes] || 512;
+    return sizes[size] || 512;
   }
 
   /**
    * Save the generated logo to the file system
+   * @param {any} imageData
+   * @param {LogoGenerationRequest} request
+   * @returns {Promise<string>}
    */
-  private async saveLogo(imageData: any, request: LogoGenerationRequest): Promise<string> {
+  async saveLogo(imageData, request) {
     const uploadsDir = path.join(process.cwd(), 'uploads', 'logos');
     
     // Ensure uploads directory exists
