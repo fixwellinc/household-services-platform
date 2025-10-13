@@ -190,7 +190,7 @@ class ProductionSecurityConfig {
             // Strict rate limiting for authentication endpoints
             auth: rateLimit({
                 windowMs: 15 * 60 * 1000, // 15 minutes
-                max: 10, // Limit each IP to 10 auth requests per windowMs
+                max: 50, // Limit each IP to 50 auth requests per windowMs (increased for testing)
                 message: {
                     error: 'Too many authentication attempts',
                     retryAfter: '15 minutes'
