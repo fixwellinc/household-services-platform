@@ -217,7 +217,7 @@ const PerksList = React.memo(function PerksList({ userTier, perks, onUpgradeClic
         </Badge>
       </div>
 
-      {Object.entries(groupedPerks).map(([category, categoryPerks]) => (
+      {Object.entries(groupedPerks || {}).map(([category, categoryPerks]) => (
         <div key={category} className="space-y-3">
           <div className="flex items-center gap-2">
             <h4 className="font-medium text-gray-800 text-sm">

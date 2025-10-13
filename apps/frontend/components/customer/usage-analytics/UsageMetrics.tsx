@@ -365,7 +365,7 @@ export default function UsageMetrics({
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {filteredMetrics.map(renderMetricCard)}
+        {(filteredMetrics || []).map(renderMetricCard)}
       </div>
 
       {/* Service Usage Breakdown */}
@@ -380,9 +380,9 @@ export default function UsageMetrics({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {serviceBreakdown.length > 0 ? (
+          {(serviceBreakdown || []).length > 0 ? (
             <div className="space-y-4">
-              {serviceBreakdown.map((service) => (
+              {(serviceBreakdown || []).map((service) => (
                 <div key={service.serviceId} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div className="flex-1">
                     <h4 className="font-medium text-gray-900">{service.serviceName}</h4>

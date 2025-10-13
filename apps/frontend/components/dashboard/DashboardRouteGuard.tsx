@@ -92,7 +92,7 @@ function ErrorDisplay({ error, onRetry, canRetry, isRetrying }: ErrorDisplayProp
           <p className="text-gray-600 mb-6">{message}</p>
           
           <div className="space-y-3">
-            {actions.map((action, index) => (
+            {(actions || []).map((action, index) => (
               <button
                 key={index}
                 onClick={action.action}
