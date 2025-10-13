@@ -93,12 +93,12 @@ const AvailableServices = React.memo(function AvailableServices({
   const [showOnlyIncluded, setShowOnlyIncluded] = useState(false);
 
   const categories = useMemo(() => {
-    const cats = Array.from(new Set(services.map(s => s.service.category)));
+    const cats = Array.from(new Set((services || []).map(s => s.service.category)));
     return ['ALL', ...cats];
   }, [services]);
 
   const filteredServices = useMemo(() => {
-    return services.filter(serviceAvailability => {
+    return (services || []).filter(serviceAvailability => {
       const service = serviceAvailability.service;
       const matchesSearch = service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            service.description.toLowerCase().includes(searchTerm.toLowerCase());
