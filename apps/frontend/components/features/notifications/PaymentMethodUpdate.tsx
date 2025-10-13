@@ -55,16 +55,28 @@ export default function PaymentMethodUpdate({
   const loadPaymentMethods = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/payments/methods');
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await fetch('/api/payments/methods', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
       if (response.ok) {
         const data = await response.json();
         setPaymentMethods(data.paymentMethods || []);
       } else {
-        throw new Error('Failed to load payment methods');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to load payment methods');
       }
     } catch (error) {
       console.error('Error loading payment methods:', error);
-      toast.error('Failed to load payment methods');
+      toast.error(error instanceof Error ? error.message : 'Failed to load payment methods');
     } finally {
       setIsLoading(false);
     }
@@ -77,8 +89,17 @@ export default function PaymentMethodUpdate({
 
     setIsUpdating(true);
     try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
       const response = await fetch(`/api/payments/methods/${paymentMethodId}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       });
 
       if (response.ok) {

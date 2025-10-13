@@ -11,6 +11,7 @@ import {
   refundPayment
 } from '../services/stripe.js';
 import subscriptionService from '../services/subscriptionService.js';
+import PaymentMethodService from '../services/paymentMethodService.js';
 import prisma from '../config/database.js';
 
 const router = express.Router();
@@ -232,6 +233,128 @@ router.post('/refund', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Refund error:', error);
     res.status(500).json({ error: 'Failed to process refund' });
+  }
+});
+
+// Initialize PaymentMethodService
+const paymentMethodService = new PaymentMethodService(prisma);
+
+// Get customer's payment methods
+router.get('/methods', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const result = await paymentMethodService.getPaymentMethods(userId);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        paymentMethods: result.paymentMethods
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    console.error('Error getting payment methods:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get payment methods'
+    });
+  }
+});
+
+// Add new payment method
+router.post('/methods', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { paymentMethodId } = req.body;
+    
+    if (!paymentMethodId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Payment method ID is required'
+      });
+    }
+    
+    const result = await paymentMethodService.updatePaymentMethod(userId, paymentMethodId);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Payment method added successfully',
+        paymentMethod: result.paymentMethod
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    console.error('Error adding payment method:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to add payment method'
+    });
+  }
+});
+
+// Update payment method (set as default)
+router.put('/methods/:paymentMethodId', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { paymentMethodId } = req.params;
+    
+    const result = await paymentMethodService.updatePaymentMethod(userId, paymentMethodId);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Payment method updated successfully',
+        paymentMethod: result.paymentMethod
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    console.error('Error updating payment method:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update payment method'
+    });
+  }
+});
+
+// Remove payment method
+router.delete('/methods/:paymentMethodId', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { paymentMethodId } = req.params;
+    
+    const result = await paymentMethodService.removePaymentMethod(userId, paymentMethodId);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Payment method removed successfully'
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    console.error('Error removing payment method:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to remove payment method'
+    });
   }
 });
 
