@@ -125,7 +125,7 @@ export function AdvancedServiceFilter({
 
   // Get unique values for dynamic options
   const availableLocations = useMemo(() => {
-    const locations = services
+    const locations = (services || [])
       .map(s => s.service.location)
       .filter(Boolean)
       .filter((location, index, self) => self.indexOf(location) === index);
@@ -133,7 +133,7 @@ export function AdvancedServiceFilter({
   }, [services]);
 
   const availableFeatures = useMemo(() => {
-    const features = services
+    const features = (services || [])
       .flatMap(s => s.service.features || [])
       .filter((feature, index, self) => self.indexOf(feature) === index);
     return features;
@@ -141,7 +141,7 @@ export function AdvancedServiceFilter({
 
   // Apply filters and sorting
   const filteredServices = useMemo(() => {
-    let filtered = services.filter(serviceAvailability => {
+    let filtered = (services || []).filter(serviceAvailability => {
       const service = serviceAvailability.service;
       
       // Search term filter
