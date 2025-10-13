@@ -310,15 +310,17 @@ export class MCPLogoService {
 
   /**
    * Get available logo styles
+   * @returns {string[]}
    */
-  getAvailableStyles(): string[] {
+  getAvailableStyles() {
     return ['modern', 'classic', 'minimalist', 'playful', 'professional'];
   }
 
   /**
    * Get available industries
+   * @returns {string[]}
    */
-  getAvailableIndustries(): string[] {
+  getAvailableIndustries() {
     return [
       'Technology',
       'Healthcare',
@@ -341,8 +343,9 @@ export class MCPLogoService {
 
   /**
    * Check if the service is properly configured
+   * @returns {boolean}
    */
-  isServiceConfigured(): boolean {
+  isServiceConfigured() {
     return this.isConfigured;
   }
 }
