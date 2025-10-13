@@ -52,12 +52,28 @@ class EnhancedErrorTracker {
   private errorQueue: ErrorReport[] = [];
   private isOnline: boolean = true;
   private userContext: Partial<ErrorContext> = {};
+  private initialized: boolean = false;
 
   constructor() {
     this.sessionId = this.generateSessionId();
+    // Don't initialize tracking in constructor - do it lazily
+  }
+
+  /**
+   * Initialize tracking only when needed and only on client side
+   */
+  private ensureInitialized(): void {
+    if (this.initialized) return;
+    
+    // Only initialize on client side
+    if (typeof window === 'undefined') {
+      return;
+    }
+    
     this.initializeTracking();
     this.setupGlobalErrorHandlers();
     this.setupPerformanceMonitoring();
+    this.initialized = true;
   }
 
   /**
@@ -199,6 +215,7 @@ class EnhancedErrorTracker {
    * Set user context
    */
   setUserContext(context: Partial<ErrorContext>): void {
+    this.ensureInitialized();
     this.userContext = { ...this.userContext, ...context };
   }
 
@@ -206,6 +223,7 @@ class EnhancedErrorTracker {
    * Add breadcrumb for debugging
    */
   addBreadcrumb(action: string, data?: any): void {
+    this.ensureInitialized();
     this.breadcrumbs.push({
       timestamp: new Date(),
       action,
@@ -228,6 +246,9 @@ class EnhancedErrorTracker {
     severity: 'low' | 'medium' | 'high' | 'critical';
     [key: string]: any;
   }): void {
+    // Ensure we're initialized before tracking
+    this.ensureInitialized();
+    
     const errorReport: ErrorReport = {
       id: this.generateErrorId(),
       message: error.message,
@@ -266,6 +287,7 @@ class EnhancedErrorTracker {
    * Track React errors
    */
   trackReactError(error: Error, errorInfo: any): void {
+    this.ensureInitialized();
     this.trackError({
       message: error.message,
       stack: error.stack,
@@ -279,6 +301,7 @@ class EnhancedErrorTracker {
    * Track custom errors
    */
   trackCustomError(message: string, severity: 'low' | 'medium' | 'high' | 'critical' = 'medium', data?: any): void {
+    this.ensureInitialized();
     this.trackError({
       message,
       type: 'custom',
@@ -319,6 +342,11 @@ class EnhancedErrorTracker {
    * Get device information
    */
   private getDeviceInfo(): { type: 'desktop' | 'mobile' | 'tablet'; os: string; browser: string } {
+    // Check if navigator is available
+    if (typeof navigator === 'undefined') {
+      return { type: 'desktop', os: 'Unknown', browser: 'Unknown' };
+    }
+    
     const userAgent = navigator.userAgent;
     
     // Determine device type
@@ -422,7 +450,46 @@ class EnhancedErrorTracker {
   }
 }
 
-// Create singleton instance
-export const errorTracker = new EnhancedErrorTracker();
+// Create singleton instance with lazy initialization
+let errorTrackerInstance: EnhancedErrorTracker | null = null;
+
+export const errorTracker = {
+  trackError: (error: any) => {
+    if (!errorTrackerInstance) {
+      errorTrackerInstance = new EnhancedErrorTracker();
+    }
+    return errorTrackerInstance.trackError(error);
+  },
+  trackReactError: (error: Error, errorInfo: any) => {
+    if (!errorTrackerInstance) {
+      errorTrackerInstance = new EnhancedErrorTracker();
+    }
+    return errorTrackerInstance.trackReactError(error, errorInfo);
+  },
+  trackCustomError: (message: string, severity?: any, data?: any) => {
+    if (!errorTrackerInstance) {
+      errorTrackerInstance = new EnhancedErrorTracker();
+    }
+    return errorTrackerInstance.trackCustomError(message, severity, data);
+  },
+  addBreadcrumb: (action: string, data?: any) => {
+    if (!errorTrackerInstance) {
+      errorTrackerInstance = new EnhancedErrorTracker();
+    }
+    return errorTrackerInstance.addBreadcrumb(action, data);
+  },
+  setUserContext: (context: any) => {
+    if (!errorTrackerInstance) {
+      errorTrackerInstance = new EnhancedErrorTracker();
+    }
+    return errorTrackerInstance.setUserContext(context);
+  },
+  getErrorStats: () => {
+    if (!errorTrackerInstance) {
+      return { totalErrors: 0, errorsByType: {}, errorsBySeverity: {}, recentErrors: [] };
+    }
+    return errorTrackerInstance.getErrorStats();
+  }
+};
 
 export default EnhancedErrorTracker;
