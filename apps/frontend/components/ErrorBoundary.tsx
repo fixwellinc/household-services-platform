@@ -26,6 +26,31 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    
+    // Special handling for React error #310 (hooks order violation)
+    if (error.message.includes('310') || error.message.includes('Rendered more hooks than during the previous render')) {
+      console.error('🚨 React Error #310 detected: Hooks order violation');
+      console.error('This usually means hooks are being called conditionally or in different orders between renders.');
+      console.error('Common causes:');
+      console.error('1. Calling hooks inside conditions, loops, or nested functions');
+      console.error('2. Early returns before all hooks are called');
+      console.error('3. Dynamic hook calls based on props/state');
+      console.error('4. Conditional rendering that affects hook call order');
+      console.error('');
+      console.error('🔧 To fix this issue:');
+      console.error('1. Move all hook calls to the top level of the component');
+      console.error('2. Use conditional rendering instead of early returns after hooks');
+      console.error('3. Ensure hooks are always called in the same order');
+      console.error('4. Use useMemo or useCallback for conditional logic');
+    }
+    
+    // Handle subscription-related errors
+    if (error.message.includes('subscription') || error.message.includes('customer')) {
+      console.error('🚨 Customer dashboard subscription error detected');
+      console.error('This might be related to subscription data loading or real-time updates');
+      console.error('Check if the user has an active subscription and if the API endpoints are working');
+    }
+    
     // Here you could send error to your error reporting service
     // e.g., Sentry, LogRocket, etc.
   }

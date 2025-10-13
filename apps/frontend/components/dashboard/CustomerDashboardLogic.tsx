@@ -53,24 +53,10 @@ export function CustomerDashboardLogic({ children }: CustomerDashboardLogicProps
     const dashboardRouting = useDashboardRouting();
     const router = useRouter();
 
-    // Access control: Redirect non-customer users or users without subscription history
-    useEffect(() => {
-        if (!authLoading && user && !subscriptionStatus.isLoading) {
-            // Admin users should be redirected to admin dashboard
-            if (user.role === 'ADMIN') {
-                router.push('/admin');
-                return;
-            }
-
-            // Customer users without subscription history should be redirected to general dashboard
-            if (user.role === 'CUSTOMER' && !subscriptionStatus.shouldShowCustomerDashboard) {
-                dashboardRouting.navigateToRoute('/dashboard', true);
-                return;
-            }
-        }
-    }, [authLoading, user, subscriptionStatus, dashboardRouting, router]);
-
-    // Real-time updates
+    // Always call hooks unconditionally - use empty string as fallback for user?.id
+    const userId = user?.id || '';
+    
+    // Real-time updates - always called with consistent parameter
     const {
         subscription: realtimeSubscription,
         usage: realtimeUsage,
@@ -82,7 +68,7 @@ export function CustomerDashboardLogic({ children }: CustomerDashboardLogicProps
         refreshData,
         updateSubscriptionOptimistically,
         updateUsageOptimistically
-    } = useCustomerRealtime(user?.id);
+    } = useCustomerRealtime(userId);
 
     // State for modals and workflows
     const [showPlanChangeWorkflow, setShowPlanChangeWorkflow] = useState(false);
@@ -119,7 +105,7 @@ export function CustomerDashboardLogic({ children }: CustomerDashboardLogicProps
             userId: user?.id || '',
             type: 'ACCOUNT',
             priority: 'LOW',
-title: 'Welcome to Premium Plan',
+            title: 'Welcome to Premium Plan',
             message: 'Your subscription upgrade is now active. Enjoy your new benefits!',
             actionRequired: false,
             isRead: true,
@@ -130,50 +116,83 @@ title: 'Welcome to Premium Plan',
     // Merge real-time notifications with local ones
     const notifications = [...realtimeNotifications, ...localNotifications];
 
-    // Show loading while determining access
-    if (authLoading || subscriptionStatus.isLoading) {
-        return (
-            <FullPageLoader
-                message="Loading customer dashboard..."
-                submessage="Verifying your subscription access..."
-            />
-        );
-    }
+    // Access control: Redirect non-customer users or users without subscription history
+    useEffect(() => {
+        if (!authLoading && user && !subscriptionStatus.isLoading) {
+            // Admin users should be redirected to admin dashboard
+            if (user.role === 'ADMIN') {
+                router.push('/admin');
+                return;
+            }
 
-    // Show loading while redirecting
-    if (
-        (user?.role === 'ADMIN') ||
-        (user?.role === 'CUSTOMER' && !subscriptionStatus.shouldShowCustomerDashboard)
-    ) {
-        return (
-            <FullPageLoader
-                message="Redirecting..."
-                submessage="Taking you to the appropriate dashboard..."
-            />
-        );
-    }
+            // Customer users without subscription history should be redirected to general dashboard
+            if (user.role === 'CUSTOMER' && !subscriptionStatus.shouldShowCustomerDashboard) {
+                dashboardRouting.navigateToRoute('/dashboard', true);
+                return;
+            }
+        }
+    }, [authLoading, user, subscriptionStatus, dashboardRouting, router]);
 
-    // Error handling for subscription status
-    if (subscriptionStatus.error) {
-        return (
-            <DashboardRouteGuard requiredRole="CUSTOMER">
-                <div className="container mx-auto px-4 py-8">
-                    <div className="max-w-md mx-auto text-center">
-                        <h1 className="text-2xl font-bold text-gray-900 mb-4">Dashboard Error</h1>
-                        <p className="text-gray-600 mb-8">
-                            We encountered an issue loading your subscription information. Please try again.
-                        </p>
-                        <button
-                            onClick={() => subscriptionStatus.refetch()}
-                            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-                        >
-                            Try Again
-                        </button>
+    // Determine what to render based on loading and error states
+    const renderContent = () => {
+        // Show loading while determining access
+        if (authLoading || subscriptionStatus.isLoading) {
+            return (
+                <FullPageLoader
+                    message="Loading customer dashboard..."
+                    submessage="Verifying your subscription access..."
+                />
+            );
+        }
+
+        // Show loading while redirecting
+        if (
+            (user?.role === 'ADMIN') ||
+            (user?.role === 'CUSTOMER' && !subscriptionStatus.shouldShowCustomerDashboard)
+        ) {
+            return (
+                <FullPageLoader
+                    message="Redirecting..."
+                    submessage="Taking you to the appropriate dashboard..."
+                />
+            );
+        }
+
+        // Error handling for subscription status
+        if (subscriptionStatus.error) {
+            return (
+                <DashboardRouteGuard requiredRole="CUSTOMER">
+                    <div className="container mx-auto px-4 py-8">
+                        <div className="max-w-md mx-auto text-center">
+                            <h1 className="text-2xl font-bold text-gray-900 mb-4">Dashboard Error</h1>
+                            <p className="text-gray-600 mb-8">
+                                We encountered an issue loading your subscription information. Please try again.
+                            </p>
+                            <button
+                                onClick={() => subscriptionStatus.refetch()}
+                                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                            >
+                                Try Again
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </DashboardRouteGuard>
-        );
-    }
+                </DashboardRouteGuard>
+            );
+        }
+
+        // This should not happen due to access control above, but handle edge case
+        if (!subscriptionStatus.shouldShowCustomerDashboard) {
+            return (
+                <FullPageLoader
+                    message="Redirecting..."
+                    submessage="Taking you to the appropriate dashboard..."
+                />
+            );
+        }
+
+        // Render the actual dashboard content
+        return children;
+    };
 
     // Handlers for subscription management
     const handlePlanChange = () => {
@@ -321,16 +340,6 @@ title: 'Welcome to Premium Plan',
         return null;
     })();
 
-    // This should not happen due to access control above, but handle edge case
-    if (!subscriptionStatus.shouldShowCustomerDashboard) {
-        return (
-            <FullPageLoader
-                message="Redirecting..."
-                submessage="Taking you to the appropriate dashboard..."
-            />
-        );
-    }
-
     const contextValue: CustomerDashboardContextType = {
         user,
         subscriptionStatus,
@@ -355,7 +364,7 @@ title: 'Welcome to Premium Plan',
 
     return (
         <CustomerDashboardContext.Provider value={contextValue}>
-            {children}
+            {renderContent()}
         </CustomerDashboardContext.Provider>
     );
 }

@@ -108,7 +108,14 @@ export function useCustomerRealtime(userId?: string) {
 
   // Subscribe to customer-specific updates
   const subscribeToUpdates = useCallback(() => {
-    if (!socket || !isConnected || !userId || subscribedRef.current) {
+    // Only subscribe if we have a valid userId (not empty string) and socket is connected
+    if (!socket || !isConnected || !userId || userId === '' || subscribedRef.current) {
+      console.log('Skipping subscription:', { 
+        hasSocket: !!socket, 
+        isConnected, 
+        userId, 
+        alreadySubscribed: subscribedRef.current 
+      });
       return;
     }
 
@@ -121,6 +128,13 @@ export function useCustomerRealtime(userId?: string) {
     // Set up event listeners
     const handleSubscriptionUpdate = (data: SubscriptionUpdate) => {
       console.log('Received subscription update:', data);
+      
+      // Validate subscription data before updating state
+      if (!data || typeof data !== 'object') {
+        console.warn('Invalid subscription update data received:', data);
+        return;
+      }
+      
       setState(prev => ({
         ...prev,
         subscription: data,
@@ -133,6 +147,13 @@ export function useCustomerRealtime(userId?: string) {
 
     const handleUsageUpdate = (data: UsageUpdate) => {
       console.log('Received usage update:', data);
+      
+      // Validate usage data before updating state
+      if (!data || typeof data !== 'object') {
+        console.warn('Invalid usage update data received:', data);
+        return;
+      }
+      
       setState(prev => ({
         ...prev,
         usage: data,
@@ -212,7 +233,7 @@ export function useCustomerRealtime(userId?: string) {
 
   // Request immediate data refresh
   const refreshData = useCallback(() => {
-    if (!socket || !isConnected || !userId) {
+    if (!socket || !isConnected || !userId || userId === '') {
       return;
     }
 
@@ -245,7 +266,7 @@ export function useCustomerRealtime(userId?: string) {
 
   // Subscribe when socket connects and user is available
   useEffect(() => {
-    if (socket && isConnected && userId && !subscribedRef.current) {
+    if (socket && isConnected && userId && userId !== '' && !subscribedRef.current) {
       const cleanup = subscribeToUpdates();
       return cleanup;
     }

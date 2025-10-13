@@ -1,3 +1,4 @@
+"use client";
 import React from 'react';
 import { CustomerDashboardWrapper } from '@/components/dashboard/CustomerDashboardWrapper';
 import { CustomerDashboardLogic, useCustomerDashboard } from '@/components/dashboard/CustomerDashboardLogic';

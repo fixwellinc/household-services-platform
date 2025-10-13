@@ -99,6 +99,12 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   
+  // Development mode settings for better error messages
+  ...(process.env.NODE_ENV === 'development' && {
+    reactStrictMode: false, // Disable strict mode to reduce hydration warnings
+    swcMinify: false,
+  }),
+  
   // Stability settings
   poweredByHeader: false,
   generateEtags: false,
