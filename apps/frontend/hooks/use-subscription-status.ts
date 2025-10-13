@@ -149,13 +149,13 @@ export function useSubscriptionStatus(): UseSubscriptionStatusResult {
       canAccessPremiumFeatures: false,
     };
 
-    // If no API response or subscription is null, return default
-    if (!apiResponse || !apiResponse.subscription) {
+    // If no API response or no subscription data, return default
+    if (!apiResponse || !apiResponse.success || !apiResponse.hasPlan || !apiResponse.subscription) {
       return defaultStatus;
     }
 
     const subscription = apiResponse.subscription;
-    const plan = subscription.plan;
+    const plan = apiResponse.plan;
     const subscriptionStatus = subscription.status?.toUpperCase() as SubscriptionStatusType;
 
     // Determine if user has subscription history (any subscription record exists)
@@ -209,7 +209,7 @@ export function useSubscriptionStatus(): UseSubscriptionStatusResult {
       shouldShowPromotion,
       canAccessPremiumFeatures,
       subscription: {
-        id: subscription.id,
+        id: subscription.id || '',
         tier: subscription.tier,
         status: subscription.status,
         currentPeriodStart: subscription.currentPeriodStart,

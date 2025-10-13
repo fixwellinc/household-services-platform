@@ -24,6 +24,7 @@ import {
   Info
 } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-api';
+import api from '@/lib/api';
 import PaymentFrequencyManager from '@/components/features/payment/PaymentFrequencyManager';
 import SubscriptionPauseStatus from '@/components/features/subscription/SubscriptionPauseStatus';
 import PropertyManager from '@/components/features/subscription/PropertyManager';
@@ -88,17 +89,24 @@ export default function SubscriptionManagement({ className = '' }: SubscriptionM
 
   const fetchSubscription = async () => {
     try {
-      const response = await fetch('/api/subscriptions/current', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSubscription(data.subscription);
+      const data = await api.getUserPlan();
+      
+      if (data.success && data.hasPlan && data.subscription) {
+        // Transform the data to match the expected subscription format
+        const transformedSubscription = {
+          id: data.subscription.id || '',
+          tier: data.subscription.tier,
+          status: data.subscription.status,
+          currentPeriodStart: data.subscription.currentPeriodStart,
+          currentPeriodEnd: data.subscription.currentPeriodEnd,
+          canCancel: true, // Default to true, can be enhanced later
+          plan: data.plan,
+          stripeSubscription: null, // Not available in this endpoint
+          usage: null, // Not available in this endpoint
+        };
+        setSubscription(transformedSubscription);
       } else {
-        console.error('Failed to fetch subscription');
+        console.error('No subscription found');
       }
     } catch (error) {
       console.error('Error fetching subscription:', error);

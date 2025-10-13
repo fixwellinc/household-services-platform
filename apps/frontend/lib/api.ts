@@ -474,7 +474,7 @@ export class ApiClient {
     };
     message: string;
   }> => {
-    return this.request('/subscriptions/current');
+    return this.request('/plans/user/current');
   }
 
   selectPlan = async (tier: string, billingCycle: 'monthly' | 'yearly'): Promise<{
