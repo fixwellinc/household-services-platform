@@ -380,6 +380,12 @@ class EnhancedErrorTracker {
    */
   private async sendErrorReport(errorReport: ErrorReport): Promise<void> {
     try {
+      // Temporarily disabled to prevent 404 errors
+      // TODO: Re-enable once the backend endpoint is properly set up
+      console.log('Error report (not sent to server):', errorReport);
+      return;
+      
+      /* Original code - commented out temporarily
       await fetch('/api/errors/track', {
         method: 'POST',
         headers: {
@@ -387,6 +393,7 @@ class EnhancedErrorTracker {
         },
         body: JSON.stringify(errorReport),
       });
+      */
     } catch (error) {
       console.error('Failed to send error report:', error);
     }

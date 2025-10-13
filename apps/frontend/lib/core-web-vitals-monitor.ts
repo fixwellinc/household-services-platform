@@ -247,6 +247,20 @@ class CoreWebVitalsMonitor {
       }
 
       // Send to custom analytics endpoint
+      // Temporarily disabled to prevent 404 errors
+      // TODO: Re-enable once the backend endpoint is properly set up
+      console.log('Web Vitals metric (not sent to server):', {
+        metric: metric.name,
+        value: metric.value,
+        delta: metric.delta,
+        id: metric.id,
+        navigationType: metric.navigationType,
+        timestamp: Date.now(),
+        url: window.location.href,
+        userAgent: navigator.userAgent,
+      });
+      
+      /* Original code - commented out temporarily
       fetch('/api/analytics/web-vitals', {
         method: 'POST',
         headers: {
@@ -265,6 +279,7 @@ class CoreWebVitalsMonitor {
       }).catch(error => {
         console.warn('Failed to send Web Vitals to analytics:', error);
       });
+      */
     } catch (error) {
       console.warn('Failed to send Web Vitals:', error);
     }
