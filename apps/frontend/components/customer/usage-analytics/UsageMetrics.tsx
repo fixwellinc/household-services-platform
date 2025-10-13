@@ -236,8 +236,8 @@ export default function UsageMetrics({
   }, [currentPeriodStart, currentPeriodEnd]);
 
   const filteredMetrics = selectedCategory === 'ALL' 
-    ? metrics 
-    : metrics.filter(metric => metric.category === selectedCategory);
+    ? (metrics || [])
+    : (metrics || []).filter(metric => metric.category === selectedCategory);
 
   const getTrendIcon = (direction: string) => {
     switch (direction) {

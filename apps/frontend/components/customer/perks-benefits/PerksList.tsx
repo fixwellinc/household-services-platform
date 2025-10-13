@@ -224,12 +224,12 @@ const PerksList = React.memo(function PerksList({ userTier, perks, onUpgradeClic
               {category?.charAt(0) + category?.slice(1).toLowerCase() || 'Unknown'} Benefits
             </h4>
             <Badge className={`${CATEGORY_COLORS[category as keyof typeof CATEGORY_COLORS]} text-xs px-2 py-0.5`}>
-              {categoryPerks.filter(p => isAccessible(p)).length} of {categoryPerks.length}
+              {(categoryPerks || []).filter(p => isAccessible(p)).length} of {(categoryPerks || []).length}
             </Badge>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {categoryPerks.map(renderPerkCard)}
+            {(categoryPerks || []).map(renderPerkCard)}
           </div>
         </div>
       ))}
@@ -241,12 +241,12 @@ const PerksList = React.memo(function PerksList({ userTier, perks, onUpgradeClic
             <div>
               <h4 className="font-medium text-gray-900 text-sm">Total Benefits</h4>
               <p className="text-xs text-gray-600 mt-1">
-                You have access to {perks.filter(p => isAccessible(p)).length} out of {perks.length} available perks
+                You have access to {(perks || []).filter(p => isAccessible(p)).length} out of {(perks || []).length} available perks
               </p>
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold text-blue-600">
-                {perks.filter(p => isAccessible(p)).length}
+                {(perks || []).filter(p => isAccessible(p)).length}
               </div>
               <div className="text-xs text-gray-500">Active Perks</div>
             </div>
