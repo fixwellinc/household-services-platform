@@ -68,6 +68,8 @@ import salesmanRoutes from './routes/salesman.js';
 import referralRoutes from './routes/referral.js';
 import adminSalesmenRoutes from './routes/admin/salesmen.js';
 import adminEmailTemplatesRoutes from './routes/admin/emailTemplates.js';
+import analyticsRoutes from './routes/analytics.js';
+import errorsRoutes from './routes/errors.js';
 
 // Import middleware
 import { authMiddleware, requireAdmin } from './middleware/auth.js';
@@ -434,6 +436,8 @@ app.use('/api/salesman', checkDatabaseMiddleware, salesmanRoutes);
 app.use('/api/referral', checkDatabaseMiddleware, referralRoutes);
 app.use('/api/admin/salesmen', checkDatabaseMiddleware, adminSalesmenRoutes);
 app.use('/api/admin/email-templates', checkDatabaseMiddleware, adminEmailTemplatesRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/errors', errorsRoutes);
 
 function requireAdminLocal(req, res, next) {
   if (!req.user || req.user.role !== 'ADMIN') {
