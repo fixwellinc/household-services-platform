@@ -1,15 +1,19 @@
 "use client";
 
 import React from 'react';
-import { EmailTemplateManagement } from '@/components/admin/communications/EmailTemplateManagement';
-import { AdminErrorBoundary } from '@/components/admin/ErrorBoundary';
+import { CommunicationsOverview } from '@/components/admin/communications/CommunicationsOverview';
+import { AdminPageErrorBoundary } from '@/components/admin/error-boundaries/AdminPageErrorBoundary';
+import { createErrorBoundaryProps } from '@/lib/admin-error-reporting';
 
 export const dynamic = 'force-dynamic';
 
 export default function CommunicationsPage() {
   return (
-    <AdminErrorBoundary context="AdminCommunicationsPage">
-      <EmailTemplateManagement />
-    </AdminErrorBoundary>
+    <AdminPageErrorBoundary 
+      {...createErrorBoundaryProps('AdminCommunicationsPage')}
+      pageTitle="Communications"
+    >
+      <CommunicationsOverview />
+    </AdminPageErrorBoundary>
   );
 }

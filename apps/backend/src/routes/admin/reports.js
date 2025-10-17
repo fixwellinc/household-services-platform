@@ -276,6 +276,215 @@ router.post('/preview', async (req, res) => {
 });
 
 /**
+ * GET /api/admin/reports
+ * Get all custom reports
+ */
+router.get('/', async (req, res) => {
+  try {
+    const { limit = 50, offset = 0, createdBy } = req.query;
+    
+    // Mock reports data - in production, fetch from database
+    const mockReports = [
+      {
+        id: '1',
+        name: 'Monthly Service Report',
+        description: 'Comprehensive monthly service statistics',
+        config: {
+          dataSource: 'services',
+          filters: [
+            { field: 'created_at', operator: 'greater_than', value: '2024-01-01' }
+          ],
+          columns: [
+            { field: 'service_name', label: 'Service', type: 'string' },
+            { field: 'count', label: 'Count', type: 'number', aggregation: 'count' }
+          ]
+        },
+        isPublic: true,
+        createdBy: req.user.id,
+        createdAt: new Date('2024-01-01'),
+        lastRun: new Date('2024-01-15')
+      }
+    ];
+    
+    let reports = [...mockReports];
+    
+    // Filter by creator if provided
+    if (createdBy) {
+      reports = reports.filter(report => report.createdBy === createdBy);
+    }
+    
+    // Apply pagination
+    const paginatedReports = reports.slice(
+      parseInt(offset), 
+      parseInt(offset) + parseInt(limit)
+    );
+    
+    res.json({
+      success: true,
+      reports: paginatedReports,
+      total: reports.length,
+      hasMore: parseInt(offset) + parseInt(limit) < reports.length
+    });
+  } catch (error) {
+    console.error('Error fetching reports:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch reports'
+    });
+  }
+});
+
+/**
+ * POST /api/admin/reports
+ * Create custom report
+ */
+router.post('/', async (req, res) => {
+  try {
+    const { name, description, config, isPublic = false } = req.body;
+    
+    if (!name || !config) {
+      return res.status(400).json({
+        success: false,
+        error: 'Name and config are required'
+      });
+    }
+    
+    const newReport = {
+      id: Date.now().toString(),
+      name: name.trim(),
+      description: description?.trim(),
+      config,
+      isPublic,
+      createdBy: req.user.id,
+      createdAt: new Date()
+    };
+    
+    // In production, save to database
+    
+    res.json({
+      success: true,
+      report: newReport
+    });
+  } catch (error) {
+    console.error('Error creating report:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create report'
+    });
+  }
+});
+
+/**
+ * PUT /api/admin/reports/:reportId
+ * Update custom report
+ */
+router.put('/:reportId', async (req, res) => {
+  try {
+    const { reportId } = req.params;
+    const updates = req.body;
+    
+    // In production, update in database
+    const updatedReport = {
+      id: reportId,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    res.json({
+      success: true,
+      report: updatedReport
+    });
+  } catch (error) {
+    console.error('Error updating report:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update report'
+    });
+  }
+});
+
+/**
+ * DELETE /api/admin/reports/:reportId
+ * Delete custom report
+ */
+router.delete('/:reportId', async (req, res) => {
+  try {
+    const { reportId } = req.params;
+    
+    // In production, delete from database
+    
+    res.json({
+      success: true,
+      message: 'Report deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting report:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete report'
+    });
+  }
+});
+
+/**
+ * POST /api/admin/reports/:reportId/export
+ * Export report data
+ */
+router.post('/:reportId/export', async (req, res) => {
+  try {
+    const { reportId } = req.params;
+    const { format = 'csv' } = req.body;
+    
+    // In production, generate export file and return URL
+    const exportUrl = `/api/admin/reports/${reportId}/download?format=${format}&token=${Date.now()}`;
+    
+    res.json({
+      success: true,
+      exportUrl,
+      message: 'Export generated successfully'
+    });
+  } catch (error) {
+    console.error('Error exporting report:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to export report'
+    });
+  }
+});
+
+/**
+ * GET /api/admin/reports/stats
+ * Get report statistics
+ */
+router.get('/stats', async (req, res) => {
+  try {
+    // Mock stats - in production, calculate from database
+    const stats = {
+      totalReports: 5,
+      scheduledReports: 2,
+      reportsRunToday: 3,
+      averageExecutionTime: 2.5, // seconds
+      categories: [
+        { name: 'Financial', count: 2 },
+        { name: 'Operations', count: 2 },
+        { name: 'Customer', count: 1 }
+      ]
+    };
+    
+    res.json({
+      success: true,
+      stats
+    });
+  } catch (error) {
+    console.error('Error fetching report stats:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch report statistics'
+    });
+  }
+});
+
+/**
  * GET /api/admin/reports/categories
  * Get report categories and statistics
  */

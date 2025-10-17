@@ -1,13 +1,17 @@
 "use client";
 
 import React from 'react';
-import { AdminSettings } from '@/components/admin/settings/AdminSettings';
-import { AdminErrorBoundary } from '@/components/admin/ErrorBoundary';
+import { EnhancedAdminSettings } from '@/components/admin/settings/EnhancedAdminSettings';
+import { AdminPageErrorBoundary } from '@/components/admin/error-boundaries/AdminPageErrorBoundary';
+import { createErrorBoundaryProps } from '@/lib/admin-error-reporting';
 
 export default function AdminSettingsPage() {
   return (
-    <AdminErrorBoundary context="AdminSettingsPage">
-      <AdminSettings />
-    </AdminErrorBoundary>
+    <AdminPageErrorBoundary 
+      {...createErrorBoundaryProps('AdminSettingsPage')}
+      pageTitle="Settings"
+    >
+      <EnhancedAdminSettings />
+    </AdminPageErrorBoundary>
   );
 }

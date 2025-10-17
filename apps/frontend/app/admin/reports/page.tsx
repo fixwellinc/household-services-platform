@@ -18,9 +18,15 @@ import {
   Clock,
   Database,
   Settings,
-  Shield
+  Shield,
+  Plus,
+  Eye
 } from 'lucide-react';
 import Link from 'next/link';
+import ReportsOverview from '@/components/admin/reports/ReportsOverview';
+import ReportBuilder from '@/components/admin/reports/ReportBuilder';
+import ReportViewer from '@/components/admin/reports/ReportViewer';
+import ExportManager from '@/components/admin/reports/ExportManager';
 
 interface Report {
   id: string;
@@ -33,9 +39,14 @@ interface Report {
   status: 'ready' | 'generating' | 'scheduled';
 }
 
-export default function ReportsPage() {
+import { AdminPageErrorBoundary } from '@/components/admin/error-boundaries/AdminPageErrorBoundary';
+import { createErrorBoundaryProps } from '@/lib/admin-error-reporting';
+
+function ReportsPageContent() {
   const [selectedType, setSelectedType] = useState('all');
   const [selectedPeriod, setSelectedPeriod] = useState('monthly');
+  const [currentView, setCurrentView] = useState<'overview' | 'builder' | 'viewer' | 'export'>('overview');
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
 
   const reports: Report[] = [
     {
@@ -112,6 +123,104 @@ export default function ReportsPage() {
     return report.type === selectedType;
   });
 
+  // Mock report data for viewer
+  const mockReportData = {
+    columns: [
+      { id: 'name', name: 'Customer Name', type: 'string' as const },
+      { id: 'email', name: 'Email', type: 'string' as const },
+      { id: 'revenue', name: 'Revenue', type: 'number' as const },
+      { id: 'signup_date', name: 'Signup Date', type: 'date' as const }
+    ],
+    rows: [
+      ['John Doe', 'john@example.com', 1250.50, new Date('2024-01-15')],
+      ['Jane Smith', 'jane@example.com', 2100.75, new Date('2024-01-20')],
+      ['Bob Johnson', 'bob@example.com', 850.25, new Date('2024-01-25')]
+    ],
+    totalRows: 3,
+    generatedAt: new Date(),
+    metadata: {
+      reportId: '1',
+      reportName: 'Customer Revenue Report',
+      description: 'Monthly customer revenue analysis',
+      dataSource: 'customers',
+      filters: [],
+      executionTime: 245
+    }
+  };
+
+  const handleCreateReport = () => {
+    setCurrentView('builder');
+  };
+
+  const handleEditReport = (reportId: string) => {
+    setSelectedReportId(reportId);
+    setCurrentView('builder');
+  };
+
+  const handleViewReport = (reportId: string) => {
+    setSelectedReportId(reportId);
+    setCurrentView('viewer');
+  };
+
+  const handleBackToOverview = () => {
+    setCurrentView('overview');
+    setSelectedReportId(null);
+  };
+
+  const handleSaveReport = (config: any) => {
+    console.log('Saving report config:', config);
+    // In real implementation, this would save to API
+    setCurrentView('overview');
+  };
+
+  const handlePreviewReport = (config: any) => {
+    console.log('Previewing report config:', config);
+    // In real implementation, this would generate preview data
+    setCurrentView('viewer');
+  };
+
+  const handleExportReport = (options: any) => {
+    console.log('Exporting report with options:', options);
+    // In real implementation, this would trigger export
+  };
+
+  // Render different views based on current state
+  if (currentView === 'builder') {
+    return (
+      <div className="space-y-6 p-6">
+        <ReportBuilder
+          onSave={handleSaveReport}
+          onPreview={handlePreviewReport}
+          onCancel={handleBackToOverview}
+        />
+      </div>
+    );
+  }
+
+  if (currentView === 'viewer') {
+    return (
+      <div className="space-y-6 p-6">
+        <ReportViewer
+          reportData={mockReportData}
+          onExport={handleExportReport}
+          onBack={handleBackToOverview}
+        />
+      </div>
+    );
+  }
+
+  if (currentView === 'export') {
+    return (
+      <div className="space-y-6 p-6">
+        <ExportManager
+          reportId={selectedReportId || undefined}
+          reportName="Sample Report"
+          onExport={handleExportReport}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
@@ -123,30 +232,18 @@ export default function ReportsPage() {
           </p>
         </div>
         <div className="flex space-x-3">
-          <Link href="/admin/reports/exports">
-            <Button variant="outline">
-              <Database className="h-4 w-4 mr-2" />
-              Data Export
-            </Button>
-          </Link>
-          <Link href="/admin/reports/templates">
-            <Button variant="outline">
-              <FileText className="h-4 w-4 mr-2" />
-              Report Templates
-            </Button>
-          </Link>
-          <Link href="/admin/reports/schedules">
-            <Button variant="outline">
-              <Settings className="h-4 w-4 mr-2" />
-              Scheduled Reports
-            </Button>
-          </Link>
-          <Link href="/admin/reports/security">
-            <Button>
-              <Shield className="h-4 w-4 mr-2" />
-              Security & Audit
-            </Button>
-          </Link>
+          <Button variant="outline" onClick={() => setCurrentView('export')}>
+            <Database className="h-4 w-4 mr-2" />
+            Export Manager
+          </Button>
+          <Button variant="outline" onClick={() => setCurrentView('builder')}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Report
+          </Button>
+          <Button onClick={() => setCurrentView('viewer')}>
+            <Eye className="h-4 w-4 mr-2" />
+            View Sample
+          </Button>
         </div>
       </div>
 
@@ -203,100 +300,43 @@ export default function ReportsPage() {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-4">
-        <Select value={selectedType} onValueChange={setSelectedType}>
-          <SelectTrigger className="w-48">
-            <Filter className="h-4 w-4 mr-2" />
-            <SelectValue placeholder="Filter by type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="financial">Financial</SelectItem>
-            <SelectItem value="operational">Operational</SelectItem>
-            <SelectItem value="customer">Customer</SelectItem>
-            <SelectItem value="marketing">Marketing</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="relative">
+          <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Select 
+            value={selectedType} 
+            onChange={(e) => setSelectedType(e.target.value)}
+            className="pl-10 w-48"
+          >
+            <option value="all">All Types</option>
+            <option value="financial">Financial</option>
+            <option value="operational">Operational</option>
+            <option value="customer">Customer</option>
+            <option value="marketing">Marketing</option>
+          </Select>
+        </div>
 
-        <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-          <SelectTrigger className="w-48">
-            <Calendar className="h-4 w-4 mr-2" />
-            <SelectValue placeholder="Time period" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="daily">Daily</SelectItem>
-            <SelectItem value="weekly">Weekly</SelectItem>
-            <SelectItem value="monthly">Monthly</SelectItem>
-            <SelectItem value="quarterly">Quarterly</SelectItem>
-            <SelectItem value="yearly">Yearly</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="relative">
+          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Select 
+            value={selectedPeriod} 
+            onChange={(e) => setSelectedPeriod(e.target.value)}
+            className="pl-10 w-48"
+          >
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="yearly">Yearly</option>
+          </Select>
+        </div>
       </div>
 
-      {/* Reports List */}
-      <div className="space-y-4">
-        {filteredReports.map((report) => (
-          <Card key={report.id} className="hover:shadow-md transition-shadow">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex items-center space-x-3">
-                  {getTypeIcon(report.type)}
-                  <div>
-                    <CardTitle className="text-lg">{report.name}</CardTitle>
-                    <CardDescription className="mt-1">
-                      {report.description}
-                    </CardDescription>
-                  </div>
-                </div>
-                <Badge className={getStatusColor(report.status)}>
-                  {report.status}
-                </Badge>
-              </div>
-            </CardHeader>
-
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-1">
-                  <div>
-                    <p className="text-xs text-gray-600">Type</p>
-                    <Badge variant="outline" className="mt-1">
-                      {report.type}
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-600">Format</p>
-                    <p className="font-medium mt-1 uppercase">{report.format}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-600">Schedule</p>
-                    <p className="font-medium mt-1">
-                      {report.schedule ? report.schedule : 'Manual'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-600">Last Generated</p>
-                    <p className="font-medium mt-1">
-                      {report.lastGenerated.toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2 ml-4">
-                  {report.status === 'ready' && (
-                    <Button variant="outline" size="sm">
-                      <Download className="h-4 w-4 mr-1" />
-                      Download
-                    </Button>
-                  )}
-                  <Button variant="outline" size="sm">
-                    <FileText className="h-4 w-4 mr-1" />
-                    Generate
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Reports Overview Component */}
+      <ReportsOverview
+        onCreateReport={handleCreateReport}
+        onEditReport={handleEditReport}
+        onViewReport={handleViewReport}
+      />
 
       {/* Report Categories */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -369,5 +409,16 @@ export default function ReportsPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function ReportsPage() {
+  return (
+    <AdminPageErrorBoundary 
+      {...createErrorBoundaryProps('AdminReportsPage')}
+      pageTitle="Reports & Analytics"
+    >
+      <ReportsPageContent />
+    </AdminPageErrorBoundary>
   );
 }

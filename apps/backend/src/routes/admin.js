@@ -20,6 +20,7 @@ import onboardingRoutes from './admin/onboarding.js';
 import tenantsRoutes from './admin/tenants.js';
 import analyticsMLRoutes from './admin/analyticsML.js';
 import apiDocsRoutes from './admin/apiDocs.js';
+import communicationsRoutes from './admin/communications.js';
 
 const router = express.Router();
 
@@ -68,6 +69,9 @@ router.use('/tenants', tenantsRoutes);
 // Mount ML analytics routes
 router.use('/analytics/ml', analyticsMLRoutes);
 router.use('/api-docs', apiDocsRoutes);
+
+// Mount communications routes
+router.use('/communications', communicationsRoutes);
 
 /**
  * GET /api/admin/dashboard/stats
