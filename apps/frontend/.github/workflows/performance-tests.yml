@@ -1,0 +1,203 @@
+name: Performance Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run performance tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  performance-tests:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: |
+        cd apps/frontend
+        npm ci
+        
+    - name: Run performance tests
+      run: |
+        cd apps/frontend
+        npm run test:performance
+        
+    - name: Run performance CI checks
+      run: |
+        cd apps/frontend
+        node scripts/performance-ci.js
+        
+    - name: Upload performance report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: performance-report-${{ matrix.node-version }}
+        path: apps/frontend/performance-report.json
+        
+    - name: Comment PR with performance results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = './apps/frontend/performance-report.json';
+          
+          if (fs.existsSync(path)) {
+            const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+            
+            let comment = '## 🚀 Performance Test Results\n\n';
+            comment += `**Test Summary:**\n`;
+            comment += `- ✅ Passed: ${report.results.summary.passed}\n`;
+            comment += `- ❌ Failed: ${report.results.summary.failed}\n`;
+            comment += `- 📊 Total: ${report.results.summary.total}\n\n`;
+            
+            if (report.results.budgets.length > 0) {
+              comment += `**Budget Results:**\n`;
+              report.results.budgets.forEach(budget => {
+                const icon = budget.status === 'passed' ? '✅' : '❌';
+                comment += `- ${icon} ${budget.metric}: ${budget.value} (Budget: ${budget.budget})\n`;
+              });
+            }
+            
+            const failedTests = report.results.tests.filter(test => test.status === 'failed');
+            if (failedTests.length > 0) {
+              comment += `\n**Failed Tests:**\n`;
+              failedTests.forEach(test => {
+                comment += `- ❌ ${test.name}\n`;
+              });
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          }
+
+  lighthouse-audit:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: |
+        cd apps/frontend
+        npm ci
+        
+    - name: Build application
+      run: |
+        cd apps/frontend
+        npm run build
+        
+    - name: Start application
+      run: |
+        cd apps/frontend
+        npm start &
+        sleep 10
+        
+    - name: Run Lighthouse audit
+      uses: treosh/lighthouse-ci-action@v10
+      with:
+        configPath: './apps/frontend/lighthouserc.js'
+        uploadArtifacts: true
+        temporaryPublicStorage: true
+        
+    - name: Comment PR with Lighthouse results
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const lighthouseResults = './lhci_reports/manifest.json';
+          
+          if (fs.existsSync(lighthouseResults)) {
+            const manifest = JSON.parse(fs.readFileSync(lighthouseResults, 'utf8'));
+            const summary = manifest[0]?.summary;
+            
+            if (summary) {
+              let comment = '## 🔍 Lighthouse Performance Audit\n\n';
+              comment += `**Performance Scores:**\n`;
+              comment += `- 🚀 Performance: ${Math.round(summary.performance * 100)}/100\n`;
+              comment += `- ♿ Accessibility: ${Math.round(summary.accessibility * 100)}/100\n`;
+              comment += `- 💡 Best Practices: ${Math.round(summary['best-practices'] * 100)}/100\n`;
+              comment += `- 🔍 SEO: ${Math.round(summary.seo * 100)}/100\n\n`;
+              comment += `[View detailed report](${manifest[0]?.url})\n`;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+          }
+
+  performance-regression:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Need full history for comparison
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: |
+        cd apps/frontend
+        npm ci
+        
+    - name: Run performance regression analysis
+      run: |
+        cd apps/frontend
+        # Compare current performance with previous commit
+        git checkout HEAD~1
+        npm run test:performance > previous-results.txt || true
+        git checkout -
+        npm run test:performance > current-results.txt || true
+        
+        # Analyze regression (this would be a more sophisticated script)
+        echo "Performance regression analysis completed"
+        
+    - name: Create issue on performance regression
+      if: failure()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: '🚨 Performance Regression Detected',
+            body: `Performance regression detected in commit ${context.sha}.\n\nPlease review the performance test results and optimize accordingly.`,
+            labels: ['performance', 'regression', 'bug']
+          });

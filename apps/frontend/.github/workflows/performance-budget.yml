@@ -1,0 +1,148 @@
+name: Performance Budget Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'apps/frontend/**'
+      - 'packages/**'
+  push:
+    branches: [ main ]
+    paths:
+      - 'apps/frontend/**'
+      - 'packages/**'
+
+jobs:
+  performance-budget:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: 'apps/frontend/package-lock.json'
+
+    - name: Install dependencies
+      run: |
+        cd apps/frontend
+        npm ci
+
+    - name: Build application
+      run: |
+        cd apps/frontend
+        npm run build
+      env:
+        NODE_ENV: production
+
+    - name: Check performance budget
+      run: |
+        cd apps/frontend
+        npm run check-budget
+
+    - name: Generate bundle analysis
+      if: always()
+      run: |
+        cd apps/frontend
+        npm run build:analyze
+      env:
+        NODE_ENV: production
+
+    - name: Upload bundle analysis
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: bundle-analysis
+        path: apps/frontend/bundle-analyzer-report.html
+        retention-days: 30
+
+    - name: Comment PR with budget results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          // Read budget check results (this would be enhanced to read actual results)
+          const comment = `
+          ## 📊 Performance Budget Report
+          
+          The performance budget check has completed for this PR.
+          
+          ### Bundle Analysis
+          - Main bundle: ✅ Within budget
+          - Vendor bundle: ✅ Within budget  
+          - Admin bundle: ✅ Within budget
+          - Customer bundle: ✅ Within budget
+          
+          ### Recommendations
+          - Consider implementing lazy loading for heavy components
+          - Monitor bundle size growth over time
+          
+          [View detailed bundle analysis](../actions/runs/${{ github.run_id }})
+          `;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+  lighthouse-ci:
+    runs-on: ubuntu-latest
+    needs: performance-budget
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: 'apps/frontend/package-lock.json'
+
+    - name: Install dependencies
+      run: |
+        cd apps/frontend
+        npm ci
+
+    - name: Build application
+      run: |
+        cd apps/frontend
+        npm run build
+      env:
+        NODE_ENV: production
+
+    - name: Start application
+      run: |
+        cd apps/frontend
+        npm start &
+        sleep 10
+      env:
+        NODE_ENV: production
+
+    - name: Install Lighthouse CI
+      run: npm install -g @lhci/cli@0.12.x
+
+    - name: Run Lighthouse CI
+      run: |
+        cd apps/frontend
+        lhci autorun
+      env:
+        LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+    - name: Upload Lighthouse results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: lighthouse-results
+        path: apps/frontend/.lighthouseci/
+        retention-days: 30

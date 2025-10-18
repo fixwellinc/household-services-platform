@@ -7,6 +7,8 @@ import { useState } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { LocationProvider } from '@/contexts/LocationContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { PerformanceProvider } from '@/lib/performance/components/PerformanceProvider';
+import { PerformanceDebugger } from '@/lib/performance/debug/PerformanceDebugger';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -34,13 +36,16 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AuthProvider>
-          <LocationProvider>
-            {children}
-          </LocationProvider>
-        </AuthProvider>
-      </ThemeProvider>
+      <PerformanceProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <LocationProvider>
+              {children}
+            </LocationProvider>
+          </AuthProvider>
+        </ThemeProvider>
+        {process.env.NODE_ENV === 'development' && <PerformanceDebugger />}
+      </PerformanceProvider>
       <Toaster position="top-right" />
       {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>

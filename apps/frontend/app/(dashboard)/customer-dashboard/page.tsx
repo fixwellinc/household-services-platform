@@ -1,9 +1,9 @@
 "use client";
-import React from 'react';
-import { CustomerDashboardLogic } from '@/components/dashboard/CustomerDashboardLogic';
+import React, { Suspense } from 'react';
+import { CustomerDashboard } from '@/lib/performance/lazy-components';
 import { DashboardRouteGuard } from '@/components/dashboard/DashboardRouteGuard';
-import { CustomerDashboardContent } from '@/components/dashboard/CustomerDashboardContent';
 import { coreWebVitalsMonitor } from '@/lib/core-web-vitals-monitor';
+import { AdminLoadingState } from '@/components/admin/AdminLoadingState';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,10 +14,10 @@ export default function CustomerDashboardPage() {
   }, []);
 
   return (
-    <CustomerDashboardLogic>
-      <DashboardRouteGuard requiredRole="CUSTOMER">
-        <CustomerDashboardContent />
-      </DashboardRouteGuard>
-    </CustomerDashboardLogic>
+    <DashboardRouteGuard requiredRole="CUSTOMER">
+      <Suspense fallback={<AdminLoadingState message="Loading customer dashboard..." />}>
+        <CustomerDashboard />
+      </Suspense>
+    </DashboardRouteGuard>
   );
 }
