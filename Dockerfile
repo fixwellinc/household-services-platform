@@ -50,10 +50,13 @@ ENV NEXT_BUILD_CACHE_DISABLED=1
 # Run progressive build attempts
 RUN npm run build || npm run build:simple || npm run build:minimal
 
-# Create missing font manifest if it doesn't exist
+# Create missing manifests if they don't exist
 RUN mkdir -p .next/server && \
     if [ ! -f .next/server/font-manifest.json ]; then \
       echo '{"pages":{},"app":{},"appUsingSizeAdjust":false,"pagesUsingSizeAdjust":false}' > .next/server/font-manifest.json; \
+    fi && \
+    if [ ! -f .next/server/pages-manifest.json ]; then \
+      echo '{}' > .next/server/pages-manifest.json; \
     fi
 
 # Verify build artifacts exist
