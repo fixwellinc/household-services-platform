@@ -3,42 +3,37 @@
  * Centralized exports for the entire component library
  */
 
-// Core UI Components
-export * from './ui/core';
-export * from './ui/forms';
-export * from './ui/data-display';
-export * from './ui/feedback';
-export * from './ui/navigation';
-export * from './ui/overlays';
+// Re-export existing UI components directly
+export { Button } from './ui/button';
+export { Input } from './ui/input';
+export { Card } from './ui/card';
+export { Badge } from './ui/badge';
+export { Avatar } from './ui/avatar';
+export { Checkbox } from './ui/checkbox';
+export { Label } from './ui/label';
+export { Progress } from './ui/progress';
+export { Select } from './ui/select';
+export { Switch } from './ui/switch';
+export { Textarea } from './ui/textarea';
+export { Tooltip } from './ui/tooltip';
+export { LoadingSpinner } from './ui/LoadingSpinner';
+export { Skeleton } from './ui/Skeleton';
 
-// Layout Components
-export * from './ui/layout';
+// Export standardized components that exist
+export { StandardErrorBoundary } from './ui/error-handling/StandardErrorBoundary';
+export { StandardLoadingStates } from './ui/feedback/StandardLoadingStates';
+export { StandardErrorStates } from './ui/feedback/StandardErrorStates';
 
-// Shared Components
-export * from './shared/animations';
-export * from './shared/charts';
-export * from './shared/utilities';
+// Export page components that exist
+export { default as HeroSection } from './pages/home/HeroSection';
+export { default as ServicesSection } from './pages/home/ServicesSection';
+export { default as FeaturesSection } from './pages/home/FeaturesSection';
+export { default as CTASection } from './pages/home/CTASection';
 
-// Feature Components
-export * from './features';
-
-// Page Components
-export * from './pages';
-
-// Higher-Order Components
-export * from './hoc';
-
-// Component Utilities
-export * from './utils';
-
-// Component Registry
-export * from './registry/ComponentRegistry';
-
-// Component Patterns and Composition
-export * from './patterns';
-
-// Standardized Types
-export * from './types';
+// Export types that exist
+export * from './types/base';
+export * from './types/interfaces';
+export * from './types/standards';
 
 // Legacy exports for backward compatibility
 export { default as HomePageClient } from './HomePageClient';
