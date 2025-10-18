@@ -22,7 +22,7 @@ import {
   PieChart,
   LineChart,
   BarChart,
-  Scatter
+  Zap as ScatterChart
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -465,7 +465,7 @@ export function AdvancedAnalyticsML() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Scatter className="h-5 w-5" />
+                    <ScatterChart className="h-5 w-5" />
                     Performance Predictions
                   </CardTitle>
                 </CardHeader>
