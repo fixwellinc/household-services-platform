@@ -17,6 +17,7 @@ import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 
 // Import services
 import socketService from './services/socketService.js';
@@ -145,39 +146,12 @@ app.use(helmet({
 app.disable('x-powered-by');
 
 // CORS configuration - Properly configured for production
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // Allow all Railway domains
-    if (origin.includes('railway.app')) {
-      return callback(null, true);
-    }
-    
-    // Allow localhost for development
-    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-      return callback(null, true);
-    }
-    
-    // Allow the specific Railway domain if needed
-    if (origin.includes('railway.app')) {
-      return callback(null, true);
-    }
-    
-    // Allow all origins for now to prevent CORS issues
-    return callback(null, true);
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Origin', 'Accept'],
-  exposedHeaders: ['X-Total-Count', 'X-Page-Count'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-};
+const corsOptions = getCorsOptions();
 
-console.log('🔧 CORS Configuration (Production Ready):', {
-  origin: 'Dynamic function (allows Railway, localhost)',
+console.log('🔧 CORS Configuration:', {
+  environment: process.env.NODE_ENV || 'development',
+  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+  corsOrigins: process.env.CORS_ORIGINS || 'default',
   credentials: corsOptions.credentials,
   methods: corsOptions.methods
 });
@@ -319,7 +293,23 @@ app.post('/api/reset-rate-limit', async (req, res) => {
 
 // CRITICAL SAFETY: Emergency admin creation route (keep for production safety)
 // This MUST be before auth middleware to allow admin creation when no admin exists
+// SECURITY: Only enabled in development or with explicit environment variable
 app.post('/api/admin/emergency-create', async (req, res) => {
+  // SECURITY: Only allow in development or with explicit flag
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_EMERGENCY_ADMIN !== 'true') {
+    return res.status(403).json({ 
+      error: 'Emergency admin creation is disabled in production for security reasons' 
+    });
+  }
+
+  // SECURITY: Require secret token for production use
+  const emergencyToken = req.headers['x-emergency-token'];
+  if (process.env.NODE_ENV === 'production' && emergencyToken !== process.env.EMERGENCY_ADMIN_TOKEN) {
+    return res.status(403).json({ 
+      error: 'Invalid emergency token' 
+    });
+  }
+
   if (!prisma) {
     return res.status(503).json({ error: 'Database not available' });
   }
@@ -337,21 +327,24 @@ app.post('/api/admin/emergency-create', async (req, res) => {
       });
     }
 
+    // SECURITY: Use environment variable for password, fallback to random secure password
+    const adminPassword = process.env.EMERGENCY_ADMIN_PASSWORD || 
+      crypto.randomBytes(32).toString('hex');
+    
     // Create admin account
     const bcrypt = await import('bcryptjs');
-    const hashedPassword = await bcrypt.default.hash('FixwellAdmin2024!', 10);
+    const hashedPassword = await bcrypt.default.hash(adminPassword, 10);
 
     const adminUser = await prisma.user.create({
       data: {
-        email: 'admin@fixwell.ca',
+        email: process.env.EMERGENCY_ADMIN_EMAIL || 'admin@fixwell.ca',
         name: 'Fixwell Admin',
         password: hashedPassword,
         role: 'ADMIN',
         isActive: true,
-        phone: '+1-604-555-0001',
+        phone: process.env.EMERGENCY_ADMIN_PHONE || '+1-604-555-0001',
         address: '123 Admin Street, Vancouver, BC',
         postalCode: 'V6B 1A1',
-        birthday: new Date('1990-01-01').toISOString(),
         preferences: {
           notifications: {
             email: true,
@@ -366,12 +359,27 @@ app.post('/api/admin/emergency-create', async (req, res) => {
       }
     });
 
-    // Log the admin creation for security
-    console.warn('⚠️  Emergency admin account created:', {
+    // Log the admin creation for security (with password in dev only)
+    const logData = {
       id: adminUser.id,
       email: adminUser.email,
       timestamp: new Date().toISOString()
-    });
+    };
+    
+    if (process.env.NODE_ENV === 'development') {
+      logData.password = adminPassword;
+      console.warn('⚠️  Emergency admin account created:', logData);
+    } else {
+      console.warn('⚠️  Emergency admin account created:', logData);
+      // In production, log to secure log system
+      auditService.log({
+        adminId: 'system',
+        action: 'EMERGENCY_ADMIN_CREATED',
+        entityType: 'User',
+        entityId: adminUser.id,
+        severity: 'critical'
+      }).catch(err => console.error('Failed to log emergency admin creation:', err));
+    }
 
     res.json({
       message: 'Emergency admin account created successfully',
@@ -379,7 +387,12 @@ app.post('/api/admin/emergency-create', async (req, res) => {
         id: adminUser.id,
         email: adminUser.email,
         role: adminUser.role
-      }
+      },
+      // Only show password in development
+      ...(process.env.NODE_ENV === 'development' && { 
+        password: adminPassword,
+        warning: 'This password is only shown in development. Change it immediately in production.' 
+      })
     });
   } catch (error) {
     console.error('❌ Emergency admin creation failed:', error);
@@ -473,7 +486,7 @@ app.get('/api/admin/services', requireAdmin, async (req, res) => {
   res.json({ services });
 });
 
-// Admin: Get all users with safety checks
+// Admin: Get all users with safety checks and pagination
 app.get('/api/admin/users', requireAdmin, async (req, res) => {
   if (!prisma) {
     return res.status(503).json({ error: 'Database not available' });
@@ -481,7 +494,7 @@ app.get('/api/admin/users', requireAdmin, async (req, res) => {
   
   try {
     // CRITICAL SAFEGUARD: Prevent bulk operations
-    const { bulk, limit } = req.query;
+    const { bulk, limit, page = 1 } = req.query;
     if (bulk === 'true') {
       return res.status(403).json({ 
         error: 'Bulk operations are disabled for security reasons. Please process users individually.',
@@ -489,31 +502,62 @@ app.get('/api/admin/users', requireAdmin, async (req, res) => {
       });
     }
     
-    // Limit the number of users returned to prevent overwhelming the system
-    const maxLimit = 100;
-    const userLimit = Math.min(parseInt(limit) || 50, maxLimit);
+    // Parse pagination
+    const { parsePagination, createPaginatedResponse, setPaginationHeaders } = await import('./utils/pagination.js');
+    const pagination = parsePagination(req.query, { defaultLimit: 50, maxLimit: 100 });
     
+    // Build optimized query with includes
     const users = await prisma.user.findMany({
-      take: userLimit,
+      skip: pagination.skip,
+      take: pagination.take,
       include: {
-        subscriptionUsage: true
+        subscriptionUsage: true,
+        subscription: {
+          select: {
+            id: true,
+            tier: true,
+            status: true,
+            currentPeriodStart: true,
+            currentPeriodEnd: true
+          }
+        },
+        assignedEmployee: {
+          include: {
+            employee: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            }
+          }
+        }
       },
       orderBy: {
         createdAt: 'desc'
       }
     });
     
-    // Add safety metadata
+    // Get total count for pagination
     const totalUsers = await prisma.user.count();
     const adminCount = await prisma.user.count({ where: { role: 'ADMIN' } });
     
+    // Set pagination headers
+    setPaginationHeaders(res, pagination, totalUsers);
+    
     res.json({ 
+      success: true,
       users,
+      pagination: {
+        ...pagination,
+        total: totalUsers,
+        totalPages: Math.ceil(totalUsers / pagination.limit)
+      },
       metadata: {
         totalUsers,
         adminCount,
         returnedUsers: users.length,
-        maxLimit,
+        maxLimit: 100,
         safetyNote: 'Bulk operations are disabled. Users must be processed individually for security.',
         timestamp: new Date().toISOString()
       }
@@ -524,23 +568,35 @@ app.get('/api/admin/users', requireAdmin, async (req, res) => {
   }
 });
 
-// Admin: Get all subscriptions with usage tracking
+// Admin: Get all subscriptions with usage tracking - optimized with Prisma includes
 app.get('/api/admin/subscriptions', requireAdmin, async (req, res) => {
   if (!prisma) {
     return res.status(503).json({ error: 'Database not available' });
   }
-  // Fetch subscriptions and join user + usage manually (no Prisma relation on Subscription.user)
-  const subscriptions = await prisma.subscription.findMany();
-  const userIds = subscriptions.map(s => s.userId).filter(Boolean);
-  const users = userIds.length > 0
-    ? await prisma.user.findMany({
-        where: { id: { in: userIds } },
-        include: { subscriptionUsage: true }
-      })
-    : [];
-  const userById = Object.fromEntries(users.map(u => [u.id, u]));
-  const enriched = subscriptions.map(s => ({ ...s, user: userById[s.userId] || null }));
-  res.json({ subscriptions: enriched });
+  
+  try {
+    // Use Prisma includes for optimized query
+    const subscriptions = await prisma.subscription.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            subscriptionUsage: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+    
+    res.json({ success: true, subscriptions });
+  } catch (error) {
+    console.error('Error fetching subscriptions:', error);
+    res.status(500).json({ error: 'Failed to fetch subscriptions' });
+  }
 });
 
 // Admin: Get subscription usage details
@@ -764,18 +820,53 @@ app.get('/api/admin/subscriptions/analytics', requireAdmin, async (req, res) => 
   });
 });
 
-// Admin: Get all bookings
+// Admin: Get all bookings - optimized with Prisma includes
 app.get('/api/admin/bookings', requireAdmin, async (req, res) => {
   if (!prisma) {
     return res.status(503).json({ error: 'Database not available' });
   }
-  const bookings = await prisma.booking.findMany();
-  const bookingsWithDetails = await Promise.all(bookings.map(async booking => {
-    const customer = await prisma.user.findUnique({ where: { id: booking.customerId } });
-    const service = await prisma.service.findUnique({ where: { id: booking.serviceId } });
-    return { ...booking, customer, service };
-  }));
-  res.json({ bookings: bookingsWithDetails });
+  
+  try {
+    // Use Prisma includes for optimized query
+    const bookings = await prisma.booking.findMany({
+      include: {
+        // Note: Add relations to Booking model if needed
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 100 // Limit for performance
+    });
+    
+    // Get related data in batch
+    const customerIds = [...new Set(bookings.map(b => b.customerId))];
+    const serviceIds = [...new Set(bookings.map(b => b.serviceId))];
+    
+    const [customers, services] = await Promise.all([
+      prisma.user.findMany({
+        where: { id: { in: customerIds } },
+        select: { id: true, name: true, email: true }
+      }),
+      prisma.service.findMany({
+        where: { id: { in: serviceIds } },
+        select: { id: true, name: true, category: true }
+      })
+    ]);
+    
+    const customerMap = new Map(customers.map(c => [c.id, c]));
+    const serviceMap = new Map(services.map(s => [s.id, s]));
+    
+    const bookingsWithDetails = bookings.map(booking => ({
+      ...booking,
+      customer: customerMap.get(booking.customerId) || null,
+      service: serviceMap.get(booking.serviceId) || null
+    }));
+    
+    res.json({ success: true, bookings: bookingsWithDetails });
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+    res.status(500).json({ error: 'Failed to fetch bookings' });
+  }
 });
 
 // Initialize analytics services
@@ -1645,18 +1736,19 @@ app.use('/avatars', (req, res, next) => {
 
 // PATTERN: Error handling middleware last
 app.use(errorLogger);
-app.use(errorHandler);
 
-// 404 handler
+// 404 handler - must be before error handler
 app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found' });
+  res.status(404).json({ 
+    error: 'Route not found',
+    path: req.originalUrl,
+    method: req.method,
+    timestamp: new Date().toISOString()
+  });
 });
 
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
-});
+// Global error handler - must be last
+app.use(errorHandler);
 
 // Only start the server if this file is run directly
 if (import.meta.url === `file://${process.argv[1]}`) {

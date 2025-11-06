@@ -1,14 +1,61 @@
 import express from 'express';
+import { getApiDocs } from '../config/apiDocs.js';
 
 const router = express.Router();
 
-// API Documentation endpoint
+// OpenAPI/Swagger JSON endpoint
+router.get('/openapi.json', (req, res) => {
+  const docs = getApiDocs();
+  res.json(docs);
+});
+
+// Swagger UI endpoint (if swagger-ui-express is installed)
+router.get('/swagger', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Fixwell Services API Documentation</title>
+        <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui.css" />
+        <style>
+          html { box-sizing: border-box; overflow: -moz-scrollbars-vertical; overflow-y: scroll; }
+          *, *:before, *:after { box-sizing: inherit; }
+          body { margin:0; background: #fafafa; }
+        </style>
+      </head>
+      <body>
+        <div id="swagger-ui"></div>
+        <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-bundle.js"></script>
+        <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-standalone-preset.js"></script>
+        <script>
+          window.onload = function() {
+            SwaggerUIBundle({
+              url: "${req.protocol}://${req.get('host')}/api/docs/openapi.json",
+              dom_id: '#swagger-ui',
+              presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+              ],
+              layout: "StandaloneLayout"
+            });
+          };
+        </script>
+      </body>
+    </html>
+  `);
+});
+
+// API Documentation endpoint (legacy format)
 router.get('/', (req, res) => {
   res.json({
-    name: 'Household Services API',
+    name: 'Fixwell Services API',
     version: '1.0.0',
-    description: 'Backend API for Household Services Subscription Platform',
+    description: 'Backend API for Fixwell Services Platform',
     baseUrl: `${req.protocol}://${req.get('host')}/api`,
+    documentation: {
+      openapi: `${req.protocol}://${req.get('host')}/api/docs/openapi.json`,
+      swagger: `${req.protocol}://${req.get('host')}/api/docs/swagger`
+    },
     endpoints: {
       auth: {
         'POST /auth/register': {
@@ -64,10 +111,14 @@ router.get('/', (req, res) => {
             complexity: 'string (optional)',
             minPrice: 'number (optional)',
             maxPrice: 'number (optional)',
-            isActive: 'boolean (optional)'
+            isActive: 'boolean (optional)',
+            page: 'number (optional, default: 1)',
+            limit: 'number (optional, default: 20, max: 100)'
           },
           response: {
-            services: 'Service[]'
+            success: 'boolean',
+            services: 'Service[]',
+            pagination: 'Pagination object'
           }
         },
         'GET /services/:id': {
@@ -76,6 +127,7 @@ router.get('/', (req, res) => {
             id: 'string (required)'
           },
           response: {
+            success: 'boolean',
             service: 'Service object'
           }
         },
@@ -92,6 +144,7 @@ router.get('/', (req, res) => {
             basePrice: 'number (required)'
           },
           response: {
+            success: 'boolean',
             service: 'Service object'
           }
         },
@@ -109,6 +162,7 @@ router.get('/', (req, res) => {
             isActive: 'boolean (optional)'
           },
           response: {
+            success: 'boolean',
             service: 'Service object'
           }
         },
@@ -118,6 +172,7 @@ router.get('/', (req, res) => {
             Authorization: 'Bearer <token> (required)'
           },
           response: {
+            success: 'boolean',
             message: 'string'
           }
         }
@@ -131,10 +186,14 @@ router.get('/', (req, res) => {
           query: {
             status: 'string (optional)',
             startDate: 'string (optional)',
-            endDate: 'string (optional)'
+            endDate: 'string (optional)',
+            page: 'number (optional, default: 1)',
+            limit: 'number (optional, default: 20, max: 100)'
           },
           response: {
-            bookings: 'Booking[]'
+            success: 'boolean',
+            bookings: 'Booking[]',
+            pagination: 'Pagination object'
           }
         },
         'GET /bookings/:id': {
@@ -143,6 +202,7 @@ router.get('/', (req, res) => {
             Authorization: 'Bearer <token> (required)'
           },
           response: {
+            success: 'boolean',
             booking: 'Booking object',
             customer: 'User object',
             service: 'Service object',
@@ -160,6 +220,7 @@ router.get('/', (req, res) => {
             notes: 'string (optional)'
           },
           response: {
+            success: 'boolean',
             booking: 'Booking object'
           }
         },
@@ -172,6 +233,7 @@ router.get('/', (req, res) => {
             status: 'string (required)'
           },
           response: {
+            success: 'boolean',
             booking: 'Booking object'
           }
         },
@@ -181,73 +243,37 @@ router.get('/', (req, res) => {
             Authorization: 'Bearer <token> (required)'
           },
           response: {
-            message: 'string'
-          }
-        }
-      },
-      payments: {
-        'POST /payments/create-intent': {
-          description: 'Create Stripe payment intent',
-          headers: {
-            Authorization: 'Bearer <token> (required)'
-          },
-          body: {
-            bookingId: 'string (required)',
-            amount: 'number (required)'
-          },
-          response: {
-            clientSecret: 'string'
-          }
-        },
-        'POST /payments/confirm': {
-          description: 'Confirm payment',
-          headers: {
-            Authorization: 'Bearer <token> (required)'
-          },
-          body: {
-            paymentIntentId: 'string (required)',
-            bookingId: 'string (required)'
-          },
-          response: {
             success: 'boolean',
             message: 'string'
           }
         }
       },
-      quotes: {
-        'GET /quotes': {
-          description: 'Get all quotes (admin only)',
+      admin: {
+        'GET /admin/users': {
+          description: 'Get all users with pagination (admin only)',
           headers: {
             Authorization: 'Bearer <token> (required)'
           },
-          response: {
-            quotes: 'Quote[]'
-          }
-        },
-        'POST /quotes': {
-          description: 'Submit a quote request',
-          body: {
-            email: 'string (required)',
-            message: 'string (required)',
-            userId: 'string (optional)',
-            serviceId: 'string (optional)'
+          query: {
+            page: 'number (optional, default: 1)',
+            limit: 'number (optional, default: 50, max: 100)',
+            role: 'string (optional)',
+            search: 'string (optional)'
           },
           response: {
             success: 'boolean',
-            quote: 'Quote object'
+            users: 'User[]',
+            pagination: 'Pagination object'
           }
         },
-        'POST /quotes/:id/reply': {
-          description: 'Reply to quote (admin only)',
+        'GET /admin/subscriptions': {
+          description: 'Get all subscriptions (admin only)',
           headers: {
             Authorization: 'Bearer <token> (required)'
           },
-          body: {
-            reply: 'string (required)',
-            price: 'number (optional)'
-          },
           response: {
-            success: 'boolean'
+            success: 'boolean',
+            subscriptions: 'Subscription[]'
           }
         }
       },
@@ -266,12 +292,14 @@ router.get('/', (req, res) => {
     authentication: {
       type: 'Bearer Token',
       header: 'Authorization: Bearer <token>',
+      cookie: 'auth_token',
       tokenExpiry: '7 days'
     },
     rateLimiting: {
-      general: '100 requests per 15 minutes per IP',
-      auth: '5 requests per 15 minutes per IP',
-      api: '200 requests per 15 minutes for authenticated users, 50 for anonymous'
+      general: '200 requests per 15 minutes per IP',
+      auth: '50 requests per 15 minutes per IP',
+      api: '500 requests per 15 minutes for authenticated users, 100 for anonymous',
+      admin: '1000 requests per 15 minutes for admin users'
     },
     errorCodes: {
       400: 'Bad Request - Invalid input data',
@@ -280,7 +308,22 @@ router.get('/', (req, res) => {
       404: 'Not Found - Resource not found',
       409: 'Conflict - Resource already exists',
       429: 'Too Many Requests - Rate limit exceeded',
-      500: 'Internal Server Error - Server error'
+      500: 'Internal Server Error - Server error',
+      503: 'Service Unavailable - Database or service unavailable'
+    },
+    responseFormat: {
+      success: {
+        success: true,
+        data: 'Response data',
+        pagination: 'Pagination object (if applicable)'
+      },
+      error: {
+        success: false,
+        error: 'Error message',
+        code: 'Error code',
+        timestamp: 'ISO timestamp',
+        details: 'Additional error details (development only)'
+      }
     }
   });
 });

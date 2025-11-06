@@ -104,6 +104,14 @@ model User {
 
   @@index([referredByCode])
   @@index([createdAt])
+  @@index([email])
+  @@index([role])
+  @@index([role, isActive])
+  @@index([isActive])
+  @@index([lastLoginAt])
+  @@index([subscriptionId])
+  @@index([createdAt, role])
+  @@index([email, role])
 }
 
 model CustomerEmployeeAssignment {
@@ -159,6 +167,17 @@ model Subscription {
 
   // Salesman referral relations
   customerReferrals        CustomerReferral[]     @relation("SubscriptionReferrals")
+  
+  @@index([status])
+  @@index([status, createdAt])
+  @@index([tier])
+  @@index([tier, status])
+  @@index([userId])
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+  @@index([createdAt])
+  @@index([currentPeriodEnd])
+  @@index([canCancel])
 }
 
 model SubscriptionUsage {
@@ -218,6 +237,14 @@ model Booking {
   messageIds            String[]
   perkType              String?
   usedSubscriptionPerk  Boolean @default(false)
+  
+  @@index([customerId])
+  @@index([serviceId])
+  @@index([status])
+  @@index([status, scheduledDate])
+  @@index([scheduledDate])
+  @@index([createdAt])
+  @@index([customerId, status])
 }
 
 model Message {
@@ -323,6 +350,15 @@ model ServiceRequest {
   assignedTechnician User?   @relation("TechnicianServiceRequests", fields: [assignedTechnicianId], references: [id])
   quotes            Quote[]  @relation("QuoteToServiceRequest")
   jobs              Job[]     @relation("ServiceRequestToJob")
+  
+  @@index([customerId])
+  @@index([serviceId])
+  @@index([status])
+  @@index([status, urgency])
+  @@index([assignedTechnicianId])
+  @@index([createdAt])
+  @@index([urgency])
+  @@index([preferredDate])
 }
 
 model Job {
@@ -348,6 +384,14 @@ model Job {
   customer          User     @relation("CustomerJobs", fields: [customerId], references: [id])
   technician        User     @relation("TechnicianJobs", fields: [technicianId], references: [id])
   invoices          Invoice[] @relation("JobToInvoice")
+  
+  @@index([customerId])
+  @@index([technicianId])
+  @@index([serviceRequestId])
+  @@index([status])
+  @@index([status, scheduledDate])
+  @@index([scheduledDate])
+  @@index([createdAt])
 }
 
 model Invoice {

@@ -111,29 +111,37 @@ export const isTest = config.nodeEnv === 'test';
 
 // Security helpers
 export const getCorsOptions = () => {
-  // For production, allow all Railway domains to prevent CORS issues
   let allowedOrigins;
   
   if (isProduction) {
-    // Allow all Railway domains in production
+    // Production: Use configured origins + Railway domains
+    const allowedOriginsList = [
+      ...config.corsOrigins,
+      ...config.productionOrigins,
+      config.frontendUrl
+    ].filter(Boolean);
+    
     allowedOrigins = (origin, callback) => {
       // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-      
-      // Allow all Railway domains
-      if (origin.includes('railway.app') || origin.includes('localhost')) {
+      if (!origin) {
         return callback(null, true);
       }
       
-      // Also allow any explicitly configured origins
-      if (config.corsOrigins.includes(origin)) {
+      // Check against allowed origins list
+      if (allowedOriginsList.includes(origin)) {
         return callback(null, true);
       }
       
-      return callback(null, true); // Allow all for now
+      // Allow Railway domains (for dynamic deployments)
+      if (origin.includes('.railway.app')) {
+        return callback(null, true);
+      }
+      
+      // Deny all other origins
+      return callback(new Error('Not allowed by CORS'));
     };
   } else {
-    // Development: use specific origins
+    // Development: use specific origins from config
     allowedOrigins = config.corsOrigins.length > 0 
       ? config.corsOrigins 
       : ['http://localhost:3000', 'http://localhost:3001'];
@@ -141,15 +149,19 @@ export const getCorsOptions = () => {
 
   console.log('🔧 CORS Configuration for', config.nodeEnv, ':', {
     type: typeof allowedOrigins,
-    origins: typeof allowedOrigins === 'function' ? 'Dynamic function' : allowedOrigins
+    origins: typeof allowedOrigins === 'function' 
+      ? `Dynamic function (checking ${config.corsOrigins.length} configured origins)` 
+      : allowedOrigins
   });
 
   return {
     origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Origin', 'Accept', 'X-Emergency-Token'],
     exposedHeaders: ['X-Total-Count', 'X-Page-Count'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204
   };
 };
 
