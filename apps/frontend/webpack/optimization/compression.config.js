@@ -117,35 +117,39 @@ function configureCSSOptimization(config) {
  */
 function configureJSOptimization(config) {
   // Enhanced terser options for better minification
-  const TerserPlugin = require('terser-webpack-plugin');
-  
-  config.optimization.minimizer = config.optimization.minimizer || [];
-  
-  // Find existing TerserPlugin and enhance it
-  const existingTerserIndex = config.optimization.minimizer.findIndex(
-    plugin => plugin.constructor.name === 'TerserPlugin'
-  );
-  
-  if (existingTerserIndex !== -1) {
-    // Replace existing terser with enhanced version
-    config.optimization.minimizer[existingTerserIndex] = new TerserPlugin({
-      parallel: true,
-      terserOptions: {
-        compress: {
-          drop_console: true,
-          drop_debugger: true,
-          pure_funcs: ['console.log', 'console.info', 'console.debug'],
-          passes: 2,
+  try {
+    const TerserPlugin = require('terser-webpack-plugin');
+    
+    config.optimization.minimizer = config.optimization.minimizer || [];
+    
+    // Find existing TerserPlugin and enhance it
+    const existingTerserIndex = config.optimization.minimizer.findIndex(
+      plugin => plugin.constructor.name === 'TerserPlugin'
+    );
+    
+    if (existingTerserIndex !== -1) {
+      // Replace existing terser with enhanced version
+      config.optimization.minimizer[existingTerserIndex] = new TerserPlugin({
+        parallel: true,
+        terserOptions: {
+          compress: {
+            drop_console: true,
+            drop_debugger: true,
+            pure_funcs: ['console.log', 'console.info', 'console.debug'],
+            passes: 2,
+          },
+          mangle: {
+            safari10: true,
+          },
+          format: {
+            comments: false,
+          },
         },
-        mangle: {
-          safari10: true,
-        },
-        format: {
-          comments: false,
-        },
-      },
-      extractComments: false,
-    });
+        extractComments: false,
+      });
+    }
+  } catch (error) {
+    console.warn('TerserPlugin not available:', error.message);
   }
 
   return config;
