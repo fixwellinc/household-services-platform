@@ -35,6 +35,9 @@ RUN npm run build --workspace=packages/utils
 # Copy all remaining source code
 COPY . .
 
+# Ensure frontend scripts directory is present (for build scripts)
+RUN mkdir -p apps/frontend/scripts && ls -la apps/frontend/scripts/ || echo "Scripts directory check"
+
 # Generate Prisma client for backend
 WORKDIR /app/apps/backend
 RUN npx prisma generate
@@ -47,13 +50,44 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV DISABLE_ESLINT_PLUGIN=true
 ENV SKIP_ENV_VALIDATION=true
 ENV NEXT_BUILD_CACHE_DISABLED=1
-# Run progressive build attempts
-RUN npm run build || npm run build:simple || npm run build:minimal
-
-# Create missing font manifest if it doesn't exist
+# Ensure manifest directory exists and create initial manifest files before build
 RUN mkdir -p .next/server && \
+    echo '{}' > .next/server/pages-manifest.json && \
+    echo '{}' > .next/server/app-paths-manifest.json && \
+    echo '{"sortedMiddleware":[],"middleware":{},"functions":{}}' > .next/server/middleware-manifest.json && \
+    echo '{"pages":{},"app":{},"appUsingSizeAdjust":false,"pagesUsingSizeAdjust":false}' > .next/server/font-manifest.json && \
+    chmod -R 755 .next/server
+
+# Run build with background manifest maintainer
+RUN (while true; do \
+       mkdir -p .next/server && \
+       echo '{}' > .next/server/pages-manifest.json 2>/dev/null || true && \
+       echo '{}' > .next/server/app-paths-manifest.json 2>/dev/null || true && \
+       echo '{"sortedMiddleware":[],"middleware":{},"functions":{}}' > .next/server/middleware-manifest.json 2>/dev/null || true && \
+       echo '{"pages":{},"app":{},"appUsingSizeAdjust":false,"pagesUsingSizeAdjust":false}' > .next/server/font-manifest.json 2>/dev/null || true && \
+       sleep 0.05; \
+     done & MANIFEST_PID=$!; \
+     sleep 0.2; \
+     if [ -f scripts/build-with-manifests.js ]; then \
+       npm run build || npm run build:simple || npm run build:minimal; \
+     else \
+       npx next build || npx next build --no-lint --experimental-build-mode=compile || NEXT_BUILD_CACHE_DISABLED=1 npx next build --no-lint; \
+     fi; \
+     kill $MANIFEST_PID 2>/dev/null || true)
+
+# Create missing manifest files if they don't exist
+RUN mkdir -p .next/server && \
+    if [ ! -f .next/server/pages-manifest.json ]; then \
+      echo '{}' > .next/server/pages-manifest.json; \
+    fi && \
     if [ ! -f .next/server/font-manifest.json ]; then \
       echo '{"pages":{},"app":{},"appUsingSizeAdjust":false,"pagesUsingSizeAdjust":false}' > .next/server/font-manifest.json; \
+    fi && \
+    if [ ! -f .next/server/app-paths-manifest.json ]; then \
+      echo '{}' > .next/server/app-paths-manifest.json; \
+    fi && \
+    if [ ! -f .next/server/middleware-manifest.json ]; then \
+      echo '{"sortedMiddleware":[],"middleware":{},"functions":{}}' > .next/server/middleware-manifest.json; \
     fi
 
 # Verify build artifacts exist

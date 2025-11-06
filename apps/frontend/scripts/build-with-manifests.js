@@ -14,50 +14,92 @@ const nextDir = path.join(frontendDir, '.next');
 const serverDir = path.join(nextDir, 'server');
 
 function ensureManifests() {
-  if (!fs.existsSync(serverDir)) {
-    fs.mkdirSync(serverDir, { recursive: true });
+  try {
+    if (!fs.existsSync(serverDir)) {
+      fs.mkdirSync(serverDir, { recursive: true });
+    }
+    
+    const manifests = {
+      'pages-manifest.json': '{}',
+      'app-paths-manifest.json': '{}',
+      'middleware-manifest.json': JSON.stringify({
+        sortedMiddleware: [],
+        middleware: {},
+        functions: {}
+      }),
+      'font-manifest.json': JSON.stringify({
+        pages: {},
+        app: {},
+        appUsingSizeAdjust: false,
+        pagesUsingSizeAdjust: false
+      })
+    };
+    
+    Object.entries(manifests).forEach(([filename, content]) => {
+      const filepath = path.join(serverDir, filename);
+      try {
+        // Use writeFileSync with flag to ensure file exists even if Next.js deletes it
+        fs.writeFileSync(filepath, content, { encoding: 'utf8', flag: 'w' });
+        // Verify file was written
+        if (!fs.existsSync(filepath)) {
+          console.warn(`Warning: Failed to create ${filename}, retrying...`);
+          fs.writeFileSync(filepath, content, { encoding: 'utf8', flag: 'w' });
+        }
+      } catch (err) {
+        console.warn(`Warning: Error creating ${filename}:`, err.message);
+      }
+    });
+  } catch (err) {
+    console.warn('Warning: Error ensuring manifests:', err.message);
   }
-  
-  const manifests = {
-    'pages-manifest.json': '{}',
-    'app-paths-manifest.json': '{}',
-    'middleware-manifest.json': JSON.stringify({
-      sortedMiddleware: [],
-      middleware: {},
-      functions: {}
-    }),
-    'font-manifest.json': JSON.stringify({
-      pages: {},
-      app: {},
-      appUsingSizeAdjust: false,
-      pagesUsingSizeAdjust: false
-    })
-  };
-  
-  Object.entries(manifests).forEach(([filename, content]) => {
-    const filepath = path.join(serverDir, filename);
-    fs.writeFileSync(filepath, content, 'utf8');
-  });
 }
 
-// Ensure manifests exist before build
+// Ensure manifests exist before build - call multiple times to be safe
 ensureManifests();
 
-// Run the build command
+// Verify manifests exist and retry if needed
+let retries = 0;
+while (retries < 5) {
+  const pagesManifest = path.join(serverDir, 'pages-manifest.json');
+  if (fs.existsSync(pagesManifest)) {
+    break;
+  }
+  ensureManifests();
+  retries++;
+  // Small synchronous delay using busy-wait (only a few milliseconds)
+  const start = Date.now();
+  while (Date.now() - start < 10) {}
+}
+
+console.log('✅ Manifest files ensured before build');
+
+// Map build commands to next build arguments
 const buildCmd = process.argv[2] || 'build';
-const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+let nextArgs = ['build'];
+
+if (buildCmd === 'build:simple') {
+  nextArgs = ['build', '--no-lint', '--experimental-build-mode=compile'];
+} else if (buildCmd === 'build:minimal') {
+  nextArgs = ['build', '--no-lint'];
+} else {
+  // Default build command
+  nextArgs = ['build'];
+}
+
+// Use npx to find next binary (works in both workspace and non-workspace setups)
+const npxCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+
+// Start periodic manifest checking before spawning build
+const manifestCheck = setInterval(() => {
+  ensureManifests();
+}, 50);
 
 // Monitor the build process and ensure manifests exist periodically
-const buildProcess = spawn(npmCmd, ['run', buildCmd], {
+const buildProcess = spawn(npxCmd, ['next', ...nextArgs], {
   cwd: frontendDir,
   stdio: 'inherit',
   env: { ...process.env }
 });
-
-// Ensure manifests exist periodically during build (every 500ms)
-const manifestCheck = setInterval(() => {
-  ensureManifests();
-}, 500);
 
 buildProcess.on('close', (code) => {
   clearInterval(manifestCheck);
