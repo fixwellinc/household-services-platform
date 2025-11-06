@@ -12,8 +12,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:with-manifests": "node scripts/build-with-manifests.js build",
     "build:simple": "next build --no-lint --experimental-build-mode=compile",
     "build:minimal": "NEXT_BUILD_CACHE_DISABLED=1 next build --no-lint",
+    "build:minimal:docker": "next build --no-lint",
     "build:analyze": "set ANALYZE=true && next build",
     "build:tree-shake": "set ANALYZE_TREE_SHAKING=true && next build",
     "build:budget": "next build && node scripts/check-performance-budget.js",
