@@ -47,71 +47,14 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV DISABLE_ESLINT_PLUGIN=true
 ENV SKIP_ENV_VALIDATION=true
 ENV NEXT_BUILD_CACHE_DISABLED=1
+# Run progressive build attempts
+RUN npm run build || npm run build:simple || npm run build:minimal
 
-# Clear any existing .next directory to start fresh
-RUN rm -rf .next
-
-# CRITICAL: Create manifest files BEFORE build starts
-# Next.js 15 tries to read these during "Collecting page data" phase
-RUN echo "📝 Creating manifest files before build..." && \
-    mkdir -p .next/server && \
-    echo '{}' > .next/server/pages-manifest.json && \
-    echo '{}' > .next/server/app-paths-manifest.json && \
-    echo '{"sortedMiddleware":[],"middleware":{},"functions":{}}' > .next/server/middleware-manifest.json && \
-    echo '{"pages":{},"app":{},"appUsingSizeAdjust":false,"pagesUsingSizeAdjust":false}' > .next/server/font-manifest.json && \
-    echo "✅ Pre-build manifests created"
-
-# Run progressive build attempts with proper error handling
-# PRIORITY: Use build:with-manifests FIRST (monitors and ensures manifests during build)
-# This is the most reliable solution for Next.js 15 manifest deletion issue
-RUN echo "🔨 Starting Next.js build..." && \
-    (npm run build:with-manifests) || \
-    (mkdir -p .next/server && \
-     echo '{}' > .next/server/pages-manifest.json && \
-     echo '{}' > .next/server/app-paths-manifest.json && \
-     echo '{"sortedMiddleware":[],"middleware":{},"functions":{}}' > .next/server/middleware-manifest.json && \
-     echo '{"pages":{},"app":{},"appUsingSizeAdjust":false,"pagesUsingSizeAdjust":false}' > .next/server/font-manifest.json && \
-     npm run build:minimal:docker) || \
-    (mkdir -p .next/server && \
-     echo '{}' > .next/server/pages-manifest.json && \
-     echo '{}' > .next/server/app-paths-manifest.json && \
-     echo '{"sortedMiddleware":[],"middleware":{},"functions":{}}' > .next/server/middleware-manifest.json && \
-     echo '{"pages":{},"app":{},"appUsingSizeAdjust":false,"pagesUsingSizeAdjust":false}' > .next/server/font-manifest.json && \
-     npm run build:simple) || \
-    (mkdir -p .next/server && \
-     echo '{}' > .next/server/pages-manifest.json && \
-     echo '{}' > .next/server/app-paths-manifest.json && \
-     echo '{"sortedMiddleware":[],"middleware":{},"functions":{}}' > .next/server/middleware-manifest.json && \
-     echo '{"pages":{},"app":{},"appUsingSizeAdjust":false,"pagesUsingSizeAdjust":false}' > .next/server/font-manifest.json && \
-     npm run build:minimal) || \
-    (mkdir -p .next/server && \
-     echo '{}' > .next/server/pages-manifest.json && \
-     echo '{}' > .next/server/app-paths-manifest.json && \
-     echo '{"sortedMiddleware":[],"middleware":{},"functions":{}}' > .next/server/middleware-manifest.json && \
-     echo '{"pages":{},"app":{},"appUsingSizeAdjust":false,"pagesUsingSizeAdjust":false}' > .next/server/font-manifest.json && \
-     npm run build) && \
-    echo "✅ Build command completed"
-
-# Verify build completed and ensure critical manifests exist
-RUN echo "🔍 Verifying build after completion..." && \
-    mkdir -p .next/server && \
-    if [ ! -f .next/server/pages-manifest.json ]; then \
-      echo '{}' > .next/server/pages-manifest.json && \
-      echo "⚠️  Created missing pages-manifest.json"; \
-    fi && \
-    if [ ! -f .next/server/app-paths-manifest.json ]; then \
-      echo '{}' > .next/server/app-paths-manifest.json && \
-      echo "⚠️  Created missing app-paths-manifest.json"; \
-    fi && \
-    if [ ! -f .next/server/middleware-manifest.json ]; then \
-      echo '{"sortedMiddleware":[],"middleware":{},"functions":{}}' > .next/server/middleware-manifest.json && \
-      echo "⚠️  Created missing middleware-manifest.json"; \
-    fi && \
+# Create missing font manifest if it doesn't exist
+RUN mkdir -p .next/server && \
     if [ ! -f .next/server/font-manifest.json ]; then \
-      echo '{"pages":{},"app":{},"appUsingSizeAdjust":false,"pagesUsingSizeAdjust":false}' > .next/server/font-manifest.json && \
-      echo "⚠️  Created missing font-manifest.json"; \
-    fi && \
-    echo "✅ Post-build manifest verification complete"
+      echo '{"pages":{},"app":{},"appUsingSizeAdjust":false,"pagesUsingSizeAdjust":false}' > .next/server/font-manifest.json; \
+    fi
 
 # Verify build artifacts exist
 RUN ls -la .next/ && ls -la .next/server/ || echo "Warning: Some build artifacts missing"
