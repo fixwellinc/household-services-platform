@@ -596,14 +596,26 @@ class EnhancedUnifiedServer {
 
 // Always start the server when this file is executed directly
 // This ensures the server starts regardless of how it's invoked
-logger.info('🎬 Initializing Enhanced Unified Server...');
-logger.info(`📁 Module URL: ${import.meta.url}`);
-logger.info(`📁 Process argv[1]: ${process.argv[1]}`);
+// Use console.log first in case logger isn't ready
+console.log('🎬 [TOP-LEVEL] Initializing Enhanced Unified Server...');
+console.log(`📁 [TOP-LEVEL] Module URL: ${import.meta.url}`);
+console.log(`📁 [TOP-LEVEL] Process argv[1]: ${process.argv[1]}`);
+
+try {
+  logger.info('🎬 Initializing Enhanced Unified Server...');
+  logger.info(`📁 Module URL: ${import.meta.url}`);
+  logger.info(`📁 Process argv[1]: ${process.argv[1]}`);
+} catch (logError) {
+  console.log('⚠️ Logger not ready yet:', logError.message);
+}
 
 const server = new EnhancedUnifiedServer();
+console.log('✅ [TOP-LEVEL] Server instance created');
 
 logger.info('🚀 Calling server.start()...');
+console.log('🚀 [TOP-LEVEL] Calling server.start()...');
 server.start().catch((error) => {
+  console.error('💥 [TOP-LEVEL] Server startup failed:', error.message);
   logger.error('💥 Server startup failed', {
     error: error.message,
     stack: error.stack
