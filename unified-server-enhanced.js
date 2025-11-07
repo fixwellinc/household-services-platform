@@ -18,7 +18,7 @@ import ErrorRecoveryService, {
 import DatabaseService from './apps/backend/src/services/databaseService.js';
 import RedisServiceWrapper from './apps/backend/src/services/redisServiceWrapper.js';
 import NextJSService from './apps/backend/src/services/nextjsService.js';
-import SocketIOService from './apps/backend/src/services/socketService.js';
+import socketServiceInstance, { SocketIOService } from './apps/backend/src/services/socketService.js';
 import BackendService from './apps/backend/src/services/backendService.js';
 import MaintenancePageService from './apps/backend/src/services/maintenancePageService.js';
 
@@ -55,7 +55,7 @@ class EnhancedUnifiedServer {
         hostname: this.hostname,
         port: this.port
       }),
-      socketio: new SocketIOService(),
+      socketio: new SocketIOService(), // Use the class, not the singleton
       maintenance: new MaintenancePageService()
     };
     
