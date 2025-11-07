@@ -127,9 +127,10 @@ RUN npm install -g prisma@^6.11.1 && \
     echo "✅ Prisma CLI installed globally"
 
 # Generate Prisma client in runtime stage
-# This is more reliable than copying from builder, especially in monorepo setups
+# Install @prisma/client first, then generate (needed for query engine)
 WORKDIR /app/apps/backend
-RUN npx prisma generate || echo "⚠️ Prisma generate failed, but continuing..." && \
+RUN npm install @prisma/client@^6.11.1 --save --legacy-peer-deps && \
+    npx prisma generate && \
     echo "✅ Prisma client generated"
 
 WORKDIR /app
