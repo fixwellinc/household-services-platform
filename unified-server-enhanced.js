@@ -595,9 +595,11 @@ class EnhancedUnifiedServer {
 }
 
 // Create and start the server if this file is run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === `file://${process.argv[1]}` || import.meta.url.endsWith('unified-server-enhanced.js')) {
+  logger.info('🎬 Initializing Enhanced Unified Server...');
   const server = new EnhancedUnifiedServer();
   
+  logger.info('🚀 Calling server.start()...');
   server.start().catch((error) => {
     logger.error('💥 Server startup failed', {
       error: error.message,
@@ -605,6 +607,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
     process.exit(1);
   });
+} else {
+  logger.info('📦 Enhanced Unified Server module loaded (not starting automatically)');
 }
 
 export default EnhancedUnifiedServer;
