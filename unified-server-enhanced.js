@@ -156,17 +156,28 @@ class EnhancedUnifiedServer {
 
       // Start all services with better error handling
       logger.info('🔧 Starting services...');
+      logger.info('📋 Registered services:', {
+        critical: Array.from(this.serviceManager.criticalServices || []),
+        nonCritical: Array.from(this.serviceManager.nonCriticalServices || [])
+      });
+      
       let serviceResults;
       try {
+        logger.info('⏳ Calling startAllServices()...');
         serviceResults = await this.serviceManager.startAllServices();
+        logger.info('✅ startAllServices() completed', serviceResults);
       } catch (serviceError) {
         logger.error('❌ Service startup failed', {
           error: serviceError.message,
           stack: serviceError.stack
         });
         // Log which services failed
-        const healthCheck = await this.serviceManager.getHealthCheck();
-        logger.error('📊 Service status:', healthCheck);
+        try {
+          const healthCheck = await this.serviceManager.getHealthCheck();
+          logger.error('📊 Service status:', healthCheck);
+        } catch (healthError) {
+          logger.error('❌ Failed to get health check:', healthError.message);
+        }
         throw serviceError;
       }
       
