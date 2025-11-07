@@ -594,29 +594,21 @@ class EnhancedUnifiedServer {
   }
 }
 
-// Create and start the server if this file is run directly
-// Check if this is the main module being executed
-const isMainModule = import.meta.url === `file://${process.argv[1]}` || 
-                     process.argv[1]?.endsWith('unified-server-enhanced.js') ||
-                     import.meta.url.includes('unified-server-enhanced.js');
+// Always start the server when this file is executed directly
+// This ensures the server starts regardless of how it's invoked
+logger.info('🎬 Initializing Enhanced Unified Server...');
+logger.info(`📁 Module URL: ${import.meta.url}`);
+logger.info(`📁 Process argv[1]: ${process.argv[1]}`);
 
-if (isMainModule) {
-  logger.info('🎬 Initializing Enhanced Unified Server...');
-  logger.info(`📁 Module URL: ${import.meta.url}`);
-  logger.info(`📁 Process argv[1]: ${process.argv[1]}`);
-  
-  const server = new EnhancedUnifiedServer();
-  
-  logger.info('🚀 Calling server.start()...');
-  server.start().catch((error) => {
-    logger.error('💥 Server startup failed', {
-      error: error.message,
-      stack: error.stack
-    });
-    process.exit(1);
+const server = new EnhancedUnifiedServer();
+
+logger.info('🚀 Calling server.start()...');
+server.start().catch((error) => {
+  logger.error('💥 Server startup failed', {
+    error: error.message,
+    stack: error.stack
   });
-} else {
-  logger.info('📦 Enhanced Unified Server module loaded (not starting automatically)');
-}
+  process.exit(1);
+});
 
 export default EnhancedUnifiedServer;
