@@ -623,6 +623,32 @@ class EnhancedUnifiedServer {
   }
 }
 
+// Handle unhandled rejections to prevent crashes
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('⚠️ [UNHANDLED] Unhandled Rejection:', reason);
+  // Log but don't crash - allow server to continue running
+  if (reason && typeof reason === 'object' && 'message' in reason) {
+    console.error('⚠️ [UNHANDLED] Error message:', reason.message);
+    // If it's a navigator error (client-side code running on server), just log it
+    if (reason.message && reason.message.includes('navigator')) {
+      console.warn('⚠️ [UNHANDLED] Navigator error detected (likely client-side code) - ignoring');
+      return; // Don't crash on navigator errors
+    }
+  }
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('💥 [UNCAUGHT] Uncaught Exception:', error.message);
+  // Only exit on critical errors
+  if (error.message && !error.message.includes('navigator')) {
+    console.error('💥 [UNCAUGHT] Critical error, exiting...');
+    process.exit(1);
+  } else {
+    console.warn('⚠️ [UNCAUGHT] Non-critical error, continuing...');
+  }
+});
+
 // Always start the server when this file is executed directly
 // This ensures the server starts regardless of how it's invoked
 // Use console.log first in case logger isn't ready
