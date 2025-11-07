@@ -161,7 +161,6 @@ CMD ["sh", "-c", "set -e && \
   cd /app/apps/backend && \
   echo '🗄️  Syncing database schema...' && \
   prisma db push || echo '⚠️  Database sync failed, continuing anyway...' && \
-  prisma generate || echo '⚠️  Prisma generate skipped' && \
   echo '✅ Database setup completed' && \
   cd /app && \
   echo '🚀 Starting unified server...' && \
