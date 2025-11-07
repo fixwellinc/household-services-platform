@@ -37,8 +37,6 @@ import {
 import DynamicLocationPromptModal from '@/components/location/DynamicLocationPromptModal';
 import QuoteRequestModal from '@/components/QuoteRequestModal';
 
-export const dynamic = 'force-dynamic';
-
 const categories = [
   { id: 'ALL', name: 'All Services', icon: Star, color: 'from-blue-500 to-purple-500' },
   { id: 'CLEANING', name: 'Cleaning', icon: Home, color: 'from-green-500 to-emerald-500' },

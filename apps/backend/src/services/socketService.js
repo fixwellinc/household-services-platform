@@ -1,436 +1,258 @@
-import jwt from 'jsonwebtoken';
-import winston from 'winston';
+import { logger } from '../utils/logger.js';
+import { Server as SocketIOServer } from 'socket.io';
 
-// Configure socket logger
-const socketLogger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.errors({ stack: true }),
-    winston.format.json()
-  ),
-  defaultMeta: { service: 'socket' },
-  transports: [
-    new winston.transports.File({ filename: 'logs/socket.log' }),
-    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-  ],
-});
-
-if (process.env.NODE_ENV !== 'production') {
-  socketLogger.add(new winston.transports.Console({
-    format: winston.format.simple()
-  }));
-}
-
-class SocketService {
+/**
+ * Socket.IO Service - Manages WebSocket connections with graceful degradation
+ */
+class SocketIOService {
   constructor() {
+    this.name = 'socketio';
     this.io = null;
-    this.adminSockets = new Map(); // Map of admin user IDs to socket IDs
-    this.userSockets = new Map(); // Map of user IDs to socket IDs
-    this.chatRooms = new Map(); // Map of chat room IDs to participants
+    this.server = null;
+    this.isInitialized = false;
+    this.connectionCount = 0;
+    this.fallbackMode = false;
   }
 
-  initialize(io) {
-    this.io = io;
-    this.setupSocketHandlers();
-    socketLogger.info('Socket service initialized');
-  }
-
-  setupSocketHandlers() {
-    this.io.on('connection', (socket) => {
-      socketLogger.info('New client connected', { socketId: socket.id });
-
-      // Authenticate socket connection
-      socket.on('authenticate', async (token) => {
-        try {
-          const decoded = jwt.verify(token, process.env.JWT_SECRET);
-          socket.userId = decoded.userId;
-          socket.userRole = decoded.role;
-          
-          // Store socket mapping
-          if (decoded.role === 'ADMIN') {
-            this.adminSockets.set(decoded.userId, socket.id);
-            socket.join('admin-room');
-            socketLogger.info('Admin authenticated', { 
-              userId: decoded.userId, 
-              socketId: socket.id 
-            });
-          } else {
-            this.userSockets.set(decoded.userId, socket.id);
-          }
-
-          socket.emit('authenticated', { success: true });
-        } catch (error) {
-          socketLogger.error('Socket authentication failed', { 
-            error: error.message,
-            socketId: socket.id 
-          });
-          socket.emit('authentication-error', { error: 'Invalid token' });
-        }
-      });
-
-      // Admin-specific handlers
-      socket.on('admin:join', () => {
-        if (socket.userRole === 'ADMIN') {
-          socket.join('admin-room');
-          socketLogger.info('Admin joined admin room', { 
-            userId: socket.userId,
-            socketId: socket.id 
-          });
-        }
-      });
-
-      socket.on('admin:leave', () => {
-        if (socket.userRole === 'ADMIN') {
-          socket.leave('admin-room');
-          socketLogger.info('Admin left admin room', { 
-            userId: socket.userId,
-            socketId: socket.id 
-          });
-        }
-      });
-
-      // Chat handlers (existing functionality)
-      socket.on('join-session', (chatId) => {
-        socket.join(chatId);
-        
-        // Track chat room participants
-        if (!this.chatRooms.has(chatId)) {
-          this.chatRooms.set(chatId, new Set());
-        }
-        this.chatRooms.get(chatId).add(socket.id);
-        
-        socketLogger.info('Socket joined chat session', { 
-          socketId: socket.id,
-          chatId,
-          userId: socket.userId 
-        });
-
-        // Notify admins of new chat activity
-        if (socket.userRole !== 'ADMIN') {
-          this.notifyAdmins('admin:chat-activity', {
-            type: 'user-joined',
-            chatId,
-            userId: socket.userId,
-            timestamp: new Date().toISOString()
-          });
-        }
-      });
-
-      socket.on('new-message', (data) => {
-        if (data && data.chatId) {
-          this.io.to(data.chatId).emit('new-message', data);
-          
-          // Notify admins of new messages
-          this.notifyAdmins('admin:new-message', {
-            chatId: data.chatId,
-            message: data,
-            timestamp: new Date().toISOString()
-          });
-          
-          socketLogger.info('Message relayed', { 
-            chatId: data.chatId,
-            senderId: socket.userId 
-          });
-        }
-      });
-
-      socket.on('typing', (data) => {
-        if (data && data.chatId) {
-          socket.to(data.chatId).emit('typing', { 
-            chatId: data.chatId, 
-            sender: data.sender 
-          });
-        }
-      });
-
-      socket.on('stop-typing', (data) => {
-        if (data && data.chatId) {
-          socket.to(data.chatId).emit('stop-typing', { 
-            chatId: data.chatId, 
-            sender: data.sender 
-          });
-        }
-      });
-
-      // Dashboard real-time updates
-      socket.on('admin:subscribe-dashboard', () => {
-        if (socket.userRole === 'ADMIN') {
-          socket.join('dashboard-updates');
-          socketLogger.info('Admin subscribed to dashboard updates', { 
-            userId: socket.userId 
-          });
-        }
-      });
-
-      socket.on('admin:unsubscribe-dashboard', () => {
-        if (socket.userRole === 'ADMIN') {
-          socket.leave('dashboard-updates');
-          socketLogger.info('Admin unsubscribed from dashboard updates', { 
-            userId: socket.userId 
-          });
-        }
-      });
-
-      // Customer dashboard real-time updates
-      socket.on('customer:subscribe', (data) => {
-        if (socket.userId && (socket.userId === data.userId || socket.userRole === 'ADMIN')) {
-          const roomName = `customer-${data.userId}`;
-          socket.join(roomName);
-          socketLogger.info('Customer subscribed to real-time updates', { 
-            userId: socket.userId,
-            targetUserId: data.userId,
-            room: roomName
-          });
-
-          // Send initial data if available
-          this.sendInitialCustomerData(socket, data.userId);
-        }
-      });
-
-      socket.on('customer:unsubscribe', (data) => {
-        if (socket.userId && (socket.userId === data.userId || socket.userRole === 'ADMIN')) {
-          const roomName = `customer-${data.userId}`;
-          socket.leave(roomName);
-          socketLogger.info('Customer unsubscribed from real-time updates', { 
-            userId: socket.userId,
-            targetUserId: data.userId,
-            room: roomName
-          });
-        }
-      });
-
-      socket.on('customer:refresh', async (data) => {
-        if (socket.userId && (socket.userId === data.userId || socket.userRole === 'ADMIN')) {
-          socketLogger.info('Customer data refresh requested', { 
-            userId: socket.userId,
-            targetUserId: data.userId
-          });
-          
-          // Send fresh data
-          await this.sendInitialCustomerData(socket, data.userId);
-        }
-      });
-
-      // Handle disconnection
-      socket.on('disconnect', () => {
-        socketLogger.info('Client disconnected', { 
-          socketId: socket.id,
-          userId: socket.userId 
-        });
-
-        // Clean up socket mappings
-        if (socket.userId) {
-          if (socket.userRole === 'ADMIN') {
-            this.adminSockets.delete(socket.userId);
-          } else {
-            this.userSockets.delete(socket.userId);
-          }
-        }
-
-        // Clean up chat room tracking
-        for (const [chatId, participants] of this.chatRooms.entries()) {
-          if (participants.has(socket.id)) {
-            participants.delete(socket.id);
-            if (participants.size === 0) {
-              this.chatRooms.delete(chatId);
-            }
-          }
-        }
-      });
-    });
-  }
-
-  // Admin notification methods
-  notifyAdmins(event, data) {
-    this.io.to('admin-room').emit(event, data);
-    socketLogger.info('Admin notification sent', { event, data });
-  }
-
-  notifySpecificAdmin(adminId, event, data) {
-    const socketId = this.adminSockets.get(adminId);
-    if (socketId) {
-      this.io.to(socketId).emit(event, data);
-      socketLogger.info('Specific admin notification sent', { 
-        adminId, 
-        event, 
-        data 
-      });
-    }
-  }
-
-  // User notification methods
-  notifyUser(userId, event, data) {
-    const socketId = this.userSockets.get(userId);
-    if (socketId) {
-      this.io.to(socketId).emit(event, data);
-      socketLogger.info('User notification sent', { userId, event, data });
-    }
-  }
-
-  notifyAllUsers(event, data) {
-    // Emit to all connected users (excluding admin room)
-    this.io.emit(event, data);
-    socketLogger.info('Broadcast notification sent', { event, data });
-  }
-
-  // Dashboard update methods
-  broadcastDashboardUpdate(metrics) {
-    this.io.to('dashboard-updates').emit('admin:dashboard-update', { metrics });
-    socketLogger.info('Dashboard update broadcasted', { metrics });
-  }
-
-  // System alert methods
-  broadcastSystemAlert(alert) {
-    this.notifyAdmins('admin:system-alert', alert);
-    socketLogger.info('System alert broadcasted', { alert });
-  }
-
-  // Chat-specific methods
-  notifyNewChatMessage(chatId, message) {
-    this.io.to(chatId).emit('new-message', message);
-    this.notifyAdmins('admin:new-message', {
-      chatId,
-      message,
-      timestamp: new Date().toISOString()
-    });
-  }
-
-  // Audit log notifications
-  notifyAuditLog(auditData) {
-    this.notifyAdmins('admin:audit-log', auditData);
-  }
-
-  // Subscription update notifications
-  notifySubscriptionUpdate(subscriptionData) {
-    this.notifyAdmins('admin:subscription-update', subscriptionData);
+  async start(httpServer) {
+    logger.info('🔌 Starting Socket.IO service...');
     
-    // Also notify the specific user if they're connected
-    if (subscriptionData.userId) {
-      this.notifyUser(subscriptionData.userId, 'subscription-update', subscriptionData);
+    try {
+      if (!httpServer) {
+        throw new Error('HTTP server required for Socket.IO initialization');
+      }
+
+      this.server = httpServer;
       
-      // Send to customer dashboard room
-      this.notifyCustomerRoom(subscriptionData.userId, 'customer:subscription-update', subscriptionData);
+      // Create Socket.IO server with CORS configuration
+      this.io = new SocketIOServer(httpServer, {
+        cors: {
+          origin: process.env.FRONTEND_URL || process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000'],
+          methods: ['GET', 'POST'],
+          credentials: true,
+        },
+        // Add connection timeout and other resilience settings
+        pingTimeout: 60000,
+        pingInterval: 25000,
+        connectTimeout: 45000,
+        transports: ['websocket', 'polling']
+      });
+
+      // Set up event handlers
+      this._setupEventHandlers();
+      
+      this.isInitialized = true;
+      this.fallbackMode = false;
+      
+      logger.info('✅ Socket.IO service started successfully');
+      
+    } catch (error) {
+      logger.error('❌ Socket.IO service startup failed', {
+        error: error.message,
+        stack: error.stack
+      });
+      
+      // Enable fallback mode - HTTP-only operation
+      this.fallbackMode = true;
+      this.isInitialized = false;
+      
+      logger.warn('⚠️ Socket.IO service failed - enabling HTTP-only fallback mode');
+      
+      // Don't throw error for non-critical service
+      return;
     }
   }
 
-  // User activity notifications
-  notifyUserActivity(activityData) {
-    this.notifyAdmins('admin:user-activity', activityData);
+  async stop() {
+    logger.info('🛑 Stopping Socket.IO service...');
+    
+    try {
+      if (this.io) {
+        // Disconnect all clients gracefully
+        this.io.disconnectSockets(true);
+        
+        // Close the server
+        this.io.close();
+      }
+      
+      this.io = null;
+      this.server = null;
+      this.isInitialized = false;
+      this.connectionCount = 0;
+      this.fallbackMode = false;
+      
+      logger.info('✅ Socket.IO service stopped');
+    } catch (error) {
+      logger.error('❌ Error stopping Socket.IO service', { error: error.message });
+      // Don't throw error for non-critical service
+    }
   }
 
-  // Bulk operation progress updates
-  notifyBulkOperationProgress(operationId, progress) {
-    this.notifyAdmins('admin:bulk-operation-progress', {
-      operationId,
-      progress,
-      timestamp: new Date().toISOString()
-    });
-  }
+  async getHealth() {
+    try {
+      if (this.fallbackMode) {
+        return {
+          status: 'degraded',
+          details: {
+            initialized: false,
+            fallbackMode: true,
+            connectionCount: 0,
+            message: 'HTTP-only mode - real-time features disabled'
+          }
+        };
+      }
 
-  // Get connection statistics
-  getConnectionStats() {
-    return {
-      totalConnections: this.io.engine.clientsCount,
-      adminConnections: this.adminSockets.size,
-      userConnections: this.userSockets.size,
-      activeChatRooms: this.chatRooms.size,
-      adminSocketIds: Array.from(this.adminSockets.values()),
-      userSocketIds: Array.from(this.userSockets.values())
-    };
-  }
+      if (!this.isInitialized || !this.io) {
+        return {
+          status: 'unhealthy',
+          details: {
+            initialized: false,
+            fallbackMode: false,
+            connectionCount: 0,
+            error: 'Socket.IO not initialized'
+          }
+        };
+      }
 
-  // Get active chat rooms
-  getActiveChatRooms() {
-    const rooms = {};
-    for (const [chatId, participants] of this.chatRooms.entries()) {
-      rooms[chatId] = {
-        participantCount: participants.size,
-        participants: Array.from(participants)
+      return {
+        status: 'healthy',
+        details: {
+          initialized: true,
+          fallbackMode: false,
+          connectionCount: this.connectionCount,
+          engine: this.io.engine ? {
+            clientsCount: this.io.engine.clientsCount,
+            upgradeTimeout: this.io.engine.upgradeTimeout,
+            pingTimeout: this.io.engine.pingTimeout,
+            pingInterval: this.io.engine.pingInterval
+          } : null
+        }
+      };
+    } catch (error) {
+      return {
+        status: 'unhealthy',
+        details: {
+          initialized: false,
+          error: error.message,
+          connectionCount: this.connectionCount
+        }
       };
     }
-    return rooms;
   }
 
-  // Customer-specific notification methods
-  notifyCustomerRoom(userId, event, data) {
-    const roomName = `customer-${userId}`;
-    this.io.to(roomName).emit(event, data);
-    socketLogger.info('Customer room notification sent', { 
-      userId, 
-      room: roomName, 
-      event, 
-      data 
-    });
+  /**
+   * Get Socket.IO instance
+   */
+  getIO() {
+    if (this.fallbackMode) {
+      // Return a mock object that doesn't break the application
+      return this._createFallbackIO();
+    }
+    
+    if (!this.isInitialized || !this.io) {
+      throw new Error('Socket.IO not initialized');
+    }
+    
+    return this.io;
   }
 
-  notifyCustomerSubscriptionUpdate(userId, subscriptionData) {
-    this.notifyCustomerRoom(userId, 'customer:subscription-update', {
-      ...subscriptionData,
-      timestamp: new Date().toISOString()
-    });
+  /**
+   * Check if Socket.IO is available
+   */
+  isAvailable() {
+    return this.isInitialized && !this.fallbackMode;
   }
 
-  notifyCustomerUsageUpdate(userId, usageData) {
-    this.notifyCustomerRoom(userId, 'customer:usage-update', {
-      ...usageData,
-      timestamp: new Date().toISOString()
-    });
+  /**
+   * Check if using fallback mode
+   */
+  isFallbackMode() {
+    return this.fallbackMode;
   }
 
-  notifyCustomerBillingEvent(userId, billingEvent) {
-    this.notifyCustomerRoom(userId, 'customer:billing-event', {
-      ...billingEvent,
-      timestamp: new Date().toISOString()
-    });
-  }
+  /**
+   * Set up Socket.IO event handlers
+   */
+  _setupEventHandlers() {
+    if (!this.io) return;
 
-  notifyCustomerPerkUpdate(userId, perkData) {
-    this.notifyCustomerRoom(userId, 'customer:perk-update', {
-      ...perkData,
-      timestamp: new Date().toISOString()
-    });
-  }
+    this.io.on('connection', (socket) => {
+      this.connectionCount++;
+      logger.debug(`Socket.IO client connected: ${socket.id} (total: ${this.connectionCount})`);
 
-  notifyCustomerNotification(userId, notification) {
-    this.notifyCustomerRoom(userId, 'customer:notification', {
-      ...notification,
-      timestamp: new Date().toISOString()
-    });
-  }
-
-  // Send initial customer data when they subscribe
-  async sendInitialCustomerData(socket, userId) {
-    try {
-      // This would typically fetch from database
-      // For now, we'll emit placeholder events to indicate the system is ready
-      socket.emit('customer:subscription-update', {
-        id: 'initial',
-        userId: userId,
-        status: 'ACTIVE',
-        message: 'Real-time updates connected',
-        timestamp: new Date().toISOString()
+      socket.on('disconnect', (reason) => {
+        this.connectionCount = Math.max(0, this.connectionCount - 1);
+        logger.debug(`Socket.IO client disconnected: ${socket.id} (reason: ${reason}, total: ${this.connectionCount})`);
       });
 
-      socket.emit('customer:usage-update', {
-        userId: userId,
-        message: 'Usage tracking connected',
-        timestamp: new Date().toISOString()
+      socket.on('error', (error) => {
+        logger.error('Socket.IO client error', {
+          socketId: socket.id,
+          error: error.message
+        });
       });
 
-      socketLogger.info('Initial customer data sent', { userId });
-    } catch (error) {
-      socketLogger.error('Failed to send initial customer data', { 
-        userId, 
-        error: error.message 
+      // Add ping/pong for connection health
+      socket.on('ping', () => {
+        socket.emit('pong');
+      });
+    });
+
+    this.io.on('error', (error) => {
+      logger.error('Socket.IO server error', {
+        error: error.message,
+        stack: error.stack
+      });
+    });
+
+    // Log engine events for debugging
+    if (this.io.engine) {
+      this.io.engine.on('connection_error', (err) => {
+        logger.warn('Socket.IO connection error', {
+          code: err.code,
+          message: err.message,
+          context: err.context,
+          type: err.type
+        });
       });
     }
   }
 
-  // Health check method
-  isHealthy() {
-    return this.io && this.io.engine && this.io.engine.clientsCount >= 0;
+  /**
+   * Create a fallback IO object that doesn't break the application
+   */
+  _createFallbackIO() {
+    const noop = () => {};
+    const mockSocket = {
+      emit: noop,
+      on: noop,
+      off: noop,
+      join: noop,
+      leave: noop,
+      disconnect: noop
+    };
+
+    return {
+      emit: (...args) => {
+        logger.debug('Socket.IO fallback: emit called but ignored', { args: args.slice(0, 2) });
+      },
+      to: () => mockSocket,
+      in: () => mockSocket,
+      on: noop,
+      off: noop,
+      use: noop,
+      close: noop,
+      disconnectSockets: noop,
+      sockets: {
+        emit: (...args) => {
+          logger.debug('Socket.IO fallback: broadcast emit called but ignored', { args: args.slice(0, 2) });
+        }
+      },
+      engine: {
+        clientsCount: 0
+      }
+    };
   }
 }
 
-export default new SocketService();
+export default SocketIOService;

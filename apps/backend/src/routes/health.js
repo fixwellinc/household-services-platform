@@ -1,8 +1,9 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import Stripe from 'stripe';
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+import redisService from '../services/redisService.js';
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const router = express.Router();
 const prisma = new PrismaClient();
 
@@ -169,6 +170,72 @@ router.post('/sync-salesmen', async (req, res) => {
   }
 });
 
+// Redis-specific health endpoint
+router.get('/redis', async (req, res) => {
+  try {
+    const redisInfo = await redisService.getInfo();
+    const redisStatus = redisService.getStatus();
+    
+    const response = {
+      timestamp: new Date().toISOString(),
+      redis: {
+        available: redisInfo.available,
+        connected: redisInfo.connected,
+        status: redisStatus,
+        info: redisInfo.available ? {
+          memory: redisInfo.memory,
+          keyspace: redisInfo.keyspace,
+          serverInfo: redisInfo.serverInfo
+        } : null,
+        error: redisInfo.error || null
+      },
+      environment: {
+        redisUrl: process.env.REDIS_URL ? 'configured' : 'not configured',
+        redisPrivateUrl: process.env.REDIS_PRIVATE_URL ? 'configured' : 'not configured'
+      }
+    };
+
+    const statusCode = redisInfo.available ? 200 : 503;
+    res.status(statusCode).json(response);
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to retrieve Redis status',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Redis reconnection endpoint (for manual recovery)
+router.post('/redis/reconnect', async (req, res) => {
+  try {
+    console.log('Manual Redis reconnection requested...');
+    
+    const success = await redisService.forceReconnect();
+    
+    if (success) {
+      res.status(200).json({
+        success: true,
+        message: 'Redis reconnection successful',
+        timestamp: new Date().toISOString()
+      });
+    } else {
+      res.status(503).json({
+        success: false,
+        message: 'Redis reconnection failed',
+        timestamp: new Date().toISOString()
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      message: 'Redis reconnection failed with error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Performance metrics endpoint
 router.get('/metrics', async (req, res) => {
   try {
@@ -225,6 +292,40 @@ async function performHealthChecks() {
       status: 'unhealthy',
       error: error.message,
       details: 'Stripe API connection failed'
+    });
+  }
+
+  // Redis connectivity check
+  try {
+    if (redisService.isAvailable()) {
+      const startTime = Date.now();
+      const pingResult = await redisService.ping();
+      const responseTime = Date.now() - startTime;
+      
+      checks.push({
+        name: 'redis',
+        status: 'healthy',
+        responseTime: `${responseTime}ms`,
+        details: 'Redis connection successful',
+        connected: true
+      });
+    } else {
+      const redisStatus = redisService.getStatus();
+      checks.push({
+        name: 'redis',
+        status: 'degraded',
+        details: 'Redis not available - using memory cache fallback',
+        connected: false,
+        lastError: redisStatus.metrics.lastError
+      });
+    }
+  } catch (error) {
+    checks.push({
+      name: 'redis',
+      status: 'unhealthy',
+      error: error.message,
+      details: 'Redis connection failed',
+      connected: false
     });
   }
 
@@ -333,23 +434,43 @@ async function performDetailedHealthChecks() {
     });
   }
 
-  // Redis health (if configured)
-  if (process.env.REDIS_URL) {
-    try {
-      // Redis connection test would go here
+  // Redis health with detailed metrics
+  try {
+    const redisInfo = await redisService.getInfo();
+    
+    if (redisInfo.available) {
+      const status = redisService.getStatus();
+      
       components.push({
         name: 'cache',
         status: 'healthy',
-        provider: 'Redis'
+        provider: 'Redis',
+        connected: redisInfo.connected,
+        responseTime: status.lastPingTime ? `${Date.now() - status.lastPingTime}ms` : 'unknown',
+        uptime: status.uptime,
+        memory: redisInfo.memory,
+        keyspace: redisInfo.keyspace,
+        connectionMetrics: status.metrics,
+        serverInfo: status.serverInfo
       });
-    } catch (error) {
+    } else {
       components.push({
         name: 'cache',
-        status: 'unhealthy',
-        error: error.message,
-        provider: 'Redis'
+        status: 'degraded',
+        provider: 'Memory (Redis fallback)',
+        connected: false,
+        error: redisInfo.error,
+        fallbackActive: true
       });
     }
+  } catch (error) {
+    components.push({
+      name: 'cache',
+      status: 'unhealthy',
+      provider: 'Redis',
+      error: error.message,
+      connected: false
+    });
   }
 
   return { components };

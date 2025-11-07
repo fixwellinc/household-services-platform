@@ -5,8 +5,6 @@ import { CommunicationsOverview } from '@/components/admin/communications/Commun
 import { AdminPageErrorBoundary } from '@/components/admin/error-boundaries/AdminPageErrorBoundary';
 import { createErrorBoundaryProps } from '@/lib/admin-error-reporting';
 
-export const dynamic = 'force-dynamic';
-
 export default function CommunicationsPage() {
   return (
     <AdminPageErrorBoundary 

@@ -48,6 +48,10 @@
     "deploy:health": "node scripts/deploy/rollback-manager.js health-check",
     "security:setup": "node scripts/deploy/setup-production-security.js",
     "security:check": "npm audit && npm run test:security",
+    "validate-env": "node scripts/validate-environment.js",
+    "validate-railway-env": "node scripts/validate-railway-env.js",
+    "test-docker-build": "bash scripts/test-docker-build.sh",
+    "test-docker-build:win": "powershell -ExecutionPolicy Bypass -File scripts/test-docker-build.ps1",
     "setup": "npm install && npm run build:unified"
   },
   "dependencies": {

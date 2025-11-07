@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import prisma from '../config/database.js';
+import { logger } from '../utils/logger.js';
 
 export const authMiddleware = async (req, res, next) => {
   try {
@@ -8,7 +9,7 @@ export const authMiddleware = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     
     if (process.env.NODE_ENV !== 'production') {
-      console.log('Auth middleware debug:', {
+      logger.debug('Auth middleware debug', {
         url: req.url,
         hasAuthHeader: !!authHeader,
         hasCookie: !!req.cookies?.auth_token,
@@ -23,7 +24,7 @@ export const authMiddleware = async (req, res, next) => {
     }
     
     if (!token) {
-      console.log('No token found, returning 401');
+      logger.debug('No token found, returning 401', { url: req.url });
       return res.status(401).json({ error: 'Access token required' });
     }
     
@@ -62,7 +63,7 @@ export const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ error: 'Token expired' });
     }
     
-    console.error('Auth middleware error:', error);
+    logger.error('Auth middleware error', { error: error.message, stack: error.stack });
     return res.status(500).json({ error: 'Authentication error' });
   }
 };

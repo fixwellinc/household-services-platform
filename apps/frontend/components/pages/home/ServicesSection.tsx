@@ -1,42 +1,110 @@
 'use client';
 
 import { Wrench, Star, Clock, MapPin } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+interface Service {
+  id: string;
+  name: string;
+  description: string;
+  basePrice: number;
+  category?: string;
+  complexity?: string;
+}
 
 interface ServicesSectionProps {
   className?: string;
 }
 
-const mockServices = [
-  {
-    id: '1',
-    name: 'House Cleaning',
-    description: 'Professional deep cleaning services for your home',
-    price: 120,
-    rating: 4.8,
-    duration: '2-3 hours',
-    location: 'All areas'
-  },
-  {
-    id: '2', 
-    name: 'Plumbing Repair',
-    description: 'Expert plumbing services for all your needs',
-    price: 85,
-    rating: 4.9,
-    duration: '1-2 hours',
-    location: 'All areas'
-  },
-  {
-    id: '3',
-    name: 'Electrical Work',
-    description: 'Safe and reliable electrical installations and repairs',
-    price: 95,
-    rating: 4.7,
-    duration: '1-3 hours', 
-    location: 'All areas'
-  }
-];
-
 export default function ServicesSection({ className }: ServicesSectionProps) {
+  const [services, setServices] = useState<Service[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchServices() {
+      try {
+        const response = await fetch('/api/services');
+        if (!response.ok) {
+          throw new Error('Failed to fetch services');
+        }
+        const data = await response.json();
+        // Get only active services, limit to 6 for homepage
+        const activeServices = (data.services || [])
+          .filter((s: Service) => s.name) // Ensure name exists
+          .slice(0, 6);
+        setServices(activeServices);
+      } catch (err) {
+        console.error('Error fetching services:', err);
+        setError('Failed to load services');
+        // Fallback to empty array - component will show nothing rather than crash
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchServices();
+  }, []);
+
+  // Helper function to get rating based on service (mock for now)
+  const getRating = (serviceName: string) => {
+    const ratings: Record<string, number> = {
+      'House Cleaning': 4.8,
+      'Plumbing Repair': 4.9,
+      'Electrical Work': 4.7,
+      'Home Organization': 4.6,
+    };
+    return ratings[serviceName] || 4.5;
+  };
+
+  // Helper function to get duration estimate
+  const getDuration = (complexity?: string) => {
+    switch (complexity) {
+      case 'SIMPLE': return '1-2 hours';
+      case 'MODERATE': return '2-3 hours';
+      case 'COMPLEX': return '3-4 hours';
+      default: return '2-3 hours';
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <section className={`py-16 bg-gray-50 ${className || ''}`}>
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+              <Wrench className="h-4 w-4" />
+              Professional Services
+            </div>
+            <h2 className="text-3xl font-bold mb-4">Our Services</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Loading services...
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || services.length === 0) {
+    return (
+      <section className={`py-16 bg-gray-50 ${className || ''}`}>
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+              <Wrench className="h-4 w-4" />
+              Professional Services
+            </div>
+            <h2 className="text-3xl font-bold mb-4">Our Services</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              {error || 'No services available at the moment'}
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className={`py-16 bg-gray-50 ${className || ''}`}>
       <div className="container mx-auto px-4">
@@ -52,35 +120,35 @@ export default function ServicesSection({ className }: ServicesSectionProps) {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockServices.map((service) => (
-            <div key={service.id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-              <div className="p-6">
+          {services.map((service) => (
+            <div key={service.id} className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow flex flex-col">
+              <div className="p-6 flex-1 flex flex-col">
                 <div className="flex items-start justify-between mb-4">
-                  <h3 className="text-lg font-semibold">{service.name}</h3>
-                  <div className="flex items-center space-x-1">
+                  <h3 className="text-lg font-semibold flex-1">{service.name}</h3>
+                  <div className="flex items-center space-x-1 ml-2">
                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm font-medium">{service.rating}</span>
+                    <span className="text-sm font-medium">{getRating(service.name)}</span>
                   </div>
                 </div>
                 
-                <p className="text-gray-600 text-sm mb-4">{service.description}</p>
+                <p className="text-gray-600 text-sm mb-4 line-clamp-3 min-h-[3.75rem]">{service.description}</p>
                 
                 <div className="flex items-center space-x-4 text-sm text-gray-500 mb-4">
                   <div className="flex items-center space-x-1">
-                    <Clock className="w-4 h-4" />
-                    <span>{service.duration}</span>
+                    <Clock className="w-4 h-4 flex-shrink-0" />
+                    <span>{getDuration(service.complexity)}</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <MapPin className="w-4 h-4" />
-                    <span>{service.location}</span>
+                    <MapPin className="w-4 h-4 flex-shrink-0" />
+                    <span>All areas</span>
                   </div>
                 </div>
                 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mt-auto">
                   <div className="text-2xl font-bold text-green-600">
-                    ${service.price}
+                    ${service.basePrice}
                   </div>
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap">
                     Book Now
                   </button>
                 </div>

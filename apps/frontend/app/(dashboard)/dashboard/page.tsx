@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, Suspense } from 'react';
-
-export const dynamic = 'force-dynamic';
 import { useRouter } from 'next/navigation';
 import { useDashboardRouting } from '@/hooks/use-dashboard-routing';
 import { useAuth } from '@/contexts/AuthContext';

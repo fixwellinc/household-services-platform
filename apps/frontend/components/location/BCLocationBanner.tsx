@@ -100,7 +100,7 @@ export default function BCLocationBanner() {
                   <span className="text-sm font-medium text-blue-800 dark:text-blue-200 block">
                     Currently serving Lower Mainland residents
                   </span>
-                  <span className="text-xs text-blue-600 block sm:inline sm:ml-2">
+                  <span className="text-xs text-blue-600 dark:text-blue-400 block sm:inline sm:ml-2">
                     {hasUserPostalCode 
                       ? `Using your profile postal code: ${user.postalCode}`
                       : 'Enter your postal code to check availability (within 50km of Surrey)'

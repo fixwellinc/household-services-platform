@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:simple": "next build --no-lint --experimental-build-mode=compile",
-    "build:minimal": "NEXT_BUILD_CACHE_DISABLED=1 next build --no-lint",
+    "build:production": "NODE_ENV=production next build",
     "postinstall": "echo 'Frontend postinstall complete'",
     "start": "next start",
     "lint": "next lint",

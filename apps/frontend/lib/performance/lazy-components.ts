@@ -163,11 +163,11 @@ export const SalesmenManagement = lazy(() =>
 // CUSTOMER DASHBOARD COMPONENTS
 // =============================================================================
 
-// Core Customer Dashboard
+// Core Customer Dashboard - Railway deployment safe version
 export const CustomerDashboard = lazy(() => 
-  Promise.resolve({
-    default: () => null // Fallback component
-  })
+  import('@/components/dashboard/SimpleCustomerDashboard').then(module => ({ 
+    default: module.SimpleCustomerDashboard 
+  }))
 );
 
 // Booking Components

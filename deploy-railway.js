@@ -54,11 +54,11 @@ if (fs.existsSync('Dockerfile')) {
   process.exit(1);
 }
 
-// Check if railway.json exists
-if (fs.existsSync('railway.json')) {
-  console.log('✅ railway.json configuration found');
+// Check if railway.toml exists
+if (fs.existsSync('railway.toml')) {
+  console.log('✅ railway.toml configuration found');
 } else {
-  console.error('❌ railway.json not found');
+  console.error('❌ railway.toml not found');
   process.exit(1);
 }
 

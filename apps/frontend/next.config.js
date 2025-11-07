@@ -1,21 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Fix for missing buildId and deploymentId errors
+  // Simplified build ID generation for Railway
   generateBuildId: async () => {
-    const buildId = process.env.NEXT_BUILD_ID ||
-                   process.env.RAILWAY_GIT_COMMIT_SHA || 
-                   process.env.VERCEL_GIT_COMMIT_SHA || 
-                   process.env.GITHUB_SHA ||
+    const buildId = process.env.RAILWAY_GIT_COMMIT_SHA || 
                    process.env.RAILWAY_DEPLOYMENT_ID ||
                    'build-' + Date.now();
     console.log('🔧 Generated buildId:', buildId);
     return buildId;
-  },
-  // Environment variables for build context
-  env: {
-    NEXT_BUILD_ID: process.env.NEXT_BUILD_ID || 'build-' + Date.now(),
-    RAILWAY_DEPLOYMENT_ID: process.env.RAILWAY_DEPLOYMENT_ID,
-    RAILWAY_GIT_COMMIT_SHA: process.env.RAILWAY_GIT_COMMIT_SHA,
   },
   images: {
     remotePatterns: [
@@ -86,6 +77,8 @@ const nextConfig = {
   trailingSlash: false,
   skipTrailingSlashRedirect: true,
   
+
+  
   // External packages for server components
   serverExternalPackages: ['sharp'],
   
@@ -93,6 +86,10 @@ const nextConfig = {
   experimental: {
     // Keep minimal experimental features for stability
   },
+  
+  // Explicitly configure for App Router only (disable Pages Router detection)
+  // This prevents Next.js from looking for _document, _app, etc.
+  pageExtensions: ['ts', 'tsx', 'js', 'jsx'],
   
   // Build optimizations
   compiler: {
@@ -128,18 +125,8 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   
-  // Advanced webpack configuration for bundle optimization
-  webpack: (config, { isServer, dev }) => {
-    // Import optimization configurations
-    const { configureTreeShaking } = require('./webpack/optimization/tree-shaking.config');
-    const { 
-      configureCompression, 
-      configureAssetCaching, 
-      configureCSSOptimization,
-      configureJSOptimization,
-      addBundleSizeMonitoring 
-    } = require('./webpack/optimization/compression.config');
-    
+  // Simplified webpack configuration for Railway deployment
+  webpack: (config, { isServer }) => {
     // Basic fallbacks for Node.js modules
     if (!isServer) {
       config.resolve.fallback = {
@@ -148,115 +135,6 @@ const nextConfig = {
         net: false,
         tls: false,
       };
-    }
-
-    // Apply advanced tree shaking configuration
-    config = configureTreeShaking(config, { isServer, dev });
-
-    // Advanced optimization settings for production
-    if (!dev) {
-      // Apply compression and caching optimizations
-      config = configureCompression(config, { isServer, dev });
-      config = configureAssetCaching(config);
-      config = configureCSSOptimization(config);
-      config = configureJSOptimization(config);
-      config = addBundleSizeMonitoring(config);
-      // Advanced code splitting configuration
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        minSize: 20000,
-        maxSize: 244000,
-        minChunks: 1,
-        maxAsyncRequests: 30,
-        maxInitialRequests: 30,
-        cacheGroups: {
-          // Vendor libraries with tree shaking
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-            priority: 10,
-            reuseExistingChunk: true,
-            enforce: true,
-          },
-          // React and Next.js framework
-          framework: {
-            test: /[\\/]node_modules[\\/](react|react-dom|next)[\\/]/,
-            name: 'framework',
-            chunks: 'all',
-            priority: 40,
-            reuseExistingChunk: true,
-          },
-          // Date utilities (optimized for tree shaking)
-          dateUtils: {
-            test: /[\\/]node_modules[\\/](date-fns)[\\/]/,
-            name: 'date-utils',
-            chunks: 'all',
-            priority: 30,
-            reuseExistingChunk: true,
-          },
-          // UI libraries (optimized for tree shaking)
-          uiLibs: {
-            test: /[\\/]node_modules[\\/](lucide-react|@radix-ui|recharts)[\\/]/,
-            name: 'ui-libs',
-            chunks: 'all',
-            priority: 25,
-            reuseExistingChunk: true,
-          },
-          // Common shared code
-          common: {
-            name: 'common',
-            minChunks: 2,
-            chunks: 'all',
-            priority: 5,
-            reuseExistingChunk: true,
-            enforce: true,
-          },
-          // Admin dashboard chunks
-          admin: {
-            test: /[\\/](components|app)[\\/]admin[\\/]/,
-            name: 'admin',
-            chunks: 'all',
-            priority: 20,
-            reuseExistingChunk: true,
-          },
-          // Customer dashboard chunks
-          dashboard: {
-            test: /[\\/](components|app)[\\/](dashboard|customer)[\\/]/,
-            name: 'dashboard',
-            chunks: 'all',
-            priority: 20,
-            reuseExistingChunk: true,
-          },
-          // Performance monitoring chunks
-          performance: {
-            test: /[\\/]lib[\\/]performance[\\/]/,
-            name: 'performance',
-            chunks: 'all',
-            priority: 15,
-            reuseExistingChunk: true,
-          },
-        },
-      };
-
-      // Enable compression
-      config.plugins = config.plugins || [];
-      
-      // Add bundle analyzer in development mode when ANALYZE=true
-      if (process.env.ANALYZE === 'true') {
-        try {
-          const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-          config.plugins.push(
-            new BundleAnalyzerPlugin({
-              analyzerMode: 'static',
-              openAnalyzer: false,
-              reportFilename: '../bundle-analyzer-report.html',
-            })
-          );
-        } catch (error) {
-          console.warn('Bundle analyzer not available:', error.message);
-        }
-      }
     }
     
     return config;

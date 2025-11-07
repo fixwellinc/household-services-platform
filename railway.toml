@@ -9,6 +9,8 @@ restartPolicyMaxRetries = 3
 
 [env]
 NODE_ENV = "production"
+HOSTNAME = "0.0.0.0"
+PORT = "3000"
+NODE_OPTIONS = "--max-old-space-size=2048"
 NEXT_TELEMETRY_DISABLED = "1"
 DISABLE_ESLINT_PLUGIN = "true"
-NODE_OPTIONS = "--max-old-space-size=2048"

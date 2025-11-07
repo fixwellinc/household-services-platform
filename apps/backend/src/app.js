@@ -1,12 +1,19 @@
+// Import logger first for initialization logging
+import { logger } from './utils/logger.js';
+
 // Add environment debugging at the very top
-console.log('🚀 Application starting...');
-console.log('🔍 Environment variables check:');
-console.log('  - NODE_ENV:', process.env.NODE_ENV);
-console.log('  - PORT:', process.env.PORT);
-console.log('  - DATABASE_URL exists:', !!process.env.DATABASE_URL);
-console.log('  - JWT_SECRET exists:', !!process.env.JWT_SECRET);
-console.log('  - STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
-console.log('  - All env vars:', Object.keys(process.env).filter(key => key.includes('DATABASE') || key.includes('JWT') || key.includes('STRIPE') || key.includes('NODE') || key.includes('PORT')));
+logger.info('🚀 Application starting...');
+logger.info('🔍 Environment variables check:', {
+  NODE_ENV: process.env.NODE_ENV,
+  PORT: process.env.PORT,
+  DATABASE_URL_EXISTS: !!process.env.DATABASE_URL,
+  JWT_SECRET_EXISTS: !!process.env.JWT_SECRET,
+  STRIPE_SECRET_KEY_EXISTS: !!process.env.STRIPE_SECRET_KEY,
+  RELEVANT_ENV_VARS: Object.keys(process.env).filter(key => 
+    key.includes('DATABASE') || key.includes('JWT') || key.includes('STRIPE') || 
+    key.includes('NODE') || key.includes('PORT')
+  )
+});
 
 import express from 'express';
 import cors from 'cors';
@@ -99,7 +106,10 @@ const checkDatabaseMiddleware = async (req, res, next) => {
     await prisma.$queryRaw`SELECT 1`;
     next();
   } catch (error) {
-    console.error('❌ Database connection check failed:', error.message);
+    logger.error('❌ Database connection check failed', { 
+      error: error.message,
+      stack: error.stack 
+    });
     return res.status(503).json({ 
       error: 'Database connection failed. Please try again later.',
       timestamp: new Date().toISOString()
@@ -148,7 +158,7 @@ app.disable('x-powered-by');
 // CORS configuration - Properly configured for production
 const corsOptions = getCorsOptions();
 
-console.log('🔧 CORS Configuration:', {
+logger.info('🔧 CORS Configuration initialized', {
   environment: process.env.NODE_ENV || 'development',
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
   corsOrigins: process.env.CORS_ORIGINS || 'default',
@@ -161,13 +171,18 @@ app.use(cors(corsOptions));
 // Handle preflight requests explicitly
 app.options('*', cors(corsOptions));
 
-// CORS debugging (all environments)
-app.use((req, res, next) => {
-  console.log('🌐 Request from:', req.headers.origin);
-  console.log('🌐 Request method:', req.method);
-  console.log('🌐 Request path:', req.path);
-  next();
-});
+// CORS debugging (development only)
+if (process.env.NODE_ENV === 'development') {
+  app.use((req, res, next) => {
+    logger.debug('🌐 Request received', {
+      origin: req.headers.origin,
+      method: req.method,
+      path: req.path,
+      ip: req.ip
+    });
+    next();
+  });
+}
 
 // Enhanced logging and monitoring
 app.use(requestLogger);
@@ -268,22 +283,40 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// TEMPORARY: Rate limit reset endpoint (remove in production)
-app.post('/api/reset-rate-limit', async (req, res) => {
+// Rate limit reset endpoint - ADMIN ONLY
+// SECURITY: This endpoint is restricted to admins only to prevent abuse
+app.post('/api/admin/reset-rate-limit', requireAdmin, async (req, res) => {
   try {
-    // Get the client's IP
-    const clientIP = req.ip || req.connection.remoteAddress;
+    const { ip, userId } = req.body;
     
-    // Clear rate limit for this IP (this is a temporary solution)
-    // In production, you'd want to implement proper rate limit management
+    if (!ip && !userId) {
+      return res.status(400).json({ 
+        error: 'Either IP address or user ID is required',
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    // Log the rate limit reset for audit purposes
+    logger.warn('Rate limit reset requested by admin', {
+      adminId: req.user.id,
+      adminEmail: req.user.email,
+      targetIP: ip,
+      targetUserId: userId,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Note: Actual rate limit reset would require access to the rate limiter store
+    // This is a placeholder - implement based on your rate limiter backend (Redis, etc.)
     res.json({ 
       success: true,
-      message: 'Rate limit reset requested',
-      clientIP,
+      message: 'Rate limit reset request logged. Rate limits will reset automatically after the window period.',
+      targetIP: ip,
+      targetUserId: userId,
       timestamp: new Date().toISOString(),
-      note: 'This is a temporary endpoint. Rate limits will reset automatically after the window period.'
+      note: 'If using Redis-backed rate limiting, implement actual reset logic here.'
     });
   } catch (error) {
+    logger.error('Rate limit reset error', { error: error.message });
     res.status(500).json({ 
       error: 'Failed to process rate limit reset request',
       timestamp: new Date().toISOString()
@@ -291,23 +324,38 @@ app.post('/api/reset-rate-limit', async (req, res) => {
   }
 });
 
-// CRITICAL SAFETY: Emergency admin creation route (keep for production safety)
-// This MUST be before auth middleware to allow admin creation when no admin exists
-// SECURITY: Only enabled in development or with explicit environment variable
+// CRITICAL SAFETY: Emergency admin creation route
+// SECURITY: Only enabled in development or with explicit environment variable AND secure token
+// This route MUST be before auth middleware to allow admin creation when no admin exists
+// PRODUCTION: Requires ALLOW_EMERGENCY_ADMIN=true AND valid EMERGENCY_ADMIN_TOKEN header
 app.post('/api/admin/emergency-create', async (req, res) => {
-  // SECURITY: Only allow in development or with explicit flag
-  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_EMERGENCY_ADMIN !== 'true') {
-    return res.status(403).json({ 
-      error: 'Emergency admin creation is disabled in production for security reasons' 
-    });
-  }
+  // SECURITY: Strict production checks
+  if (process.env.NODE_ENV === 'production') {
+    // Require explicit flag
+    if (process.env.ALLOW_EMERGENCY_ADMIN !== 'true') {
+      logger.warn('Emergency admin creation attempted but disabled', {
+        ip: req.ip,
+        timestamp: new Date().toISOString()
+      });
+      return res.status(403).json({ 
+        error: 'Emergency admin creation is disabled in production for security reasons' 
+      });
+    }
 
-  // SECURITY: Require secret token for production use
-  const emergencyToken = req.headers['x-emergency-token'];
-  if (process.env.NODE_ENV === 'production' && emergencyToken !== process.env.EMERGENCY_ADMIN_TOKEN) {
-    return res.status(403).json({ 
-      error: 'Invalid emergency token' 
-    });
+    // Require secure token
+    const emergencyToken = req.headers['x-emergency-token'];
+    const expectedToken = process.env.EMERGENCY_ADMIN_TOKEN;
+    
+    if (!emergencyToken || !expectedToken || emergencyToken !== expectedToken) {
+      logger.warn('Emergency admin creation attempted with invalid token', {
+        ip: req.ip,
+        hasToken: !!emergencyToken,
+        timestamp: new Date().toISOString()
+      });
+      return res.status(403).json({ 
+        error: 'Invalid emergency token' 
+      });
+    }
   }
 
   if (!prisma) {
@@ -321,6 +369,9 @@ app.post('/api/admin/emergency-create', async (req, res) => {
     });
 
     if (existingAdmin) {
+      logger.info('Emergency admin creation attempted but admin exists', {
+        existingAdminEmail: existingAdmin.email
+      });
       return res.json({
         message: 'Admin account already exists',
         admin: { email: existingAdmin.email, role: existingAdmin.role }
@@ -333,7 +384,7 @@ app.post('/api/admin/emergency-create', async (req, res) => {
     
     // Create admin account
     const bcrypt = await import('bcryptjs');
-    const hashedPassword = await bcrypt.default.hash(adminPassword, 10);
+    const hashedPassword = await bcrypt.default.hash(adminPassword, parseInt(process.env.BCRYPT_ROUNDS) || 12);
 
     const adminUser = await prisma.user.create({
       data: {
@@ -363,22 +414,24 @@ app.post('/api/admin/emergency-create', async (req, res) => {
     const logData = {
       id: adminUser.id,
       email: adminUser.email,
+      ip: req.ip,
       timestamp: new Date().toISOString()
     };
     
     if (process.env.NODE_ENV === 'development') {
       logData.password = adminPassword;
-      console.warn('⚠️  Emergency admin account created:', logData);
+      logger.warn('⚠️  Emergency admin account created (DEV MODE)', logData);
     } else {
-      console.warn('⚠️  Emergency admin account created:', logData);
+      logger.warn('⚠️  Emergency admin account created (PRODUCTION)', logData);
       // In production, log to secure log system
       auditService.log({
         adminId: 'system',
         action: 'EMERGENCY_ADMIN_CREATED',
         entityType: 'User',
         entityId: adminUser.id,
-        severity: 'critical'
-      }).catch(err => console.error('Failed to log emergency admin creation:', err));
+        severity: 'critical',
+        metadata: { ip: req.ip }
+      }).catch(err => logger.error('Failed to log emergency admin creation', { error: err.message }));
     }
 
     res.json({
@@ -395,7 +448,11 @@ app.post('/api/admin/emergency-create', async (req, res) => {
       })
     });
   } catch (error) {
-    console.error('❌ Emergency admin creation failed:', error);
+    logger.error('❌ Emergency admin creation failed', { 
+      error: error.message,
+      stack: error.stack,
+      ip: req.ip
+    });
     res.status(500).json({
       error: 'Failed to create emergency admin account',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
@@ -563,7 +620,7 @@ app.get('/api/admin/users', requireAdmin, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching users:', error);
+    logger.error('Error fetching users', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Failed to fetch users' });
   }
 });
@@ -594,7 +651,7 @@ app.get('/api/admin/subscriptions', requireAdmin, async (req, res) => {
     
     res.json({ success: true, subscriptions });
   } catch (error) {
-    console.error('Error fetching subscriptions:', error);
+    logger.error('Error fetching subscriptions', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Failed to fetch subscriptions' });
   }
 });
@@ -669,7 +726,7 @@ app.get('/api/admin/system-safety', requireAdmin, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('System safety check failed:', error);
+    logger.error('System safety check failed', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Failed to check system safety' });
   }
 });
@@ -734,15 +791,23 @@ app.get('/api/admin/customers/subscribed', requireAdmin, async (req, res) => {
     }
   });
   
-  // Manually fetch subscription data since relation doesn't exist yet
-  const enrichedCustomers = await Promise.all(
-    subscribedCustomers.map(async (customer) => {
-      const subscription = customer.subscriptionId 
-        ? await prisma.subscription.findUnique({ where: { id: customer.subscriptionId } })
-        : null;
-      return { ...customer, subscription };
-    })
-  );
+  // Manually fetch subscription data using batch query to avoid N+1
+  const subscriptionIds = subscribedCustomers
+    .map(c => c.subscriptionId)
+    .filter(Boolean);
+  
+  const subscriptions = subscriptionIds.length > 0
+    ? await prisma.subscription.findMany({
+        where: { id: { in: subscriptionIds } }
+      })
+    : [];
+  
+  const subscriptionMap = new Map(subscriptions.map(s => [s.id, s]));
+  
+  const enrichedCustomers = subscribedCustomers.map(customer => ({
+    ...customer,
+    subscription: customer.subscriptionId ? subscriptionMap.get(customer.subscriptionId) || null : null
+  }));
   
   res.json({ customers: enrichedCustomers });
 });
@@ -768,15 +833,23 @@ app.get('/api/admin/customers/perks-used', requireAdmin, async (req, res) => {
     }
   });
   
-  // Manually fetch subscription data since relation doesn't exist yet
-  const enrichedCustomers = await Promise.all(
-    customersWithPerksUsed.map(async (customer) => {
-      const subscription = customer.subscriptionId 
-        ? await prisma.subscription.findUnique({ where: { id: customer.subscriptionId } })
-        : null;
-      return { ...customer, subscription };
-    })
-  );
+  // Manually fetch subscription data using batch query to avoid N+1
+  const subscriptionIds = customersWithPerksUsed
+    .map(c => c.subscriptionId)
+    .filter(Boolean);
+  
+  const subscriptions = subscriptionIds.length > 0
+    ? await prisma.subscription.findMany({
+        where: { id: { in: subscriptionIds } }
+      })
+    : [];
+  
+  const subscriptionMap = new Map(subscriptions.map(s => [s.id, s]));
+  
+  const enrichedCustomers = customersWithPerksUsed.map(customer => ({
+    ...customer,
+    subscription: customer.subscriptionId ? subscriptionMap.get(customer.subscriptionId) || null : null
+  }));
   
   res.json({ customers: enrichedCustomers });
 });
@@ -838,7 +911,7 @@ app.get('/api/admin/bookings', requireAdmin, async (req, res) => {
       take: 100 // Limit for performance
     });
     
-    // Get related data in batch
+    // Get related data in batch to avoid N+1 queries
     const customerIds = [...new Set(bookings.map(b => b.customerId))];
     const serviceIds = [...new Set(bookings.map(b => b.serviceId))];
     
@@ -864,7 +937,7 @@ app.get('/api/admin/bookings', requireAdmin, async (req, res) => {
     
     res.json({ success: true, bookings: bookingsWithDetails });
   } catch (error) {
-    console.error('Error fetching bookings:', error);
+    logger.error('Error fetching bookings', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Failed to fetch bookings' });
   }
 });
@@ -1037,7 +1110,7 @@ app.get('/api/admin/analytics', requireAdmin, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Analytics calculation error:', error);
+    logger.error('Analytics calculation error', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Failed to calculate analytics' });
   }
 });
@@ -1077,7 +1150,7 @@ app.get('/api/analytics/churn-risk', requireAdmin, async (req, res) => {
       highRiskCustomers: highRiskCustomers.slice(0, parseInt(limit))
     });
   } catch (error) {
-    console.error('Churn risk analysis error:', error);
+    logger.error('Churn risk analysis error', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Failed to analyze churn risk' });
   }
 });
@@ -1097,7 +1170,7 @@ app.get('/api/analytics/revenue-trends', requireAdmin, async (req, res) => {
 
     res.json(revenueTrends);
   } catch (error) {
-    console.error('Revenue trends analysis error:', error);
+    logger.error('Revenue trends analysis error', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Failed to analyze revenue trends' });
   }
 });
@@ -1113,7 +1186,7 @@ app.get('/api/analytics/perk-utilization', requireAdmin, async (req, res) => {
     
     res.json(perkUtilization);
   } catch (error) {
-    console.error('Perk utilization analysis error:', error);
+    logger.error('Perk utilization analysis error', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Failed to analyze perk utilization' });
   }
 });
@@ -1151,7 +1224,7 @@ app.post('/api/admin/email-blast', requireAdmin, bulkAdminLimiter, async (req, r
       return res.status(400).json({ error: 'No recipients found for this blast' });
     }
   } catch (error) {
-    console.error('Email blast preprocessing error:', error);
+    logger.error('Email blast preprocessing error', { error: error.message, stack: error.stack });
     return res.status(500).json({ error: 'Failed to prepare recipients' });
   }
 
@@ -1194,7 +1267,7 @@ app.post('/api/admin/email-blast', requireAdmin, bulkAdminLimiter, async (req, r
       failedEmails
     });
   } catch (error) {
-    console.error('Email blast error:', error);
+    logger.error('Email blast error', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Failed to send email blast' });
   }
 });
@@ -1230,7 +1303,7 @@ app.post('/api/admin/notifications', requireAdmin, bulkAdminLimiter, async (req,
     const failed = results.filter(r => !r.success);
     res.json({ success: failed.length === 0, results });
   } catch (error) {
-    console.error('Admin notifications error:', error);
+    logger.error('Admin notifications error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: 'Failed to send notifications' });
   }
 });
@@ -1250,7 +1323,7 @@ app.get('/api/admin/settings', requireAdmin, async (req, res) => {
     
     res.json({ settings: settingsMap });
   } catch (error) {
-    console.error('Failed to fetch settings:', error);
+    logger.error('Failed to fetch settings', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Failed to fetch settings' });
   }
 });
@@ -1284,12 +1357,12 @@ app.post('/api/admin/settings', requireAdmin, async (req, res) => {
       const { default: emailService } = await import('./services/email.js');
       await emailService.reconfigure();
     } catch (error) {
-      console.error('Failed to reconfigure email service:', error);
+      logger.error('Failed to reconfigure email service', { error: error.message, stack: error.stack });
     }
     
     res.json({ success: true, settings: results });
   } catch (error) {
-    console.error('Failed to update settings:', error);
+    logger.error('Failed to update settings', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Failed to update settings' });
   }
 });
@@ -1341,7 +1414,7 @@ app.post('/api/admin/test-email', requireAdmin, async (req, res) => {
       messageId: testResult.messageId 
     });
   } catch (error) {
-    console.error('Email test failed:', error);
+    logger.error('Email test failed', { error: error.message, stack: error.stack });
     res.status(500).json({ error: `Email test failed: ${error.message}` });
   }
 });
@@ -1541,7 +1614,7 @@ app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
       }
       
       // CRITICAL SAFEGUARD 7: Log the deletion attempt
-      console.log(`🚨 ADMIN USER DELETION ATTEMPT:`, {
+      logger.warn('🚨 ADMIN USER DELETION ATTEMPT', {
         adminId: req.user.id,
         adminEmail: req.user.email,
         targetUserId: id,
@@ -1578,7 +1651,7 @@ app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
     res.json(result);
     
   } catch (error) {
-    console.error('❌ USER DELETION FAILED:', {
+    logger.error('❌ USER DELETION FAILED', {
       adminId: req.user.id,
       targetUserId: id,
       error: error.message,
@@ -1671,7 +1744,7 @@ app.post('/api/quotes/:id/reply', requireAdmin, async (req, res) => {
     });
     
     if (!emailResult.success) {
-      console.error('Failed to send quote reply email:', emailResult.error);
+      logger.error('Failed to send quote reply email', { error: emailResult.error });
     }
     
     res.json({ 
@@ -1680,7 +1753,7 @@ app.post('/api/quotes/:id/reply', requireAdmin, async (req, res) => {
       emailSent: emailResult.success 
     });
   } catch (error) {
-    console.error('Quote reply error:', error);
+    logger.error('Quote reply error', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Failed to send quote reply' });
   }
 });
@@ -1756,18 +1829,18 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   
   // Start memory monitoring
   memoryMonitor.startMonitoring();
-  console.log('🔍 Memory monitoring started');
+  logger.info('🔍 Memory monitoring started');
   
   app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log('🚀 Performance monitoring enabled');
+    logger.info(`Server running on port ${PORT}`);
+    logger.info('🚀 Performance monitoring enabled');
     
     // Start automated alerting service
     import('./services/alertingService.js').then(({ default: alertingService }) => {
       alertingService.startMonitoring(30000); // Check every 30 seconds
-      console.log('🔔 Automated alerting service started');
+      logger.info('🔔 Automated alerting service started');
     }).catch(error => {
-      console.error('Failed to start alerting service:', error);
+      logger.error('Failed to start alerting service', { error: error.message, stack: error.stack });
     });
   });
 }

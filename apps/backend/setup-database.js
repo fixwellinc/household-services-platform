@@ -3,13 +3,18 @@ import bcrypt from 'bcryptjs';
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
+import { logger } from './src/utils/logger.js';
 
 const prisma = new PrismaClient();
 
 // Create .env file if it doesn't exist
 const envPath = path.join(process.cwd(), '.env');
-const envContent = `# Database Configuration
-DATABASE_URL="mongodb+srv://fixwellinc:cSbodtzmEscXmMo2@fixwell.09bziew.mongodb.net/household_services?retryWrites=true&w=majority"
+const envContent = `# Database Configuration (PostgreSQL)
+# For local development with PostgreSQL:
+# DATABASE_URL="postgresql://user:password@localhost:5432/household_services?schema=public"
+# For SQLite (development only):
+# DATABASE_URL="file:./dev.db"
+DATABASE_URL="postgresql://user:password@localhost:5432/household_services?schema=public"
 
 # JWT Configuration
 JWT_SECRET="your-super-secret-jwt-key-change-this-in-production"
@@ -65,39 +70,39 @@ ENABLE_ANALYTICS="false"
 
 async function setupDatabase() {
   try {
-    console.log('🔧 Setting up MongoDB connection...');
+    logger.info('🔧 Setting up database connection...');
     
     // Create .env file if it doesn't exist
     if (!fs.existsSync(envPath)) {
       fs.writeFileSync(envPath, envContent);
-      console.log('✅ Created .env file with MongoDB configuration');
+      logger.info('✅ Created .env file with database configuration');
     } else {
-      console.log('ℹ️  .env file already exists');
+      logger.info('ℹ️  .env file already exists');
     }
     
     // Regenerate Prisma client
-    console.log('🔄 Regenerating Prisma client...');
+    logger.info('🔄 Regenerating Prisma client...');
     execSync('npx prisma generate', { stdio: 'inherit' });
-    console.log('✅ Prisma client regenerated');
+    logger.info('✅ Prisma client regenerated');
     
     // Test database connection
-    console.log('🔍 Testing database connection...');
+    logger.info('🔍 Testing database connection...');
     await prisma.$connect();
-    console.log('✅ Database connection successful!');
+    logger.info('✅ Database connection successful!');
     
     // Seed the database
-    console.log('🌱 Seeding database...');
+    logger.info('🌱 Seeding database...');
     await seedDatabase();
-    console.log('✅ Database seeded successfully!');
+    logger.info('✅ Database seeded successfully!');
     
-    console.log('\n🎉 Setup complete! You can now run:');
-    console.log('npm run dev');
-    console.log('\nTest credentials:');
-    console.log('Admin: admin@example.com / test1234');
-    console.log('Customer: customer@example.com / test1234');
+    logger.info('\n🎉 Setup complete! You can now run:');
+    logger.info('npm run dev');
+    logger.info('\nTest credentials:');
+    logger.info('Admin: admin@example.com / test1234');
+    logger.info('Customer: customer@example.com / test1234');
     
   } catch (error) {
-    console.error('❌ Setup failed:', error);
+    logger.error('❌ Setup failed:', { error: error.message, stack: error.stack });
     process.exit(1);
   } finally {
     await prisma.$disconnect();
@@ -214,4 +219,5 @@ async function seedDatabase() {
   }
 }
 
-setupDatabase(); 
+setupDatabase();
+

@@ -1,30 +1,54 @@
 import dotenv from 'dotenv';
+import { logger } from '../utils/logger.js';
 
 // Load environment variables
 dotenv.config();
 
-console.log('🔧 Environment configuration loading...');
-console.log('🔍 Available environment variables:');
-console.log('  - NODE_ENV:', process.env.NODE_ENV || 'undefined');
-console.log('  - DATABASE_URL exists:', !!process.env.DATABASE_URL);
-console.log('  - JWT_SECRET exists:', !!process.env.JWT_SECRET);
-console.log('  - STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
-console.log('  - PORT:', process.env.PORT || 'undefined');
+logger.info('🔧 Environment configuration loading...');
 
-// Environment validation - warn but don't exit
+// Environment validation - FAIL FAST on missing critical variables
 const requiredEnvVars = [
   'DATABASE_URL',
   'JWT_SECRET',
   'NODE_ENV'
 ];
 
+// Additional validation for production
+const productionRequiredVars = [
+  'STRIPE_SECRET_KEY',
+  'STRIPE_PUBLISHABLE_KEY'
+];
+
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingVars.length > 0) {
-  console.warn('⚠️  Missing environment variables:', missingVars.join(', '));
-  console.warn('⚠️  Some features may not work properly');
-  // Don't throw error - let the app start and handle missing vars gracefully
+  const errorMsg = `❌ CRITICAL: Missing required environment variables: ${missingVars.join(', ')}. Application cannot start without these variables.`;
+  logger.error(errorMsg);
+  throw new Error(errorMsg);
 }
+
+// Validate JWT_SECRET strength in production
+if (process.env.NODE_ENV === 'production') {
+  const jwtSecret = process.env.JWT_SECRET;
+  if (jwtSecret && jwtSecret.length < 32) {
+    const errorMsg = '❌ CRITICAL: JWT_SECRET must be at least 32 characters long in production';
+    logger.error(errorMsg);
+    throw new Error(errorMsg);
+  }
+  
+  // Check production-specific variables
+  const missingProductionVars = productionRequiredVars.filter(varName => !process.env[varName]);
+  if (missingProductionVars.length > 0) {
+    logger.warn(`⚠️  Missing production environment variables: ${missingProductionVars.join(', ')}. Some features may not work properly.`);
+  }
+}
+
+logger.info('✅ Environment configuration validated successfully', {
+  NODE_ENV: process.env.NODE_ENV,
+  DATABASE_URL_EXISTS: !!process.env.DATABASE_URL,
+  JWT_SECRET_EXISTS: !!process.env.JWT_SECRET,
+  STRIPE_SECRET_KEY_EXISTS: !!process.env.STRIPE_SECRET_KEY
+});
 
 // Environment configuration
 export const config = {
@@ -102,7 +126,7 @@ export const config = {
   }
 };
 
-console.log('✅ Environment configuration loaded successfully');
+logger.info('✅ Environment configuration loaded successfully');
 
 // Validation helpers
 export const isDevelopment = config.nodeEnv === 'development';
@@ -147,7 +171,8 @@ export const getCorsOptions = () => {
       : ['http://localhost:3000', 'http://localhost:3001'];
   }
 
-  console.log('🔧 CORS Configuration for', config.nodeEnv, ':', {
+  logger.debug('🔧 CORS Configuration', {
+    environment: config.nodeEnv,
     type: typeof allowedOrigins,
     origins: typeof allowedOrigins === 'function' 
       ? `Dynamic function (checking ${config.corsOrigins.length} configured origins)` 

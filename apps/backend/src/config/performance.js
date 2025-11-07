@@ -1,8 +1,9 @@
 import NodeCache from 'node-cache';
 import { performance } from 'perf_hooks';
+import redisService from '../services/redisService.js';
 
-// Cache configuration
-const cache = new NodeCache({
+// In-memory cache configuration (fallback when Redis is unavailable)
+const memoryCache = new NodeCache({
   stdTTL: 600, // 10 minutes default TTL
   checkperiod: 120, // Check for expired keys every 2 minutes
   useClones: false // Better performance, but be careful with object mutations
@@ -66,7 +67,8 @@ class PerformanceMonitor {
         hitRate: this.cacheHitRate.hits / (this.cacheHitRate.hits + this.cacheHitRate.misses) || 0,
         hits: this.cacheHitRate.hits,
         misses: this.cacheHitRate.misses,
-        keys: cache.keys().length
+        memoryKeys: memoryCache.keys().length,
+        redisAvailable: redisService.isAvailable()
       }
     };
   }
@@ -82,13 +84,33 @@ class PerformanceMonitor {
 
 const monitor = new PerformanceMonitor();
 
-// Cache utilities
+// Cache utilities with Redis fallback
 export const cacheUtils = {
   // Get from cache with performance monitoring
-  get(key) {
+  async get(key) {
     const startTime = monitor.startTimer('cache_get');
-    const value = cache.get(key);
-    monitor.endTimer('cache_get', startTime, { key, hit: !!value });
+    let value = null;
+    let source = 'none';
+    
+    try {
+      // Try Redis first
+      if (redisService.isAvailable()) {
+        value = await redisService.get(key);
+        source = 'redis';
+      }
+      
+      // Fallback to memory cache
+      if (value === null) {
+        value = memoryCache.get(key);
+        source = value !== undefined ? 'memory' : 'none';
+      }
+    } catch (error) {
+      // Fallback to memory cache on Redis error
+      value = memoryCache.get(key);
+      source = value !== undefined ? 'memory' : 'none';
+    }
+    
+    monitor.endTimer('cache_get', startTime, { key, hit: !!value, source });
     
     if (value) {
       monitor.recordCacheHit();
@@ -100,30 +122,83 @@ export const cacheUtils = {
   },
 
   // Set cache with TTL
-  set(key, value, ttl = 600) {
+  async set(key, value, ttl = 600) {
     const startTime = monitor.startTimer('cache_set');
-    const result = cache.set(key, value, ttl);
-    monitor.endTimer('cache_set', startTime, { key, ttl });
-    return result;
+    let redisResult = false;
+    let memoryResult = false;
+    
+    try {
+      // Try to set in Redis first
+      if (redisService.isAvailable()) {
+        const serializedValue = typeof value === 'string' ? value : JSON.stringify(value);
+        redisResult = await redisService.set(key, serializedValue, ttl);
+      }
+    } catch (error) {
+      // Redis failed, continue with memory cache
+    }
+    
+    // Always set in memory cache as fallback
+    memoryResult = memoryCache.set(key, value, ttl);
+    
+    monitor.endTimer('cache_set', startTime, { key, ttl, redis: redisResult, memory: memoryResult });
+    return redisResult || memoryResult;
   },
 
   // Delete from cache
-  del(key) {
-    return cache.del(key);
+  async del(key) {
+    let redisResult = false;
+    let memoryResult = false;
+    
+    try {
+      if (redisService.isAvailable()) {
+        redisResult = await redisService.del(key);
+      }
+    } catch (error) {
+      // Redis failed, continue with memory cache
+    }
+    
+    memoryResult = memoryCache.del(key) > 0;
+    return redisResult || memoryResult;
   },
 
   // Clear cache by pattern
-  clearPattern(pattern) {
-    const keys = cache.keys();
+  async clearPattern(pattern) {
     const regex = new RegExp(pattern);
-    const keysToDelete = keys.filter(key => regex.test(key));
-    keysToDelete.forEach(key => cache.del(key));
-    return keysToDelete.length;
+    let totalDeleted = 0;
+    
+    // Clear from memory cache
+    const memoryKeys = memoryCache.keys();
+    const memoryKeysToDelete = memoryKeys.filter(key => regex.test(key));
+    memoryKeysToDelete.forEach(key => memoryCache.del(key));
+    totalDeleted += memoryKeysToDelete.length;
+    
+    // Note: Redis pattern deletion would require SCAN command
+    // For now, we'll just clear memory cache patterns
+    
+    return totalDeleted;
   },
 
   // Get cache statistics
-  getStats() {
-    return cache.getStats();
+  async getStats() {
+    const memoryStats = memoryCache.getStats();
+    let redisStats = null;
+    
+    try {
+      if (redisService.isAvailable()) {
+        redisStats = await redisService.getStatus();
+      }
+    } catch (error) {
+      // Redis stats unavailable
+    }
+    
+    return {
+      memory: memoryStats,
+      redis: redisStats,
+      combined: {
+        hits: memoryStats.hits + (redisStats?.metrics?.totalConnections || 0),
+        misses: memoryStats.misses + (redisStats?.metrics?.failedConnections || 0)
+      }
+    };
   }
 };
 
@@ -134,8 +209,16 @@ export const dbUtils = {
     const startTime = monitor.startTimer('db_cached_query');
     
     // Try cache first
-    let result = cacheUtils.get(key);
+    let result = await cacheUtils.get(key);
     if (result) {
+      // Parse JSON if it's a string (from Redis)
+      if (typeof result === 'string') {
+        try {
+          result = JSON.parse(result);
+        } catch (e) {
+          // If parsing fails, use the string as-is
+        }
+      }
       monitor.endTimer('db_cached_query', startTime, { key, cached: true });
       return result;
     }
@@ -147,7 +230,7 @@ export const dbUtils = {
       monitor.endTimer('db_query', queryStartTime, { key });
       
       // Cache the result
-      cacheUtils.set(key, result, ttl);
+      await cacheUtils.set(key, result, ttl);
       
       monitor.endTimer('db_cached_query', startTime, { key, cached: false });
       return result;

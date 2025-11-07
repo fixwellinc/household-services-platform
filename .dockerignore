@@ -1,12 +1,71 @@
+# Dependencies
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Git and CI
 .git/
 .github/
-# scripts/ is needed for build, so do not ignore it
-# deploy.sh is needed for build, so do not ignore it
-# docker-compose.yml is needed for build, so do not ignore it
-*.log
+.gitignore
+
+# Environment files
 .env.local
 .env.development
 .env.test
+.env*.local
+
+# Logs
+*.log
+logs/
+
+# Build artifacts (will be built in container)
+.next/
+dist/
+build/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Documentation
 README.md
-# Do NOT ignore apps/ or packages/ 
+CODEBASE_REVIEW.md
+IMPLEMENTATION_SUMMARY.md
+FIXES_SUMMARY.md
+RAILWAY_DEPLOYMENT_FIXES.md
+
+# Test files
+coverage/
+.nyc_output/
+
+# Temporary files
+tmp/
+temp/
+
+# Docker files (not needed in container)
+Dockerfile*
+docker-compose*.yml
+
+# Railway files (not needed in container)
+railway.json
+railway.toml
+
+# Upload directories (will be created at runtime)
+uploads/
+
+# Frontend build scripts (using standard Next.js build now)
+apps/frontend/scripts/build-with-manifests.js
+apps/frontend/scripts/ensure-manifests.sh 

@@ -22,8 +22,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import QuoteRequestModal from '@/components/QuoteRequestModal';
 
-export const dynamic = 'force-dynamic';
-
 export default function HVACMaintenancePage() {
   const router = useRouter();
   const [showQuoteModal, setShowQuoteModal] = useState(false);
