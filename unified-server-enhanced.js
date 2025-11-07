@@ -595,8 +595,16 @@ class EnhancedUnifiedServer {
 }
 
 // Create and start the server if this file is run directly
-if (import.meta.url === `file://${process.argv[1]}` || import.meta.url.endsWith('unified-server-enhanced.js')) {
+// Check if this is the main module being executed
+const isMainModule = import.meta.url === `file://${process.argv[1]}` || 
+                     process.argv[1]?.endsWith('unified-server-enhanced.js') ||
+                     import.meta.url.includes('unified-server-enhanced.js');
+
+if (isMainModule) {
   logger.info('🎬 Initializing Enhanced Unified Server...');
+  logger.info(`📁 Module URL: ${import.meta.url}`);
+  logger.info(`📁 Process argv[1]: ${process.argv[1]}`);
+  
   const server = new EnhancedUnifiedServer();
   
   logger.info('🚀 Calling server.start()...');
