@@ -141,15 +141,15 @@ USER nextjs
 
 # Set environment variables
 ENV NODE_ENV=production
-ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
+# PORT will be set by Render automatically - don't override it
 
-# Expose port
+# Expose port (Render will set the actual PORT via environment variable)
 EXPOSE 3000
 
-# Health check
+# Health check (uses PORT from environment, defaults to 3000)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+  CMD node -e "require('http').get('http://localhost:' + (process.env.PORT || '3000') + '/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
 # Start the unified server with database sync
 CMD ["sh", "-c", "set -e && \
