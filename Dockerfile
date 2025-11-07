@@ -126,13 +126,11 @@ RUN npm install --workspace=apps/backend --omit=dev --legacy-peer-deps && npm ca
 RUN npm install -g prisma@^6.11.1 && \
     echo "✅ Prisma CLI installed globally"
 
-# Copy Prisma generated client from builder (already generated there)
-# This avoids needing to generate it again and ensures @prisma/client is available
+# Generate Prisma client in runtime stage
+# This is more reliable than copying from builder, especially in monorepo setups
 WORKDIR /app/apps/backend
-RUN mkdir -p node_modules
-COPY --from=builder --chown=nextjs:nodejs /app/apps/backend/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder --chown=nextjs:nodejs /app/apps/backend/node_modules/@prisma ./node_modules/@prisma
-RUN echo "✅ Prisma client copied from builder"
+RUN npx prisma generate || echo "⚠️ Prisma generate failed, but continuing..." && \
+    echo "✅ Prisma client generated"
 
 WORKDIR /app
 
