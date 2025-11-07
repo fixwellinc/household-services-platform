@@ -255,4 +255,16 @@ class SocketIOService {
   }
 }
 
-export default SocketIOService;
+// Export both the class and a singleton instance for backward compatibility
+const socketServiceInstance = new SocketIOService();
+
+// Add initialize method for backward compatibility with app.js
+socketServiceInstance.initialize = (io) => {
+  socketServiceInstance.io = io;
+  socketServiceInstance.isInitialized = true;
+  socketServiceInstance._setupEventHandlers();
+  logger.info('✅ Socket.IO service initialized via legacy initialize() method');
+};
+
+export default socketServiceInstance;
+export { SocketIOService };
