@@ -152,15 +152,14 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:' + (process.env.PORT || '3000') + '/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
 # Start the unified server with database sync
-CMD ["sh", "-c", "set -e && \
-  echo '🚀 Starting application...' && \
+CMD ["sh", "-c", "echo '🚀 Starting application...' && \
   echo \"📦 Environment: ${NODE_ENV:-production}\" && \
   echo \"🔌 Port: ${PORT:-3000}\" && \
   echo \"🌐 Hostname: ${HOSTNAME:-0.0.0.0}\" && \
   cd /app/apps/backend && \
   echo '🗄️  Syncing database schema...' && \
-  npx --yes prisma@^6.11.1 db push --skip-generate || echo '⚠️  Database sync failed, continuing anyway...' && \
+  (npx --yes prisma@^6.11.1 db push --skip-generate 2>&1 || echo '⚠️  Database sync failed, continuing anyway...') && \
   echo '✅ Database setup completed' && \
   cd /app && \
   echo '🚀 Starting unified server...' && \
-  node unified-server-enhanced.js"]
+  exec node unified-server-enhanced.js"]
