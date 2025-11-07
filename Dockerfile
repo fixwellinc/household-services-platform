@@ -37,6 +37,15 @@ WORKDIR /app/apps/frontend
 # Clean any existing build artifacts
 RUN rm -rf .next
 
+# Create necessary Next.js manifest directories and files before build
+# This prevents ENOENT errors during the build process
+RUN mkdir -p .next/server && \
+    echo '{}' > .next/server/pages-manifest.json && \
+    echo '{}' > .next/server/app-paths-manifest.json && \
+    echo '{"sortedMiddleware":[],"middleware":{},"functions":{}}' > .next/server/middleware-manifest.json && \
+    echo '{"pages":{},"app":{},"appUsingSizeAdjust":false,"pagesUsingSizeAdjust":false}' > .next/server/font-manifest.json && \
+    chmod -R 755 .next
+
 # Set build environment
 ENV NODE_OPTIONS="--max-old-space-size=2048 --max-semi-space-size=128"
 ENV NEXT_TELEMETRY_DISABLED=1
