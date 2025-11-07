@@ -159,7 +159,7 @@ CMD ["sh", "-c", "set -e && \
   echo \"🌐 Hostname: ${HOSTNAME:-0.0.0.0}\" && \
   cd /app/apps/backend && \
   echo '🗄️  Syncing database schema...' && \
-  prisma db push || echo '⚠️  Database sync failed, continuing anyway...' && \
+  npx --yes prisma@^6.11.1 db push --skip-generate || echo '⚠️  Database sync failed, continuing anyway...' && \
   echo '✅ Database setup completed' && \
   cd /app && \
   echo '🚀 Starting unified server...' && \
