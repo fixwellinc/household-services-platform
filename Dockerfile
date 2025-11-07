@@ -122,10 +122,10 @@ RUN rm -rf apps/backend/node_modules
 WORKDIR /app
 RUN npm install --workspace=apps/backend --omit=dev --legacy-peer-deps && npm cache clean --force
 
-# Install Prisma CLI and @prisma/client at root level
+# Install Prisma CLI and @prisma/client at root level (without modifying package.json)
 # This ensures Prisma can find the query engine files
 WORKDIR /app
-RUN npm install prisma@^6.11.1 @prisma/client@^6.11.1 --save --legacy-peer-deps && \
+RUN npm install prisma@^6.11.1 @prisma/client@^6.11.1 --no-save --legacy-peer-deps && \
     echo "✅ Prisma installed at root level"
 
 # Generate Prisma client in runtime stage
