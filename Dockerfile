@@ -122,16 +122,14 @@ RUN rm -rf apps/backend/node_modules
 WORKDIR /app
 RUN npm install --workspace=apps/backend --omit=dev --legacy-peer-deps && npm cache clean --force
 
-# Install Prisma CLI globally for generation
-RUN npm install -g prisma@^6.11.1 && \
-    echo "✅ Prisma CLI installed globally"
-
-# Generate Prisma client in runtime stage
-# @prisma/client should already be installed from workspace dependencies
+# Copy generated Prisma client from builder stage (already generated there successfully)
+# This avoids needing to generate again and ensures query engine files are available
 WORKDIR /app/apps/backend
-RUN prisma generate || (echo "⚠️ Prisma generate failed, checking if @prisma/client exists..." && \
-    ls -la node_modules/@prisma/client 2>/dev/null || echo "❌ @prisma/client not found") && \
-    echo "✅ Prisma client generation attempted"
+RUN mkdir -p node_modules/@prisma && \
+    mkdir -p node_modules/.prisma
+COPY --from=builder --chown=nextjs:nodejs /app/apps/backend/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nextjs:nodejs /app/apps/backend/node_modules/@prisma/client ./node_modules/@prisma/client
+RUN echo "✅ Prisma client copied from builder stage"
 
 WORKDIR /app
 
