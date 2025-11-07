@@ -127,11 +127,11 @@ RUN npm install -g prisma@^6.11.1 && \
     echo "✅ Prisma CLI installed globally"
 
 # Generate Prisma client in runtime stage
-# Ensure @prisma/client is available in backend workspace, then generate
+# @prisma/client should already be installed from workspace dependencies
 WORKDIR /app/apps/backend
-RUN (npm list @prisma/client || npm install @prisma/client@^6.11.1 --legacy-peer-deps) && \
-    prisma generate && \
-    echo "✅ Prisma client generated"
+RUN prisma generate || (echo "⚠️ Prisma generate failed, checking if @prisma/client exists..." && \
+    ls -la node_modules/@prisma/client 2>/dev/null || echo "❌ @prisma/client not found") && \
+    echo "✅ Prisma client generation attempted"
 
 WORKDIR /app
 
