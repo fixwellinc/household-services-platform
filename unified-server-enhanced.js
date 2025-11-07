@@ -203,8 +203,11 @@ class EnhancedUnifiedServer {
 
       // Start HTTP server
       try {
+        console.log('🚀 [STARTUP] About to start HTTP server...');
         await this._startHttpServer();
+        console.log('✅ [STARTUP] HTTP server started successfully');
       } catch (serverError) {
+        console.error('❌ [STARTUP] HTTP server startup failed:', serverError.message);
         logger.error('❌ HTTP server startup failed', {
           error: serverError.message,
           stack: serverError.stack
@@ -219,8 +222,11 @@ class EnhancedUnifiedServer {
       const startupDuration = Date.now() - this.startupTime.getTime();
       
       logger.info(`✅ Enhanced Unified Server started successfully in ${startupDuration}ms`);
+      console.log(`✅ [STARTUP] Enhanced Unified Server started successfully in ${startupDuration}ms`);
       logger.info(`🔌 API available at http://${this.hostname}:${this.port}/api`);
       logger.info(`🏥 Health check available at http://${this.hostname}:${this.port}/api/health`);
+      console.log(`🔌 [STARTUP] API available at http://${this.hostname}:${this.port}/api`);
+      console.log(`🏥 [STARTUP] Health check available at http://${this.hostname}:${this.port}/api/health`);
       
       // Log service status
       const healthCheck = await this.serviceManager.getHealthCheck();
@@ -458,29 +464,52 @@ class EnhancedUnifiedServer {
   async _startHttpServer() {
     return new Promise((resolve, reject) => {
       logger.info(`🔌 Starting HTTP server on ${this.hostname}:${this.port}...`);
-      this.httpServer.listen(this.port, this.hostname, (error) => {
-        if (error) {
-          logger.error(`❌ HTTP server failed to listen: ${error.message}`, {
+      console.log(`🔌 [HTTP] Starting HTTP server on ${this.hostname}:${this.port}...`);
+      
+      try {
+        this.httpServer.listen(this.port, this.hostname, (error) => {
+          if (error) {
+            console.error(`❌ [HTTP] Server failed to listen: ${error.message}`);
+            logger.error(`❌ HTTP server failed to listen: ${error.message}`, {
+              error: error.message,
+              stack: error.stack,
+              port: this.port,
+              hostname: this.hostname
+            });
+            reject(error);
+          } else {
+            console.log(`✅ [HTTP] Server listening on ${this.hostname}:${this.port}`);
+            logger.info(`✅ HTTP server listening on ${this.hostname}:${this.port}`);
+            
+            // Verify the server is actually listening
+            const address = this.httpServer.address();
+            console.log(`📡 [HTTP] Server address:`, address);
+            logger.info(`📡 HTTP server address:`, address);
+            
+            resolve();
+          }
+        });
+        
+        // Add error handler for server errors
+        this.httpServer.on('error', (error) => {
+          console.error(`❌ [HTTP] Server error: ${error.message}`, error.code);
+          logger.error(`❌ HTTP server error: ${error.message}`, {
             error: error.message,
             stack: error.stack,
-            port: this.port,
-            hostname: this.hostname
+            code: error.code
           });
-          reject(error);
-        } else {
-          logger.info(`✅ HTTP server listening on ${this.hostname}:${this.port}`);
-          resolve();
-        }
-      });
-      
-      // Add error handler for server errors
-      this.httpServer.on('error', (error) => {
-        logger.error(`❌ HTTP server error: ${error.message}`, {
-          error: error.message,
-          stack: error.stack,
-          code: error.code
         });
-      });
+        
+        // Add listening event handler
+        this.httpServer.on('listening', () => {
+          const address = this.httpServer.address();
+          console.log(`🎉 [HTTP] Server is now listening on ${address?.address}:${address?.port}`);
+          logger.info(`🎉 HTTP server is now listening on ${address?.address}:${address?.port}`);
+        });
+      } catch (listenError) {
+        console.error(`❌ [HTTP] Exception during listen: ${listenError.message}`);
+        reject(listenError);
+      }
     });
   }
 
