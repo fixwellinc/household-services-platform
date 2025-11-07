@@ -446,12 +446,29 @@ class EnhancedUnifiedServer {
    */
   async _startHttpServer() {
     return new Promise((resolve, reject) => {
+      logger.info(`🔌 Starting HTTP server on ${this.hostname}:${this.port}...`);
       this.httpServer.listen(this.port, this.hostname, (error) => {
         if (error) {
+          logger.error(`❌ HTTP server failed to listen: ${error.message}`, {
+            error: error.message,
+            stack: error.stack,
+            port: this.port,
+            hostname: this.hostname
+          });
           reject(error);
         } else {
+          logger.info(`✅ HTTP server listening on ${this.hostname}:${this.port}`);
           resolve();
         }
+      });
+      
+      // Add error handler for server errors
+      this.httpServer.on('error', (error) => {
+        logger.error(`❌ HTTP server error: ${error.message}`, {
+          error: error.message,
+          stack: error.stack,
+          code: error.code
+        });
       });
     });
   }
