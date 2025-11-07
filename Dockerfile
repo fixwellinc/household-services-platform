@@ -122,27 +122,13 @@ RUN rm -rf apps/backend/node_modules
 WORKDIR /app
 RUN npm install --workspace=apps/backend --omit=dev --legacy-peer-deps && npm cache clean --force
 
-# Copy generated Prisma client from builder stage if it exists
-# In workspace setups, Prisma might be in root node_modules or workspace node_modules
+# Generate Prisma client in runtime stage
+# @prisma/client should already be installed from workspace dependencies
+# Use global prisma CLI (installed earlier) to avoid workspace npm issues
 WORKDIR /app/apps/backend
-RUN mkdir -p node_modules/@prisma && \
-    mkdir -p node_modules/.prisma
-# Try copying from various possible locations (workspace or root)
-RUN (cp -r /app/apps/backend/node_modules/.prisma ./node_modules/.prisma 2>/dev/null || \
-     cp -r /app/node_modules/.prisma ./node_modules/.prisma 2>/dev/null || \
-     echo "⚠️ .prisma not found in builder, will generate at runtime") && \
-    (cp -r /app/apps/backend/node_modules/@prisma/client ./node_modules/@prisma/client 2>/dev/null || \
-     cp -r /app/node_modules/@prisma/client ./node_modules/@prisma/client 2>/dev/null || \
-     echo "⚠️ @prisma/client not found in builder") && \
-    echo "✅ Prisma client copy attempted"
-
-# Generate Prisma client if it wasn't copied successfully
-RUN if [ ! -d "node_modules/.prisma" ] || [ ! -d "node_modules/@prisma/client" ]; then \
-      echo "🔄 Generating Prisma client in runtime stage..." && \
-      npm install @prisma/client@^6.11.1 --legacy-peer-deps 2>/dev/null || true && \
-      npx prisma generate 2>/dev/null || echo "⚠️ Prisma generate failed, but continuing..."; \
-    fi && \
-    echo "✅ Prisma client ready"
+RUN prisma generate || (echo "⚠️ Prisma generate failed with global CLI, trying npx..." && \
+    npx --yes prisma@^6.11.1 generate || echo "⚠️ Prisma generate failed, but continuing...") && \
+    echo "✅ Prisma client generation completed"
 
 WORKDIR /app
 
