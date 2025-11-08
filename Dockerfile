@@ -55,6 +55,7 @@ ENV NODE_ENV=production
 ENV DISABLE_ESLINT_PLUGIN=true
 # Enable Next.js debug mode to see detailed errors
 ENV NEXT_DEBUG=1
+ENV DEBUG=*
 
 # Build the Next.js application with verbose error reporting
 # Capture full output to see actual webpack errors
