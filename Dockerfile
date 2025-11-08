@@ -122,9 +122,11 @@ COPY packages/utils/package.json ./packages/utils/
 COPY packages/types/package.json ./packages/types/
 COPY packages/shared/package.json ./packages/shared/
 
-# Install only production dependencies
+# Install production dependencies
+# Also install prisma CLI (normally dev dependency) for runtime prisma generate
 # Using npm install instead of npm ci to handle lock file sync issues
 RUN npm install --omit=dev --legacy-peer-deps && \
+    npm install prisma@^6.11.1 --legacy-peer-deps && \
     npm cache clean --force
 
 # Copy built frontend from builder
