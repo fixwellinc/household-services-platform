@@ -110,8 +110,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/backend ./apps/backend
 # Copy unified server
 COPY --from=builder --chown=nextjs:nodejs /app/unified-server-enhanced.js ./
 
-# Copy packages if they exist
-COPY --from=builder --chown=nextjs:nodejs /app/packages ./packages 2>/dev/null || true
+# Copy packages from builder
+COPY --from=builder --chown=nextjs:nodejs /app/packages ./packages
 
 # Generate Prisma client in runtime stage
 WORKDIR /app/apps/backend
