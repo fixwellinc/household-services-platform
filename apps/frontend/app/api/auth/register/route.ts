@@ -4,9 +4,12 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     
-    // Proxy the request to the Railway backend
-    const railwayUrl = process.env.NEXT_PUBLIC_API_URL || 'https://fixwell.up.railway.app/api'
-    const response = await fetch(`${railwayUrl}/auth/register`, {
+    // Determine backend URL - use local backend if unified server, otherwise use configured URL
+    const isUnifiedServer = process.env.UNIFIED_SERVER === 'true' || !process.env.NEXT_PUBLIC_API_URL
+    const backendUrl = isUnifiedServer 
+      ? `http://localhost:${process.env.PORT || 3000}/api`
+      : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api')
+    const response = await fetch(`${backendUrl}/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
