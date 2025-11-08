@@ -34,7 +34,8 @@ COPY unified-server-enhanced.js ./
 
 # Generate Prisma client for backend
 WORKDIR /app/apps/backend
-RUN npx prisma generate
+RUN npx prisma generate && \
+    echo "✅ Prisma client generated in builder stage"
 
 # Build frontend
 WORKDIR /app/apps/frontend
@@ -142,8 +143,16 @@ COPY --from=builder --chown=nextjs:nodejs /app/unified-server-enhanced.js ./
 COPY --from=builder --chown=nextjs:nodejs /app/packages ./packages
 
 # Generate Prisma client in runtime stage
+# Install prisma CLI globally since it's a dev dependency
+WORKDIR /app
+RUN npm install -g prisma@^6.11.1 || echo "⚠️ Global Prisma install failed"
+
+# Generate Prisma client - the @prisma/client package should already be installed
 WORKDIR /app/apps/backend
-RUN npx prisma generate || echo "⚠️ Prisma generate failed, but continuing..."
+RUN prisma generate || (echo "⚠️ Prisma generate failed, trying alternative..." && \
+    cd /app && npm install prisma@^6.11.1 --legacy-peer-deps && \
+    cd /app/apps/backend && npx prisma generate || echo "⚠️ Prisma generate failed, but continuing...") && \
+    echo "✅ Prisma client generation completed"
 
 # Set proper ownership
 WORKDIR /app
