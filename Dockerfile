@@ -39,6 +39,14 @@ RUN npx prisma generate
 # Build frontend
 WORKDIR /app/apps/frontend
 
+# Verify workspace dependencies are linked
+RUN echo "🔗 Verifying workspace dependencies..." && \
+    echo "Checking @fixwell/types:" && \
+    (test -L node_modules/@fixwell/types || test -d node_modules/@fixwell/types) && echo "  ✓ @fixwell/types found" || echo "  ✗ @fixwell/types missing" && \
+    echo "Checking packages:" && \
+    ls -la ../../packages/ 2>/dev/null | head -5 || echo "  packages directory not found" && \
+    echo ""
+
 # Set build environment variables
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 ENV NEXT_TELEMETRY_DISABLED=1
