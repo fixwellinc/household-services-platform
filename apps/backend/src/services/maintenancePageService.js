@@ -58,7 +58,8 @@ class MaintenancePageService {
       apiStatus,
       estimatedTime,
       showApiInfo,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      host: req?.headers?.host || 'your-domain'
     });
 
     res.end(html);
@@ -122,7 +123,8 @@ class MaintenancePageService {
       apiStatus,
       estimatedTime,
       showApiInfo,
-      timestamp
+      timestamp,
+      host = 'your-domain'
     } = options;
 
     return `<!DOCTYPE html>
@@ -359,8 +361,8 @@ class MaintenancePageService {
         <div class="api-info">
             <strong>🔌 API Access Available</strong>
             <p>Developers can still access our API services:</p>
-            <div class="api-endpoint">GET ${req?.headers?.host || 'your-domain'}/api/health</div>
-            <div class="api-endpoint">POST ${req?.headers?.host || 'your-domain'}/api/*</div>
+            <div class="api-endpoint">GET ${host}/api/health</div>
+            <div class="api-endpoint">POST ${host}/api/*</div>
         </div>
         ` : ''}
         
