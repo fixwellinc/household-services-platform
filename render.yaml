@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: fixwell-services-platform
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    region: oregon
+    branch: main
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOSTNAME
+        value: 0.0.0.0
+      - key: PORT
+        value: 3000
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=2048
+      - key: NEXT_TELEMETRY_DISABLED
+        value: 1
+      - key: DISABLE_ESLINT_PLUGIN
+        value: "true"
+    # Note: Add your environment variables in Render dashboard:
+    # - DATABASE_URL
+    # - JWT_SECRET
+    # - STRIPE_SECRET_KEY
+    # - STRIPE_PUBLISHABLE_KEY
+    # - Any other required environment variables
+

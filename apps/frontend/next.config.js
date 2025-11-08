@@ -1,9 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Simplified build ID generation for Railway
+  // Simplified build ID generation for Railway and Render
   generateBuildId: async () => {
     const buildId = process.env.RAILWAY_GIT_COMMIT_SHA || 
                    process.env.RAILWAY_DEPLOYMENT_ID ||
+                   process.env.RENDER_GIT_COMMIT ||
+                   process.env.RENDER_DEPLOYMENT_ID ||
                    'build-' + Date.now();
     console.log('🔧 Generated buildId:', buildId);
     return buildId;
@@ -25,6 +27,14 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'roasted-key-production.up.railway.app',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.onrender.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.render.com',
       }
     ],
   },
