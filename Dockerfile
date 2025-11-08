@@ -103,6 +103,7 @@ ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 ENV NODE_OPTIONS="--max-old-space-size=2048"
+ENV UNIFIED_SERVER=true
 
 # Expose port
 EXPOSE 3000
