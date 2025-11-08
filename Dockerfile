@@ -71,7 +71,9 @@ COPY packages/types/package.json ./packages/types/
 COPY packages/shared/package.json ./packages/shared/
 
 # Install production dependencies only
+# Also install prisma CLI (needed for db push at runtime)
 RUN npm install --omit=dev --legacy-peer-deps && \
+    npm install prisma@^6.11.1 --legacy-peer-deps && \
     npm cache clean --force
 
 # Copy built application from builder stage
