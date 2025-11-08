@@ -84,9 +84,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/backend ./apps/backend
 COPY --from=builder --chown=nextjs:nodejs /app/packages ./packages
 COPY --from=builder --chown=nextjs:nodejs /app/unified-server-enhanced.js ./
 
-# Generate Prisma client for runtime (needed for db push)
-WORKDIR /app/apps/backend
-RUN npx prisma generate || npm install prisma@^6.11.1 --legacy-peer-deps && npx prisma generate
+# Copy generated Prisma client from builder stage (already generated, no need to regenerate)
+# The Prisma client is generated in node_modules/@prisma/client in the builder stage
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
 # Set ownership
 WORKDIR /app
