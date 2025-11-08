@@ -17,7 +17,11 @@ WORKDIR /app
 COPY package*.json ./
 COPY apps/backend/package*.json ./apps/backend/
 COPY apps/frontend/package*.json ./apps/frontend/
-COPY packages/*/package*.json ./packages/*/
+# Create package directories and copy package.json files individually to avoid workspace conflicts
+RUN mkdir -p packages/utils packages/types packages/shared
+COPY packages/utils/package.json ./packages/utils/
+COPY packages/types/package.json ./packages/types/
+COPY packages/shared/package.json ./packages/shared/
 
 # Install all dependencies (including dev dependencies for build)
 # Using npm install instead of npm ci to handle lock file sync issues
@@ -77,7 +81,11 @@ WORKDIR /app
 COPY package*.json ./
 COPY apps/backend/package*.json ./apps/backend/
 COPY apps/frontend/package*.json ./apps/frontend/
-COPY packages/*/package*.json ./packages/*/
+# Create package directories and copy package.json files individually to avoid workspace conflicts
+RUN mkdir -p packages/utils packages/types packages/shared
+COPY packages/utils/package.json ./packages/utils/
+COPY packages/types/package.json ./packages/types/
+COPY packages/shared/package.json ./packages/shared/
 
 # Install only production dependencies
 # Using npm install instead of npm ci to handle lock file sync issues
