@@ -84,8 +84,11 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/backend ./apps/backend
 COPY --from=builder --chown=nextjs:nodejs /app/packages ./packages
 COPY --from=builder --chown=nextjs:nodejs /app/unified-server-enhanced.js ./
 
-# Copy generated Prisma client from builder stage (already generated, no need to regenerate)
-# The Prisma client is generated in node_modules/@prisma/client in the builder stage
+# Copy generated Prisma client from builder stage
+# Prisma generates the client in node_modules/.prisma/client (note the dot)
+# Also copy @prisma/client package which contains the runtime
+RUN mkdir -p node_modules/.prisma node_modules/@prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
 # Set ownership
@@ -109,5 +112,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:' + (process.env.PORT || '3000') + '/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
 # Start the unified server (with database setup)
-CMD ["sh", "-c", "cd /app/apps/backend && npx prisma db push --skip-generate --accept-data-loss || true && cd /app && node unified-server-enhanced.js"]
+# Generate Prisma client first if it doesn't exist, then start server
+CMD ["sh", "-c", "cd /app/apps/backend && if [ ! -d /app/node_modules/.prisma/client ]; then echo 'Generating Prisma client...' && npx prisma generate; fi && npx prisma db push --skip-generate --accept-data-loss || true && cd /app && node unified-server-enhanced.js"]
 
