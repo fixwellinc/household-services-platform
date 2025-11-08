@@ -27,12 +27,17 @@ export interface ErrorRecoveryOptions {
 }
 
 class AdminErrorReportingService {
-  private static instance: AdminErrorReportingService;
+  private static instance: AdminErrorReportingService | null = null;
   private errorQueue: ErrorReport[] = [];
-  private isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+  private isOnline: boolean;
   private retryInterval: NodeJS.Timeout | null = null;
 
   private constructor() {
+    // Safely initialize isOnline - only access navigator in browser
+    this.isOnline = typeof navigator !== 'undefined' && typeof navigator.onLine !== 'undefined' 
+      ? navigator.onLine 
+      : true;
+    
     // Only set up event listeners if we're in a browser environment
     if (typeof window !== 'undefined') {
       // Listen for online/offline events
@@ -45,7 +50,10 @@ class AdminErrorReportingService {
   }
 
   public static getInstance(): AdminErrorReportingService {
+    // Lazy initialization - only create instance when actually needed
+    // This prevents SSR issues where navigator is not available
     if (!AdminErrorReportingService.instance) {
+      // Always create instance - constructor handles SSR safely
       AdminErrorReportingService.instance = new AdminErrorReportingService();
     }
     return AdminErrorReportingService.instance;
@@ -246,8 +254,23 @@ class AdminErrorReportingService {
   }
 }
 
-// Export singleton instance
-export const adminErrorReporting = AdminErrorReportingService.getInstance();
+// Export lazy getter function instead of singleton instance
+// This prevents the instance from being created at module load time during SSR
+export function getAdminErrorReporting(): AdminErrorReportingService {
+  return AdminErrorReportingService.getInstance();
+}
+
+// For backward compatibility, export a proxy that lazily gets the instance
+export const adminErrorReporting = new Proxy({} as AdminErrorReportingService, {
+  get(_target, prop) {
+    const instance = AdminErrorReportingService.getInstance();
+    const value = (instance as any)[prop];
+    if (typeof value === 'function') {
+      return value.bind(instance);
+    }
+    return value;
+  }
+});
 
 // Utility functions for error recovery
 export function withErrorRecovery<T extends (...args: any[]) => any>(
