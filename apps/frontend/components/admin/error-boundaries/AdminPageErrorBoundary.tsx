@@ -97,8 +97,8 @@ export class AdminPageErrorBoundary extends Component<Props, State> {
       context: this.props.context || 'Unknown',
       pageTitle: this.props.pageTitle,
       timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-      url: window.location.href
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
+      url: typeof window !== 'undefined' ? window.location.href : 'Unknown'
     };
 
     // Send to error reporting service

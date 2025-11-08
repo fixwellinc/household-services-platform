@@ -29,16 +29,19 @@ export interface ErrorRecoveryOptions {
 class AdminErrorReportingService {
   private static instance: AdminErrorReportingService;
   private errorQueue: ErrorReport[] = [];
-  private isOnline = navigator.onLine;
+  private isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
   private retryInterval: NodeJS.Timeout | null = null;
 
   private constructor() {
-    // Listen for online/offline events
-    window.addEventListener('online', this.handleOnline);
-    window.addEventListener('offline', this.handleOffline);
-    
-    // Start retry mechanism for queued errors
-    this.startRetryMechanism();
+    // Only set up event listeners if we're in a browser environment
+    if (typeof window !== 'undefined') {
+      // Listen for online/offline events
+      window.addEventListener('online', this.handleOnline);
+      window.addEventListener('offline', this.handleOffline);
+      
+      // Start retry mechanism for queued errors
+      this.startRetryMechanism();
+    }
   }
 
   public static getInstance(): AdminErrorReportingService {
@@ -89,8 +92,8 @@ class AdminErrorReportingService {
       dataSource: options.dataSource,
       retryCount: options.retryCount || 0,
       timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-      url: window.location.href,
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
+      url: typeof window !== 'undefined' ? window.location.href : 'Unknown',
       userId: this.getCurrentUserId(),
       sessionId: this.getSessionId()
     };
@@ -231,8 +234,10 @@ class AdminErrorReportingService {
   }
 
   public destroy(): void {
-    window.removeEventListener('online', this.handleOnline);
-    window.removeEventListener('offline', this.handleOffline);
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('online', this.handleOnline);
+      window.removeEventListener('offline', this.handleOffline);
+    }
     
     if (this.retryInterval) {
       clearInterval(this.retryInterval);
