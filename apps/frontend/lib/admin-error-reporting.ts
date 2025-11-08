@@ -34,9 +34,16 @@ class AdminErrorReportingService {
 
   private constructor() {
     // Safely initialize isOnline - only access navigator in browser
-    this.isOnline = typeof navigator !== 'undefined' && typeof navigator.onLine !== 'undefined' 
-      ? navigator.onLine 
-      : true;
+    // Use try-catch as additional safety for SSR
+    try {
+      this.isOnline = (typeof navigator !== 'undefined' && 
+                       typeof (navigator as any).onLine !== 'undefined') 
+        ? (navigator as any).onLine 
+        : true;
+    } catch (e) {
+      // Fallback for SSR environments where navigator doesn't exist
+      this.isOnline = true;
+    }
     
     // Only set up event listeners if we're in a browser environment
     if (typeof window !== 'undefined') {
