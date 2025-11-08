@@ -20,7 +20,8 @@ COPY apps/frontend/package*.json ./apps/frontend/
 COPY packages/*/package*.json ./packages/*/
 
 # Install all dependencies (including dev dependencies for build)
-RUN npm ci --legacy-peer-deps
+# Using npm install instead of npm ci to handle lock file sync issues
+RUN npm install --legacy-peer-deps
 
 # Copy all source code
 COPY apps ./apps
@@ -79,7 +80,8 @@ COPY apps/frontend/package*.json ./apps/frontend/
 COPY packages/*/package*.json ./packages/*/
 
 # Install only production dependencies
-RUN npm ci --omit=dev --legacy-peer-deps && \
+# Using npm install instead of npm ci to handle lock file sync issues
+RUN npm install --omit=dev --legacy-peer-deps && \
     npm cache clean --force
 
 # Copy built frontend from builder
