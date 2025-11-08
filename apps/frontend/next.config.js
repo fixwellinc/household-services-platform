@@ -135,8 +135,8 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   
-  // Simplified webpack configuration for Railway deployment
-  webpack: (config, { isServer }) => {
+  // Simplified webpack configuration for Railway and Render deployment
+  webpack: (config, { isServer, webpack }) => {
     // Basic fallbacks for Node.js modules
     if (!isServer) {
       config.resolve.fallback = {
@@ -144,6 +144,23 @@ const nextConfig = {
         fs: false,
         net: false,
         tls: false,
+        path: false,
+        crypto: false,
+      };
+    }
+    
+    // Better error handling in production builds
+    if (process.env.NODE_ENV === 'production') {
+      config.optimization = {
+        ...config.optimization,
+        minimize: true,
+      };
+      
+      // Improve error messages
+      config.stats = {
+        ...config.stats,
+        errorDetails: true,
+        warnings: true,
       };
     }
     

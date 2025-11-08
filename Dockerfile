@@ -45,9 +45,15 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV DISABLE_ESLINT_PLUGIN=true
 
-# Build the Next.js application
+# Build the Next.js application with verbose error reporting
 RUN echo "🔨 Building Next.js application..." && \
-    npm run build
+    echo "📦 Environment info:" && \
+    echo "   Node: $(node --version)" && \
+    echo "   npm: $(npm --version)" && \
+    echo "   Working directory: $(pwd)" && \
+    echo "   Files in current dir: $(ls -la | head -5)" && \
+    echo "" && \
+    NODE_OPTIONS="--max-old-space-size=2048" npm run build
 
 # Verify build artifacts
 RUN echo "🔍 Verifying build artifacts..." && \
