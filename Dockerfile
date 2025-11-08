@@ -73,7 +73,6 @@ RUN echo "🔨 Building Next.js application..." && \
      echo "=== FULL BUILD OUTPUT ===" && \
      cat /tmp/build-output.log 2>/dev/null || echo "Could not read build log" && \
      echo "" && \
-    (echo "" && \
      echo "❌❌❌ BUILD FAILED ❌❌❌" && \
      echo "Full error output above. Checking environment..." && \
      echo "Node modules:" && \
