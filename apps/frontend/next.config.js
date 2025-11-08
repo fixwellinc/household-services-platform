@@ -151,15 +151,25 @@ const nextConfig = {
     
     // Better error handling and verbose output
     config.infrastructureLogging = {
-      level: 'error',
+      level: 'verbose',
     };
     
-    // Improve error messages in all builds
+    // Improve error messages in all builds - show everything
     config.stats = {
       ...config.stats,
       errorDetails: true,
       warnings: true,
+      warningsFilter: undefined, // Show all warnings
       colors: true,
+      modules: false,
+      chunks: false,
+      chunkModules: false,
+      reasons: true,
+      usedExports: false,
+      providedExports: false,
+      optimizationBailout: false,
+      errorStack: true,
+      moduleTrace: true,
     };
     
     // Better error handling in production builds

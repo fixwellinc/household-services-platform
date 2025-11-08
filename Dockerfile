@@ -69,20 +69,37 @@ RUN echo "🔨 Building Next.js application..." && \
     (test -d .next && echo "   ⚠ .next already exists (will be rebuilt)" || echo "   ✓ .next doesn't exist yet") && \
     echo "" && \
     echo "🚀 Starting build with full error output..." && \
-    NODE_OPTIONS="--max-old-space-size=2048" npm run build 2>&1 | tee /tmp/build-output.log || \
-    (echo "" && \
-     echo "=== FULL BUILD OUTPUT ===" && \
-     cat /tmp/build-output.log 2>/dev/null || echo "Could not read build log" && \
-     echo "" && \
-     echo "❌❌❌ BUILD FAILED ❌❌❌" && \
-     echo "Full error output above. Checking environment..." && \
-     echo "Node modules:" && \
-     ls -la node_modules 2>/dev/null | head -10 || echo "node_modules not accessible" && \
-     echo "Package.json:" && \
-     cat package.json | head -30 && \
-     echo "Next.js config:" && \
-     test -f next.config.js && echo "next.config.js exists" || echo "next.config.js missing" && \
-     exit 1)
+    set -o pipefail && \
+    NODE_OPTIONS="--max-old-space-size=2048" npm run build 2>&1 | tee /tmp/build-output.log; \
+    BUILD_EXIT_CODE=$?; \
+    if [ $BUILD_EXIT_CODE -ne 0 ]; then \
+      echo ""; \
+      echo "=== BUILD FAILED WITH EXIT CODE: $BUILD_EXIT_CODE ==="; \
+      echo ""; \
+      echo "=== LAST 200 LINES OF BUILD OUTPUT ==="; \
+      tail -200 /tmp/build-output.log 2>/dev/null || echo "Could not read build log"; \
+      echo ""; \
+      echo "=== SEARCHING FOR ERROR KEYWORDS ==="; \
+      grep -i "error\|failed\|cannot\|missing\|undefined" /tmp/build-output.log 2>/dev/null | tail -50 || echo "No error keywords found"; \
+      echo ""; \
+      echo "=== FULL BUILD OUTPUT (first 500 lines) ==="; \
+      head -500 /tmp/build-output.log 2>/dev/null || echo "Could not read build log"; \
+      echo ""; \
+      echo "=== FULL BUILD OUTPUT (last 500 lines) ==="; \
+      tail -500 /tmp/build-output.log 2>/dev/null || echo "Could not read build log"; \
+      echo ""; \
+      echo "❌❌❌ BUILD FAILED ❌❌❌"; \
+      echo "Checking environment..."; \
+      echo "Node modules:"; \
+      ls -la node_modules 2>/dev/null | head -10 || echo "node_modules not accessible"; \
+      echo "Package.json:"; \
+      cat package.json | head -30; \
+      echo "Next.js config:"; \
+      test -f next.config.js && echo "next.config.js exists" || echo "next.config.js missing"; \
+      echo "Checking for .next directory:"; \
+      ls -la .next 2>/dev/null | head -10 || echo ".next directory not found"; \
+      exit $BUILD_EXIT_CODE; \
+    fi
 
 # Verify build artifacts
 RUN echo "🔍 Verifying build artifacts..." && \
