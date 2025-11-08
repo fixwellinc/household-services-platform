@@ -83,6 +83,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/next.config.js ./ap
 COPY --from=builder --chown=nextjs:nodejs /app/apps/backend ./apps/backend
 COPY --from=builder --chown=nextjs:nodejs /app/packages ./packages
 COPY --from=builder --chown=nextjs:nodejs /app/unified-server-enhanced.js ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/backend/create-admin-account.js ./apps/backend/
 
 # Copy generated Prisma client from builder stage
 # Prisma generates the client in node_modules/.prisma/client (note the dot)
@@ -114,5 +115,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 # Start the unified server (with database setup)
 # Generate Prisma client first if it doesn't exist, then start server
-CMD ["sh", "-c", "cd /app/apps/backend && if [ ! -d /app/node_modules/.prisma/client ]; then echo 'Generating Prisma client...' && npx prisma generate; fi && npx prisma db push --skip-generate --accept-data-loss || true && cd /app && node unified-server-enhanced.js"]
+CMD ["sh", "-c", "cd /app/apps/backend && if [ ! -d /app/node_modules/.prisma/client ]; then echo 'Generating Prisma client...' && npx prisma generate; fi && npx prisma db push --skip-generate --accept-data-loss || true && echo 'Creating admin account...' && node ../create-admin-account.js || echo 'Admin account creation failed, continuing...' && cd /app && node unified-server-enhanced.js"]
 
