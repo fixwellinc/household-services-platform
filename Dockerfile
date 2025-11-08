@@ -51,9 +51,23 @@ RUN echo "🔨 Building Next.js application..." && \
     echo "   Node: $(node --version)" && \
     echo "   npm: $(npm --version)" && \
     echo "   Working directory: $(pwd)" && \
-    echo "   Files in current dir: $(ls -la | head -5)" && \
+    echo "   Checking node_modules..." && \
+    (test -d node_modules && echo "   ✓ node_modules exists" || echo "   ✗ node_modules missing") && \
+    echo "   Checking .next directory..." && \
+    (test -d .next && echo "   ⚠ .next already exists (will be rebuilt)" || echo "   ✓ .next doesn't exist yet") && \
     echo "" && \
-    NODE_OPTIONS="--max-old-space-size=2048" npm run build
+    echo "🚀 Starting build with verbose output..." && \
+    NODE_OPTIONS="--max-old-space-size=2048" npm run build 2>&1 | head -200 || \
+    (echo "" && \
+     echo "❌❌❌ BUILD FAILED ❌❌❌" && \
+     echo "Checking for common issues..." && \
+     echo "Node modules check:" && \
+     ls -la node_modules 2>/dev/null | head -5 || echo "node_modules not accessible" && \
+     echo "Package.json check:" && \
+     cat package.json | head -20 && \
+     echo "Next.js config check:" && \
+     test -f next.config.js && echo "next.config.js exists" || echo "next.config.js missing" && \
+     exit 1)
 
 # Verify build artifacts
 RUN echo "🔍 Verifying build artifacts..." && \

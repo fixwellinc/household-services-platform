@@ -149,20 +149,30 @@ const nextConfig = {
       };
     }
     
+    // Better error handling and verbose output
+    config.infrastructureLogging = {
+      level: 'error',
+    };
+    
+    // Improve error messages in all builds
+    config.stats = {
+      ...config.stats,
+      errorDetails: true,
+      warnings: true,
+      colors: true,
+    };
+    
     // Better error handling in production builds
     if (process.env.NODE_ENV === 'production') {
       config.optimization = {
         ...config.optimization,
         minimize: true,
       };
-      
-      // Improve error messages
-      config.stats = {
-        ...config.stats,
-        errorDetails: true,
-        warnings: true,
-      };
     }
+    
+    // Add error handling for missing modules
+    config.resolve.symlinks = true;
+    config.resolve.cacheWithContext = false;
     
     return config;
   },
