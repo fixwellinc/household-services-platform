@@ -115,5 +115,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 # Start the unified server (with database setup)
 # Generate Prisma client first if it doesn't exist, then start server
-CMD ["sh", "-c", "cd /app/apps/backend && if [ ! -d /app/node_modules/.prisma/client ]; then echo 'Generating Prisma client...' && npx prisma generate; fi && npx prisma db push --skip-generate --accept-data-loss || true && echo 'Creating admin account...' && node ../create-admin-account.js || echo 'Admin account creation failed, continuing...' && cd /app && node unified-server-enhanced.js"]
+CMD ["sh", "-c", "cd /app/apps/backend && if [ ! -d /app/node_modules/.prisma/client ]; then echo 'Generating Prisma client...' && npx prisma generate; fi && npx prisma db push --skip-generate --accept-data-loss || true && echo 'Creating admin account...' && node create-admin-account.js || echo 'Admin account creation failed, continuing...' && cd /app && node unified-server-enhanced.js"]
 
