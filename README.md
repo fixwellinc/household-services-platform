@@ -21,6 +21,7 @@ This project is now configured for **single deployment** on Railway, eliminating
 - Node.js 18+
 - npm 9+
 - PostgreSQL database
+- Python 3.11+ (optional, for Python tooling with Ruff)
 
 ### Setup
 
@@ -45,6 +46,17 @@ This project is now configured for **single deployment** on Railway, eliminating
    cd apps/backend
    npx prisma generate
    npx prisma db push
+   ```
+
+4. **Python tooling (optional):**
+   If you plan to use Python scripts or want to lint Python code with Ruff:
+   ```bash
+   # Install Python 3.11+ if not already installed
+   # Then install Ruff
+   pip install -r requirements-dev.txt
+   
+   # Or install Ruff directly
+   pip install ruff
    ```
 
 ### Running the Application
@@ -137,6 +149,43 @@ Fixwell/
 - `npm run build:unified` - Build both frontend and backend
 - `npm run start:unified` - Start unified production server
 - `npm run deploy:unified` - Deploy to Railway
+
+## 🐍 Python Code Quality (Ruff)
+
+This project includes Ruff configuration for Python code quality. Ruff is a fast Python linter and formatter.
+
+### Setup
+
+```bash
+# Install Ruff
+pip install ruff
+# Or use the requirements file
+pip install -r requirements-dev.txt
+```
+
+### Usage
+
+```bash
+# Check for linting issues
+ruff check .
+
+# Auto-fix issues
+ruff check --fix .
+
+# Format code
+ruff format .
+
+# Check specific file or directory
+ruff check path/to/file.py
+```
+
+### Configuration
+
+Ruff is configured via `pyproject.toml`. Key settings:
+- Line length: 100 characters
+- Target Python version: 3.11+
+- Enabled rule sets: pycodestyle, pyflakes, isort, pep8-naming, pyupgrade, and more
+- Excludes: node_modules, .next, build directories, etc.
 
 ## 🔗 API Endpoints
 

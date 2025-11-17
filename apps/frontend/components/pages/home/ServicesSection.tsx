@@ -24,24 +24,34 @@ export default function ServicesSection({ className }: ServicesSectionProps) {
   useEffect(() => {
     async function fetchServices() {
       try {
+        // In unified deployment, /api/services goes directly to backend Express app
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
         const response = await fetch('/api/services', {
-          // Add timeout to prevent hanging
-          signal: AbortSignal.timeout(10000) // 10 second timeout
+          signal: controller.signal,
+          headers: {
+            'Content-Type': 'application/json',
+          },
         });
+        
+        clearTimeout(timeoutId);
+        
         if (!response.ok) {
           throw new Error(`Failed to fetch services: ${response.status}`);
         }
+        
         const data = await response.json();
+        
         // Get only active services, limit to 6 for homepage
         const activeServices = Array.isArray(data.services) 
           ? data.services
-              .filter((s: Service) => s && s.name) // Ensure service exists and has name
+              .filter((s: Service) => s && s.name && s.isActive !== false) // Ensure service exists, has name, and is active
               .slice(0, 6)
           : [];
+        
         setServices(activeServices);
-        if (activeServices.length === 0 && !error) {
-          setError(null); // Clear error if we got empty array but no error
-        }
+        setError(null); // Clear any previous errors
       } catch (err: any) {
         console.error('Error fetching services:', err);
         // Don't set error if it's just a timeout or abort - show empty state gracefully

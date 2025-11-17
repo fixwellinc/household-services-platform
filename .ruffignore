@@ -1,0 +1,43 @@
+# Ruff ignore file
+# Add patterns for files/directories to ignore
+
+# Build and distribution directories
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Node modules (if Python scripts interact with JS codebase)
+node_modules/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment files
+.env
+.env.local
+
+# Next.js build output
+.next/
+out/
+
+# TypeScript build output
+*.tsbuildinfo
+
