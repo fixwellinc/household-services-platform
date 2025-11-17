@@ -1,3 +1,5 @@
+import { logger } from '../utils/logger.js';
+
 class AnalyticsService {
   constructor(prismaClient) {
     this.prisma = prismaClient;
@@ -9,6 +11,10 @@ class AnalyticsService {
    * @returns {Object} Churn rate metrics
    */
   async calculateChurnRate(options = {}) {
+    if (!this.prisma) {
+      throw new Error('Prisma client not initialized');
+    }
+
     const { startDate, endDate, tier, paymentFrequency } = options;
     
     const dateFilter = {};
@@ -39,24 +45,38 @@ class AnalyticsService {
     });
 
     // Calculate churn rate by tier
-    const churnByTier = await this.prisma.subscription.groupBy({
-      by: ['tier'],
-      where: {
-        ...dateFilter,
-        status: 'CANCELLED'
-      },
-      _count: { tier: true }
-    });
+    let churnByTier = [];
+    try {
+      const tierResults = await this.prisma.subscription.groupBy({
+        by: ['tier'],
+        where: {
+          ...dateFilter,
+          status: 'CANCELLED'
+        },
+        _count: { tier: true }
+      });
+      churnByTier = Array.isArray(tierResults) ? tierResults : [];
+    } catch (error) {
+      logger.warn('Error calculating churn by tier', { error: error.message });
+      churnByTier = [];
+    }
 
     // Calculate churn rate by payment frequency
-    const churnByFrequency = await this.prisma.subscription.groupBy({
-      by: ['paymentFrequency'],
-      where: {
-        ...dateFilter,
-        status: 'CANCELLED'
-      },
-      _count: { paymentFrequency: true }
-    });
+    let churnByFrequency = [];
+    try {
+      const frequencyResults = await this.prisma.subscription.groupBy({
+        by: ['paymentFrequency'],
+        where: {
+          ...dateFilter,
+          status: 'CANCELLED'
+        },
+        _count: { paymentFrequency: true }
+      });
+      churnByFrequency = Array.isArray(frequencyResults) ? frequencyResults : [];
+    } catch (error) {
+      logger.warn('Error calculating churn by frequency', { error: error.message });
+      churnByFrequency = [];
+    }
 
     const overallChurnRate = totalSubscriptions > 0 ? 
       (cancelledSubscriptions / totalSubscriptions) * 100 : 0;
@@ -65,18 +85,18 @@ class AnalyticsService {
       overallChurnRate: Math.round(overallChurnRate * 100) / 100,
       totalSubscriptions,
       cancelledSubscriptions,
-      churnByTier: churnByTier.map(item => ({
+      churnByTier: Array.isArray(churnByTier) ? churnByTier.map(item => ({
         tier: item.tier,
-        count: item._count.tier,
+        count: item._count?.tier || 0,
         rate: totalSubscriptions > 0 ? 
-          Math.round((item._count.tier / totalSubscriptions) * 10000) / 100 : 0
-      })),
-      churnByFrequency: churnByFrequency.map(item => ({
+          Math.round((item._count?.tier || 0) / totalSubscriptions) * 10000 / 100 : 0
+      })) : [],
+      churnByFrequency: Array.isArray(churnByFrequency) ? churnByFrequency.map(item => ({
         frequency: item.paymentFrequency,
-        count: item._count.paymentFrequency,
+        count: item._count?.paymentFrequency || 0,
         rate: totalSubscriptions > 0 ? 
-          Math.round((item._count.paymentFrequency / totalSubscriptions) * 10000) / 100 : 0
-      }))
+          Math.round((item._count?.paymentFrequency || 0) / totalSubscriptions) * 10000 / 100 : 0
+      })) : []
     };
   }
 
@@ -86,6 +106,10 @@ class AnalyticsService {
    * @returns {Object} CLV metrics
    */
   async calculateCustomerLifetimeValue(options = {}) {
+    if (!this.prisma) {
+      throw new Error('Prisma client not initialized');
+    }
+
     const { tier, paymentFrequency } = options;
 
     const whereClause = {
@@ -102,6 +126,19 @@ class AnalyticsService {
         additionalProperties: true
       }
     });
+
+    // Ensure subscriptions is an array
+    if (!Array.isArray(subscriptions)) {
+      logger.warn('Subscriptions query returned non-array result', { subscriptions });
+      return {
+        averageCLV: 0,
+        averageDurationMonths: 0,
+        totalActiveSubscriptions: 0,
+        totalMonthlyRevenue: 0,
+        clvByTier: [],
+        clvByFrequency: []
+      };
+    }
 
     // Calculate average subscription duration (in months)
     const now = new Date();
@@ -127,7 +164,10 @@ class AnalyticsService {
       }
 
       // Add additional property fees
-      const additionalPropertyRevenue = subscription.additionalProperties.length * 
+      const additionalProperties = Array.isArray(subscription.additionalProperties) 
+        ? subscription.additionalProperties 
+        : [];
+      const additionalPropertyRevenue = additionalProperties.length * 
         (monthlyRevenue * 0.5);
       monthlyRevenue += additionalPropertyRevenue;
 
@@ -206,11 +246,14 @@ class AnalyticsService {
         }
       });
 
+      // Ensure subscriptions is an array
+      const safeSubscriptions = Array.isArray(subscriptions) ? subscriptions : [];
+
       let monthlyRevenue = 0;
       let newSubscriptions = 0;
       let cancelledSubscriptions = 0;
 
-      for (const subscription of subscriptions) {
+      for (const subscription of safeSubscriptions) {
         const basePrice = this.getBasePriceByTier(subscription.tier);
         let revenue = basePrice;
 
@@ -218,7 +261,10 @@ class AnalyticsService {
           revenue *= 0.9 * 12; // Yearly discount and full year
         }
 
-        revenue += subscription.additionalProperties.length * (basePrice * 0.5);
+        const additionalProperties = Array.isArray(subscription.additionalProperties) 
+          ? subscription.additionalProperties 
+          : [];
+        revenue += additionalProperties.length * (basePrice * 0.5);
         monthlyRevenue += revenue;
 
         if (subscription.status === 'ACTIVE') {
@@ -263,53 +309,78 @@ class AnalyticsService {
    * @returns {Object} Perk utilization metrics
    */
   async getPerkUtilization() {
-    const totalUsage = await this.prisma.subscriptionUsage.count();
-    
-    const perkUsage = await this.prisma.subscriptionUsage.aggregate({
-      _count: {
-        priorityBookingUsed: true,
-        discountUsed: true,
-        freeServiceUsed: true,
-        emergencyServiceUsed: true
-      },
-      where: {
-        OR: [
-          { priorityBookingUsed: true },
-          { discountUsed: true },
-          { freeServiceUsed: true },
-          { emergencyServiceUsed: true }
-        ]
-      }
-    });
+    if (!this.prisma) {
+      throw new Error('Prisma client not initialized');
+    }
+
+    let totalUsage = 0;
+    let perkUsage = { _count: {} };
+    let usageByTier = [];
+
+    try {
+      totalUsage = await this.prisma.subscriptionUsage.count();
+    } catch (error) {
+      logger.warn('Error counting subscription usage', { error: error.message });
+      totalUsage = 0;
+    }
+
+    try {
+      perkUsage = await this.prisma.subscriptionUsage.aggregate({
+        _count: {
+          priorityBookingUsed: true,
+          discountUsed: true,
+          freeServiceUsed: true,
+          emergencyServiceUsed: true
+        },
+        where: {
+          OR: [
+            { priorityBookingUsed: true },
+            { discountUsed: true },
+            { freeServiceUsed: true },
+            { emergencyServiceUsed: true }
+          ]
+        }
+      });
+    } catch (error) {
+      logger.warn('Error aggregating perk usage', { error: error.message });
+      perkUsage = { _count: {} };
+    }
 
     // Get usage by tier
-    const usageByTier = await this.prisma.subscriptionUsage.groupBy({
-      by: ['tier'],
-      _count: {
-        priorityBookingUsed: true,
-        discountUsed: true,
-        freeServiceUsed: true,
-        emergencyServiceUsed: true
-      },
-      where: {
-        OR: [
-          { priorityBookingUsed: true },
-          { discountUsed: true },
-          { freeServiceUsed: true },
-          { emergencyServiceUsed: true }
-        ]
-      }
-    });
+    try {
+      const tierResults = await this.prisma.subscriptionUsage.groupBy({
+        by: ['tier'],
+        _count: {
+          priorityBookingUsed: true,
+          discountUsed: true,
+          freeServiceUsed: true,
+          emergencyServiceUsed: true
+        },
+        where: {
+          OR: [
+            { priorityBookingUsed: true },
+            { discountUsed: true },
+            { freeServiceUsed: true },
+            { emergencyServiceUsed: true }
+          ]
+        }
+      });
+      usageByTier = Array.isArray(tierResults) ? tierResults : [];
+    } catch (error) {
+      logger.warn('Error grouping usage by tier', { error: error.message });
+      usageByTier = [];
+    }
 
+    const count = perkUsage._count || {};
     const utilizationRates = {
       priorityBooking: totalUsage > 0 ? 
-        (perkUsage._count.priorityBookingUsed / totalUsage) * 100 : 0,
+        ((count.priorityBookingUsed || 0) / totalUsage) * 100 : 0,
       discount: totalUsage > 0 ? 
-        (perkUsage._count.discountUsed / totalUsage) * 100 : 0,
+        ((count.discountUsed || 0) / totalUsage) * 100 : 0,
       freeService: totalUsage > 0 ? 
-        (perkUsage._count.freeServiceUsed / totalUsage) * 100 : 0,
+        ((count.freeServiceUsed || 0) / totalUsage) * 100 : 0,
       emergencyService: totalUsage > 0 ? 
-        (perkUsage._count.emergencyServiceUsed / totalUsage) * 100 : 0
+        ((count.emergencyServiceUsed || 0) / totalUsage) * 100 : 0
     };
 
     return {
@@ -318,13 +389,13 @@ class AnalyticsService {
         perk,
         utilizationRate: Math.round(rate * 100) / 100
       })),
-      usageByTier: usageByTier.map(tier => ({
+      usageByTier: Array.isArray(usageByTier) ? usageByTier.map(tier => ({
         tier: tier.tier,
-        priorityBookingUsage: tier._count.priorityBookingUsed,
-        discountUsage: tier._count.discountUsed,
-        freeServiceUsage: tier._count.freeServiceUsed,
-        emergencyServiceUsage: tier._count.emergencyServiceUsed
-      }))
+        priorityBookingUsage: tier._count?.priorityBookingUsed || 0,
+        discountUsage: tier._count?.discountUsed || 0,
+        freeServiceUsage: tier._count?.freeServiceUsed || 0,
+        emergencyServiceUsage: tier._count?.emergencyServiceUsed || 0
+      })) : []
     };
   }
 

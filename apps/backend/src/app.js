@@ -981,7 +981,9 @@ app.get('/api/admin/analytics', requireAdmin, async (req, res) => {
       }
     });
     
-    const totalRevenue = subscriptions.reduce((sum, sub) => {
+    // Ensure subscriptions is an array before reducing
+    const safeSubscriptions = Array.isArray(subscriptions) ? subscriptions : [];
+    const totalRevenue = safeSubscriptions.reduce((sum, sub) => {
       const planPrice = sub.plan?.monthlyPrice || sub.plan?.yearlyPrice || 0;
       return sum + planPrice;
     }, 0);
@@ -1062,15 +1064,36 @@ app.get('/api/admin/analytics', requireAdmin, async (req, res) => {
       take: 5
     });
 
-    // Enhanced subscription analytics
-    const analyticsService = new AnalyticsService();
-    const churnRate = await analyticsService.calculateChurnRate({
-      startDate: thirtyDaysAgo.toISOString(),
-      endDate: now.toISOString()
-    });
+    // Enhanced subscription analytics (use the service initialized at top of file)
+    let churnRate, clvAnalysis, perkUtilization;
+    try {
+      churnRate = await analyticsService.calculateChurnRate({
+        startDate: thirtyDaysAgo.toISOString(),
+        endDate: now.toISOString()
+      });
 
-    const clvAnalysis = await analyticsService.calculateCustomerLifetimeValue();
-    const perkUtilization = await analyticsService.getPerkUtilization();
+      clvAnalysis = await analyticsService.calculateCustomerLifetimeValue();
+      perkUtilization = await analyticsService.getPerkUtilization();
+    } catch (analyticsError) {
+      logger.error('Error calculating enhanced analytics', { 
+        error: analyticsError.message, 
+        stack: analyticsError.stack 
+      });
+      // Provide default values if analytics fail
+      churnRate = {
+        overallChurnRate: 0,
+        churnByTier: [],
+        churnByFrequency: []
+      };
+      clvAnalysis = {
+        averageCLV: 0,
+        clvByTier: [],
+        clvByFrequency: []
+      };
+      perkUtilization = {
+        utilizationRates: []
+      };
+    }
 
     // Calculate notification statistics (mock for now, can be enhanced later)
     const notificationStats = {
@@ -1092,7 +1115,7 @@ app.get('/api/admin/analytics', requireAdmin, async (req, res) => {
       sessionGrowth: Math.round(sessionGrowth * 10) / 10,
       totalQuotes: quoteCount,
       totalServices: serviceCount,
-      totalSubscriptions: subscriptions.length,
+      totalSubscriptions: safeSubscriptions.length,
       topServices: topServices.map(service => ({
         name: service.name,
         bookings: service._count.bookings
