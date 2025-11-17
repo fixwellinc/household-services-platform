@@ -24,20 +24,32 @@ export default function ServicesSection({ className }: ServicesSectionProps) {
   useEffect(() => {
     async function fetchServices() {
       try {
-        const response = await fetch('/api/services');
+        const response = await fetch('/api/services', {
+          // Add timeout to prevent hanging
+          signal: AbortSignal.timeout(10000) // 10 second timeout
+        });
         if (!response.ok) {
-          throw new Error('Failed to fetch services');
+          throw new Error(`Failed to fetch services: ${response.status}`);
         }
         const data = await response.json();
         // Get only active services, limit to 6 for homepage
-        const activeServices = (data.services || [])
-          .filter((s: Service) => s.name) // Ensure name exists
-          .slice(0, 6);
+        const activeServices = Array.isArray(data.services) 
+          ? data.services
+              .filter((s: Service) => s && s.name) // Ensure service exists and has name
+              .slice(0, 6)
+          : [];
         setServices(activeServices);
-      } catch (err) {
+        if (activeServices.length === 0 && !error) {
+          setError(null); // Clear error if we got empty array but no error
+        }
+      } catch (err: any) {
         console.error('Error fetching services:', err);
-        setError('Failed to load services');
-        // Fallback to empty array - component will show nothing rather than crash
+        // Don't set error if it's just a timeout or abort - show empty state gracefully
+        if (err.name !== 'AbortError' && err.name !== 'TimeoutError') {
+          setError('Failed to load services');
+        }
+        // Always set empty array on error to prevent crashes
+        setServices([]);
       } finally {
         setIsLoading(false);
       }

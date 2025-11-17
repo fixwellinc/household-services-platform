@@ -8,28 +8,55 @@ export async function GET(request: NextRequest) {
     
     // Build the URL with query parameters
     const url = new URL(request.url)
-    const railwayUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cultured-account-production.up.railway.app/api'
-    const targetUrl = `${railwayUrl}/services${url.search}`
+    // Use BACKEND_URL or NEXT_PUBLIC_API_URL, fallback to Render URL
+    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'https://fixwell.onrender.com/api'
+    const targetUrl = `${backendUrl.replace(/\/api$/, '')}/services${url.search}`
     
-    const response = await fetch(targetUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(authHeader && { 'Authorization': authHeader }),
-      },
-    })
+    // Add timeout to prevent hanging
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 8000) // 8 second timeout
     
-    const data = await response.json()
-    
-    if (!response.ok) {
-      return NextResponse.json(data, { status: response.status })
+    try {
+      const response = await fetch(targetUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authHeader && { 'Authorization': authHeader }),
+        },
+        signal: controller.signal,
+      })
+      
+      clearTimeout(timeoutId)
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to fetch services' }))
+        return NextResponse.json(errorData, { status: response.status })
+      }
+      
+      const data = await response.json()
+      
+      // Ensure services array exists
+      if (!data.services || !Array.isArray(data.services)) {
+        return NextResponse.json({ services: [] })
+      }
+      
+      return NextResponse.json(data)
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId)
+      if (fetchError.name === 'AbortError') {
+        console.error('Services API request timeout')
+        return NextResponse.json(
+          { error: 'Request timeout', services: [] },
+          { status: 504 }
+        )
+      }
+      throw fetchError
     }
-    
-    return NextResponse.json(data)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Get services proxy error:', error)
+    // Return empty services array instead of error to prevent page breakage
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { services: [], error: 'Failed to load services' },
       { status: 500 }
     )
   }
