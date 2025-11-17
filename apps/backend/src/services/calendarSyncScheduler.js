@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import { PrismaClient } from '@prisma/client';
 import CalendarSyncService from './calendarSyncService.js';
 import CalendarOAuthService from './calendarOAuthService.js';
+import { logger } from '../utils/logger.js';
 
 const prisma = new PrismaClient();
 
@@ -22,11 +23,11 @@ class CalendarSyncScheduler {
    */
   start() {
     if (this.isRunning) {
-      console.log('Calendar sync scheduler is already running');
+      logger.info('Calendar sync scheduler is already running');
       return;
     }
 
-    console.log('Starting calendar sync scheduler...');
+    logger.info('Starting calendar sync scheduler');
     this.isRunning = true;
 
     // Schedule periodic full sync every hour
@@ -61,7 +62,7 @@ class CalendarSyncScheduler {
       timezone: 'America/New_York'
     }));
 
-    console.log('Calendar sync scheduler started successfully');
+    logger.info('Calendar sync scheduler started successfully');
   }
 
   /**
@@ -69,23 +70,23 @@ class CalendarSyncScheduler {
    */
   stop() {
     if (!this.isRunning) {
-      console.log('Calendar sync scheduler is not running');
+      logger.info('Calendar sync scheduler is not running');
       return;
     }
 
-    console.log('Stopping calendar sync scheduler...');
+    logger.info('Stopping calendar sync scheduler');
     
     // Stop all scheduled tasks
     this.scheduledTasks.forEach((task, name) => {
       task.destroy();
-      console.log(`Stopped scheduled task: ${name}`);
+      logger.debug('Stopped scheduled task', { taskName: name });
     });
     
     this.scheduledTasks.clear();
     this.retryQueue.clear();
     this.isRunning = false;
 
-    console.log('Calendar sync scheduler stopped');
+    logger.info('Calendar sync scheduler stopped');
   }
 
   /**
@@ -93,11 +94,14 @@ class CalendarSyncScheduler {
    */
   async performScheduledSync() {
     try {
-      console.log('Starting scheduled calendar sync...');
+      logger.info('Starting scheduled calendar sync');
       
       const result = await this.syncService.performFullSync();
       
-      console.log(`Scheduled sync completed: ${result.successfulSyncs}/${result.totalSyncs} successful`);
+      logger.info('Scheduled sync completed', {
+        successfulSyncs: result.successfulSyncs,
+        totalSyncs: result.totalSyncs
+      });
       
       // Add failed syncs to retry queue
       const failedSyncs = result.results.filter(r => !r.success);
@@ -109,7 +113,10 @@ class CalendarSyncScheduler {
       await this.logSyncStatistics(result);
       
     } catch (error) {
-      console.error('Scheduled sync failed:', error);
+      logger.error('Scheduled sync failed', {
+        error: error.message,
+        stack: error.stack
+      });
       await this.logSyncError('scheduledSync', error.message);
     }
   }
@@ -122,7 +129,9 @@ class CalendarSyncScheduler {
       return;
     }
 
-    console.log(`Processing retry queue: ${this.retryQueue.size} items`);
+    logger.info('Processing retry queue', {
+      queueSize: this.retryQueue.size
+    });
 
     const retryPromises = [];
     const itemsToRemove = [];
@@ -133,7 +142,11 @@ class CalendarSyncScheduler {
       }
 
       if (retryItem.attempts >= this.maxRetries) {
-        console.error(`Max retries exceeded for ${key}, removing from queue`);
+        logger.error('Max retries exceeded, removing from queue', {
+          key,
+          calendarSyncId: retryItem.calendarSyncId,
+          attempts: retryItem.attempts
+        });
         itemsToRemove.push(key);
         await this.handleMaxRetriesExceeded(retryItem);
         continue;
@@ -154,7 +167,11 @@ class CalendarSyncScheduler {
    */
   async processRetryItem(key, retryItem) {
     try {
-      console.log(`Retrying ${retryItem.operation} for calendar sync ${retryItem.calendarSyncId} (attempt ${retryItem.attempts + 1})`);
+      logger.info('Retrying calendar sync operation', {
+        operation: retryItem.operation,
+        calendarSyncId: retryItem.calendarSyncId,
+        attempt: retryItem.attempts + 1
+      });
       
       retryItem.attempts++;
       retryItem.lastAttempt = Date.now();
@@ -177,12 +194,15 @@ class CalendarSyncScheduler {
           break;
         
         default:
-          console.error(`Unknown retry operation: ${retryItem.operation}`);
+          logger.error('Unknown retry operation', {
+            operation: retryItem.operation,
+            key
+          });
           success = false;
       }
 
       if (success) {
-        console.log(`Retry successful for ${key}`);
+        logger.info('Retry successful', { key });
         this.retryQueue.delete(key);
         
         // Clear sync errors
@@ -195,11 +215,15 @@ class CalendarSyncScheduler {
           }
         });
       } else {
-        console.log(`Retry failed for ${key}, will try again later`);
+        logger.warn('Retry failed, will try again later', { key });
       }
 
     } catch (error) {
-      console.error(`Retry failed for ${key}:`, error);
+      logger.error('Retry failed', {
+        key,
+        error: error.message,
+        stack: error.stack
+      });
       retryItem.lastError = error.message;
     }
   }
@@ -227,7 +251,12 @@ class CalendarSyncScheduler {
       });
     }
 
-    console.log(`Added to retry queue: ${key} - ${error}`);
+    logger.info('Added to retry queue', {
+      key,
+      calendarSyncId,
+      operation,
+      error
+    });
   }
 
   /**
@@ -245,13 +274,21 @@ class CalendarSyncScheduler {
         }
       });
 
-      console.error(`Calendar sync ${retryItem.calendarSyncId} disabled due to repeated failures`);
+      logger.error('Calendar sync disabled due to repeated failures', {
+        calendarSyncId: retryItem.calendarSyncId,
+        lastError: retryItem.lastError,
+        attempts: retryItem.attempts
+      });
       
       // Log critical error
       await this.logSyncError('maxRetriesExceeded', `Calendar sync ${retryItem.calendarSyncId} disabled: ${retryItem.lastError}`);
       
     } catch (error) {
-      console.error('Failed to handle max retries exceeded:', error);
+      logger.error('Failed to handle max retries exceeded', {
+        error: error.message,
+        stack: error.stack,
+        calendarSyncId: retryItem.calendarSyncId
+      });
     }
   }
 
@@ -260,7 +297,7 @@ class CalendarSyncScheduler {
    */
   async validateAllTokens() {
     try {
-      console.log('Starting token validation...');
+      logger.info('Starting token validation');
       
       const activeCalendarSyncs = await this.oauthService.getActiveCalendarSyncs();
       const validationPromises = activeCalendarSyncs.map(sync => 
@@ -282,10 +319,16 @@ class CalendarSyncScheduler {
         }
       });
 
-      console.log(`Token validation completed: ${validTokens} valid, ${invalidTokens} invalid`);
+      logger.info('Token validation completed', {
+        validTokens,
+        invalidTokens
+      });
       
     } catch (error) {
-      console.error('Token validation failed:', error);
+      logger.error('Token validation failed', {
+        error: error.message,
+        stack: error.stack
+      });
       await this.logSyncError('tokenValidation', error.message);
     }
   }
@@ -298,12 +341,19 @@ class CalendarSyncScheduler {
       const result = await this.oauthService.validateCalendarSync(calendarSyncId);
       
       if (!result.valid) {
-        console.warn(`Invalid token for calendar sync ${calendarSyncId}: ${result.error}`);
+        logger.warn('Invalid token for calendar sync', {
+          calendarSyncId,
+          error: result.error
+        });
       }
       
       return result;
     } catch (error) {
-      console.error(`Token validation failed for ${calendarSyncId}:`, error);
+      logger.error('Token validation failed', {
+        calendarSyncId,
+        error: error.message,
+        stack: error.stack
+      });
       return { valid: false, error: error.message };
     }
   }
@@ -330,10 +380,16 @@ class CalendarSyncScheduler {
         throw new Error(`Unknown calendar provider: ${calendarSync.provider}`);
       }
 
-      console.log(`Token refreshed successfully for calendar sync ${calendarSyncId}`);
+      logger.info('Token refreshed successfully', {
+        calendarSyncId
+      });
       
     } catch (error) {
-      console.error(`Token refresh failed for ${calendarSyncId}:`, error);
+      logger.error('Token refresh failed', {
+        calendarSyncId,
+        error: error.message,
+        stack: error.stack
+      });
       throw error;
     }
   }
@@ -343,7 +399,7 @@ class CalendarSyncScheduler {
    */
   async cleanupOldSyncData() {
     try {
-      console.log('Starting sync data cleanup...');
+      logger.info('Starting sync data cleanup');
       
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       
@@ -358,10 +414,15 @@ class CalendarSyncScheduler {
         }
       });
 
-      console.log(`Cleanup completed: cleared ${clearedErrors.count} old sync errors`);
+      logger.info('Cleanup completed', {
+        clearedErrors: clearedErrors.count
+      });
       
     } catch (error) {
-      console.error('Sync data cleanup failed:', error);
+      logger.error('Sync data cleanup failed', {
+        error: error.message,
+        stack: error.stack
+      });
       await this.logSyncError('cleanup', error.message);
     }
   }
@@ -379,13 +440,16 @@ class CalendarSyncScheduler {
         retryQueueSize: this.retryQueue.size
       };
 
-      console.log('Sync Statistics:', stats);
+      logger.info('Sync Statistics', stats);
       
       // You could store these stats in a database table for monitoring
       // await prisma.syncStatistics.create({ data: stats });
       
     } catch (error) {
-      console.error('Failed to log sync statistics:', error);
+      logger.error('Failed to log sync statistics', {
+        error: error.message,
+        stack: error.stack
+      });
     }
   }
 
@@ -401,13 +465,16 @@ class CalendarSyncScheduler {
         retryQueueSize: this.retryQueue.size
       };
 
-      console.error('Sync Error:', errorLog);
+      logger.error('Sync Error', errorLog);
       
       // You could store these errors in a database table for monitoring
       // await prisma.syncErrors.create({ data: errorLog });
       
     } catch (error) {
-      console.error('Failed to log sync error:', error);
+      logger.error('Failed to log sync error', {
+        error: error.message,
+        stack: error.stack
+      });
     }
   }
 
@@ -435,7 +502,9 @@ class CalendarSyncScheduler {
    */
   async forceSyncCalendar(calendarSyncId) {
     try {
-      console.log(`Force syncing calendar ${calendarSyncId}...`);
+      logger.info('Force syncing calendar', {
+        calendarSyncId
+      });
       
       const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // 7 days ago
       const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);  // 30 days ahead
@@ -453,7 +522,11 @@ class CalendarSyncScheduler {
       return result;
       
     } catch (error) {
-      console.error(`Force sync failed for calendar ${calendarSyncId}:`, error);
+      logger.error('Force sync failed', {
+        calendarSyncId,
+        error: error.message,
+        stack: error.stack
+      });
       await this.addToRetryQueue(calendarSyncId, 'fullSync', error.message);
       throw error;
     }
@@ -473,7 +546,10 @@ class CalendarSyncScheduler {
 
     keysToRemove.forEach(key => this.retryQueue.delete(key));
     
-    console.log(`Cleared ${keysToRemove.length} retry items for calendar ${calendarSyncId}`);
+    logger.info('Cleared retry items', {
+      count: keysToRemove.length,
+      calendarSyncId
+    });
     
     return keysToRemove.length;
   }
@@ -495,7 +571,10 @@ class CalendarSyncScheduler {
         );
 
         if (conflictCheck.hasConflicts) {
-          console.warn(`Conflicts detected for appointment ${appointment.id}:`, conflictCheck.conflictsByProvider);
+          logger.warn('Conflicts detected for appointment', {
+            appointmentId: appointment.id,
+            conflictsByProvider: conflictCheck.conflictsByProvider
+          });
           
           // You could implement conflict resolution logic here
           // For now, we'll log the conflicts and proceed
@@ -521,7 +600,11 @@ class CalendarSyncScheduler {
       return result;
       
     } catch (error) {
-      console.error(`Appointment sync failed for ${appointment.id}:`, error);
+      logger.error('Appointment sync failed', {
+        appointmentId: appointment.id,
+        error: error.message,
+        stack: error.stack
+      });
       throw error;
     }
   }

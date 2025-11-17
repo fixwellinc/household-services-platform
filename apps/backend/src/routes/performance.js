@@ -205,11 +205,13 @@ router.get('/analysis/cache-efficiency', requireAdmin, async (req, res) => {
 router.post('/database/analyze', requireAdmin, async (req, res) => {
   try {
     // Run ANALYZE on subscription-related tables
-    await prisma.$executeRaw`ANALYZE "Subscription"`;
-    await prisma.$executeRaw`ANALYZE "PaymentFrequency"`;
-    await prisma.$executeRaw`ANALYZE "SubscriptionPause"`;
-    await prisma.$executeRaw`ANALYZE "RewardCredit"`;
-    await prisma.$executeRaw`ANALYZE "AdditionalProperty"`;
+    // Use $executeRawUnsafe with proper identifier quoting (table names are hardcoded, so safe)
+    // PostgreSQL requires double quotes for identifiers
+    await prisma.$executeRawUnsafe(`ANALYZE "Subscription"`);
+    await prisma.$executeRawUnsafe(`ANALYZE "PaymentFrequency"`);
+    await prisma.$executeRawUnsafe(`ANALYZE "SubscriptionPause"`);
+    await prisma.$executeRawUnsafe(`ANALYZE "RewardCredit"`);
+    await prisma.$executeRawUnsafe(`ANALYZE "AdditionalProperty"`);
 
     res.json({
       success: true,

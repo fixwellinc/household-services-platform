@@ -6,6 +6,7 @@ import queueService from '../services/queueService.js';
 import socketService from '../services/socketService.js';
 import searchService from '../services/searchService.js';
 import searchIndexService from '../services/searchIndexService.js';
+import { logger } from '../utils/logger.js';
 import billingAdjustmentRoutes from './admin/billingAdjustments.js';
 import exportRoutes from './admin/exports.js';
 import reportRoutes from './admin/reports.js';
@@ -103,7 +104,10 @@ router.get('/dashboard/stats', async (req, res) => {
 
     res.json({ success: true, stats });
   } catch (error) {
-    console.error('Error fetching dashboard stats:', error);
+    logger.error('Error fetching dashboard stats', {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch dashboard statistics'
@@ -130,7 +134,10 @@ router.get('/dashboard/users', async (req, res) => {
 
     res.json(userData);
   } catch (error) {
-    console.error('Error fetching user metrics:', error);
+    logger.error('Error fetching user metrics', {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch user metrics'
@@ -157,7 +164,10 @@ router.get('/dashboard/revenue', async (req, res) => {
 
     res.json(revenueData);
   } catch (error) {
-    console.error('Error fetching revenue metrics:', error);
+    logger.error('Error fetching revenue metrics', {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch revenue metrics'
@@ -183,7 +193,10 @@ router.get('/dashboard/bookings', async (req, res) => {
 
     res.json(bookingData);
   } catch (error) {
-    console.error('Error fetching booking metrics:', error);
+    logger.error('Error fetching booking metrics', {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch booking metrics'
@@ -226,7 +239,10 @@ router.get('/dashboard/alerts', async (req, res) => {
 
     res.json(alertData);
   } catch (error) {
-    console.error('Error fetching system alerts:', error);
+    logger.error('Error fetching system alerts', {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch system alerts'
@@ -271,7 +287,10 @@ router.get('/dashboard/subscriptions', async (req, res) => {
       res.json(subscriptionData);
     }
   } catch (error) {
-    console.error('Error fetching subscription data:', error);
+    logger.error('Error fetching subscription data', {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch subscription data'
@@ -303,7 +322,10 @@ router.get('/dashboard/layouts', async (req, res) => {
 
     res.json({ success: true, layouts });
   } catch (error) {
-    console.error('Error fetching dashboard layouts:', error);
+    logger.error('Error fetching dashboard layouts', {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch dashboard layouts'
@@ -329,7 +351,10 @@ router.post('/dashboard/layouts', async (req, res) => {
 
     res.json({ success: true, layout: savedLayout });
   } catch (error) {
-    console.error('Error saving dashboard layout:', error);
+    logger.error('Error saving dashboard layout', {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to save dashboard layout'
@@ -353,7 +378,10 @@ router.put('/dashboard/layouts', async (req, res) => {
 
     res.json({ success: true, layout: updatedLayout });
   } catch (error) {
-    console.error('Error updating dashboard layout:', error);
+    logger.error('Error updating dashboard layout', {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to update dashboard layout'
@@ -381,7 +409,11 @@ router.get('/audit-logs', async (req, res) => {
     const result = await auditService.getAuditLogs(filters);
     res.json({ success: true, ...result });
   } catch (error) {
-    console.error('Error fetching audit logs:', error);
+    logger.error('Error fetching audit logs', {
+      error: error.message,
+      stack: error.stack,
+      filters
+    });
     res.status(500).json({ 
       success: false, 
       error: 'Failed to fetch audit logs' 
@@ -418,7 +450,11 @@ router.get('/audit-logs/export', async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.send(exportData);
   } catch (error) {
-    console.error('Error exporting audit logs:', error);
+    logger.error('Error exporting audit logs', {
+      error: error.message,
+      stack: error.stack,
+      filters
+    });
     res.status(500).json({ 
       success: false, 
       error: 'Failed to export audit logs' 
@@ -440,7 +476,11 @@ router.get('/audit-logs/stats', async (req, res) => {
     const stats = await auditService.getAuditStats(filters);
     res.json({ success: true, stats });
   } catch (error) {
-    console.error('Error fetching audit stats:', error);
+    logger.error('Error fetching audit stats', {
+      error: error.message,
+      stack: error.stack,
+      filters
+    });
     res.status(500).json({ 
       success: false, 
       error: 'Failed to fetch audit statistics' 
@@ -457,7 +497,10 @@ router.get('/queue/stats', async (req, res) => {
     const stats = await queueService.getAllQueueStats();
     res.json({ success: true, stats });
   } catch (error) {
-    console.error('Error fetching queue stats:', error);
+    logger.error('Error fetching queue stats', {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({ 
       success: false, 
       error: 'Failed to fetch queue statistics' 
@@ -479,7 +522,11 @@ router.post('/queue/:queueName/pause', auditPresets.settingsUpdate, async (req, 
     
     res.json({ success: true, message: `Queue ${queueName} paused` });
   } catch (error) {
-    console.error('Error pausing queue:', error);
+    logger.error('Error pausing queue', {
+      queueName,
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({ 
       success: false, 
       error: error.message 
@@ -501,7 +548,11 @@ router.post('/queue/:queueName/resume', auditPresets.settingsUpdate, async (req,
     
     res.json({ success: true, message: `Queue ${queueName} resumed` });
   } catch (error) {
-    console.error('Error resuming queue:', error);
+    logger.error('Error resuming queue', {
+      queueName,
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({ 
       success: false, 
       error: error.message 
@@ -526,7 +577,10 @@ router.get('/socket/stats', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching socket stats:', error);
+    logger.error('Error fetching socket stats', {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({ 
       success: false, 
       error: 'Failed to fetch socket statistics' 
@@ -561,7 +615,11 @@ router.post('/broadcast/system-alert', auditPresets.settingsUpdate, async (req, 
     
     res.json({ success: true, message: 'System alert broadcasted' });
   } catch (error) {
-    console.error('Error broadcasting system alert:', error);
+    logger.error('Error broadcasting system alert', {
+      error: error.message,
+      stack: error.stack,
+      alert: req.body
+    });
     res.status(500).json({ 
       success: false, 
       error: 'Failed to broadcast system alert' 
@@ -599,7 +657,11 @@ router.get('/search/global', async (req, res) => {
     
     res.json({ success: true, ...results });
   } catch (error) {
-    console.error('Error performing global search:', error);
+    logger.error('Error performing global search', {
+      error: error.message,
+      stack: error.stack,
+      query: req.query.q
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to perform search'
@@ -651,7 +713,12 @@ router.get('/search/:entity', async (req, res) => {
     
     res.json({ success: true, ...results });
   } catch (error) {
-    console.error(`Error searching ${req.params.entity}:`, error);
+    logger.error('Error searching entity', {
+      entity: req.params.entity,
+      error: error.message,
+      stack: error.stack,
+      query: req.query.q
+    });
     res.status(500).json({
       success: false,
       error: error.message || 'Failed to perform entity search'
@@ -677,7 +744,11 @@ router.get('/search/config/:entity', async (req, res) => {
 
     res.json({ success: true, config });
   } catch (error) {
-    console.error(`Error getting search config for ${req.params.entity}:`, error);
+    logger.error('Error getting search config for entity', {
+      entity: req.params.entity,
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to get search configuration'
@@ -694,7 +765,10 @@ router.get('/search/configs', async (req, res) => {
     const configs = searchService.getAllSearchConfigs();
     res.json({ success: true, configs });
   } catch (error) {
-    console.error('Error getting search configs:', error);
+    logger.error('Error getting search configs', {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to get search configurations'
@@ -726,7 +800,12 @@ router.get('/search/suggestions/:entity', async (req, res) => {
     const suggestions = await searchService.generateSuggestions(config, query);
     res.json({ success: true, suggestions });
   } catch (error) {
-    console.error(`Error getting suggestions for ${req.params.entity}:`, error);
+    logger.error('Error getting suggestions for entity', {
+      entity: req.params.entity,
+      query,
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to get search suggestions'
@@ -743,7 +822,10 @@ router.get('/search/stats', async (req, res) => {
     const stats = searchIndexService.getSearchStats();
     res.json({ success: true, stats });
   } catch (error) {
-    console.error('Error getting search stats:', error);
+    logger.error('Error getting search stats', {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to get search statistics'
@@ -760,7 +842,10 @@ router.delete('/search/stats', auditPresets.settingsUpdate, async (req, res) => 
     searchIndexService.clearSearchStats();
     res.json({ success: true, message: 'Search statistics cleared' });
   } catch (error) {
-    console.error('Error clearing search stats:', error);
+    logger.error('Error clearing search stats', {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to clear search statistics'
@@ -792,7 +877,11 @@ router.post('/test/audit-log', async (req, res) => {
 
     res.json({ success: true, auditLog });
   } catch (error) {
-    console.error('Error creating test audit log:', error);
+    logger.error('Error creating test audit log', {
+      error: error.message,
+      stack: error.stack,
+      data: req.body
+    });
     res.status(500).json({ 
       success: false, 
       error: 'Failed to create test audit log' 

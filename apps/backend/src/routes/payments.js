@@ -13,6 +13,7 @@ import {
 import subscriptionService from '../services/subscriptionService.js';
 import PaymentMethodService from '../services/paymentMethodService.js';
 import prisma from '../config/database.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -51,7 +52,13 @@ router.post('/create-payment-intent', authMiddleware, async (req, res) => {
       paymentIntentId: paymentIntent.id,
     });
   } catch (error) {
-    console.error('Payment intent creation error:', error);
+    logger.error('Payment intent creation error', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user?.id,
+      amount,
+      bookingId
+    });
     res.status(500).json({ error: 'Failed to create payment intent' });
   }
 });
@@ -113,7 +120,12 @@ router.post('/create-subscription', authMiddleware, async (req, res) => {
       clientSecret: subscription.latest_invoice.payment_intent.client_secret,
     });
   } catch (error) {
-    console.error('Subscription creation error:', error);
+    logger.error('Subscription creation error', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user?.id,
+      planId: req.body.planId
+    });
     res.status(500).json({ error: 'Failed to create subscription' });
   }
 });
@@ -144,7 +156,12 @@ router.post('/cancel-subscription', authMiddleware, async (req, res) => {
 
     res.json({ message: 'Subscription cancelled successfully' });
   } catch (error) {
-    console.error('Subscription cancellation error:', error);
+    logger.error('Subscription cancellation error', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user?.id,
+      subscriptionId: req.body.subscriptionId
+    });
     res.status(500).json({ error: 'Failed to cancel subscription' });
   }
 });
@@ -168,7 +185,11 @@ router.post('/create-checkout-session', authMiddleware, async (req, res) => {
 
     res.json({ sessionId: session.id, url: session.url });
   } catch (error) {
-    console.error('Checkout session creation error:', error);
+    logger.error('Checkout session creation error', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user?.id
+    });
     res.status(500).json({ error: 'Failed to create checkout session' });
   }
 });
@@ -192,7 +213,12 @@ router.post('/create-subscription-checkout', authMiddleware, async (req, res) =>
 
     res.json({ sessionId: session.id, url: session.url });
   } catch (error) {
-    console.error('Subscription checkout session creation error:', error);
+    logger.error('Subscription checkout session creation error', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user?.id,
+      planId: req.body.planId
+    });
     res.status(500).json({ error: 'Failed to create subscription checkout session' });
   }
 });
@@ -231,7 +257,12 @@ router.post('/refund', authMiddleware, async (req, res) => {
 
     res.json({ refundId: refund.id, status: refund.status });
   } catch (error) {
-    console.error('Refund error:', error);
+    logger.error('Refund error', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user?.id,
+      paymentIntentId: req.body.paymentIntentId
+    });
     res.status(500).json({ error: 'Failed to process refund' });
   }
 });
@@ -257,7 +288,11 @@ router.get('/methods', authMiddleware, async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('Error getting payment methods:', error);
+    logger.error('Error getting payment methods', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user?.id
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to get payment methods'
@@ -293,7 +328,11 @@ router.post('/methods', authMiddleware, async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('Error adding payment method:', error);
+    logger.error('Error adding payment method', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user?.id
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to add payment method'
@@ -322,7 +361,12 @@ router.put('/methods/:paymentMethodId', authMiddleware, async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('Error updating payment method:', error);
+    logger.error('Error updating payment method', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user?.id,
+      paymentMethodId: req.params.id
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to update payment method'
@@ -350,7 +394,12 @@ router.delete('/methods/:paymentMethodId', authMiddleware, async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('Error removing payment method:', error);
+    logger.error('Error removing payment method', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user?.id,
+      paymentMethodId: req.params.id
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to remove payment method'
@@ -360,7 +409,7 @@ router.delete('/methods/:paymentMethodId', authMiddleware, async (req, res) => {
 
 // Stripe webhook handler (legacy endpoint - redirects to /api/webhooks/stripe)
 router.post('/webhook', async (req, res) => {
-  console.log('🔄 Legacy webhook endpoint called, redirecting to /api/webhooks/stripe');
+  logger.info('Legacy webhook endpoint called, redirecting to /api/webhooks/stripe');
   
   // Redirect to the new webhook endpoint
   const newUrl = req.originalUrl.replace('/api/payments/webhook', '/api/webhooks/stripe');
@@ -379,7 +428,10 @@ router.post('/webhook', async (req, res) => {
     const data = await response.json();
     res.status(response.status).json(data);
   } catch (error) {
-    console.error('Error forwarding webhook:', error);
+    logger.error('Error forwarding webhook', {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({ error: 'Failed to forward webhook' });
   }
 });
@@ -399,7 +451,12 @@ async function handlePaymentSuccess(paymentIntent) {
       });
     }
   } catch (error) {
-    console.error('Error handling payment success:', error);
+    logger.error('Error handling payment success', {
+      error: error.message,
+      stack: error.stack,
+      paymentIntentId: paymentIntent.id,
+      bookingId: paymentIntent.metadata?.bookingId
+    });
   }
 }
 
@@ -416,7 +473,12 @@ async function handlePaymentFailure(paymentIntent) {
       });
     }
   } catch (error) {
-    console.error('Error handling payment failure:', error);
+    logger.error('Error handling payment failure', {
+      error: error.message,
+      stack: error.stack,
+      paymentIntentId: paymentIntent.id,
+      bookingId: paymentIntent.metadata?.bookingId
+    });
   }
 }
 
@@ -447,7 +509,12 @@ async function handleSubscriptionCreated(subscription) {
       });
     }
   } catch (error) {
-    console.error('Error handling subscription created:', error);
+    logger.error('Error handling subscription created', {
+      error: error.message,
+      stack: error.stack,
+      subscriptionId: subscription.id,
+      userId: subscription.metadata?.userId
+    });
   }
 }
 
@@ -466,7 +533,12 @@ async function handleSubscriptionUpdated(subscription) {
       });
     }
   } catch (error) {
-    console.error('Error handling subscription updated:', error);
+    logger.error('Error handling subscription updated', {
+      error: error.message,
+      stack: error.stack,
+      subscriptionId: subscription.id,
+      userId: subscription.metadata?.userId
+    });
   }
 }
 
@@ -483,7 +555,12 @@ async function handleSubscriptionDeleted(subscription) {
       });
     }
   } catch (error) {
-    console.error('Error handling subscription deleted:', error);
+    logger.error('Error handling subscription deleted', {
+      error: error.message,
+      stack: error.stack,
+      subscriptionId: subscription.id,
+      userId: subscription.metadata?.userId
+    });
   }
 }
 
@@ -504,7 +581,12 @@ async function handleInvoicePaymentSucceeded(invoice) {
       }
     }
   } catch (error) {
-    console.error('Error handling invoice payment succeeded:', error);
+    logger.error('Error handling invoice payment succeeded', {
+      error: error.message,
+      stack: error.stack,
+      invoiceId: invoice.id,
+      subscriptionId: invoice.subscription
+    });
   }
 }
 
@@ -525,7 +607,12 @@ async function handleInvoicePaymentFailed(invoice) {
       }
     }
   } catch (error) {
-    console.error('Error handling invoice payment failed:', error);
+    logger.error('Error handling invoice payment failed', {
+      error: error.message,
+      stack: error.stack,
+      invoiceId: invoice.id,
+      subscriptionId: invoice.subscription
+    });
   }
 }
 

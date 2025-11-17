@@ -1,3 +1,5 @@
+import { logger } from '../utils/logger.js';
+
 // Global error handling middleware
 export const errorHandler = (err, req, res, next) => {
   // Don't log errors that have already been handled
@@ -5,7 +7,7 @@ export const errorHandler = (err, req, res, next) => {
     return next(err);
   }
 
-  // Log error for debugging (use structured logging in production)
+  // Log error using Winston logger with structured logging
   const errorLog = {
     message: err.message,
     stack: err.stack,
@@ -13,16 +15,18 @@ export const errorHandler = (err, req, res, next) => {
     method: req.method,
     user: req.user?.id || 'anonymous',
     ip: req.ip,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    errorCode: err.code,
+    errorName: err.name
   };
 
-  // Use appropriate logging level
-  if (process.env.NODE_ENV === 'production') {
-    // In production, use structured logging
-    console.error('Error:', JSON.stringify(errorLog));
+  // Use appropriate logging level based on error severity
+  if (err.statusCode && err.statusCode < 500) {
+    // Client errors (4xx) - log as warn
+    logger.warn('Client error', errorLog);
   } else {
-    // In development, use detailed logging
-    console.error('Error:', errorLog);
+    // Server errors (5xx) or unhandled errors - log as error
+    logger.error('Server error', errorLog);
   }
 
   // Handle Prisma errors

@@ -2,6 +2,7 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import Stripe from 'stripe';
 import redisService from '../services/redisService.js';
+import { logger } from '../utils/logger.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const router = express.Router();
@@ -106,7 +107,7 @@ router.get('/live', (req, res) => {
 // Manual sync endpoint to fix missing salesman profiles
 router.post('/sync-salesmen', async (req, res) => {
   try {
-    console.log('Manual salesman sync requested...');
+    logger.info('Manual salesman sync requested');
 
     // Find users with SALESMAN role but no salesman profile
     const usersWithoutProfiles = await prisma.user.findMany({
@@ -117,7 +118,10 @@ router.post('/sync-salesmen', async (req, res) => {
       select: { id: true, email: true, name: true, role: true }
     });
 
-    console.log(`Found ${usersWithoutProfiles.length} users needing profiles:`, usersWithoutProfiles);
+    logger.info(`Found ${usersWithoutProfiles.length} users needing profiles`, {
+      count: usersWithoutProfiles.length,
+      userIds: usersWithoutProfiles.map(u => u.id)
+    });
 
     const created = [];
     const errors = [];
@@ -146,9 +150,17 @@ router.post('/sync-salesmen', async (req, res) => {
         });
 
         created.push({ userId: user.id, profileId: profile.id, referralCode });
-        console.log(`Created profile for user ${user.id} with code ${referralCode}`);
+        logger.info(`Created profile for user`, {
+          userId: user.id,
+          profileId: profile.id,
+          referralCode
+        });
       } catch (error) {
-        console.error(`Failed to create profile for user ${user.id}:`, error);
+        logger.error(`Failed to create profile for user`, {
+          userId: user.id,
+          error: error.message,
+          stack: error.stack
+        });
         errors.push({ userId: user.id, error: error.message });
       }
     }
@@ -162,7 +174,10 @@ router.post('/sync-salesmen', async (req, res) => {
       errorDetails: errors
     });
   } catch (error) {
-    console.error('Error in manual sync endpoint:', error);
+    logger.error('Error in manual sync endpoint', {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({
       error: error.message,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined

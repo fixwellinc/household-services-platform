@@ -91,7 +91,9 @@ class MaintenanceService {
       const results = [];
       for (const table of tables) {
         try {
-          await prisma.$executeRaw`ANALYZE ${table}`;
+          // Use $queryRawUnsafe with proper identifier quoting (table names are hardcoded, so safe)
+          // PostgreSQL requires double quotes for identifiers
+          await prisma.$executeRawUnsafe(`ANALYZE "${table}"`);
           results.push({ table, status: 'success' });
         } catch (error) {
           results.push({ table, status: 'error', error: error.message });
@@ -182,7 +184,8 @@ class MaintenanceService {
       const results = [];
       for (const index of indexes) {
         try {
-          await prisma.$executeRaw`REINDEX INDEX ${index.indexname}`;
+          // Use $queryRawUnsafe with proper identifier quoting (index names are from database introspection)
+          await prisma.$executeRawUnsafe(`REINDEX INDEX "${index.indexname}"`);
           results.push({ 
             index: index.indexname, 
             table: index.tablename, 

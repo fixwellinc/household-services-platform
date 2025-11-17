@@ -858,6 +858,521 @@ export class ApiClient {
       },
     });
   }
+
+  // ============================================
+  // CUSTOMER API ENDPOINTS
+  // ============================================
+
+  // Subscription Management
+  getCustomerSubscription = async (): Promise<{
+    success: boolean;
+    data: {
+      id: string;
+      userId: string;
+      tier: string;
+      status: string;
+      stripeCustomerId?: string;
+      stripeSubscriptionId?: string;
+      currentPeriodStart?: string;
+      currentPeriodEnd?: string;
+      paymentFrequency: string;
+      nextPaymentAmount?: number;
+      isPaused: boolean;
+      daysRemaining?: number;
+      usage?: any;
+      stripeSubscription?: any;
+    };
+  }> => {
+    return this.request('/customer/subscription');
+  }
+
+  updateCustomerSubscription = async (data: {
+    tier?: string;
+    paymentFrequency?: string;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> => {
+    return this.request('/customer/subscription', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  pauseSubscription = async (data: {
+    startDate: string;
+    endDate: string;
+    reason?: string;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> => {
+    return this.request('/customer/subscription/pause', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  resumeSubscription = async (): Promise<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> => {
+    return this.request('/customer/subscription/resume', {
+      method: 'POST',
+    });
+  }
+
+  getSubscriptionHistory = async (): Promise<{
+    success: boolean;
+    data: {
+      subscription: any;
+      pauses: any[];
+      billingAdjustments: any[];
+      creditTransactions: any[];
+    };
+  }> => {
+    return this.request('/customer/subscription/history');
+  }
+
+  // Service Management
+  getCustomerAppointments = async (params?: {
+    status?: string;
+    startDate?: string;
+    endDate?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<{
+    success: boolean;
+    data: any[];
+    pagination: {
+      total: number;
+      limit: number;
+      offset: number;
+      hasMore: boolean;
+    };
+  }> => {
+    const queryParams = new URLSearchParams();
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.startDate) queryParams.append('startDate', params.startDate);
+    if (params?.endDate) queryParams.append('endDate', params.endDate);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.offset) queryParams.append('offset', params.offset.toString());
+    
+    const query = queryParams.toString();
+    return this.request(`/customer/appointments${query ? `?${query}` : ''}`);
+  }
+
+  getCustomerAppointment = async (id: string): Promise<{
+    success: boolean;
+    data: any;
+  }> => {
+    return this.request(`/customer/appointments/${id}`);
+  }
+
+  createAppointment = async (data: {
+    serviceTypeId: string;
+    scheduledDate: string;
+    duration?: number;
+    customerName?: string;
+    customerEmail?: string;
+    customerPhone?: string;
+    propertyAddress: string;
+    notes?: string;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> => {
+    return this.request('/customer/appointments', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  updateAppointment = async (id: string, data: {
+    scheduledDate?: string;
+    duration?: number;
+    notes?: string;
+    status?: string;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> => {
+    return this.request(`/customer/appointments/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  cancelAppointment = async (id: string): Promise<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> => {
+    return this.request(`/customer/appointments/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  getServiceRequests = async (params?: {
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<{
+    success: boolean;
+    data: any[];
+    pagination: {
+      total: number;
+      limit: number;
+      offset: number;
+      hasMore: boolean;
+    };
+  }> => {
+    const queryParams = new URLSearchParams();
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.offset) queryParams.append('offset', params.offset.toString());
+    
+    const query = queryParams.toString();
+    return this.request(`/customer/service-requests${query ? `?${query}` : ''}`);
+  }
+
+  getServiceHistory = async (params?: {
+    limit?: number;
+    offset?: number;
+  }): Promise<{
+    success: boolean;
+    data: any[];
+    pagination: {
+      total: number;
+      limit: number;
+      offset: number;
+      hasMore: boolean;
+    };
+  }> => {
+    const queryParams = new URLSearchParams();
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.offset) queryParams.append('offset', params.offset.toString());
+    
+    const query = queryParams.toString();
+    return this.request(`/customer/service-history${query ? `?${query}` : ''}`);
+  }
+
+  // Billing Management
+  getBillingOverview = async (): Promise<{
+    success: boolean;
+    data: {
+      subscription: {
+        tier: string;
+        status: string;
+        paymentFrequency: string;
+      };
+      upcomingCharges: {
+        nextBillingDate?: string;
+        nextPaymentAmount: number;
+        currency: string;
+      };
+      outstandingBalance: number;
+      outstandingInvoices: any[];
+      recentTransactions: any[];
+    };
+  }> => {
+    return this.request('/customer/billing');
+  }
+
+  getPaymentMethods = async (): Promise<{
+    success: boolean;
+    data: any[];
+  }> => {
+    return this.request('/customer/payment-methods');
+  }
+
+  addPaymentMethod = async (paymentMethodId: string): Promise<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> => {
+    return this.request('/customer/payment-methods', {
+      method: 'POST',
+      body: JSON.stringify({ paymentMethodId }),
+    });
+  }
+
+  removePaymentMethod = async (id: string): Promise<{
+    success: boolean;
+    message: string;
+  }> => {
+    return this.request(`/customer/payment-methods/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  getInvoices = async (params?: {
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<{
+    success: boolean;
+    data: any[];
+    pagination: {
+      total: number;
+      limit: number;
+      offset: number;
+      hasMore: boolean;
+    };
+  }> => {
+    const queryParams = new URLSearchParams();
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.offset) queryParams.append('offset', params.offset.toString());
+    
+    const query = queryParams.toString();
+    return this.request(`/customer/invoices${query ? `?${query}` : ''}`);
+  }
+
+  getInvoice = async (id: string): Promise<{
+    success: boolean;
+    data: any;
+  }> => {
+    return this.request(`/customer/invoices/${id}`);
+  }
+
+  getInvoicePDF = async (id: string): Promise<Blob> => {
+    return this.request(`/customer/invoices/${id}/pdf`, {
+      headers: {
+        'Accept': 'application/pdf',
+      },
+    });
+  }
+
+  getBillingHistory = async (params?: {
+    limit?: number;
+    offset?: number;
+  }): Promise<{
+    success: boolean;
+    data: {
+      invoices: any[];
+      billingAdjustments: any[];
+      pagination: {
+        total: number;
+        limit: number;
+        offset: number;
+        hasMore: boolean;
+      };
+    };
+  }> => {
+    const queryParams = new URLSearchParams();
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.offset) queryParams.append('offset', params.offset.toString());
+    
+    const query = queryParams.toString();
+    return this.request(`/customer/billing-history${query ? `?${query}` : ''}`);
+  }
+
+  // Notifications
+  getNotifications = async (params?: {
+    type?: string;
+    status?: string;
+    isRead?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Promise<{
+    success: boolean;
+    data: any[];
+    pagination: {
+      total: number;
+      limit: number;
+      offset: number;
+      hasMore: boolean;
+    };
+  }> => {
+    const queryParams = new URLSearchParams();
+    if (params?.type) queryParams.append('type', params.type);
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.isRead !== undefined) queryParams.append('isRead', params.isRead.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.offset) queryParams.append('offset', params.offset.toString());
+    
+    const query = queryParams.toString();
+    return this.request(`/customer/notifications${query ? `?${query}` : ''}`);
+  }
+
+  updateNotification = async (id: string, data: {
+    status?: string;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> => {
+    return this.request(`/customer/notifications/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  markAllNotificationsRead = async (): Promise<{
+    success: boolean;
+    message: string;
+    count: number;
+  }> => {
+    return this.request('/customer/notifications/read-all', {
+      method: 'PUT',
+    });
+  }
+
+  getNotificationPreferences = async (): Promise<{
+    success: boolean;
+    data: any;
+  }> => {
+    return this.request('/customer/notifications/preferences');
+  }
+
+  updateNotificationPreferences = async (data: any): Promise<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> => {
+    return this.request('/customer/notifications/preferences', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Profile & Settings
+  getCustomerProfile = async (): Promise<{
+    success: boolean;
+    data: {
+      id: string;
+      email: string;
+      name?: string;
+      phone?: string;
+      address?: string;
+      postalCode?: string;
+      avatar?: string;
+      createdAt: string;
+      updatedAt: string;
+      lastLoginAt?: string;
+    };
+  }> => {
+    return this.request('/customer/profile');
+  }
+
+  updateCustomerProfile = async (data: {
+    name?: string;
+    phone?: string;
+    address?: string;
+    postalCode?: string;
+    avatar?: string;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> => {
+    return this.request('/customer/profile', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  getCustomerSettings = async (): Promise<{
+    success: boolean;
+    data: {
+      user: {
+        email: string;
+        notifications?: any;
+      };
+      notificationPreferences?: any;
+    };
+  }> => {
+    return this.request('/customer/settings');
+  }
+
+  updateCustomerSettings = async (data: {
+    notifications?: any;
+    timezone?: string;
+    language?: string;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    data: any;
+  }> => {
+    return this.request('/customer/settings', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  getSecurityInfo = async (): Promise<{
+    success: boolean;
+    data: {
+      email: string;
+      lastLoginAt?: string;
+      passwordChangedAt?: string;
+      isLocked: boolean;
+      lockedAt?: string;
+      failedLoginAttempts: number;
+      lastFailedLoginAt?: string;
+    };
+  }> => {
+    return this.request('/customer/security');
+  }
+
+  changePassword = async (data: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<{
+    success: boolean;
+    message: string;
+  }> => {
+    return this.request('/customer/change-password', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Usage
+  getCustomerUsage = async (): Promise<{
+    success: boolean;
+    data: {
+      userId: string;
+      subscriptionId: string;
+      tier: string;
+      servicesUsed: number;
+      discountsSaved: number;
+      priorityBookings: number;
+      emergencyServices: number;
+      limits: {
+        maxServices: number;
+        maxDiscountAmount: number;
+        maxPriorityBookings: number;
+        maxEmergencyServices: number;
+      };
+      warnings: any[];
+    };
+  }> => {
+    return this.request('/customer/usage');
+  }
+
+  getUsageMetrics = async (data: {
+    startDate?: string;
+    endDate?: string;
+  }): Promise<{
+    success: boolean;
+    metrics: any[];
+    serviceBreakdown: any[];
+    totalSavings: number;
+    totalSpent: number;
+    message: string;
+  }> => {
+    return this.request('/customer/usage/metrics', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
 }
 
 // Create and export API client instance

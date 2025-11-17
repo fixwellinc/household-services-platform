@@ -1,13 +1,14 @@
 import Stripe from 'stripe';
+import { logger } from '../utils/logger.js';
 
 // Force redeploy - updated at 2025-01-07
-console.log('🚀 Stripe service starting...');
-console.log('🔍 Environment check:');
-console.log('  - NODE_ENV:', process.env.NODE_ENV);
-console.log('  - STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
-console.log('  - STRIPE_SECRET_KEY length:', process.env.STRIPE_SECRET_KEY?.length || 0);
-console.log('  - STRIPE_SECRET_KEY starts with sk_test:', process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_') || false);
-console.log('  - STRIPE_SECRET_KEY starts with sk_live:', process.env.STRIPE_SECRET_KEY?.startsWith('sk_live_') || false);
+logger.info('Stripe service starting', {
+  nodeEnv: process.env.NODE_ENV,
+  hasStripeSecretKey: !!process.env.STRIPE_SECRET_KEY,
+  stripeKeyLength: process.env.STRIPE_SECRET_KEY?.length || 0,
+  isTestKey: process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_') || false,
+  isLiveKey: process.env.STRIPE_SECRET_KEY?.startsWith('sk_live_') || false
+});
 
 // Check if we have valid Stripe keys (both test and live keys are valid)
 const hasValidStripeKeys = process.env.STRIPE_SECRET_KEY && 
@@ -16,12 +17,14 @@ const hasValidStripeKeys = process.env.STRIPE_SECRET_KEY &&
   process.env.STRIPE_SECRET_KEY.length > 0 &&
   (process.env.STRIPE_SECRET_KEY.startsWith('sk_test_') || process.env.STRIPE_SECRET_KEY.startsWith('sk_live_'));
 
-console.log('🔍 hasValidStripeKeys:', hasValidStripeKeys);
+logger.debug('Stripe keys validation', {
+  hasValidStripeKeys
+});
 
 let stripe = null;
 
 if (!hasValidStripeKeys) {
-  console.log('🔧 Using mock Stripe service (no valid Stripe keys found)');
+  logger.warn('Using mock Stripe service (no valid Stripe keys found)');
   // Create a mock Stripe instance for development or when keys are missing
   stripe = {
     paymentIntents: {
@@ -116,18 +119,21 @@ if (!hasValidStripeKeys) {
       }),
     },
   };
-  console.log('✅ Mock Stripe service initialized successfully');
+  logger.info('Mock Stripe service initialized successfully');
 } else {
-  console.log('💳 Initializing real Stripe service with provided keys');
+  logger.info('Initializing real Stripe service with provided keys');
   try {
     // Use real Stripe in production
     stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2024-12-18.acacia',
     });
-    console.log('✅ Real Stripe service initialized successfully');
+    logger.info('Real Stripe service initialized successfully');
   } catch (error) {
-    console.error('❌ Failed to initialize real Stripe service:', error.message);
-    console.log('🔄 Falling back to mock Stripe service');
+    logger.error('Failed to initialize real Stripe service', {
+      error: error.message,
+      stack: error.stack
+    });
+    logger.warn('Falling back to mock Stripe service');
     // Fall back to mock service if real Stripe fails
     stripe = {
       paymentIntents: {
@@ -145,7 +151,7 @@ if (!hasValidStripeKeys) {
   }
 }
 
-console.log('🎉 Stripe service initialization complete');
+logger.info('Stripe service initialization complete');
 
 export default stripe;
 
@@ -162,7 +168,12 @@ export const createPaymentIntent = async (amount, currency = 'usd', metadata = {
     });
     return paymentIntent;
   } catch (error) {
-    console.error('Error creating payment intent:', error);
+    logger.error('Error creating payment intent', {
+      error: error.message,
+      stack: error.stack,
+      amount,
+      currency
+    });
     throw new Error('Failed to create payment intent');
   }
 };
@@ -177,7 +188,11 @@ export const createCustomer = async (email, name, metadata = {}) => {
     });
     return customer;
   } catch (error) {
-    console.error('Error creating customer:', error);
+    logger.error('Error creating customer', {
+      error: error.message,
+      stack: error.stack,
+      email: params.email
+    });
     throw new Error('Failed to create customer');
   }
 };
@@ -189,7 +204,9 @@ export const createSubscription = async (customerId, priceId, metadata = {}) => 
     const isMockPriceId = priceId.startsWith('price_') && !priceId.includes('_test_') && !priceId.includes('_live_');
     
     if (isMockPriceId) {
-      console.log('🔧 Using mock subscription for testing price ID:', priceId);
+      logger.debug('Using mock subscription for testing', {
+        priceId
+      });
       return {
         id: `sub_mock_${Date.now()}`,
         customer: customerId,
@@ -215,7 +232,12 @@ export const createSubscription = async (customerId, priceId, metadata = {}) => 
     });
     return subscription;
   } catch (error) {
-    console.error('Error creating subscription:', error);
+    logger.error('Error creating subscription', {
+      error: error.message,
+      stack: error.stack,
+      customerId,
+      priceId
+    });
     
     // If it's a resource_missing error, provide a helpful message
     if (error.code === 'resource_missing' && error.param === 'line_items[0][price]') {
@@ -232,7 +254,11 @@ export const cancelSubscription = async (subscriptionId) => {
     const subscription = await stripe.subscriptions.cancel(subscriptionId);
     return subscription;
   } catch (error) {
-    console.error('Error canceling subscription:', error);
+    logger.error('Error canceling subscription', {
+      error: error.message,
+      stack: error.stack,
+      subscriptionId
+    });
     throw new Error('Failed to cancel subscription');
   }
 };
@@ -245,7 +271,7 @@ export const verifyWebhookSignature = (payload, signature, webhookSecret = null)
     
     // Check if webhook secret is configured
     if (!secret) {
-      console.log('⚠️ STRIPE_WEBHOOK_SECRET not configured, skipping signature verification for testing');
+      logger.warn('STRIPE_WEBHOOK_SECRET not configured, skipping signature verification for testing');
       // For testing, handle the payload appropriately
       try {
         let event;
@@ -253,19 +279,22 @@ export const verifyWebhookSignature = (payload, signature, webhookSecret = null)
         // If payload is already an object (parsed by Express), use it directly
         if (typeof payload === 'object' && payload !== null) {
           event = payload;
-          console.log('✅ Using payload as object for testing');
+          logger.debug('Using payload as object for testing');
         } else {
           // If payload is a string or buffer, parse it
           const payloadString = Buffer.isBuffer(payload) ? payload.toString('utf8') : payload;
           event = JSON.parse(payloadString);
-          console.log('✅ Successfully parsed webhook payload for testing');
+          logger.debug('Successfully parsed webhook payload for testing');
         }
         
         return event;
       } catch (parseError) {
-        console.error('Failed to parse webhook payload:', parseError);
-        console.error('Payload type:', typeof payload);
-        console.error('Payload length:', payload.length);
+        logger.error('Failed to parse webhook payload', {
+          error: parseError.message,
+          stack: parseError.stack,
+          payloadType: typeof payload,
+          payloadLength: payload.length
+        });
         throw new Error('Invalid webhook payload');
       }
     }
@@ -277,7 +306,10 @@ export const verifyWebhookSignature = (payload, signature, webhookSecret = null)
     );
     return event;
   } catch (error) {
-    console.error('Webhook signature verification failed:', error);
+    logger.error('Webhook signature verification failed', {
+      error: error.message,
+      stack: error.stack
+    });
     throw new Error('Invalid webhook signature');
   }
 };
@@ -288,7 +320,11 @@ export const getSubscription = async (subscriptionId) => {
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
     return subscription;
   } catch (error) {
-    console.error('Error retrieving subscription:', error);
+    logger.error('Error retrieving subscription', {
+      error: error.message,
+      stack: error.stack,
+      subscriptionId
+    });
     throw new Error('Failed to retrieve subscription');
   }
 };
@@ -299,7 +335,11 @@ export const getCustomer = async (customerId) => {
     const customer = await stripe.customers.retrieve(customerId);
     return customer;
   } catch (error) {
-    console.error('Error retrieving customer:', error);
+    logger.error('Error retrieving customer', {
+      error: error.message,
+      stack: error.stack,
+      customerId
+    });
     throw new Error('Failed to retrieve customer');
   }
 };
@@ -310,7 +350,11 @@ export const updateCustomer = async (customerId, updates) => {
     const customer = await stripe.customers.update(customerId, updates);
     return customer;
   } catch (error) {
-    console.error('Error updating customer:', error);
+    logger.error('Error updating customer', {
+      error: error.message,
+      stack: error.stack,
+      customerId
+    });
     throw new Error('Failed to update customer');
   }
 };
@@ -328,7 +372,10 @@ export const createCheckoutSession = async (lineItems, successUrl, cancelUrl, me
     });
     return session;
   } catch (error) {
-    console.error('Error creating checkout session:', error);
+    logger.error('Error creating checkout session', {
+      error: error.message,
+      stack: error.stack
+    });
     throw new Error('Failed to create checkout session');
   }
 };
@@ -340,7 +387,9 @@ export const createSubscriptionCheckoutSession = async (priceId, successUrl, can
     const isMockPriceId = priceId.startsWith('price_mock_') || priceId.startsWith('price_test_');
     
     if (isMockPriceId) {
-      console.log('🔧 Using mock checkout session for testing price ID:', priceId);
+      logger.debug('Using mock checkout session for testing', {
+        priceId
+      });
       return {
         id: `cs_mock_${Date.now()}`,
         url: successUrl, // Redirect directly to success URL for testing
@@ -359,7 +408,11 @@ export const createSubscriptionCheckoutSession = async (priceId, successUrl, can
     });
     return session;
   } catch (error) {
-    console.error('Error creating subscription checkout session:', error);
+    logger.error('Error creating subscription checkout session', {
+      error: error.message,
+      stack: error.stack,
+      priceId
+    });
     
     // If it's a resource_missing error, provide a helpful message
     if (error.code === 'resource_missing' && error.param === 'line_items[0][price]') {
@@ -375,7 +428,9 @@ export const updateSubscriptionSchedule = async (subscriptionId, newPriceId, nex
   try {
     // For mock subscriptions, return a mock response
     if (subscriptionId.startsWith('sub_mock_')) {
-      console.log('🔧 Using mock subscription schedule update for:', subscriptionId);
+      logger.debug('Using mock subscription schedule update', {
+        subscriptionId
+      });
       return {
         id: `sub_sched_mock_${Date.now()}`,
         subscription: subscriptionId,
@@ -403,18 +458,27 @@ export const updateSubscriptionSchedule = async (subscriptionId, newPriceId, nex
 
     return updatedSchedule;
   } catch (error) {
-    console.error('Error updating subscription schedule:', error);
+    logger.error('Error updating subscription schedule', {
+      error: error.message,
+      stack: error.stack,
+      subscriptionId
+    });
     throw new Error('Failed to update subscription schedule');
   }
 };
 
 // Update subscription payment method or other details
 export const updateSubscription = async (subscriptionId, updates) => {
-  console.log('🔄 Updating subscription:', subscriptionId, updates);
+  logger.debug('Updating subscription', {
+    subscriptionId,
+    updates
+  });
   try {
     // For mock subscriptions, return a mock response
     if (subscriptionId.startsWith('sub_mock_')) {
-      console.log('🔧 Using mock subscription update for:', subscriptionId);
+      logger.debug('Using mock subscription update', {
+        subscriptionId
+      });
       return {
         id: subscriptionId,
         ...updates,
@@ -431,21 +495,33 @@ export const updateSubscription = async (subscriptionId, updates) => {
     }
 
     const subscription = await stripe.subscriptions.update(subscriptionId, updates);
-    console.log('✅ Subscription updated successfully');
+    logger.info('Subscription updated successfully', {
+      subscriptionId
+    });
     return subscription;
   } catch (error) {
-    console.error('Error updating subscription:', error);
+    logger.error('Error updating subscription', {
+      error: error.message,
+      stack: error.stack,
+      subscriptionId
+    });
     throw new Error('Failed to update subscription');
   }
 };
 
 // Update subscription with plan change and proration
 export const updateSubscriptionPlan = async (subscriptionId, newPriceId, prorationBehavior = 'create_prorations') => {
-  console.log('🔄 Updating subscription plan:', subscriptionId, 'to price:', newPriceId);
+  logger.debug('Updating subscription plan', {
+    subscriptionId,
+    newPriceId,
+    prorationBehavior
+  });
   try {
     // For mock subscriptions, return a mock response
     if (subscriptionId.startsWith('sub_mock_')) {
-      console.log('🔧 Using mock subscription plan update for:', subscriptionId);
+      logger.debug('Using mock subscription plan update', {
+        subscriptionId
+      });
       return {
         id: subscriptionId,
         status: 'active',
@@ -487,10 +563,18 @@ export const updateSubscriptionPlan = async (subscriptionId, newPriceId, prorati
       proration_behavior: prorationBehavior,
     });
 
-    console.log('✅ Subscription plan updated successfully');
+    logger.info('Subscription plan updated successfully', {
+      subscriptionId,
+      newPriceId
+    });
     return subscription;
   } catch (error) {
-    console.error('Error updating subscription plan:', error);
+    logger.error('Error updating subscription plan', {
+      error: error.message,
+      stack: error.stack,
+      subscriptionId,
+      newPriceId
+    });
     throw new Error('Failed to update subscription plan');
   }
 };
@@ -510,7 +594,11 @@ export const refundPayment = async (paymentIntentId, amount = null, reason = 're
     const refund = await stripe.refunds.create(refundData);
     return refund;
   } catch (error) {
-    console.error('Error creating refund:', error);
+    logger.error('Error creating refund', {
+      error: error.message,
+      stack: error.stack,
+      paymentIntentId
+    });
     throw new Error('Failed to create refund');
   }
 };
@@ -520,7 +608,9 @@ export const pauseSubscription = async (subscriptionId, options = {}) => {
   try {
     // For mock subscriptions, return a mock response
     if (subscriptionId.startsWith('sub_mock_')) {
-      console.log('🔧 Using mock subscription pause for:', subscriptionId);
+      logger.debug('Using mock subscription pause', {
+        subscriptionId
+      });
       return {
         id: subscriptionId,
         status: 'paused',
@@ -545,7 +635,11 @@ export const pauseSubscription = async (subscriptionId, options = {}) => {
     const subscription = await stripe.subscriptions.update(subscriptionId, pauseData);
     return subscription;
   } catch (error) {
-    console.error('Error pausing subscription:', error);
+    logger.error('Error pausing subscription', {
+      error: error.message,
+      stack: error.stack,
+      subscriptionId
+    });
     throw new Error('Failed to pause subscription');
   }
 };
@@ -555,7 +649,9 @@ export const resumeSubscription = async (subscriptionId) => {
   try {
     // For mock subscriptions, return a mock response
     if (subscriptionId.startsWith('sub_mock_')) {
-      console.log('🔧 Using mock subscription resume for:', subscriptionId);
+      logger.debug('Using mock subscription resume', {
+        subscriptionId
+      });
       return {
         id: subscriptionId,
         status: 'active',
@@ -569,7 +665,11 @@ export const resumeSubscription = async (subscriptionId) => {
     });
     return subscription;
   } catch (error) {
-    console.error('Error resuming subscription:', error);
+    logger.error('Error resuming subscription', {
+      error: error.message,
+      stack: error.stack,
+      subscriptionId
+    });
     throw new Error('Failed to resume subscription');
   }
 }; 

@@ -28,6 +28,16 @@ import CancellationModal from '@/components/customer/subscription-management/Can
 // These are now lazy loaded below
 import UsageWarnings from '@/components/customer/usage-tracking/UsageWarnings';
 import RealtimePerkStatus from '@/components/customer/perks-benefits/RealtimePerkStatus';
+// New dashboard components
+import { DashboardOverview } from '@/components/customer/dashboard-overview';
+import { AppointmentsList } from '@/components/customer/services/AppointmentsList';
+import { QuickBookService } from '@/components/customer/services/QuickBookService';
+import { ServiceHistory } from '@/components/customer/services/ServiceHistory';
+import { BillingOverview } from '@/components/customer/billing/BillingOverview';
+import { UsageLimitsCard } from '@/components/customer/usage-tracking/UsageLimitsCard';
+import { UsageTrendsChart } from '@/components/customer/usage-analytics/UsageTrendsChart';
+import { ServiceCategoryChart } from '@/components/customer/usage-analytics/ServiceCategoryChart';
+import { SavingsChart } from '@/components/customer/usage-analytics/SavingsChart';
 import { 
   ResponsiveLayout, 
   ResponsiveContainer, 
@@ -149,6 +159,16 @@ export function CustomerDashboardContent() {
         {/* Main Content */}
         <main id="main-content" className="space-y-8">
           
+          {/* Dashboard Overview Section */}
+          <section id="dashboard-overview" aria-labelledby="dashboard-overview-heading">
+            <Suspense fallback={<div className="h-64 bg-gray-200 animate-pulse rounded-lg" />}>
+              <DashboardOverview
+                onPlanChange={handlePlanChange}
+                onCancelSubscription={handleCancelSubscription}
+              />
+            </Suspense>
+          </section>
+
           {/* Subscription Overview Section */}
           <section id="subscription-overview" aria-labelledby="subscription-heading">
             <h2 id="subscription-heading" className="text-xl font-semibold text-gray-900 mb-6">
@@ -375,6 +395,74 @@ export function CustomerDashboardContent() {
                 addBreadcrumb('service_selected', { serviceId: service.id });
               }}
             />
+          </section>
+
+          {/* Quick Book Service */}
+          <section aria-labelledby="quick-book-heading">
+            <h2 id="quick-book-heading" className="text-xl font-semibold text-gray-900 mb-6">
+              Quick Book Service
+            </h2>
+            <Suspense fallback={<div className="h-48 bg-gray-200 animate-pulse rounded-lg" />}>
+              <QuickBookService />
+            </Suspense>
+          </section>
+
+          {/* Appointments */}
+          <section aria-labelledby="appointments-heading">
+            <h2 id="appointments-heading" className="text-xl font-semibold text-gray-900 mb-6">
+              Upcoming Appointments
+            </h2>
+            <Suspense fallback={<div className="h-64 bg-gray-200 animate-pulse rounded-lg" />}>
+              <AppointmentsList limit={5} />
+            </Suspense>
+          </section>
+
+          {/* Service History */}
+          <section aria-labelledby="service-history-heading">
+            <h2 id="service-history-heading" className="text-xl font-semibold text-gray-900 mb-6">
+              Service History
+            </h2>
+            <Suspense fallback={<div className="h-64 bg-gray-200 animate-pulse rounded-lg" />}>
+              <ServiceHistory />
+            </Suspense>
+          </section>
+
+          {/* Billing Overview */}
+          <section aria-labelledby="billing-overview-heading">
+            <h2 id="billing-overview-heading" className="text-xl font-semibold text-gray-900 mb-6">
+              Billing Overview
+            </h2>
+            <Suspense fallback={<div className="h-64 bg-gray-200 animate-pulse rounded-lg" />}>
+              <BillingOverview />
+            </Suspense>
+          </section>
+
+          {/* Usage Analytics */}
+          <section aria-labelledby="usage-analytics-heading">
+            <h2 id="usage-analytics-heading" className="text-xl font-semibold text-gray-900 mb-6">
+              Usage Analytics
+            </h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <Suspense fallback={<div className="h-64 bg-gray-200 animate-pulse rounded-lg" />}>
+                <UsageTrendsChart days={30} />
+              </Suspense>
+              <Suspense fallback={<div className="h-64 bg-gray-200 animate-pulse rounded-lg" />}>
+                <ServiceCategoryChart days={30} />
+              </Suspense>
+            </div>
+            <Suspense fallback={<div className="h-64 bg-gray-200 animate-pulse rounded-lg" />}>
+              <SavingsChart days={30} />
+            </Suspense>
+          </section>
+
+          {/* Usage Limits */}
+          <section aria-labelledby="usage-limits-heading">
+            <h2 id="usage-limits-heading" className="text-xl font-semibold text-gray-900 mb-6">
+              Usage Limits
+            </h2>
+            <Suspense fallback={<div className="h-64 bg-gray-200 animate-pulse rounded-lg" />}>
+              <UsageLimitsCard />
+            </Suspense>
           </section>
 
           {/* Modals */}

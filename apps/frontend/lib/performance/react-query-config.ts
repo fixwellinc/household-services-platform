@@ -102,6 +102,32 @@ export const queryKeys = {
     exports: () => [...queryKeys.reports.all, 'exports'] as const,
     scheduled: () => [...queryKeys.reports.all, 'scheduled'] as const,
   },
+  
+  // Customer dashboard queries
+  customer: {
+    all: ['customer'] as const,
+    subscription: () => [...queryKeys.customer.all, 'subscription'] as const,
+    subscriptionHistory: () => [...queryKeys.customer.subscription(), 'history'] as const,
+    appointments: (filters?: any) => [...queryKeys.customer.all, 'appointments', filters] as const,
+    appointment: (id: string) => [...queryKeys.customer.all, 'appointments', id] as const,
+    serviceRequests: (filters?: any) => [...queryKeys.customer.all, 'service-requests', filters] as const,
+    serviceHistory: (params?: any) => [...queryKeys.customer.all, 'service-history', params] as const,
+    billing: {
+      all: () => [...queryKeys.customer.all, 'billing'] as const,
+      overview: () => [...queryKeys.customer.billing.all(), 'overview'] as const,
+      history: (params?: any) => [...queryKeys.customer.billing.all(), 'history', params] as const,
+    },
+    paymentMethods: () => [...queryKeys.customer.all, 'payment-methods'] as const,
+    invoices: (filters?: any) => [...queryKeys.customer.all, 'invoices', filters] as const,
+    invoice: (id: string) => [...queryKeys.customer.all, 'invoices', id] as const,
+    notifications: (filters?: any) => [...queryKeys.customer.all, 'notifications', filters] as const,
+    notificationPreferences: () => [...queryKeys.customer.all, 'notifications', 'preferences'] as const,
+    profile: () => [...queryKeys.customer.all, 'profile'] as const,
+    settings: () => [...queryKeys.customer.all, 'settings'] as const,
+    security: () => [...queryKeys.customer.all, 'security'] as const,
+    usage: () => [...queryKeys.customer.all, 'usage'] as const,
+    usageMetrics: (startDate?: string, endDate?: string) => [...queryKeys.customer.usage(), 'metrics', startDate, endDate] as const,
+  },
 };
 
 // Cache invalidation helpers
@@ -120,6 +146,9 @@ export const invalidateQueries = {
   },
   monitoring: (queryClient: QueryClient) => {
     queryClient.invalidateQueries({ queryKey: queryKeys.monitoring.all });
+  },
+  customer: (queryClient: QueryClient) => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.customer.all });
   },
   all: (queryClient: QueryClient) => {
     queryClient.invalidateQueries();

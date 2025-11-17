@@ -232,6 +232,59 @@ export const UsageMetrics = lazy(() =>
   })
 );
 
+// New Customer Dashboard Components
+export const DashboardOverview = lazy(() => 
+  import('@/components/customer/dashboard-overview').then(m => ({ default: m.DashboardOverview }))
+);
+
+export const AppointmentsListComponent = lazy(() => 
+  import('@/components/customer/services/AppointmentsList').then(m => ({ default: m.AppointmentsList }))
+);
+
+export const QuickBookService = lazy(() => 
+  import('@/components/customer/services/QuickBookService').then(m => ({ default: m.QuickBookService }))
+);
+
+export const ServiceHistory = lazy(() => 
+  import('@/components/customer/services/ServiceHistory').then(m => ({ default: m.ServiceHistory }))
+);
+
+export const BillingOverview = lazy(() => 
+  import('@/components/customer/billing/BillingOverview').then(m => ({ default: m.BillingOverview }))
+);
+
+export const UsageTrendsChart = lazy(() => 
+  import('@/components/customer/usage-analytics/UsageTrendsChart').then(m => ({ default: m.UsageTrendsChart }))
+);
+
+export const ServiceCategoryChart = lazy(() => 
+  import('@/components/customer/usage-analytics/ServiceCategoryChart').then(m => ({ default: m.ServiceCategoryChart }))
+);
+
+export const SavingsChart = lazy(() => 
+  import('@/components/customer/usage-analytics/SavingsChart').then(m => ({ default: m.SavingsChart }))
+);
+
+export const UsageLimitsCard = lazy(() => 
+  import('@/components/customer/usage-tracking/UsageLimitsCard').then(m => ({ default: m.UsageLimitsCard }))
+);
+
+export const PaymentMethodsList = lazy(() => 
+  import('@/components/customer/billing/PaymentMethodsList').then(m => ({ default: m.PaymentMethodsList }))
+);
+
+export const InvoicesList = lazy(() => 
+  import('@/components/customer/billing/InvoicesList').then(m => ({ default: m.InvoicesList }))
+);
+
+export const ProfileSettings = lazy(() => 
+  import('@/components/customer/settings/ProfileSettings').then(m => ({ default: m.ProfileSettings }))
+);
+
+export const NotificationPreferences = lazy(() => 
+  import('@/components/customer/settings/NotificationPreferences').then(m => ({ default: m.NotificationPreferences }))
+);
+
 // Notification Components
 export const NotificationCenter = lazy(() => 
   Promise.resolve({

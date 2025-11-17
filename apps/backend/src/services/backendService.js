@@ -17,14 +17,16 @@ class BackendService {
     
     try {
       // Import the backend app with detailed error logging
-      logger.info('📦 Importing backend app.js...');
+      logger.info('Importing backend app.js');
       const appModule = await import('../app.js');
-      console.log('📦 [BACKEND] App module imported:', Object.keys(appModule));
+      logger.debug('App module imported', {
+        availableExports: Object.keys(appModule)
+      });
       
       const app = appModule.app || appModule.default;
       
       if (!app) {
-        logger.error('❌ Backend app not found in module exports', {
+        logger.error('Backend app not found in module exports', {
           availableExports: Object.keys(appModule)
         });
         throw new Error('Backend app not available');
@@ -34,12 +36,10 @@ class BackendService {
       this.isInitialized = true;
       this.routesLoaded = true;
       
-      logger.info('✅ Backend service started successfully');
+      logger.info('Backend service started successfully');
       
     } catch (error) {
-      console.error('💥 [BACKEND] Service startup failed:', error.message);
-      console.error('💥 [BACKEND] Stack:', error.stack);
-      logger.error('❌ Backend service startup failed', {
+      logger.error('Backend service startup failed', {
         error: error.message,
         stack: error.stack
       });

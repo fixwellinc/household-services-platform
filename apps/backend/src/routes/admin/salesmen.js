@@ -12,13 +12,14 @@ import {
   logFailedAuth
 } from '../../middleware/appointmentSecurity.js';
 import prisma from '../../config/database.js';
+import { logger } from '../../utils/logger.js';
 
 const router = express.Router();
 
 // Health check endpoint (NO AUTH) - for production diagnostics
 router.get('/health', async (req, res) => {
   try {
-    console.log('🏥 Health check endpoint accessed');
+    logger.info('Health check endpoint accessed');
 
     // Basic server health
     const serverHealth = {
@@ -55,7 +56,10 @@ router.get('/health', async (req, res) => {
       environment: process.env.NODE_ENV || 'unknown'
     });
   } catch (error) {
-    console.error('Health check error:', error);
+    logger.error('Health check error', {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({
       success: false,
       error: error.message,
@@ -67,7 +71,7 @@ router.get('/health', async (req, res) => {
 // Debug and fix endpoints (NO AUTH) - place before auth middleware
 router.get('/debug', async (req, res, next) => {
   try {
-    console.log('🔍 Debug endpoint triggered...');
+    logger.info('Debug endpoint triggered');
 
     // Get all users with SALESMAN role
     const salesmanUsers = await prisma.user.findMany({
@@ -80,9 +84,9 @@ router.get('/debug', async (req, res, next) => {
       include: { user: true }
     });
 
-    console.log('📊 Debug data:', {
-      salesmanUsers: salesmanUsers.length,
-      salesmanProfiles: salesmanProfiles.length
+    logger.info('Debug data retrieved', {
+      salesmanUsersCount: salesmanUsers.length,
+      salesmanProfilesCount: salesmanProfiles.length
     });
 
     res.json({
@@ -106,14 +110,17 @@ router.get('/debug', async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Error in debug endpoint:', error);
+    logger.error('Error in debug endpoint', {
+      error: error.message,
+      stack: error.stack
+    });
     next(error);
   }
 });
 
 router.get('/fix-now', async (req, res, next) => {
   try {
-    console.log('🔧 Immediate fix endpoint triggered...');
+    logger.info('Immediate fix endpoint triggered');
     // Get all profiles that need fixing
     const allProfiles = await prisma.salesmanProfile.findMany({
       include: { user: true }
@@ -145,7 +152,12 @@ router.get('/fix-now', async (req, res, next) => {
           });
 
           updatedCount++;
-          console.log(`✅ Fixed: ${profile.user.email} -> ${newDisplayName}`);
+          logger.info('Fixed salesman profile', {
+            profileId: profile.id,
+            userEmail: profile.user.email,
+            oldDisplayName,
+            newDisplayName
+          });
         }
       }
     }
@@ -159,7 +171,10 @@ router.get('/fix-now', async (req, res, next) => {
     });
 
   } catch (error) {
-    console.error('Error in fix-now endpoint:', error);
+    logger.error('Error in fix-now endpoint', {
+      error: error.message,
+      stack: error.stack
+    });
     next(error);
   }
 });
@@ -331,7 +346,7 @@ const validateSalesmanAdmin = (schemaName) => {
 // GET /api/admin/salesmen/sync - Debug endpoint to manually sync profiles
 router.get('/sync', async (req, res, next) => {
   try {
-    console.log('🔄 Manual sync triggered by admin...');
+    logger.info('Manual sync triggered by admin');
     const created = await salesmanService.syncMissingSalesmanProfiles();
 
     // Also refresh the data to show immediate results
@@ -345,7 +360,10 @@ router.get('/sync', async (req, res, next) => {
       data: result.salesmen
     });
   } catch (error) {
-    console.error('Error syncing salesmen profiles:', error);
+    logger.error('Error syncing salesmen profiles', {
+      error: error.message,
+      stack: error.stack
+    });
     next(error);
   }
 });
@@ -353,7 +371,7 @@ router.get('/sync', async (req, res, next) => {
 // GET /api/admin/salesmen/force-refresh - Force refresh all profiles
 router.get('/force-refresh', async (req, res, next) => {
   try {
-    console.log('🔄 Force refresh triggered by admin...');
+    logger.info('Force refresh triggered by admin');
 
     // Get all existing profiles
     const allProfiles = await prisma.salesmanProfile.findMany({
@@ -376,11 +394,19 @@ router.get('/force-refresh', async (req, res, next) => {
             }
           });
 
-          console.log(`✅ Force updated profile: ${profile.user.email} -> ${newDisplayName}`);
+          logger.info('Force updated profile', {
+            profileId: profile.id,
+            userEmail: profile.user.email,
+            newDisplayName
+          });
           updatedCount++;
         }
       } catch (error) {
-        console.error(`❌ Failed to update profile ${profile.id}:`, error.message);
+        logger.error('Failed to update profile', {
+          profileId: profile.id,
+          error: error.message,
+          stack: error.stack
+        });
       }
     }
 
@@ -395,7 +421,10 @@ router.get('/force-refresh', async (req, res, next) => {
       data: result.salesmen
     });
   } catch (error) {
-    console.error('Error force refreshing salesmen profiles:', error);
+    logger.error('Error force refreshing salesmen profiles', {
+      error: error.message,
+      stack: error.stack
+    });
     next(error);
   }
 });
@@ -403,10 +432,12 @@ router.get('/force-refresh', async (req, res, next) => {
 // GET /api/admin/salesmen - Get all salesmen (enhanced version with fallback)
 router.get('/', async (req, res, next) => {
   try {
-    console.log('📋 Main salesmen endpoint accessed with query:', req.query);
+    logger.info('Main salesmen endpoint accessed', {
+      query: req.query
+    });
 
     // Test if we can even reach this point
-    console.log('🔧 Testing basic functionality...');
+    logger.debug('Testing basic functionality');
 
     const options = {
       page: parseInt(req.query.page) || 1,
@@ -419,17 +450,17 @@ router.get('/', async (req, res, next) => {
       sortOrder: req.query.sortOrder || 'desc'
     };
 
-    console.log('📊 Parsed options:', options);
+    logger.debug('Parsed options', { options });
 
     // Test database connection first
-    console.log('🔗 Testing database connection...');
+    logger.debug('Testing database connection');
     await prisma.$queryRaw`SELECT 1`;
-    console.log('✅ Database connection successful');
+    logger.debug('Database connection successful');
 
     // Service is already imported at module scope
 
     // Temporarily use only original service until enhanced service is fixed
-    console.log('📋 Getting salesmen data...');
+    logger.debug('Getting salesmen data');
     const result = await salesmanService.getSalesmen({
       status: options.status,
       search: options.search,
@@ -438,7 +469,9 @@ router.get('/', async (req, res, next) => {
       sortBy: options.sortBy,
       sortOrder: options.sortOrder
     });
-    console.log('✅ Data retrieved successfully:', result.salesmen?.length || 0, 'salesmen');
+    logger.info('Data retrieved successfully', {
+      salesmenCount: result.salesmen?.length || 0
+    });
 
     res.json({
       success: true,
@@ -452,8 +485,11 @@ router.get('/', async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('❌ Error getting salesmen:', error);
-    console.error('Error stack:', error.stack);
+    logger.error('Error getting salesmen', {
+      error: error.message,
+      stack: error.stack,
+      query: req.query
+    });
 
     // Return detailed error for debugging
     res.status(500).json({
@@ -488,7 +524,11 @@ router.post('/',
         data: newSalesman
       });
     } catch (error) {
-      console.error('Error creating salesman:', error);
+      logger.error('Error creating salesman', {
+        error: error.message,
+        stack: error.stack,
+        data: req.validatedData
+      });
 
       if (error.message.includes('User not found')) {
         return res.status(404).json({
@@ -541,7 +581,11 @@ router.get('/:id', async (req, res, next) => {
       temporary_fallback: true
     });
   } catch (error) {
-    console.error('Error getting salesman:', error);
+    logger.error('Error getting salesman', {
+      salesmanId: req.params.id,
+      error: error.message,
+      stack: error.stack
+    });
     next(error);
   }
 });
@@ -571,7 +615,11 @@ router.put('/:id',
         data: updatedSalesman
       });
     } catch (error) {
-      console.error('Error updating salesman:', error);
+      logger.error('Error updating salesman', {
+        salesmanId: id,
+        error: error.message,
+        stack: error.stack
+      });
 
       if (error.message.includes('not found')) {
         return res.status(404).json({
@@ -600,7 +648,11 @@ router.delete('/:id',
         message: result.message
       });
     } catch (error) {
-      console.error('Error deleting salesman:', error);
+      logger.error('Error deleting salesman', {
+        salesmanId: id,
+        error: error.message,
+        stack: error.stack
+      });
 
       if (error.message.includes('not found')) {
         return res.status(404).json({
@@ -639,7 +691,11 @@ router.post('/:id/activate',
         data: updatedSalesman
       });
     } catch (error) {
-      console.error('Error activating salesman:', error);
+      logger.error('Error activating salesman', {
+        salesmanId: id,
+        error: error.message,
+        stack: error.stack
+      });
 
       if (error.message.includes('not found')) {
         return res.status(404).json({
@@ -672,7 +728,11 @@ router.post('/:id/suspend',
         data: updatedSalesman
       });
     } catch (error) {
-      console.error('Error suspending salesman:', error);
+      logger.error('Error suspending salesman', {
+        salesmanId: id,
+        error: error.message,
+        stack: error.stack
+      });
 
       if (error.message.includes('not found')) {
         return res.status(404).json({
@@ -729,7 +789,11 @@ router.get('/:id/customers', async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Error getting salesman customers:', error);
+    logger.error('Error getting salesman customers', {
+      salesmanId: req.params.id,
+      error: error.message,
+      stack: error.stack
+    });
     next(error);
   }
 });
@@ -755,7 +819,11 @@ router.get('/:id/performance', async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Error getting salesman performance:', error);
+    logger.error('Error getting salesman performance', {
+      salesmanId: req.params.id,
+      error: error.message,
+      stack: error.stack
+    });
     next(error);
   }
 });
@@ -791,7 +859,11 @@ router.get('/analytics/overview', async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Error getting salesmen analytics:', error);
+    logger.error('Error getting salesmen analytics', {
+      period: req.query.period,
+      error: error.message,
+      stack: error.stack
+    });
     next(error);
   }
 });
