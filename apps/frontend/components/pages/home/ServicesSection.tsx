@@ -54,9 +54,13 @@ export default function ServicesSection({ className }: ServicesSectionProps) {
         setError(null); // Clear any previous errors
       } catch (err: any) {
         console.error('Error fetching services:', err);
-        // Don't set error if it's just a timeout or abort - show empty state gracefully
-        if (err.name !== 'AbortError' && err.name !== 'TimeoutError') {
-          setError('Failed to load services');
+        // Set appropriate error message based on error type
+        if (err.name === 'AbortError' || err.name === 'TimeoutError') {
+          setError('Request timed out. Please check your connection and try again.');
+        } else if (err.message?.includes('Failed to fetch')) {
+          setError('Unable to connect to the server. Please check your internet connection.');
+        } else {
+          setError('Failed to load services. Please try again later.');
         }
         // Always set empty array on error to prevent crashes
         setServices([]);
@@ -108,20 +112,26 @@ export default function ServicesSection({ className }: ServicesSectionProps) {
     );
   }
 
-  // Show loading or error state gracefully without breaking the page
-  if (isLoading) {
+  // Show error state if there was an error fetching services
+  if (error) {
     return (
       <section className={`py-16 bg-gray-50 ${className || ''}`}>
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 bg-red-100 text-red-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
               <Wrench className="h-4 w-4" />
               Professional Services
             </div>
             <h2 className="text-3xl font-bold mb-4">Our Services</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Loading services...
+            <p className="text-gray-600 max-w-2xl mx-auto mb-4">
+              {error}
             </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="text-blue-600 hover:text-blue-800 underline text-sm"
+            >
+              Try again
+            </button>
           </div>
         </div>
       </section>

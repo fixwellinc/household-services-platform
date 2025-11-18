@@ -7,6 +7,7 @@ import ServicesSection from '@/components/pages/home/ServicesSection';
 import FeaturesSection from '@/components/pages/home/FeaturesSection';
 import CTASection from '@/components/pages/home/CTASection';
 import { Loader2 } from 'lucide-react';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 export default function ModernizedHomePageClient() {
   const { isHydrated } = useAuth();
@@ -27,10 +28,18 @@ export default function ModernizedHomePageClient() {
 
   return (
     <div className="min-h-screen">
-      <HeroSection />
-      <ServicesSection />
-      <FeaturesSection />
-      <CTASection />
+      <ErrorBoundary>
+        <HeroSection />
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <ServicesSection />
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <FeaturesSection />
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <CTASection />
+      </ErrorBoundary>
     </div>
   );
 }
